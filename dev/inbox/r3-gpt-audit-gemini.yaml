@@ -1,0 +1,294 @@
+audits:
+  - case_id: G-R-001
+    verdict: accept_with_fix
+    defects:
+      - kind: answer_leak
+        detail: |
+          notes 明示本例要求把 perform/carry out + noun 改成中文动词表达。
+        fix: |
+          删除 notes，或从候选模型可见的输入中排除 notes。
+      - kind: wrong_expectation
+        detail: |
+          首个 invalid_transformations 把「进行解析」「进行有效性检查」一概判为严重翻译腔；二者在标准模式的技术中文中可以是自然搭配，不能仅凭出现这些形式判失败。
+        fix: |
+          将反例改成无争议的名物化堆叠，并把判据限定为冗余结构组合，而不是禁用单个「进行」搭配。
+      - kind: schema_error
+        detail: |
+          `schema validator` 同时被列为 protected token，却用并非源 token 的「schema 校验器」尝试授权变更；第二个反例还引用了不存在的 invariant kind `fact`。此外，`rendering` 未在决策 002 的 kind 列表中定义，非 review 用例不应携带 expected_issues。
+        fix: |
+          从 protected_tokens 移除 `schema validator`，或在 authorized_token_changes 中释放该源 token；把第二个反例改标为 [actor, causality]；在提升用例前为 rendering 取得 schema 支持，并移除 expected_issues。
+    strongest_objection: |
+      核心反例使用的是常见技术中文搭配，因此可能把可接受译文误判为失败。
+
+  - case_id: G-R-002
+    verdict: accept_with_fix
+    defects:
+      - kind: answer_leak
+        detail: |
+          notes 直接说明应保持客观情态并消除翻译腔。
+        fix: |
+          删除 notes，或确保候选模型不可见。
+      - kind: schema_error
+        detail: |
+          `rendering` 未在决策 002 的 invariant kind 列表中定义；非 review 用例还包含 review 专用的 expected_issues。
+        fix: |
+          在提升前使用已批准的 kind 或先正式扩展 schema，并移除 expected_issues。
+    strongest_objection: |
+      对「对于……而言，其/它们……」的绝对禁令可能误伤依赖上下文对比焦点的自然表达，不过本例给出的反例确实冗余。
+
+  - case_id: G-R-003
+    verdict: accept_with_fix
+    defects:
+      - kind: answer_leak
+        detail: |
+          notes 明示本例要消除同位语直译和多重被动。
+        fix: |
+          删除 notes，或确保候选模型不可见。
+      - kind: schema_error
+        detail: |
+          第二个反例引用不存在的 invariant kind `quantifier`；`rendering` 未由决策 002 定义；非 review 用例不应包含 expected_issues。
+        fix: |
+          将该反例的 violated 改为 [condition, fact]，为 rendering 取得 schema 支持，并移除 expected_issues。
+    strongest_objection: |
+      被动语态本身并非缺陷；判据必须始终限于本例这种明显的被动堆叠，不能扩展为普遍禁令。
+
+  - case_id: G-R-004
+    verdict: accept_with_fix
+    defects:
+      - kind: answer_leak
+        detail: |
+          notes 明示正确行为是克制改写并保持原文。
+        fix: |
+          删除 notes，或确保候选模型不可见。
+      - kind: schema_error
+        detail: |
+          `rendering` 未在决策 002 的 invariant kind 列表中定义；rewrite 用例不应包含 expected_issues。
+        fix: |
+          在提升前解决 rendering 的 schema 归属，并移除 expected_issues。
+    strongest_objection: |
+      「生效」的隐含主语是配置修改；脱离上下文时略有省略，但在该句内部通常仍可唯一恢复。
+
+  - case_id: G-R-005
+    verdict: accept_with_fix
+    defects:
+      - kind: answer_leak
+        detail: |
+          notes 明示不得把简洁 API 契约展开成口语化解释。
+        fix: |
+          删除 notes，或确保候选模型不可见。
+      - kind: schema_error
+        detail: |
+          `rendering` 未在决策 002 中定义；rewrite 用例不应包含 expected_issues。
+        fix: |
+          在提升前解决 rendering 的 schema 归属，并移除 expected_issues。
+    strongest_objection: |
+      「条」未说明具体记录类型，因此把原文称为完整 API 契约略显过强；不过改写任务没有权限自行补造该类型。
+
+  - case_id: G-R-006
+    verdict: accept_with_fix
+    defects:
+      - kind: answer_leak
+        detail: |
+          notes 明示无需补齐时间从句外壳。
+        fix: |
+          删除 notes，或确保候选模型不可见。
+      - kind: schema_error
+        detail: |
+          `rendering` 未在决策 002 中定义；rewrite 用例不应包含 expected_issues。
+        fix: |
+          在提升前解决 rendering 的 schema 归属，并移除 expected_issues。
+    strongest_objection: |
+      「磁盘用量」不如「磁盘使用率」精确，但百分比已经充分限定其含义，不足以构成必须改写的缺陷。
+
+  - case_id: G-R-007
+    verdict: accept_with_fix
+    defects:
+      - kind: answer_leak
+        detail: |
+          notes 直接说明审阅器不得报告主语缺失或词性问题。
+        fix: |
+          删除 notes，或确保候选模型不可见。
+      - kind: schema_error
+        detail: |
+          `rendering` 未在决策 002 的 invariant kind 列表中定义。
+        fix: |
+          在提升前使用已批准的 kind，或正式扩展 schema。
+    strongest_objection: |
+      若文档涉及多个操作角色，省略施事者可能影响责任归属；仅凭孤立句子无法证明上下文已经确定执行者。
+
+  - case_id: G-R-008
+    verdict: accept_with_fix
+    defects:
+      - kind: answer_leak
+        detail: |
+          notes 明示不得补造责任主体。
+        fix: |
+          删除 notes，或确保候选模型不可见。
+      - kind: invariant_contradicts_source
+        detail: |
+          「生产环境禁用调试模式」既可读作配置状态，也可读作要求执行禁用动作；`禁用` 本身不等于绝对禁止模态。modality invariant 擅自选择了后一种解释。
+        fix: |
+          将 source 改为无歧义的「生产环境不得启用调试模式」，或把本例改成保留原表达并报告两种解释的歧义用例。
+      - kind: policy_conflict
+        detail: |
+          把有歧义的「禁用」固定解释为绝对禁止，违反政策 1 的不得静默消歧要求。
+        fix: |
+          采用上述无歧义 source，或要求保留原表达并输出待确认项。
+      - kind: schema_error
+        detail: |
+          首个反例引用不存在的 invariant kind `actor`；`rendering` 未由决策 002 定义；rewrite 用例不应包含 expected_issues。
+        fix: |
+          将 violated 改为 [rendering]，解决 rendering 的 schema 归属，并移除 expected_issues。
+    strongest_objection: |
+      本例把具有状态句和指令句两种读法的「禁用」错误地当成确定的禁止模态。
+
+  - case_id: G-R-009
+    verdict: reject
+    defects:
+      - kind: answer_leak
+        detail: |
+          notes 直接说明应把原提示改成严格确定的 Agent 行为准则。
+        fix: |
+          删除 notes，或确保候选模型不可见。
+      - kind: policy_conflict
+        detail: |
+          用例要求把「尽可能帮忙调用一下」强化为「必须调用」，直接违反政策 5 对目标文档情态类别的保留要求；它还要求把「好像有 SQL 相关词汇」静默改成确定触发条件，违反政策 1。
+        fix: none
+      - kind: invariant_contradicts_source
+        detail: |
+          源文只表达尽可能调用工具，并没有授予强制调用义务；源文的触发条件也明确带有不确定性。两个 invariant 都制造了新约束。
+        fix: none
+      - kind: schema_error
+        detail: |
+          第二个反例引用不存在的 invariant kinds `scope` 和 `fact`；`rendering` 未由决策 002 定义；rewrite 用例不应包含 expected_issues。
+        fix: none
+    strongest_objection: |
+      本例把语域清理当成授权改变安全策略，系统性地强化了触发条件和义务等级；修复需要反转核心期望，而非局部调整。
+
+  - case_id: G-R-010
+    verdict: accept_with_fix
+    defects:
+      - kind: answer_leak
+        detail: |
+          notes 明示应消除会话套话并保留哪些契约信息。
+        fix: |
+          删除 notes，或确保候选模型不可见。
+      - kind: schema_error
+        detail: |
+          `rendering` 未在决策 002 中定义；rewrite 用例不应包含 expected_issues。
+        fix: |
+          在提升前解决 rendering 的 schema 归属，并移除 expected_issues。
+    strongest_objection: |
+      禁止第二人称主要是工具描述的语域选择，而非语义正确性；判据应限于本项目明确支持的工具契约场景。
+
+  - case_id: G-R-011
+    verdict: accept_with_fix
+    defects:
+      - kind: answer_leak
+        detail: |
+          notes 明示应去情绪化并前置故障对象和参数。
+        fix: |
+          删除 notes，或确保候选模型不可见。
+      - kind: invariant_contradicts_source
+        detail: |
+          source 将网络问题表述为未知或疑似原因，并给出「稍后重试」或「联系管理员检查网络」两个替代动作；rendering invariant 容易把原因写成确定事实，并把替代动作改成由同一主体执行的合取动作。
+        fix: |
+          明确要求保留「可能存在网络问题」的不确定性，以及「重试，或联系管理员检查网络」的选择关系和角色绑定。
+      - kind: policy_conflict
+        detail: |
+          若按当前 invariant 消除全部推测性信息，就会静默确定故障原因，违反政策 1。
+        fix: |
+          允许删除口语化「好像」，但必须用「可能」等方式保留原因的不确定性。
+      - kind: unjudgeable_invariant
+        detail: |
+          「在第一视距直接呈现」不是可重复判定的检查；同时现有 fact invariant 不能判断「等待 5000ms 后超时」被改成「超过 5000ms」的阈值漂移。
+        fix: |
+          将要求改为「首句必须包含目标地址和超时事实」，并增加 threshold invariant，明确不得把 5000ms 的超时点改成大于 5000ms。
+      - kind: schema_error
+        detail: |
+          `rendering` 未由决策 002 定义；rewrite 用例不应包含 expected_issues。
+        fix: |
+          解决 rendering 的 schema 归属，并移除 expected_issues。
+    strongest_objection: |
+      当前契约可能把未知网络原因写成已确认原因，并改变原文的替代处置路径。
+
+  - case_id: G-R-012
+    verdict: accept_with_fix
+    defects:
+      - kind: answer_leak
+        detail: |
+          notes 直接说明不得机械禁止被动句。
+        fix: |
+          删除 notes，或确保候选模型不可见。
+      - kind: schema_error
+        detail: |
+          `rendering` 未在决策 002 中定义；而 source 被声明为正确且期望零问题，却标记 `over_edit_trap: false`。
+        fix: |
+          在提升前解决 rendering 的 schema 归属，并把 over_edit_trap 改为 true。
+    strongest_objection: |
+      在需要定位具体清理子系统的文档中，缺少施事者可能值得提示；本例必须限定为只审查这条独立行为说明。
+
+  - case_id: G-R-013
+    verdict: accept_with_fix
+    defects:
+      - kind: answer_leak
+        detail: |
+          notes 明示应报告主语重复和受控语言机械套用。
+        fix: |
+          删除 notes，或确保候选模型不可见。
+      - kind: wrong_expectation
+        detail: |
+          显式主语重复确有问题，但把两个句子必然认定为「流程过度割裂」依据不足；分句可以合法承载不同情态强度。
+        fix: |
+          将必报项限定为机械重复「用户」；把流程割裂降为可选观察，除非另有可判定的范围或顺序损失。
+      - kind: unjudgeable_invariant
+        detail: |
+          「显式主语机械重复 / 流程过度割裂」中的斜杠没有说明必须报告两者、任一项还是组合问题，与 expected_issues 只列主语重复也不一致。
+        fix: |
+          明确唯一必报问题及其 locus；若保留割裂问题，为其增加独立 expected_issues 条目和判定条件。
+      - kind: schema_error
+        detail: |
+          expected_issues 使用 `category`，而决策 002 规定该字段使用 `rule`；`rendering` 也未在该决策中定义。
+        fix: |
+          将 category 改为实际规则 ID，并解决 rendering 的 schema 归属。
+    strongest_objection: |
+      两句承载三步操作并不天然构成过度割裂，强制合并还可能模糊「必须」「需要」「应当」各自的作用域。
+
+  - case_id: G-R-014
+    verdict: accept_with_fix
+    defects:
+      - kind: answer_leak
+        detail: |
+          notes 明示应消除轻动词，同时保留管理员主体。
+        fix: |
+          删除 notes，或确保候选模型不可见。
+      - kind: unjudgeable_invariant
+        detail: |
+          source 包含「以便……完成流量切换」的目的关系，但现有 invariants 没有要求保留它。候选输出可以删除该目的而仍满足 actor、order 和表面 rendering 检查。
+        fix: |
+          增加 causality invariant：必须保留路由流量的目的是完成流量切换，且不得把目的改成已保证的结果。
+      - kind: schema_error
+        detail: |
+          `rendering` 未在决策 002 中定义；rewrite 用例不应包含 expected_issues。
+        fix: |
+          在提升前解决 rendering 的 schema 归属，并移除 expected_issues。
+    strongest_objection: |
+      缺少目的关系 invariant 会允许语义信息丢失；此外，反例理由声称管理员关系到事故定责和权限审计，这一用途并非 source 所述。
+
+summary:
+  accept: 0
+  accept_with_fix: 13
+  reject: 1
+  systemic_problems:
+    - |
+      14 个 notes 全部披露了预期克制或目标转换；若 notes 对候选可见，所有用例都会从判断测试退化为指令遵从测试。
+    - |
+      14 个用例都使用决策 002 未定义的 invariant kind `rendering`。提升前必须正式扩展 schema，或把检查迁移到已批准且语义匹配的结构。
+    - |
+      11 个非 review 用例携带 review 专用的 expected_issues 空列表。
+    - |
+      G-R-001、G-R-003、G-R-008 和 G-R-009 的 violated 引用了不存在的 invariant kind。
+    - |
+      G-R-008、G-R-009 和 G-R-011 都存在静默确定歧义、强化情态或抹除不确定性的风险，其中 G-R-009 与已接受政策正面冲突。
+    - |
+      若把常见的「进行解析」「进行检查」等搭配本身设为硬失败，评测会奖励表面避词而非自然、准确的技术中文。

@@ -96,3 +96,251 @@ cases:
   over_edit_trap: false
   provenance: orchestrator-reviewed
   source_file: r2-gpt-cases.yaml
+- id: G-T-101
+  category: terminology-consistency
+  task: rewrite
+  mode: strict
+  source: '## 发布流程
+
+
+    1. 新版本先以灰度发布上线，覆盖 5% 流量。
+
+    2. 金丝雀发布期间每 5 分钟检查一次错误率。
+
+    3. 小流量验证通过后，按 25%、50% 逐步放量。
+
+    4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+
+    '
+  invariants:
+  - kind: terminology
+    detail: '第 1、2、3 步中的「灰度发布」「金丝雀发布」「小流量验证」在本文中指同一个发布阶段
+
+      （5% 流量的受控放量）。输出须在全文用同一术语指代该阶段；若输出中仍有两个及以上不同术语
+
+      指代它，判为术语不一致。
+
+      '
+  - kind: terminology
+    detail: '第 4 步的「全量发布」指 100% 放量，与上述阶段是不同概念。输出若把它也替换为统一后的
+
+      灰度类术语（例如「灰度发布后保留旧版本实例 24 小时」），判为错误归并（§17.5）。
+
+      '
+  - kind: fact
+    detail: '放量档位 5%、25%、50%、检查间隔 5 分钟、旧实例保留 24 小时的数值与单位不得增删或改动。
+
+      '
+  protected_tokens:
+  - 5%
+  - 25%
+  - 50%
+  - 24 小时
+  authorized_token_changes:
+  - 金丝雀发布
+  - 小流量验证
+  invalid_transformations:
+  - output: '1. 新版本先以灰度发布上线，覆盖 5% 流量。
+
+      2. 灰度发布期间每 5 分钟检查一次错误率。
+
+      3. 灰度发布验证通过后，按 25%、50% 逐步放量。
+
+      4. 灰度发布后保留旧版本实例 24 小时，以便回滚。
+
+      '
+    violated:
+    - terminology
+    - fact
+    reason: '前三步统一是对的，第 4 步的「全量发布」被一并改成「灰度发布」，100% 放量阶段消失，
+
+      读者会以为 5% 阶段结束后就可以下线旧实例。
+
+      '
+  - output: '1. 新版本先以灰度发布上线，覆盖 5% 流量。
+
+      2. 金丝雀发布期间每 5 分钟检查一次错误率。
+
+      3. 小流量验证通过后，按 25%、50% 逐步放量。
+
+      4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+
+      '
+    violated:
+    - terminology
+    reason: '原样返回。同一份发布流程里三个术语指同一阶段，新人无法判断是三个阶段还是一个阶段，
+
+      严格模式下这是必须处理的问题。
+
+      '
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  notes: '一个案例内同时含「须统一」与「不得归并」，防止术语规则一刀切。
+
+    '
+  source_file: r2-claude-cases.yaml
+- id: G-T-102
+  category: terminology-false-normalization
+  task: rewrite
+  mode: standard
+  source: '## `confd` 运维须知
+
+
+    - 修改 `upstream` 配置后须重启 `confd`；重启期间约 2 秒不可用。
+
+    - 仅修改日志级别时执行重载（`kill -HUP`），连接不中断。
+
+    - 每晚 02:00 生成一份备份并上传对象存储；集群内的三份副本用于在线容灾，不能替代备份。
+
+    '
+  invariants:
+  - kind: terminology
+    detail: '「重启」与「重载」在本文中是两个不同操作，源文已给出区分依据：重启约 2 秒不可用，
+
+      重载（`kill -HUP`）连接不中断。输出不得把二者统一为其中之一，也不得互换。
+
+      '
+  - kind: terminology
+    detail: '「备份」（每晚上传对象存储的离线拷贝）与「副本」（集群内在线容灾的三份数据）是两个不同
+
+      对象，源文第三条明确写出「不能替代备份」。输出不得把「副本」改称「备份」或反之，
+
+      也不得删除「不能替代备份」这一判断。
+
+      '
+  - kind: over-edit
+    detail: '三条要点术语已一致且区分正确，不存在需要统一的术语问题。任何以「统一术语」为由的替换
+
+      都判为失败。
+
+      '
+  - kind: token
+    detail: '`confd`、`upstream`、`kill -HUP`、02:00 须逐字保留，「2 秒」「三份」的数值不变。
+
+      '
+  protected_tokens:
+  - '`confd`'
+  - '`upstream`'
+  - '`kill -HUP`'
+  - 02:00
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '- 修改 `upstream` 配置后须重启 `confd`；重启期间约 2 秒不可用。
+
+      - 仅修改日志级别时重启 `confd`（`kill -HUP`），连接不中断。
+
+      '
+    violated:
+    - terminology
+    - fact
+    reason: '重载被并入重启。读者要么预期这次也会有 2 秒中断，要么以为 `kill -HUP` 会重启进程；
+
+      两种理解都与实际行为不符。
+
+      '
+  - output: '- 每晚 02:00 生成一份备份并上传对象存储；集群内的三份备份用于在线容灾。
+
+      '
+    violated:
+    - terminology
+    - fact
+    reason: '「副本」被改称「备份」，并删除了「不能替代备份」的结论。在线冗余与离线备份的区别消失后，
+
+      有人会据此认为三副本已经等于有备份，从而停掉夜间备份。
+
+      '
+  over_edit_trap: true
+  provenance: orchestrator-reviewed
+  notes: '§17.5 的 false normalization 控制点，也是术语规则最容易越界的地方。
+
+    '
+  source_file: r2-claude-cases.yaml
+- id: G-T-103
+  category: terminology-referent-drift
+  task: rewrite
+  mode: strict
+  source: '## 积压排查
+
+
+    调度器内部维护一个任务队列（内存，容量上限 10000），用于暂存待分发的作业；跨服务通知走消息队列（Kafka topic `job-events`）。
+
+
+    任务队列积压超过 8000 时，先确认消费者线程数是否被调低，再决定是否扩容调度器。
+
+    消息队列积压通常与下游消费者故障有关，处理路径不同。
+
+    '
+  instruction: '压缩成值班速查条目，每条判断的适用对象保持不变。
+
+    '
+  invariants:
+  - kind: terminology
+    detail: '「任务队列」（调度器内存队列，上限 10000）与「消息队列」（Kafka topic `job-events`）
+
+      是两个不同的系统对象。输出中每条判断必须仍绑定源文指定的那个对象：「积压超过 8000 →
+
+      查消费者线程数 / 扩容调度器」只适用于任务队列；「积压与下游消费者故障有关」只适用于
+
+      消息队列。任何一条挂到另一个对象上，判为失败。
+
+      '
+  - kind: reference
+    detail: '压缩后不得出现无限定的「队列」：若输出中有「队列积压超过 8000」这类表述，
+
+      值班无法判断该查内存队列还是 Kafka，判为失败。近义词替换同样禁止，
+
+      例如把「任务队列」写成「作业队列」「调度队列」以外的名称，或写成「消息队列」。
+
+      '
+  - kind: token
+    detail: '`job-events`、10000、8000 须逐字保留。
+
+      '
+  protected_tokens:
+  - '`job-events`'
+  - '8000'
+  - '10000'
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '- 队列积压超过 8000：先确认消费者线程数是否被调低，再决定是否扩容调度器。
+
+      - 队列积压通常与下游消费者故障有关。
+
+      '
+    violated:
+    - terminology
+    - reference
+    reason: '两个不同对象被压缩成同一个「队列」，两条判断的适用范围互相污染，
+
+      值班在告警页上无法确定该查哪个组件。
+
+      '
+  - output: '- 消息队列积压超过 8000：先确认消费者线程数是否被调低，再决定是否扩容调度器。
+
+      - 任务队列积压通常与下游消费者故障有关。
+
+      '
+    violated:
+    - terminology
+    - fact
+    reason: '阈值与处置动作被挂到了错误的组件上。按此排查会去看 Kafka 消费者，
+
+      而真正积压的是调度器内存队列。
+
+      '
+  - output: '- 作业缓冲区积压超过 8000：先确认消费者线程数是否被调低，再决定是否扩容调度器。
+
+      '
+    violated:
+    - terminology
+    reason: '「作业缓冲区」是源文没有的名称，与监控面板、代码中的「任务队列」对不上，
+
+      近义词替换让被指称的系统对象无法定位。
+
+      '
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  notes: '压缩指令是诱因：把两个限定词都省成「队列」是最自然的压缩方向，也是最危险的。
+
+    '
+  source_file: r2-claude-cases.yaml

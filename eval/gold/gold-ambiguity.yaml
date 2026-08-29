@@ -1,0 +1,563 @@
+# 歧义与指代：施事省略、代词、修饰语与并列作用域
+# 由 tools/curate_cases.py 从 dev/inbox 提升而来；策展变更见 git 历史与 decision 002。
+# provenance: orchestrator-reviewed —— 已由编排者按已接受语义审阅，尚未经人工复核。
+cases:
+- id: G-A-001
+  category: actor-omission-ambiguous
+  task: rewrite
+  mode: strict
+  source: '## 上游实例熔断
+
+
+    1. 网关连续 5 次收到上游实例返回的 `503`，判定该实例不健康。
+
+    2. 网关将不健康事件上报调度器，随后把该实例从负载均衡池中摘除。
+
+    3. 摘除后 60 秒内不再向该实例转发请求。
+
+    '
+  invariants:
+  - kind: actor
+    detail: '第 2 步「随后把该实例从负载均衡池中摘除」的施事在源文中不可唯一确定：既可读作承前省略的
+
+      「网关」，也可读作刚刚提及的「调度器」——负载均衡池归谁管辖源文没有说明。输出可以原样保留
+
+      该句，也可以显式标注此处施事待作者确认（例如加注「〔待确认：摘除由网关还是调度器执行〕」）；
+
+      若输出把其中任何一方写成确定施事而源文未提供依据，判为凭空补全事实。
+
+      '
+  - kind: actor
+    detail: '第 1、2 步已显式出现的施事「网关」不得被删除，也不得改写为无施事的被动句
+
+      （如「该实例被判定为不健康」「不健康事件被上报」）。熔断排障需要知道是哪个组件做的判定。
+
+      '
+  - kind: procedure
+    detail: '第 3 步的「摘除后 60 秒内不再转发」是摘除动作的结果约束，不得改写为摘除的前置条件
+
+      （如「摘除前须停止转发 60 秒」）。
+
+      '
+  protected_tokens:
+  - '`503`'
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '2. 网关将不健康事件上报调度器，随后由调度器把该实例从负载均衡池中摘除。
+
+      '
+    violated:
+    - actor
+    - fact
+    reason: '源文没有说明摘除由调度器执行。输出把一种读法固定成事实，值班据此排障会去查错组件。
+
+      '
+  - output: '2. 网关将不健康事件上报调度器，随后网关把该实例从负载均衡池中摘除。
+
+      '
+    violated:
+    - actor
+    - fact
+    reason: '另一种读法同样是凭空指定。不可解的歧义应当报告，而不是替作者决定（D001 发现 5）。
+
+      '
+  - output: '2. 不健康事件被上报后，该实例被从负载均衡池中摘除。
+
+      '
+    violated:
+    - actor
+    reason: '用无施事被动句抹掉了源文已明确的「网关」，删除的正是事故响应需要的信息（D001 发现 3）。
+
+      '
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  notes: '两个失败方向对称：既不能删已知施事，也不能补未知施事。
+
+    '
+  source_file: r2-claude-cases.yaml
+- id: G-A-002
+  category: actor-omission-ambiguous
+  task: review
+  mode: review
+  source: '### `auto_renew`
+
+
+    类型：布尔。默认 `false`。
+
+
+    开启后，证书到期前 7 天由续期服务向 CA 发起续期请求；续期失败时通知租户管理员并回滚到上一版本证书。
+
+    '
+  instruction: '审阅这段参数说明并报告问题，不要重写文档。
+
+    '
+  invariants:
+  - kind: instruction
+    detail: '输出须是问题清单（含位置、问题、风险、修改建议），不得返回整段改写后的参数说明。
+
+      若输出的主体是重写文本——即使重写本身正确——判为失败。
+
+      '
+  - kind: actor
+    detail: '清单须指出「回滚到上一版本证书」的执行方不可确定：既可读作续期服务自动回滚，也可读作由被
+
+      通知的租户管理员手动回滚，二者决定该功能是否需要人工介入。若清单只给出一种「正确写法」而
+
+      不说明源文无法判定，判为擅自决定。
+
+      '
+  - kind: over-edit
+    detail: '「由续期服务向 CA 发起续期请求」的施事已明确，不得作为施事缺失或被动语态问题报告；
+
+      报告它判为误报（§17.3 不奖励无谓显式化）。
+
+      '
+  protected_tokens:
+  - '`auto_renew`'
+  - '`false`'
+  authorized_token_changes: []
+  expected_issues:
+  - category: actor-omission-ambiguous
+    severity: ERROR
+    locus: 通知租户管理员并回滚到上一版本证书
+  invalid_transformations:
+  - output: '开启后，续期服务在证书到期前 7 天向 CA 发起续期请求；续期失败时，续期服务通知租户管理员，
+
+      并自动回滚到上一版本证书。
+
+      '
+    violated:
+    - instruction
+    - actor
+    - fact
+    reason: 'review 模式被当成 rewrite 执行；且「自动回滚」是源文没有的事实，把一种读法写成了规格。
+
+      '
+  - output: '问题 1（ERROR，位置：由续期服务向 CA 发起续期请求）：施事表述冗余，建议改为主动句「续期服务向 CA 发起续期请求」。
+
+      问题 2（WARNING，位置：通知租户管理员并回滚到上一版本证书）：建议改为「续期服务通知租户管理员，并回滚到上一版本证书」。
+
+      '
+    violated:
+    - over-edit
+    - actor
+    reason: '问题 1 是误报（施事本已明确）；问题 2 把回滚方定死为续期服务，且未指出源文不足以判定。
+
+      '
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  notes: '同时测两件事：review 不得整篇重写，以及 review 不得用「建议改为」偷偷消歧。
+
+    '
+  source_file: r2-claude-cases.yaml
+- id: G-A-003
+  category: actor-omission-single-actor
+  task: rewrite
+  mode: strict
+  source: '## 备库提升（单人值班执行）
+
+
+    1. 停止写入流量，等待 `replication_lag` 降至 0。
+
+    2. 执行 `pg_ctl promote` 提升备库。
+
+    3. 修改 `pgbouncer.ini` 中的 `host` 指向新主库，并 reload `pgbouncer`。
+
+    4. 在 `#oncall` 频道同步切换结果。
+
+    '
+  invariants:
+  - kind: actor
+    detail: '全篇只有一个施事：标题已注明「单人值班执行」，四步都是发给该值班人的祈使句，不存在第二个
+
+      可能的执行方。输出若为任一步补写显式主语（「值班工程师须」「运维人员需要」「你应当」等），
+
+      判为无消歧价值的显式化：源文没有施事歧义可消。
+
+      '
+  - kind: procedure
+    detail: '步骤数须保持 4。每一步已是一个完整操作目标，输出若按「一句一动词」拆分（例如把第 3 步拆成
+
+      「修改 host」与「reload pgbouncer」两步），判为过度切分。
+
+      '
+  - kind: token
+    detail: '`replication_lag`、`pg_ctl promote`、`pgbouncer.ini`、`host`、`pgbouncer`、`#oncall`
+
+      须逐字出现在输出中。
+
+      '
+  protected_tokens:
+  - '`replication_lag`'
+  - '`pg_ctl promote`'
+  - '`pgbouncer.ini`'
+  - '`#oncall`'
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '## 备库提升（单人值班执行）
+
+
+      1. 值班工程师须停止写入流量，值班工程师须等待 `replication_lag` 降至 0。
+
+      2. 值班工程师须执行 `pg_ctl promote` 提升备库。
+
+      3. 值班工程师须修改 `pgbouncer.ini` 中的 `host` 指向新主库，值班工程师须 reload `pgbouncer`。
+
+      4. 值班工程师须在 `#oncall` 频道同步切换结果。
+
+      '
+    violated:
+    - over-edit
+    - actor
+    reason: '唯一施事被重复五次，零消歧收益，切换窗口内的可读性明显下降（§17.6 中「无消歧价值的重复主语」）。
+
+      '
+  - output: '1. 停止写入流量。
+
+      2. 等待 `replication_lag` 降至 0。
+
+      3. 执行 `pg_ctl promote`。
+
+      4. 提升备库。
+
+      5. 修改 `pgbouncer.ini` 中的 `host` 指向新主库。
+
+      6. reload `pgbouncer`。
+
+      7. 在 `#oncall` 频道同步切换结果。
+
+      '
+    violated:
+    - over-edit
+    - procedure
+    reason: '原第 4 步「提升备库」被从命令中剥离成独立步骤，读起来像两个动作；整体切分成 7 步后，
+
+      紧急切换的步骤边界与真实操作边界不再对应。
+
+      '
+  over_edit_trap: true
+  provenance: orchestrator-reviewed
+  notes: 'G-A-001 的边界样本：施事省略本身不是缺陷，只有在存在第二个可能施事时才是。
+
+    '
+  source_file: r2-claude-cases.yaml
+- id: G-A-004
+  category: reference-ambiguous-pronoun
+  task: rewrite
+  mode: strict
+  source: '## 工作节点失联处理
+
+
+    调度器检测到工作节点心跳超时后，会将其上运行中的任务重新入队，并将其状态标记为 `失败`。
+
+    重新入队的任务将在下一轮调度中分配给其他节点。
+
+    '
+  invariants:
+  - kind: reference
+    detail: '第二个「其」的先行词在源文中不唯一：可指「工作节点」（把节点置为失败），也可指「其上运行
+
+      中的任务」的本次执行（把该次执行置为失败）。两种读法在调度系统中都成立，第二句「重新入队
+
+      的任务将在下一轮调度中分配给其他节点」也没有排除任何一种。输出若写成「将该节点状态标记为
+
+      `失败`」或「将这些任务的状态标记为 `失败`」而未标注不确定，判为擅自消歧。
+
+      '
+  - kind: reference
+    detail: '第一个「其上运行中的任务」中的「其」先行词唯一（工作节点），不构成歧义。输出若把它一并改写
+
+      为待确认项、或替换成重复的长名词短语（如「心跳超时的那个工作节点上运行中的任务」），
+
+      判为过度改写。
+
+      '
+  - kind: actor
+    detail: '施事「调度器」在源文中明确，不得删除，也不得改写为无施事被动句
+
+      （如「工作节点心跳超时后，其上运行中的任务会被重新入队」）。
+
+      排查任务重复执行时，需要知道重新入队是调度器发起的。
+
+      '
+  protected_tokens:
+  - '`失败`'
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '调度器检测到工作节点心跳超时后，会将该节点上运行中的任务重新入队，并将该节点状态标记为 `失败`。
+
+      '
+    violated:
+    - reference
+    - fact
+    reason: '「其」被固定为节点。若原意是把本次任务执行标记为失败，输出就凭空规定了节点级状态变更，
+
+      影响后续是否还向该节点派发任务。
+
+      '
+  - output: '调度器检测到工作节点心跳超时后，会将其上运行中的任务重新入队，并将这些任务的状态标记为 `失败`。
+
+      '
+    violated:
+    - reference
+    - fact
+    reason: '「其」被固定为任务。同一句里任务既被重新入队又被标记失败，输出把一种可疑读法确认为规格。
+
+      '
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  notes: '一个案例内同时含歧义代词与非歧义代词，防止规则对所有「其」一律开火。
+
+    '
+  source_file: r2-claude-cases.yaml
+- id: G-A-005
+  category: reference-ambiguous-pronoun
+  task: rewrite
+  mode: strict
+  source: '## 每日快照归档
+
+
+    1. 代理在本地生成数据库快照，并计算 SHA-256 校验和。
+
+    2. 代理将快照上传至 `s3://backup-prod/daily/`，上传完成后重新计算校验和并与步骤 1 的结果比对。
+
+    3. 校验和不一致时删除它，并重新执行本任务。
+
+    '
+  invariants:
+  - kind: reference
+    detail: '第 3 步「删除它」的先行词在源文中不可唯一确定：可指本地快照，也可指已上传到
+
+      `s3://backup-prod/daily/` 的对象。两者后果不同——删本地副本意味着重新导出，删远端对象
+
+      意味着当日归档暂时缺失。输出若指定其中之一而源文无依据，判为凭空补全事实；保留原句或
+
+      显式标注待确认均可接受。
+
+      '
+  - kind: procedure
+    detail: '「重新执行本任务」指重跑步骤 1–3（含重新生成快照）。输出不得收窄为「重新上传」
+
+      或「重新计算校验和」，那会跳过快照生成，遇到本地快照损坏时永远无法自愈。
+
+      '
+  - kind: token
+    detail: '`s3://backup-prod/daily/` 与 SHA-256 须逐字保留，不得改成 `s3://backup-prod/daily`
+
+      或「SHA256」。
+
+      '
+  protected_tokens:
+  - '`s3://backup-prod/daily/`'
+  - SHA-256
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '3. 校验和不一致时删除本地快照，并重新执行本任务。
+
+      '
+    violated:
+    - reference
+    - fact
+    reason: '源文未指明删的是本地快照；输出替作者做了删除对象的选择，且删除是不可逆动作。
+
+      '
+  - output: '3. 校验和不一致时，删除对象存储中的副本并重新上传。
+
+      '
+    violated:
+    - reference
+    - procedure
+    - fact
+    reason: '既固定了先行词，又把「重新执行本任务」收窄为「重新上传」，跳过了步骤 1 的快照生成。
+
+      '
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  notes: '指代歧义与删除类不可逆动作叠加，是这类案例里风险最高的形态。
+
+    '
+  source_file: r2-claude-cases.yaml
+- id: G-A-006
+  category: reference-unambiguous-pronoun
+  task: rewrite
+  mode: standard
+  source: '### `POST /v2/ingest/batch`
+
+
+    接收一个最多包含 500 条记录的数组。若其中任意一条记录未通过 Schema 校验，该请求整体失败，
+
+    且不写入任何记录。校验失败的下标在响应体 `errors[].index` 中返回。
+
+    '
+  invariants:
+  - kind: reference
+    detail: '「其中」的先行词唯一（前句的数组），「该请求」的先行词唯一（本次 `POST /v2/ingest/batch`
+
+      请求，段内没有第二个请求）。二者都不构成歧义。输出若把它们替换为重复的长名词短语
+
+      （例如反复写「向 `/v2/ingest/batch` 端点发起的批量写入请求」），判为无消歧价值的替换。
+
+      '
+  - kind: fact
+    detail: '「该请求整体失败，且不写入任何记录」是全有或全无语义。输出不得改成部分写入语义
+
+      （如「未通过校验的记录不写入」「跳过非法记录后继续写入」）。
+
+      '
+  - kind: token
+    detail: '`POST /v2/ingest/batch`、`errors[].index`、500 须逐字保留。
+
+      '
+  protected_tokens:
+  - '`POST /v2/ingest/batch`'
+  - '`errors[].index`'
+  - '500'
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '### `POST /v2/ingest/batch`
+
+
+      该批量写入接口接收一个最多包含 500 条记录的数组。若该数组中任意一条记录未通过 Schema 校验，
+
+      则本次向 `POST /v2/ingest/batch` 端点发起的批量写入请求整体失败，且本次向
+
+      `POST /v2/ingest/batch` 端点发起的批量写入请求不写入任何记录。校验失败的下标在本次向
+
+      `POST /v2/ingest/batch` 端点发起的批量写入请求的响应体 `errors[].index` 中返回。
+
+      '
+    violated:
+    - over-edit
+    - reference
+    reason: '用重复长名词短语替换本无歧义的代词，段落长度翻倍而信息不变，正是 §17.3 与 §17.6 要罚的写法。
+
+      '
+  - output: '若其中某条记录未通过 Schema 校验，该记录不写入，其余记录正常写入，失败下标在
+
+      `errors[].index` 中返回。
+
+      '
+    violated:
+    - fact
+    reason: '原子失败被改成部分成功，调用方的重试逻辑（整批重发 vs 补发失败项）会因此写错。
+
+      '
+  over_edit_trap: true
+  provenance: orchestrator-reviewed
+  notes: 'G-A-004、G-A-005 的边界样本：代词本身不是缺陷，只有先行词不唯一时才是。
+
+    '
+  source_file: r2-claude-cases.yaml
+- id: G-A-007
+  category: modifier-scope-coordination
+  task: rewrite
+  mode: strict
+  source: '> **警告**：`cleanup.sh` 会删除超过 30 天的日志文件和临时索引，删除后不可恢复。
+
+    > 执行前请先确认 `/var/lib/search/tmp` 已完成快照。
+
+    '
+  invariants:
+  - kind: scope
+    detail: '「超过 30 天的」是否同时修饰「临时索引」在源文中不可确定。读法一：删除超过 30 天的日志文件，
+
+      外加全部临时索引；读法二：日志文件与临时索引都以 30 天为界。两种读法删除的数据集合不同，
+
+      而删除不可恢复。输出若采用其中任一种写法（无论哪一种）而未标注该处需作者确认，判为擅自消歧。
+
+      '
+  - kind: fact
+    detail: '「删除后不可恢复」这一后果说明，以及「执行前请先确认 `/var/lib/search/tmp` 已完成快照」
+
+      这一前置要求，都必须出现在输出中，不得删除，也不得弱化为「建议先备份」
+
+      或移出告警块之外。
+
+      '
+  - kind: token
+    detail: '`cleanup.sh`、`/var/lib/search/tmp`、30 天须逐字保留。
+
+      '
+  protected_tokens:
+  - '`cleanup.sh`'
+  - '`/var/lib/search/tmp`'
+  - 30 天
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '> **警告**：`cleanup.sh` 会删除超过 30 天的日志文件与超过 30 天的临时索引，删除后不可恢复。
+
+      > 执行前请先确认 `/var/lib/search/tmp` 已完成快照。
+
+      '
+    violated:
+    - scope
+    - fact
+    reason: '静默选定读法二。若实际行为是清空全部临时索引，本告警会让人低估影响范围。
+
+      '
+  - output: '> **警告**：`cleanup.sh` 会删除超过 30 天的日志文件，以及全部临时索引，删除后不可恢复。
+
+      > 执行前请先确认 `/var/lib/search/tmp` 已完成快照。
+
+      '
+    violated:
+    - scope
+    - fact
+    reason: '静默选定读法一，并新增了源文没有的「全部」。修饰语辖域的两个方向都不能凭空钉死。
+
+      '
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  notes: '前置定语辖及并列名词一项还是两项；与 G-A-008 的状语辖域是不同现象。
+
+    '
+  source_file: r2-claude-cases.yaml
+- id: G-A-008
+  category: adverbial-scope-coordination
+  task: rewrite
+  mode: standard
+  source: '### `confd-agent`
+
+
+    `confd-agent` 每小时从配置中心拉取一次配置并重启守护进程；拉取失败时保留上一次成功的配置。
+
+    运行日志写入 `/var/log/confd-agent.log`。
+
+    '
+  invariants:
+  - kind: scope
+    detail: '「每小时」是否辖及「重启守护进程」在源文中不可确定，但汉语读者多半会默认「每小时拉取并在同一周期内重启」。因此固定这一默认读法不判为失败。
+
+      本用例只考一件事：输出不得引入源文没有的触发条件（如「配置发生变更时重启」「拉取成功后才重启」）。引入即判为凭空补全事实。
+
+      '
+  - kind: fact
+    detail: '「拉取失败时保留上一次成功的配置」须原样保留其含义，不得改为「拉取失败时重启」
+
+      「拉取失败时使用默认配置」，也不得删除。
+
+      '
+  - kind: token
+    detail: '`confd-agent`、`/var/log/confd-agent.log` 须逐字保留。
+
+      '
+  protected_tokens:
+  - '`confd-agent`'
+  - '`/var/log/confd-agent.log`'
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '`confd-agent` 每小时从配置中心拉取一次配置；配置发生变更时重启守护进程。拉取失败时保留上一次成功的配置。
+
+      '
+    violated:
+    - scope
+    - fact
+    reason: '「配置发生变更时」是源文没有的触发条件。读者会据此认为配置不变就不会重启，而源文并未这样承诺。
+
+      '
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  notes: '状语辖及并列谓语一项还是两项。诱因很强：模型倾向补一个「变更时」使句子看起来更合理。策展调整：原稿同时禁止「固定其中一种读法」，但汉语默认读法足够强，那样会因读者共识而误伤正确输出；现仅保留「不得虚构触发条件」这一无争议的半边。
+
+    '
+  source_file: r2-claude-cases.yaml

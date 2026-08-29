@@ -228,7 +228,6 @@ cases:
   over_edit_trap: false
   provenance: orchestrator-reviewed
   source_file: r2-gpt-cases.yaml
-  notes: 源文刻意保留「由于……的事实」这一翻译腔：本用例同时检验模型能否修复生硬句式，又不把「另一个进程」泛化为「其他进程」。见 eval/disagreements/D002。
 - id: G-L-007
   category: quantifier-scope-drift
   task: translate
@@ -472,21 +471,6 @@ cases:
     - order
     - negation
     reason: '候选输出把提升主库与两个必要前置步骤并行化，删除了等待边。
-
-      '
-  - output: '故障切换步骤：
-
-      1. 暂停写入。
-
-      2. 等待 `replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`。
-
-      3. 将备用库提升为主库。
-
-      '
-    violated:
-    - negation
-    - order
-    reason: '候选输出逐字保留了三个步骤和全部受保护标记，只删除了末尾的并行禁止警告；顺序在纸面上仍然成立，但禁止并行执行的约束已经消失。
 
       '
   over_edit_trap: true

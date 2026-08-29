@@ -26,7 +26,9 @@ cases:
       '
   protected_tokens:
   - SDK
-  authorized_token_changes: []
+  - schema validator
+  authorized_token_changes:
+  - schema 校验器
   invalid_transformations:
   - output: SDK 将对上传的配置文件进行解析，并通过调用 schema 校验器来进行有效性检查。
     violated:
@@ -40,8 +42,7 @@ cases:
   expected_issues: []
   over_edit_trap: false
   provenance: orchestrator-reviewed
-  notes: 测试英文技术文档中 perform/carry out + noun 结构向自然中文动词的转换。 策展修正：schema validator 是需要翻译的普通名词，不是受保护标记；受保护标记只保留
-    SDK。
+  notes: 测试英文技术文档中 perform/carry out + noun 结构向自然中文动词的转换。
   source_file: r2-gemini-cases.yaml
 - id: G-R-002
   category: translationese-clunky-connectors

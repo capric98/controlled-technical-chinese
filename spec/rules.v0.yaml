@@ -13,17 +13,26 @@ meta:
   inputs_read:
     - docs/decisions/000-design.md
     - AGENTS.md
+    - docs/decisions/001-development-protocol.md
     - docs/decisions/002-gold-case-schema.md
     - eval/disagreements/D001-naturalness-vs-modality.md
   not_read_on_purpose:
-    - dev/inbox/*        # parallel independent passes; independence before discussion (000 §12)
-  rule_count: 30
-  family_counts: {S: 7, A: 6, P: 5, T: 2, L: 4, R: 6}
-  level_counts: {MUST: 18, SHOULD: 11, MAY: 1}
+    - dev/inbox/*        # parallel independent passes; independence before discussion
+                         # (000-design.md §12, 001-development-protocol.md independence protocol)
+  rule_count: 29
+  family_counts: {S: 7, A: 5, P: 5, T: 2, L: 4, R: 6}
+  level_counts: {MUST: 19, SHOULD: 9, MAY: 1}
+  must_ratio_note: >-
+    19 of 29 rules are MUST, which is high for a rule set whose governing principle is minimality.
+    Seven of them are the semantic core that 000-design.md §7.1 places above all stylistic
+    preference, and four rest on failures demonstrated in D001 or in 002's own gold-case example.
+    Every MUST carries the six items required by the admission gate. The candidates a synthesis
+    pass should re-examine first, in order, are A002, P004 and S007: each is defensible but each
+    could be a SHOULD that strict mode enforces, at the cost of losing its ERROR severity.
   conventions:
     pending_block: >-
       「待确认」is the single channel through which a rewrite reports what it refused to decide.
-      Rules A006 / P003 / P005 / R004 depend on it existing; see modes[].output_contract.
+      Rules A005 / P003 / P005 / R004 depend on it existing; see modes[].output_contract.
     severity_mapping: MUST -> ERROR, SHOULD -> WARNING, MAY -> STYLE (000-design.md §28)
     detection_note: >-
       Per 002-gold-case-schema.md, `deterministic` is reserved for properties decidable by string
@@ -49,7 +58,7 @@ priority_ladder:
     overrides: >-
       Overrides levels 2-5 unconditionally. If a clearer, more consistent, more natural or more
       house-style-conformant wording changes any property above, the change is abandoned, not
-      negotiated. Clarity gained by inventing content is not clarity (see A006).
+      negotiated. Clarity gained by inventing content is not clarity (see A005).
   - level: 2
     name: operational-clarity
     means: >-
@@ -126,7 +135,7 @@ modes:
       granularity, code fences and inline code. No preamble, no explanation of the changes. If and
       only if unresolved items exist, append one final section headed 「待确认」 containing at most
       one line per item, each as: 位置 | 问题 | 需要的信息. Items are limited to ambiguities that
-      could not be resolved from evidence (A006), success criteria the source never stated (P003),
+      could not be resolved from evidence (A005), success criteria the source never stated (P003),
       trigger conditions missing from a tool description (P005), and undefined normative criteria
       (R004). If there are none, the section is absent.
   - id: standard
@@ -752,3 +761,518 @@ rules:
       risk: "工具选择与调用参数被一段虚构的能力说明驱动；错误在运行时才暴露，且指向错误的排查方向。"
       not_covered_by: "S002 覆盖了坏输出这一半（虚构能力），但不覆盖另一半：缺少触发条件的描述本身就是一种失败，而 S002 恰恰禁止用补写来修复它。本规则把两半连起来：缺失就报告，不填空。"
       why_defeasible: "能否写出触发条件完全取决于素材是否包含它。定为 MUST 会与 S002 直接冲突，逼出虚构。"
+
+  # ------------------------------------------------------------------- T: terminology
+
+  - id: CTC-T001
+    family: T
+    concept: term-consistency
+    level: SHOULD
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: "同一概念在本次工作单位（被改写的文本，加上调用方给出的上下文）内出现两种以上称呼。"
+    requirement: "同一概念应统一为一个术语。选择顺序：调用方提供的术语约定 > 来源中最明确且出现最多的形式 > 来源中首次出现的形式。"
+    prohibition: "引入来源与上下文都没有出现过的新术语或新译名；在同一文档内无理由地交替使用中英形式；把来源已经统一的术语替换为模型自己偏好的说法。"
+    exceptions: "首次出现处给出中英对照属于术语定义，不算不一致。引用外部系统或标准的固有名称时保持原名。本技能不附带产品术语表（000-design.md §7.4）：术语只能来自来源文本与调用上下文。"
+    invariant: "concept-to-term — 概念到术语的映射在工作单位内是函数（一个概念一个术语）。"
+    detection: mixed
+    detection_note: "当调用方提供了术语约定时，约定内术语可做确定性字符串检查；无约定时，同义变体的识别属于语义层。"
+    examples:
+      positive:
+        source_zh: "访问令牌的有效期为 1 小时。token 过期后需要重新获取凭证。"
+        good_zh: "访问令牌的有效期为 1 小时；访问令牌过期后需要重新获取。"
+      negative:
+        source_zh: "访问令牌的有效期为 1 小时。访问令牌过期后需要重新获取。"
+        bad_zh: "access token 的有效期为 1 小时。令牌过期后需重新申请凭据。"
+        why_bad: "同一对象在两句里出现三种称呼，且都不是来源使用的形式。读者无法确定「凭据」与「access token」是否同一件东西，排查权限问题时会去找两套配置。"
+      boundary:
+        source_zh: "服务端返回访问令牌（access token）与刷新令牌（refresh token）。"
+        output_zh: "服务端返回访问令牌（access token）与刷新令牌（refresh token）。"
+        why_not_triggered: "首次出现处的中英对照是术语定义；且访问令牌与刷新令牌是两个不同概念，统一为「令牌」反而会违反 T002。"
+    justification: "术语漂移不改变任何单句的真值，却让读者在文档内部建立错误的对象数量模型。"
+    gate_evidence:
+      failing_input: "访问令牌的有效期为 1 小时。访问令牌过期后需要重新获取。"
+      observed_bad_output: "access token 的有效期为 1 小时。令牌过期后需重新申请凭据。"
+      risk: "读者把一个对象当成两个或三个；在鉴权文档里这直接导致配置错项。"
+      not_covered_by: "S001 不触发：断言完整。T002 是反方向的规则（禁止合并概念），不要求统一。"
+      why_defeasible: "同一概念的不同形式有时承担不同分工：正文用中文名，示例与字段说明用英文标识符。硬性统一会破坏这种分工，也会与 S005 冲突，因此必须保持可反驳。000-design.md §7.4 使用「should normally」的措辞，本级别与之一致。"
+
+  - id: CTC-T002
+    family: T
+    concept: concept-distinction
+    level: MUST
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: "改写把两个术语合并为一个，或用近义词替换一个已确立的术语。"
+    requirement: "不同的领域概念必须保持不同的术语。替换术语之前必须确认二者在本文档的领域内确实同指。"
+    prohibition: "合并这类近义对：认证／授权、参数／属性／字段、缓存／缓冲、重启／重载、告警／错误、限流／熔断、副本／备份、幂等／去重；用上位词覆盖下位区分。"
+    exceptions: "来源本身在同一意义上交替使用两个词时，统一为其中之一不算合并，那属于 T001。"
+    invariant: "term-to-concept — 术语到概念的映射是单射（一个术语不覆盖两个概念）。"
+    detection: semantic
+    examples:
+      positive:
+        source_zh: "该接口先做身份认证，再做权限校验。"
+        good_zh: "该接口先进行身份认证，再进行权限校验。"
+      negative:
+        source_zh: "该接口先做身份认证，再做权限校验。"
+        bad_zh: "该接口会进行权限认证。"
+        why_bad: "认证（你是谁）与授权（你能做什么）被合并为一个词，两个步骤也塌缩成一个。读者无法据此区分 401 与 403，排查时会从错误的方向开始。"
+      boundary:
+        source_zh: "请求会被网关拒绝并返回 403。被拒绝的调用不计入配额。"
+        output_zh: "请求会被网关拒绝并返回 403；被拒绝的请求不计入配额。"
+        why_not_triggered: "「请求」与「调用」在本文中指同一对象，来源自身在交替使用；统一为「请求」没有合并任何区分。"
+    justification: "统一术语的压力天然会推向合并；必须有一条同等强度的规则限定它的上限。"
+    gate_evidence:
+      failing_input: "该接口先做身份认证，再做权限校验。"
+      observed_bad_output: "该接口会进行权限认证。"
+      risk: "两个安全语义不同的阶段被合并，读者失去区分 401 与 403 的依据；在权限设计文档中这会传播成实现缺陷。"
+      not_covered_by: "T001 要求统一，本规则给出统一的上限；只有 T001 时，「保持术语一致」反而成为合并概念的正当理由。S001 不触发方式很隐蔽：坏输出中断言数量减少了，但语义层若按「概念相近」判断，很容易接受这次合并。"
+      distinguishing_criterion: "对每一次术语替换追问：被替换的两个词在本领域是否同指？答否即 ERROR。"
+
+  # -------------------------------------------------- L: logic, conditions, temporal order
+
+  - id: CTC-L001
+    family: L
+    concept: condition-and-exception-preservation
+    level: MUST
+    scope: [rewrite, translate, review]
+    modes: [strict, standard, review]
+    trigger: "来源含有条件、前提、例外、适用限定或告警。"
+    requirement: "条件、前提与例外必须保留，并继续限定同一对象。有条件的陈述必须仍然是有条件的。"
+    prohibition: "删除例外（「只读副本除外」）；把有条件的规则降格为一般规则；把「在 X 情况下」改为无限定表述；把例外挪到一个不再修饰目标句的位置。"
+    exceptions: "条件的表述形式可变（若…则／…时／前提是），只要限定对象与逻辑方向不变（L002）。"
+    invariant: "condition-set — 每条断言所附带的 (条件, 例外) 集合不变。"
+    detection: semantic
+    examples:
+      positive:
+        source_zh: "除只读副本外，所有节点都需要重新加载证书。"
+        good_zh: "所有节点都需要重新加载证书，只读副本除外。"
+      negative:
+        source_zh: "除只读副本外，所有节点都需要重新加载证书。"
+        bad_zh: "所有节点都需要重新加载证书。"
+        why_bad: "例外被删除，规则的适用范围被扩大。只读副本会被执行一次不必要的证书重载，而在部分实现中该操作会触发副本重建。"
+      boundary:
+        source_zh: "在启用了 TLS 的集群中，还需要同时更新 CA 包。"
+        output_zh: "启用 TLS 的集群还需同时更新 CA 包。"
+        why_not_triggered: "条件仍限定同一对象集合，只是语序与助词变化。"
+    justification: "例外与前提是句子里最像赘余的成分，因此在以简洁为目标的改写中最先被牺牲。"
+    gate_evidence:
+      failing_input: "除只读副本外，所有节点都需要重新加载证书。"
+      observed_bad_output: "所有节点都需要重新加载证书。"
+      risk: "一条被明确排除的对象被纳入操作范围；在证书轮换这类全集群操作中，例外通常正是为了避免一次已知的破坏性副作用。"
+      not_covered_by: "S001 的判据是「来源断言能否在输出中定位」，而条件降格会让输出的断言变得更强、更概括，逐条比对断言时不会显示为缺失；输出甚至看起来信息更完整。检测条件降格需要逐条检查断言的适用范围，这是与 S001 不同的判据。"
+      distinguishing_criterion: "对来源中每条断言列出 (条件, 例外)，在输出的对应断言上比较；集合缩小即 ERROR。"
+
+  - id: CTC-L002
+    family: L
+    concept: logical-direction-fidelity
+    level: MUST
+    scope: [rewrite, translate, review]
+    modes: [strict, standard, review]
+    trigger: "来源含有逻辑连接成分（且、或、若…则、仅当…才、只有…才、除非…否则、即使…也）。"
+    requirement: "连接成分表达的逻辑关系必须保持：合取不变析取，充分条件不变必要条件，让步不变条件，分组结构不变。"
+    prohibition: "「仅当 A 才 B」→「A 时 B」；「A 且 B」→「A 或 B」；「除非 A，否则 B」→「若 A 则 B」；「即使 A，也 B」→「若 A，则 B」；把 (A 且 B) 或 C 改写为 A、B、C 三选一。"
+    exceptions: "同义连接词替换允许（若…则 ↔ …时 ↔ 当…时），前提是逻辑方向不变。"
+    invariant: "logical-form — 命题的逻辑式（合取／析取／蕴含方向／分组）不变。"
+    detection: mixed
+    detection_note: "确定性层可对连接词表（仅当、只有、才、除非、否则、即使、且、或、以及、和）做出现差分并给出 WARNING；方向是否真的改变由语义层判定。"
+    examples:
+      positive:
+        source_zh: "仅当集群处于维护模式时，才允许手动删除 PVC。"
+        good_zh: "只有在集群处于维护模式时，才允许手动删除 PVC。"
+      negative:
+        source_zh: "仅当集群处于维护模式时，才允许手动删除 PVC。"
+        bad_zh: "集群处于维护模式时，允许手动删除 PVC。"
+        why_bad: "必要条件被改写为充分条件。原文排除了其他一切情形下的手动删除，改写后不再排除，读者会认为还存在别的被允许的路径，于是在非维护期删除 PVC，数据卷被回收。"
+      boundary:
+        source_zh: "如果队列长度超过 1000，则触发扩容。"
+        output_zh: "队列长度超过 1000 时触发扩容。"
+        why_not_triggered: "「如果…则」与「…时」在此同为充分条件表达，逻辑方向未变。"
+    justification: "「仅」「才」「除非」都是单字级成分，删除它们既不影响流畅度也不触发任何长度或断言检查，但它们承载整句的逻辑方向。"
+    gate_evidence:
+      failing_input: "仅当集群处于维护模式时，才允许手动删除 PVC。"
+      observed_bad_output: "集群处于维护模式时，允许手动删除 PVC。"
+      risk: "一条排他性授权条件被读作普通条件；破坏性操作的适用范围被静默放宽。"
+      not_covered_by: "S001 不触发：删掉一个「仅」字不会被判为断言丢失。S007 覆盖量化词的论域大小，不覆盖条件与结论之间的蕴含方向。L001 只检查条件是否仍在，此处条件完好，改变的是它与结论的关系。"
+      distinguishing_criterion: "把两侧还原为逻辑式（A→B / B→A / A∧B / A∨B）比较；式子不同即 ERROR。"
+
+  - id: CTC-L003
+    family: L
+    concept: temporal-order-preservation
+    level: MUST
+    scope: [rewrite, translate, review]
+    modes: [strict, standard, review]
+    trigger: "来源给出了动作、事件或状态之间的先后、并发或期间关系。"
+    requirement: "时间关系必须保持：先后不变并发，并发不变先后，「在 X 完成之后」不变「在 X 期间」。顺序标记被删除时，顺序必须仍可从文本恢复。"
+    prohibition: "交换存在依赖关系的步骤；把顺序执行改写为同时执行；把「完成后」改为「期间」或「同时」；删除唯一表达顺序的标记。"
+    exceptions: "陈述顺序可以与时间顺序不同（「临时文件应在服务重启之后清理」），只要时间关系本身不变。"
+    invariant: "temporal-relations — 事件对之间的 (先于, 同时, 期间) 关系集合不变。"
+    detection: semantic
+    examples:
+      positive:
+        source_zh: "先禁用定时任务，再执行数据库迁移；迁移完成后重新启用定时任务。"
+        good_zh: |-
+          1. 禁用定时任务。
+          2. 执行数据库迁移。
+          3. 迁移完成后，重新启用定时任务。
+      negative:
+        source_zh: "先禁用定时任务，再执行数据库迁移；迁移完成后重新启用定时任务。"
+        bad_zh: "执行数据库迁移，并在迁移期间禁用定时任务。"
+        why_bad: "「先禁用、再迁移」变成了「迁移期间禁用」。迁移开始时定时任务仍在运行，可能在迁移中途按旧表结构写入数据，而这类损坏在迁移完成后才会显现。"
+      boundary:
+        source_zh: "重启服务后清理临时文件。"
+        output_zh: "临时文件应在服务重启之后清理。"
+        why_not_triggered: "陈述顺序改变，但两个动作的时间关系（重启在前）未变。"
+    justification: "把顺序关系压缩成并列是中文改写中很自然的一步，且改写后的句子通常更短更顺。"
+    gate_evidence:
+      failing_input: "先禁用定时任务，再执行数据库迁移；迁移完成后重新启用定时任务。"
+      observed_bad_output: "执行数据库迁移，并在迁移期间禁用定时任务。"
+      risk: "数据在迁移窗口内被并发写入，产生难以定位的数据损坏。"
+      not_covered_by: "S001 不触发：两个动作都在。P001 覆盖原子性分组，此处分组正确、顺序错误；P001 的判据（哪些动作必须落在同一窗口内）恰恰会把这个坏输出判为通过。"
+      distinguishing_criterion: "抽取两侧的事件对时间关系集合比较；关系类型不同即 ERROR。"
+
+  - id: CTC-L004
+    family: L
+    concept: threshold-boundary-preservation
+    level: MUST
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: "来源含有比较关系或边界表述（达到、超过、不少于、至少、最多、不超过、以上、以下、以内、之前、之后）。"
+    requirement: "比较算子与边界包含性必须保持不变：「达到 N」包含 N，「超过 N」不包含 N，「N 以内」包含 N。"
+    prohibition: "达到→超过；至少→多于；最多→少于；不少于→大于；「N 秒内」→「N 秒后」；把闭区间写成开区间或反向。"
+    exceptions: "同义算子替换允许（不少于 N ↔ N 及以上 ↔ 大于等于 N）。当来源的边界表述本身歧义（如「3 次以上」在中文中可含可不含 3）且边界值会改变行为时，不得静默择一，转 A005。"
+    invariant: "comparator-and-inclusivity — 每个阈值的 (比较方向, 边界是否包含) 不变。"
+    detection: mixed
+    detection_note: "002 的确定性层执行 threshold-comparator drift 检查并给出 WARNING；等值替换与真实漂移的区分留给语义层，因为合法改写可以改变表层算子。"
+    examples:
+      positive:
+        source_zh: "当队列长度达到 100 时拒绝新任务。"
+        good_zh: "队列长度达到 100 时，拒绝新任务。"
+      negative:
+        source_zh: "当队列长度达到 100 时拒绝新任务。"
+        bad_zh: "当队列长度超过 100 时拒绝新任务。"
+        why_bad: "边界包含性被改变：队列长度恰为 100 时的行为从拒绝变成接受。容量告警与压测断言都以该边界为准，这一位偏移会表现为「文档与实现不符」，并被误判为实现缺陷。"
+      boundary:
+        source_zh: "重试间隔不少于 500 ms。"
+        output_zh: "重试间隔为 500 ms 及以上。"
+        why_not_triggered: "「不少于 N」与「N 及以上」是同一闭区间下界的两种表述，比较方向与包含性均未变。"
+    justification: "中文的边界词（达到／超过／以上／以内）在日常语用中可互换，在规格文本中不可互换。此 ID 与 002-gold-case-schema.md 中示例案例 G-L-003 引用的 `rule: CTC-L004` 对齐。"
+    gate_evidence:
+      failing_input: "当队列长度达到 100 时拒绝新任务。（002-gold-case-schema.md 示例案例 G-L-003）"
+      observed_bad_output: "当队列长度超过 100 时拒绝新任务。"
+      risk: "边界处行为反转；限流、配额、告警阈值类文档中的 off-by-one 会直接产生生产事故或误告警。"
+      not_covered_by: "S004 保证数值与单位不变——在这个坏输出里 100 完好无损，变的是比较算子。002 的确定性层也把两者分成两项独立检查（quantity multiset 与 comparator drift），说明它们不是同一个属性。L001 只检查条件是否存在，不检查条件的边界值。"
+      distinguishing_criterion: "抽取每个阈值的 (比较方向, 包含性) 比较；任一不同即 ERROR。"
+
+  # ------------------------------------------------ R: rendering and controlled style
+
+  - id: CTC-R001
+    family: R
+    concept: minimal-attributable-intervention
+    level: MUST
+    scope: [rewrite, translate, review]
+    modes: [strict, standard, review]
+    trigger: "任何改写或翻译任务；尤其是来源本身已经正确、清晰、合规的情形。"
+    requirement: "每一处改动都必须能归因到一条具体规则 ID。未触发任何规则的文本原样返回；整段合规时，合法的输出就是原文。"
+    prohibition: "无规则依据的重写；以「更清楚」「更专业」为由的等义替换；为体现工作量而改写；把多处不相关改动混在一起，使审查无法分别核对。"
+    exceptions: "调用方明确要求统一风格、调整体例或指定改写目标时，该要求本身即为归因，需在改动上标注其来源。"
+    invariant: "edit-attribution — 改动集合与规则触发集合一一对应；无触发即无改动。"
+    detection: mixed
+    detection_note: "确定性层可给出未改动字符占比与改动处数；某一处改动是否可归因由语义层判定。002 的 `over_edit_trap: true` 案例（至少五分之一）正是为这条规则准备的。"
+    examples:
+      positive:
+        source_zh: "调用 `POST /v1/jobs` 创建任务。任务创建后返回 `job_id`，可用于查询状态。"
+        good_zh: "调用 `POST /v1/jobs` 创建任务。任务创建后返回 `job_id`，可用于查询状态。"
+      negative:
+        source_zh: "调用 `POST /v1/jobs` 创建任务。任务创建后返回 `job_id`，可用于查询状态。"
+        bad_zh: "通过调用 `POST /v1/jobs` 接口，可以完成任务的创建操作。在任务创建完成之后，系统将会返回 `job_id`，该 `job_id` 可以被用于对任务状态进行查询。"
+        why_bad: "没有任何规则被触发。长度翻倍而信息不变，并引入了名词化与被动赘语；更严重的是，审查者现在必须重新核对每一句，而真正需要注意的改动（如果有）被淹没在其中。"
+      boundary:
+        source_zh: "请求失败时可能会返回 5xx。建议客户端进行重试。"
+        output_zh: "请求失败时可能返回 5xx，建议客户端重试。"
+        why_not_triggered: "两处改动都可归因于 R003（冗余的「会」与「进行」），情态词「可能」「建议」原样保留；这是可归因的最小改动，不是自由重写。"
+    justification: "过度改写是 000-design.md §17.7 与 §32 单列的评估维度，也是一个成熟受控语言系统与一个改写模型之间的差别。"
+    gate_evidence:
+      failing_input: "调用 `POST /v1/jobs` 创建任务。任务创建后返回 `job_id`，可用于查询状态。（已合规，属 over_edit_trap）"
+      observed_bad_output: "通过调用 `POST /v1/jobs` 接口，可以完成任务的创建操作。在任务创建完成之后，系统将会返回 `job_id`，该 `job_id` 可以被用于对任务状态进行查询。"
+      risk: "每一次不必要的改写都是一次 S 族违规的机会；D001 的六处语义损失全部发生在被认为只是措辞改进的改动中。累积效应是文档的可信度下降与审查成本上升。"
+      not_covered_by: "S 族全部是「不得改变 X」形式的规则，它们共同允许一次保持全部不变量的等义重写。等义重写本身不违反其中任何一条，却是全部语义漂移的载体，因此需要一条独立的、可归因性的硬规则。"
+      distinguishing_criterion: "对输出与来源做差分，对每一处改动要求给出规则 ID；给不出即 ERROR。这一判据同时提供了 over-edit 评估维度的度量方式。"
+
+  - id: CTC-R002
+    family: R
+    concept: anti-over-explicitation
+    level: SHOULD
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: "输出中出现逐句重复的主语、被机械拆分的短句，或不消除任何歧义的补充限定。"
+    requirement: "显式化必须换来歧义的消除。每一个补出的主语、重复的中心语、拆出的短句，都应对应一处具体的歧义风险。"
+    prohibition: "在只有一个执行者的语境中逐句补出主语；把正常复句拆成一行一句；给每个步骤补写「以确保操作正确执行」之类的空补语；对已经唯一确定的对象反复加限定。"
+    exceptions: "多执行者交替出现时重复主语具有消歧价值（A001）。面向 agent 的指令中为使每条可被单独引用而分条编号，不算机械拆句。strict 模式提高的是歧义敏感度，不是显式化的数量要求。"
+    invariant: "explicitness-justified — 每个显式成分对应一处可指认的歧义风险。"
+    detection: semantic
+    examples:
+      positive:
+        source_zh: "操作员登录堡垒机。操作员切换到运维账号。操作员执行部署脚本。"
+        good_zh: "操作员登录堡垒机，切换到运维账号后执行部署脚本。"
+      negative:
+        source_zh: "登录堡垒机，切换到运维账号，执行部署脚本。"
+        bad_zh: |-
+          操作员登录堡垒机。
+          操作员切换到运维账号。
+          操作员执行部署脚本。
+        why_bad: "全文只有一个执行者，重复的主语不消除任何歧义；拆句也没有改变任何依赖关系。文本变长、信息密度下降，需要特别注意的步骤与例行步骤之间失去了区分。"
+      boundary:
+        source_zh: "值班工程师确认影响范围，平台组执行回滚。"
+        output_zh: "值班工程师确认影响范围，平台组执行回滚。"
+        why_not_triggered: "两个主语指向不同执行者，重复具有消歧价值；删掉任何一个都会违反 A001。"
+    justification: "受控语言最典型的失败不是不够严格，而是把严格等同于显式，产出没有人愿意读、因而没有人会照做的文档。"
+    gate_evidence:
+      failing_input: "登录堡垒机，切换到运维账号，执行部署脚本。"
+      observed_bad_output: "操作员登录堡垒机。／操作员切换到运维账号。／操作员执行部署脚本。"
+      risk: "文档冗长导致实际执行者跳读；000-design.md §17.6 把重复主语与原子化短句列为需要扣分的自然度失败。"
+      not_covered_by: "R001 只约束「有没有规则依据」；此处 A001 与 P002 确实提供了依据，只是被过度应用。需要一条规则为它们设置上限，正如 A005 为消歧设置上限。"
+      why_defeasible: "「是否消除歧义」是判断问题，且 strict 模式下同一段文本确实可能需要更多显式成分。定为 MUST 会与 A001／P002 在边界上互相拉扯，产生无法同时满足的规则对。"
+
+  - id: CTC-R003
+    family: R
+    concept: anti-translationese
+    level: SHOULD
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: "文本含无必要的被动式、名词化赘语（进行／作出／予以 + 动词）、过长的「的」字串、英语从句语序残留（「由于…的事实」「在…的情况下」滥用），或直译的连接词。"
+    requirement: "在语义完全不变的前提下，使用中文技术写作的常规表达。"
+    prohibition: "为求正式而使用「被…所」；用「进行处理」代替「处理」；保留英语原文的从句语序；把简单谓语改写成「对…进行…操作」。"
+    exceptions: "被动用于突出受事、施事未知、或施事已在同句给出时是自然的技术表述。术语内部的固定搭配不改。本规则永远低于 S 族：任何自然度改进一旦改变不变量即作废（D001）。"
+    invariant: "meaning-under-rendering — 渲染改动前后，S、A、P、T、L 各族不变量全部不变。"
+    detection: semantic
+    examples:
+      positive:
+        source_zh: "该配置项被用于对超时时间进行控制。"
+        good_zh: "该配置项用于控制超时时间。"
+      negative:
+        source_zh: "网关会拒绝超出配额的请求。"
+        bad_zh: "超出配额的请求将会被网关所拒绝。"
+        why_bad: "「被…所」是书面化冗余结构，主动语序更短且信息完全相同；这类改动通常发生在把「正式」误当作「精确」的方向上。"
+      boundary:
+        source_zh: "该字段由服务端生成，客户端不得修改。"
+        output_zh: "该字段由服务端生成，客户端不得修改。"
+        why_not_triggered: "被动在此突出受事且施事已显式给出，是自然的技术表述；改成主动句属于无归因改动（R001），删除施事则违反 A001。"
+    justification: "翻译体是中文技术文档最普遍的质量问题，也是本技能存在的部分理由；但它必须被限定为一条可反驳的低优先级规则。"
+    gate_evidence:
+      failing_input: "网关会拒绝超出配额的请求。"
+      observed_bad_output: "超出配额的请求将会被网关所拒绝。"
+      risk: "文档可读性下降；在 agent 指令中，冗长的被动结构还会稀释指令的可执行性。"
+      not_covered_by: "R001 只要求改动可归因，不提供「什么是好的中文技术表达」的判据；R002 覆盖过度显式化，不覆盖句法层面的翻译腔。"
+      why_defeasible: "自然度是判断问题且随体裁变化。更重要的是 D001 证明了自然度改写本身正是语义损失的来源：这条规则必须始终可以被 S 族推翻，因此不能是 MUST。"
+
+  - id: CTC-R004
+    family: R
+    concept: normative-decidability
+    level: SHOULD
+    scope: [author, rewrite, review]
+    modes: [strict, review]
+    trigger: "目标文本是规范性指令（agent 指令、SOP、策略、门禁条件），且其判定条件由「尽量、适当、必要时、一般来说、合理」这类无判据词承担。"
+    requirement: "author 模式下，规范性条件应给出可判定的触发条件：阈值、状态或事件。rewrite 模式下不得补出来源没有的判据，应在「待确认」中提出。规范强度词（必须／应／可以）在同一文档内应保持稳定用法（000-design.md §26）。"
+    prohibition: "在改写中把无判据词替换为具体阈值（那是 S002 违规）；在同一文档内让「应」时而表示义务、时而表示建议；把目标文档中限定观测事实的普通汉语副词当作违规删除。"
+    exceptions: "本规则只适用于规范性指令文本。目标文档中对观测事实的限定（「该接口通常在 100 ms 内返回」）不受限制（000-design.md §26 末段）。"
+    invariant: "criterion-decidable — 每个规范性条件都对应一个可观测的判定依据，或被显式标记为未定义。"
+    detection: mixed
+    detection_note: "确定性层可对无判据词表（尽量、适当、必要时、一般来说、合理、酌情）做字符串检查并给出 WARNING；该词是否承担判定条件、附近是否已定义判据，由语义层判定。"
+    examples:
+      positive:
+        source_zh: "（author 模式；调用方素材：SLO 规定服务异常后 15 分钟内恢复，超时升级至平台组）服务异常时应尽量快速恢复。"
+        good_zh: "服务异常后应在 15 分钟内恢复；15 分钟内未恢复的，升级至平台组。"
+      negative:
+        source_zh: "服务异常时应尽量快速恢复。"
+        bad_zh: "服务异常时应尽量快速恢复，必要时可采取适当措施。"
+        why_bad: "「尽量」「必要时」「适当」都没有判定条件。执行者无法判断何时算达标、何时该升级；这段补充读起来像是加强了要求，实际上没有增加任何可执行内容，还稀释了原句。"
+      boundary:
+        source_zh: "该接口通常在 100 ms 内返回。"
+        output_zh: "该接口通常在 100 ms 内返回。"
+        why_not_triggered: "「通常」限定的是一个观测事实，不是规范判定条件。删除它会把统计描述变成性能保证（S003），量化它则是虚构（S002）。"
+    justification: "本技能的首要产出对象是 agent 指令与 SOP，其中一个不可判定的条件等于没有条件；同时必须防止这条规则外溢到普通技术散文。"
+    gate_evidence:
+      failing_input: "服务异常时应尽量快速恢复。"
+      observed_bad_output: "服务异常时应尽量快速恢复，必要时可采取适当措施。"
+      risk: "规范文本看起来完备而实际不可执行；不同执行者对同一条款做出不同判断，事故处置时间无法约束。"
+      not_covered_by: "S002 禁止虚构判据，但不要求识别并报告判据缺失；S003 保持情态强度不变，对「强度明确但触发条件不可判定」的条款不置一词。"
+      why_defeasible: "能否给出判据完全取决于素材。在 rewrite 模式下本规则只能以报告形式生效，因此不能是 MUST；000-design.md §26 本身也把限制范围限定在规范性指令上。"
+
+  - id: CTC-R005
+    family: R
+    concept: document-structure-preservation
+    level: SHOULD
+    scope: [rewrite, translate, review]
+    modes: [strict, standard, review]
+    trigger: "来源包含 Markdown 结构：标题层级、有序或无序列表、表格、围栏代码块及其语言标注、链接、引用块。"
+    requirement: "结构标记及其承载的粒度应保持不变：表格仍是表格，代码块仍是代码块并保留语言标注，列表项数保持一致（P001 允许的合法拆合除外），标题层级不变。"
+    prohibition: "把表格展平为句子；把围栏代码块改为行内代码或普通段落；删除语言标注；把编号步骤改写成散文段落；调整标题层级从而改变文档结构。"
+    exceptions: "调用方明确要求改变格式时按要求执行。把顺序敏感的无序列表改为有序列表是允许的，前提是顺序已由来源给出（否则属 S002 新增）。"
+    invariant: "structure-counts — (标题层级序列, 列表项数, 代码块数与语言标注, 表格行列数) 不变。"
+    detection: mixed
+    detection_note: "确定性层可比较结构计数（标题、列表项、代码围栏与语言标注、表格行列）并给出 WARNING；差异是否被任务授权由语义层判定。"
+    examples:
+      positive:
+        source_zh: |-
+          | 状态码 | 含义 |
+          | --- | --- |
+          | 429 | 触发限流 |
+        good_zh: |-
+          | 状态码 | 含义 |
+          | --- | --- |
+          | 429 | 已触发限流 |
+      negative:
+        source_zh: |-
+          | 状态码 | 含义 |
+          | --- | --- |
+          | 429 | 触发限流 |
+        bad_zh: "状态码 429 表示已触发限流。"
+        why_bad: "表格被展平。后续追加状态码时没有可对齐的位置，版本差异从「新增一行」变成「重写一段」，从文档抽取状态码表的工具也直接失效。"
+      boundary:
+        source_zh: |-
+          响应示例：
+
+          ```json
+          {"job_id": "j-123"}
+          ```
+        output_zh: |-
+          响应示例如下：
+
+          ```json
+          {"job_id": "j-123"}
+          ```
+        why_not_triggered: "代码块及其语言标注未被改动，只调整了块外的引导语；结构计数完全一致。"
+    justification: "技术文档的结构承载可维护性与机器可读性，而改写模型倾向于把结构视为可自由重排的排版。"
+    gate_evidence:
+      failing_input: "一张三行的状态码表。"
+      observed_bad_output: "状态码 429 表示已触发限流。"
+      risk: "文档的可维护性与可抽取性下降；在 API 文档中，表格常常是被工具消费的接口契约。"
+      not_covered_by: "S005 保护标记内部的字符，不保护标记之外的块级结构；P001 覆盖步骤语义上的拆合，不覆盖表格、标题与代码块。"
+      why_defeasible: "结构变化有时正是任务本身（把一段散文整理成步骤列表）。因此规则要求的是「未经要求不改，且改动须报告」，而不是绝对禁止。"
+
+  - id: CTC-R006
+    family: R
+    concept: typography-and-locale
+    level: MAY
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: "标点全半角、中英文之间的空格、引号样式、数字格式等排版约定不一致。"
+    requirement: "可以在不触碰受保护标记的前提下统一排版约定；统一的目标是来源或项目已有的一致风格，不是模型的偏好。"
+    prohibition: "为统一排版而改动受保护标记内部（S005 优先）；把排版偏好按 ERROR 上报（000-design.md §28）；在来源已有一致风格时按模型偏好改写（R001）。"
+    exceptions: "none"
+    invariant: "typography-subordinate — 排版改动不触及任何受保护标记，也不改变任何语义不变量。"
+    detection: deterministic
+    detection_note: "全半角、空格与引号样式可用字符级检查判定。本规则的作用主要是限定这些检查的效力，而不是扩大它们。"
+    examples:
+      positive:
+        source_zh: "重启服务,等待30秒."
+        good_zh: "重启服务，等待 30 秒。"
+      negative:
+        source_zh: "执行 `kubectl get pods -n prod`。"
+        bad_zh: "执行 `kubectl get pods —n prod`。"
+        why_bad: "为统一标点把命令中的半角连字符改成了全角破折号，命令不可执行。排版偏好不得凌驾于受保护标记之上。"
+      boundary:
+        source_zh: "错误码:404 表示资源不存在。（全文一致使用半角标点）"
+        output_zh: "错误码:404 表示资源不存在。"
+        why_not_triggered: "全篇一致的半角标点是项目风格，不造成解释歧义；为统一而改动属于无归因改动（R001），且 000-design.md §7.5 明确禁止把区域风格偏好升格为语义规则。"
+    justification: "排版问题会以两种方式出错：被当作语义问题上报，或在统一过程中破坏受保护标记。把它显式定为 MAY 级，同时堵住这两个方向。"
+    gate_evidence:
+      level_rationale: "MAY 级不经过硬规则门禁。保留它的理由是它排除了两类错误，而不是它要求了什么；若删除本规则，排版检查会以 STYLE 之外的严重级重新出现。"
+      observed_bad_output: "执行 `kubectl get pods —n prod`。"
+      not_covered_by: "S005 会拦截这个具体的坏输出，但不说明排版统一本身是否被允许以及处于什么优先级。"
+
+self_check:
+  - step: "改写之前，先抽取来源的不变量清单并写下来。"
+    checks:
+      - "列出全部受保护标记（S005）。"
+      - "列出全部 (数值, 单位) 与精度（S004）。"
+      - "列出每个阈值的比较方向与边界包含性（L004）。"
+      - "逐句记录 (认识强度, 道义强度, 言语行为类型)（S003）。"
+      - "列出全部条件、前提与例外，及其限定对象（L001）。"
+      - "列出每个量化位置的 (量化类型, 论域)（S007）。"
+      - "列出全部具名施事及其动作（A001）。"
+      - "列出事件之间的先后／并发／期间关系（L003）与原子性分组（P001）。"
+      - "记录术语到概念的映射（T001、T002）。"
+  - step: "确定规则触发集合，而不是先想怎么改。"
+    checks:
+      - "逐条规则回答：本文中哪一处触发它？记录触发点与规则 ID。"
+      - "没有触发点的规则不产生任何改动。"
+      - "触发集合为空时，直接返回原文；这是合法且常见的结果（R001）。"
+  - step: "只修改触发处；冲突用优先级阶梯解决。"
+    checks:
+      - "每一处改动都记下它的规则 ID。"
+      - "语义类改动先做，渲染类改动后做（000-design.md §27）。"
+      - "两条规则冲突时高层胜出；同层冲突时保留来源已有形式。"
+      - "若不违反第 1 层就无法达成第 2 层，则不改写该处，转 A005 报告。"
+  - step: "从输出文本重新抽取同一张清单——重新读，不要凭记忆。"
+    checks:
+      - "禁止用「我没有改变含义」代替本步骤；自述无变化不构成证据（D001 结论 1）。"
+      - "两张清单逐项比对：标记、数值、阈值、情态、条件、量化、施事、时序、术语。"
+      - "任一项不同且不属于已授权改动，回退该处改动而不是解释它。"
+  - step: "检查是否新增了来源没有的内容。"
+    checks:
+      - "输出中每条命题都能指回来源或调用上下文的具体位置（S002）。"
+      - "新出现的因果连接词有来源依据（S006）。"
+      - "没有新出现的数字、参数、执行者、判据或能力（S002、A005、P003、P005）。"
+  - step: "检查改写本身是否制造了新的歧义。"
+    checks:
+      - "每个指代成分的可及先行词唯一（A002）。"
+      - "句子合并没有制造修饰语与并列项的结合歧义（A003）。"
+      - "否定的作用域与来源一致（A004）。"
+      - "步骤拆合保留了原子性分组与顺序依赖（P001、L003）。"
+      - "不可逆动作的守护条件仍在动作之前（P004）。"
+  - step: "检查过度改写与自然度。"
+    checks:
+      - "未触发任何规则的段落与来源逐字相同（R001）。"
+      - "没有无消歧价值的重复主语或机械拆句（R002）。"
+      - "保留的被动与名词化都有理由（R003）。"
+      - "结构计数与来源一致：标题、列表项、代码块与语言标注、表格行列（R005）。"
+  - step: "按模式的输出契约组装结果。"
+    checks:
+      - "strict／standard：正文 + 可选「待确认」；无待确认项时不输出该节。"
+      - "「待确认」条目来自 A005、P003、P005、R004，每条给出 位置 | 问题 | 需要的信息。"
+      - "review：只输出 findings，每条含规则 ID、严重级、逐字引用的位置、问题、风险、建议。"
+      - "任何模式下都不输出对自身改动的辩解性说明。"
+
+open_issues:
+  - issue: "000-design.md 定义了 review 模式的输出结构，但没有定义 rewrite／translate 模式的输出格式。A005、P003、P005、R004 都依赖一个「报告而不改写」的通道。"
+    options:
+      - "只输出正文，未决歧义静默保留。"
+      - "正文 + 可选「待确认」小节（本文件采用）。"
+      - "由调用方开关决定是否输出「待确认」。"
+    recommendation: "采用第二项并设为默认。没有这个通道时，A005 只能在「静默带入歧义」与「虚构以求确定」之间二选一，而 D001 §5 表明模型会选后者。建议在 SKILL.md 中固定该小节的字段格式，并限制条目数量以免它变成免责声明列表。"
+  - issue: "strict 模式如何加强 A 族与 P 族的 SHOULD 规则，设计文档只说 strict「应当偏好显式」，没有说这是否改变规则级别。"
+    options:
+      - "级别固定，模式只改变触发阈值（本文件采用）。"
+      - "每个模式一张独立的级别表。"
+      - "不做任何加强，strict 与 standard 仅在语气上不同。"
+    recommendation: "采用第一项。第二项会让实际规则数量接近三倍，且同一条规则在不同模式下拥有不同 ID 语义，破坏 ID 稳定性。需要一并确认的是：strict 下被抬升执行的 SHOULD 违规，在 review 输出中应报 ERROR 还是标注为 WARNING (strict)。本文件暂按前者，即严重级随执行级别一起抬升。"
+  - issue: "术语一致性的作用域单位。000-design.md §7.4 说「in a document or project」，但改写任务通常只看到文档片段。"
+    options:
+      - "仅限本次输入文本加调用方提供的上下文（本文件采用）。"
+      - "允许模型使用自身的通用术语知识补齐一致性。"
+      - "要求调用方显式提供术语约定，否则不执行 T001。"
+    recommendation: "采用第一项。第二项等价于附带一份隐式术语表，违反 §7.4；第三项会让 T001 在绝大多数调用中失效。建议在 SKILL.md 中明确说明片段级一致性的局限：跨片段的不一致本技能无法发现，也不应假装发现。"
+  - issue: "CTC-L004 的 ID 归属。002-gold-case-schema.md 的示例案例 G-L-003（category: threshold-boundary）引用了 `rule: CTC-L004`，而 000-design.md §7 说 ID 在被决策或评估案例引用后即稳定。"
+    options:
+      - "按 002 的引用把阈值边界规则定为 CTC-L004（本文件采用），并放弃原先设想的 L004「隐含逻辑关系显式化」。"
+      - "视 002 中的片段为示意性，另行编号。"
+    recommendation: "采用第一项。分类上也讲得通：边界包含性决定的是条件的边界，属于 L 族而非 S 族；且 002 的确定性层把 comparator drift 与 quantity 分成两项检查，与本文件把 L004 与 S004 分开一致。若合成阶段改变这一编号，需要同步更新 002 的示例。"
+  - issue: "000-design.md §7.2 把「隐含逻辑关系」列为候选歧义领域，本文件没有为它设立规则。"
+    options:
+      - "不设立，等待评估中出现真实失败（本文件采用）。"
+      - "设为 SHOULD：当两个小句之间的关系有分歧读法且改变行为时，应显式化。"
+      - "并入 A003 的结合歧义。"
+    recommendation: "采用第一项。中文技术文本大量使用意合结构，一条要求显式化逻辑关系的规则会在正常并列句上广泛误触发，与 R002 直接冲突；而插入连接词又极易违反 S006。真正危险的子情形（条件读作现象）已被 L001 与 A005 覆盖。若评估中出现该类失败，再按门禁新增。"
+  - issue: "严重级与规则级别是否恒等映射。T001 是 SHOULD，但鉴权文档中的术语混乱可能造成配置错误；A003 在 strict 下按 MUST 执行。"
+    options:
+      - "恒等映射，strict 抬升时严重级一并抬升（本文件采用）。"
+      - "引入按上下文风险调整的严重级。"
+    recommendation: "采用第一项。第二项需要一个风险模型，而本项目没有可靠的风险标注来源；用上下文风险调整严重级还会让同一条规则在不同文档中给出不同判决，破坏 review 输出的可比较性。"
+  - issue: "CTC-R001（最小可归因改动）被放在 R 族，但它约束的是全部规则族的适用方式，不只是渲染。"
+    options:
+      - "留在 R 族（本文件采用）。"
+      - "提升为一条与优先级阶梯并列的元规则，不进入任何族。"
+      - "新设一个族。"
+    recommendation: "采用第一项，但在合成时值得重新考虑第二项。留在 R 族的理由是保持 ID 空间简单、且它确实在渲染阶段被违反；反对的理由是它与 A005 一样是「上限型」规则，而 A005 在 A 族里也有同样的错位。若合成阶段引入元规则层，R001 与 A005 应一并迁移。"

@@ -1,0 +1,586 @@
+# 流程结构与指令遵循
+# 由 tools/curate_cases.py 从 dev/inbox 提升而来；策展变更见 git 历史与 decision 002。
+# provenance: orchestrator-reviewed —— 已由编排者按已接受语义审阅，尚未经人工复核。
+cases:
+- id: G-P-001
+  category: procedure-missing-element
+  task: rewrite
+  mode: strict
+  source: '## 灰度发布
+
+
+    1. 将新版本发布到 5% 流量。
+
+    2. 观察 10 分钟。
+
+    3. 无异常则继续放量至 50%，再观察 10 分钟。
+
+    4. 仍无异常则全量发布。
+
+    '
+  invariants:
+  - kind: procedure
+    detail: '源文缺少「结果」要素：第 2、3 步中「无异常」的判定依据——观察哪些指标、阈值是多少、由谁
+
+      判定——在源文中不存在，也无法从上下文推得，因而每次放量的门禁是不可执行的。输出须让这一
+
+      缺口保持可见：保留原措辞并标注待作者补充，或以问题形式指出。
+
+      '
+  - kind: fact
+    detail: '输出中不得出现源文没有的指标名、阈值或判定方：出现「错误率低于 1%」「P99 延迟无上升」
+
+      「5xx 比例」「无告警触发」「由发布负责人确认」等任何一项，判为凭空补全事实。
+
+      '
+  - kind: procedure
+    detail: '放量档位 5% → 50% → 全量、两次「观察 10 分钟」的次数与时长不得增删或改值，
+
+      也不得把两次观察合并成一次。
+
+      '
+  - kind: fact
+    detail: '源文未规定出现异常时的处置动作。输出不得补写「异常则回滚」「异常则暂停放量」之类的分支。
+
+      '
+  protected_tokens:
+  - 5%
+  - 50%
+  - 10 分钟
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '2. 观察 10 分钟，确认错误率低于 1%、P99 延迟无明显上升。
+
+      '
+    violated:
+    - fact
+    - procedure
+    reason: '指标与阈值均为源文所无。写进 runbook 后会被当成已批准的发布门禁，而没有任何人批准过 1%。
+
+      '
+  - output: '2. 观察 10 分钟；如有异常立即回滚至上一版本。
+
+      '
+    violated:
+    - fact
+    reason: '源文只说「无异常则继续」，没有规定异常时回滚、暂停还是上报。补写等于新增操作规程。
+
+      '
+  - output: '2. 观察一段时间后确认服务稳定。
+
+      '
+    violated:
+    - procedure
+    - fact
+    reason: '把可执行的「10 分钟」抹成「一段时间」，用「稳定」替换同样不可判定的「无异常」，
+
+      缺口没有被暴露，反而更难发现。
+
+      '
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  notes: '考的是：识别出结果要素缺失，且不用自造的阈值把它补上。诱因极强。
+
+    '
+  source_file: r2-claude-cases.yaml
+- id: G-P-002
+  category: procedure-step-atomicity
+  task: rewrite
+  mode: strict
+  source: "## 签名密钥轮换\n\n1. 通过单次 `PUT /v1/keyring` 请求完成换位：同一请求内把新密钥写入 `active` 槽位、\n   把当前密钥移入 `previous`\
+    \ 槽位（服务端原子生效）。\n2. 等待边缘节点同步，最长 30 秒。\n3. 确认 `GET /v1/keyring/status` 返回的 `synced_nodes` 等于节点总数后，清空\
+    \ `previous` 槽位。\n"
+  invariants:
+  - kind: procedure
+    detail: '第 1 步的两次槽位写入必须留在同一个步骤、同一次 `PUT /v1/keyring` 请求内。输出若把
+
+      「写入 `active`」与「移入 `previous`」拆成两个步骤或两次请求，判为改变行为：拆分后存在
+
+      两个槽位不一致的中间状态，此期间到达的请求会验签失败。
+
+      '
+  - kind: procedure
+    detail: '第 3 步中「`synced_nodes` 等于节点总数」是清空 `previous` 的前置校验。输出不得删除该校验，
+
+      不得把清空动作提前到第 2 步或与第 2 步合并；未同步完成即清空旧密钥会使落后节点全部验签失败。
+
+      '
+  - kind: token
+    detail: '`PUT /v1/keyring`、`active`、`previous`、`GET /v1/keyring/status`、`synced_nodes`
+
+      须逐字保留。
+
+      '
+  protected_tokens:
+  - '`PUT /v1/keyring`'
+  - '`active`'
+  - '`previous`'
+  - '`synced_nodes`'
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '1. 将新密钥写入 `active` 槽位。
+
+      2. 将当前密钥移入 `previous` 槽位。
+
+      3. 等待边缘节点同步，最长 30 秒。
+
+      4. 确认 `GET /v1/keyring/status` 返回的 `synced_nodes` 等于节点总数后，清空 `previous` 槽位。
+
+      '
+    violated:
+    - procedure
+    - fact
+    reason: '「一步一动作」的机械拆分把一次原子请求写成了两次写入，制造出源文明确排除的中间状态。
+
+      '
+  - output: '2. 等待边缘节点同步（最长 30 秒）后清空 `previous` 槽位。
+
+      3. 通过 `GET /v1/keyring/status` 查看 `synced_nodes`。
+
+      '
+    violated:
+    - procedure
+    reason: '同步校验由清空的前置条件降级为事后查看，未同步完成的节点会在旧密钥被清空后全部失败。
+
+      '
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  notes: '对应 §17.4「拆分或重排步骤不得改变行为」，与 OC-03 的连动句拆分诱因。
+
+    '
+  source_file: r2-claude-cases.yaml
+- id: G-P-003
+  category: procedure-checkpoint-preservation
+  task: rewrite
+  mode: strict
+  source: '## 扩容收尾
+
+
+    1. 在新节点上启动 `chunk-server`。
+
+    2. 在管理端确认新节点状态为 `READY`，且分片元数据已全部加载。
+
+    3. 将新节点加入写入路由表。
+
+    4. 观察 15 分钟无写入错误后，下线旧节点。
+
+    '
+  instruction: '合并可以合并的步骤，压缩到不超过 3 步，操作行为保持不变。
+
+    '
+  invariants:
+  - kind: procedure
+    detail: '第 2 步是「加入写入路由表」之前的人工核对点，包含两个必须分别确认的条件：状态为 `READY`、
+
+      分片元数据已全部加载。无论如何压缩，输出中都必须存在一个位于「加入写入路由表」之前、
+
+      由操作者执行、并同时列出这两个条件的确认动作。若两个条件只剩其一，或核对点消失，
+
+      或被改写为不需要操作者动作的陈述（如「节点就绪后加入路由表」），判为删除校验点。
+
+      '
+  - kind: procedure
+    detail: '「观察 15 分钟无写入错误」是下线旧节点的前置条件，不得删除或弱化为「随后下线旧节点」
+
+      「确认无误后下线旧节点」；时长 15 分钟与判据「无写入错误」都必须保留。
+
+      '
+  - kind: instruction
+    detail: '压缩指令不得凌驾于行为保持之上。若为满足「不超过 3 步」而丢掉任一校验条件，判为失败；
+
+      输出步骤数超过 3 但校验完整，优于步骤数达标而校验丢失。
+
+      '
+  - kind: token
+    detail: '`chunk-server`、`READY` 须逐字保留。
+
+      '
+  protected_tokens:
+  - '`chunk-server`'
+  - '`READY`'
+  - 15 分钟
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '1. 在新节点上启动 `chunk-server` 并加入写入路由表。
+
+      2. 观察 15 分钟无写入错误后，下线旧节点。
+
+      '
+    violated:
+    - procedure
+    - instruction
+    reason: '核对点整体消失。元数据尚未加载完就接收写入，会造成分片写到错误位置。
+
+      '
+  - output: '1. 在新节点上启动 `chunk-server`。
+
+      2. 节点就绪后加入写入路由表。
+
+      3. 观察 15 分钟无写入错误后，下线旧节点。
+
+      '
+    violated:
+    - procedure
+    reason: '「节点就绪」把两个具体核对条件压成一个模糊状态词，元数据加载条件丢失，且不再要求
+
+      操作者在管理端主动确认。
+
+      '
+  - output: '1. 在新节点上启动 `chunk-server`，确认状态为 `READY` 后加入写入路由表。
+
+      2. 下线旧节点。
+
+      '
+    violated:
+    - procedure
+    reason: '元数据加载条件与 15 分钟观察窗口同时被压缩掉，旧节点可能在新节点尚未稳定时就下线。
+
+      '
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  notes: '指令本身诱导删校验点，考的是指令服从与行为保持冲突时的优先级。
+
+    '
+  source_file: r2-claude-cases.yaml
+- id: G-P-004
+  category: procedure-already-clear
+  task: rewrite
+  mode: strict
+  source: '## 紧急回滚（目标 5 分钟内完成）
+
+
+    1. 在发布平台点击「回滚到上一版本」，确认目标版本号为 `v3.14.2`。
+
+    2. 回滚完成后刷新健康检查页，确认 `/healthz` 连续 3 次返回 `200`。
+
+    3. 在 `#incident` 频道同步回滚结果与影响范围。
+
+    '
+  invariants:
+  - kind: over-edit
+    detail: '三步已含操作者（事故值班人，标题上下文唯一）、动作、对象与可验证结果，条件与顺序清晰，
+
+      不存在歧义。输出若增加步骤数、为任一步补写显式主语、或把动作与确认拆成两句，
+
+      判为过度改写（§17.7）。
+
+      '
+  - kind: procedure
+    detail: '步骤数保持 3。第 2 步的「确认 `/healthz` 连续 3 次返回 `200`」是一个确认动作，
+
+      不得拆成「刷新健康检查页」与「确认返回 200」两步。
+
+      '
+  - kind: fact
+    detail: '输出不得新增源文没有的步骤或分支（例如「若健康检查未通过则联系发布负责人」
+
+      「回滚前先通知业务方」）。
+
+      '
+  - kind: token
+    detail: '`v3.14.2`、`/healthz`、`200`、`#incident` 须逐字保留，「5 分钟」与「3 次」的数值不变。
+
+      '
+  protected_tokens:
+  - '`v3.14.2`'
+  - '`/healthz`'
+  - '`#incident`'
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '## 紧急回滚（目标 5 分钟内完成）
+
+
+      1. 事故值班工程师登录发布平台。
+
+      2. 事故值班工程师点击「回滚到上一版本」。
+
+      3. 事故值班工程师确认目标版本号为 `v3.14.2`。
+
+      4. 如果回滚已经完成，那么事故值班工程师刷新健康检查页。
+
+      5. 事故值班工程师确认 `/healthz` 连续 3 次返回 `200`。
+
+      6. 事故值班工程师在 `#incident` 频道同步回滚结果与影响范围。
+
+      '
+    violated:
+    - over-edit
+    - procedure
+    reason: '目标 5 分钟内完成的清单被膨胀成 6 步并附加了源文没有的登录步骤；重复主语与
+
+      「如果…那么…」句式没有带来任何消歧收益（§17.6、§17.7）。
+
+      '
+  - output: '1. 在发布平台点击「回滚到上一版本」，确认目标版本号为 `v3.14.2`。
+
+      2. 回滚完成后刷新健康检查页，确认 `/healthz` 连续 3 次返回 `200`。
+
+      3. 在 `#incident` 频道同步回滚结果与影响范围。
+
+      4. 若健康检查未通过，联系发布负责人决定是否二次回滚。
+
+      '
+    violated:
+    - fact
+    reason: '第 4 步是新增的操作规程，源文没有规定失败分支，也没有「发布负责人」这一角色。
+
+      '
+  over_edit_trap: true
+  provenance: orchestrator-reviewed
+  notes: '§17.7 的正面样本：已经合格的流程，正确行为是基本不动。
+
+    '
+  source_file: r2-claude-cases.yaml
+- id: G-P-005
+  category: instruction-review-mode
+  task: review
+  mode: review
+  source: '## 告警抑制规则变更
+
+
+    监控平台收到抑制规则更新后通知各采集端，随后重新加载规则文件。加载失败时保留旧规则，并在下一个周期重试。该文件位于 `/etc/alerting/rules.d/`，变更后须在值班群报备。
+
+    '
+  instruction: '以 review 模式审阅这段文档，报告问题，不要输出改写后的文档。
+
+    '
+  invariants:
+  - kind: instruction
+    detail: '输出须是问题清单，每条至少含位置、问题、风险与修改建议。不得返回整段改写后的文档；
+
+      若输出主体是重写文本（即便另附简短说明），判为失败。
+
+      '
+  - kind: actor
+    detail: '清单须报告「随后重新加载规则文件」的施事不可确定：既可读作监控平台重新加载，
+
+      也可读作各采集端各自重新加载，二者决定故障时该查哪一侧。若清单只给出一种「正确写法」
+
+      而不说明源文不足以判定，判为擅自决定。
+
+      '
+  - kind: reference
+    detail: '`/etc/alerting/rules.d/` 是目录，单数「该文件」缺少唯一先行词。清单若报告这一点，属于合理发现，不得计为误报；但不报告它不判为失败——这一层粒度不作为正确审阅的必要条件。
+
+      '
+  - kind: over-edit
+    detail: '「监控平台收到抑制规则更新后通知各采集端」施事明确且承前一致，不得作为施事缺失或
+
+      被动语态问题报告；报告它判为误报。
+
+      '
+  protected_tokens:
+  - '`/etc/alerting/rules.d/`'
+  authorized_token_changes: []
+  expected_issues:
+  - category: actor-omission-ambiguous
+    severity: ERROR
+    locus: 随后重新加载规则文件
+  invalid_transformations:
+  - output: '监控平台收到抑制规则更新后通知各采集端，各采集端随后重新加载 `/etc/alerting/rules.d/`
+
+      下的规则文件。加载失败时保留旧规则，并在下一个采集周期重试。变更后须在值班群报备。
+
+      '
+    violated:
+    - instruction
+    - actor
+    - fact
+    reason: 'review 模式被当成 rewrite；同时把加载方定为采集端、把「下一个周期」定为采集周期，
+
+      两处都是源文没有的事实。
+
+      '
+  - output: '问题 1（ERROR，位置：随后重新加载规则文件）：施事缺失，应改为「各采集端随后重新加载规则文件」。
+
+      问题 2（WARNING，位置：监控平台收到抑制规则更新后通知各采集端）：建议补充主语以避免歧义。
+
+      '
+    violated:
+    - actor
+    - over-edit
+    reason: '问题 1 定位正确但把一种读法当成唯一答案，未说明源文无法判定；问题 2 是误报，
+
+      该处施事已明确，误报会稀释真实问题。
+
+      '
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  notes: '三项同时考：不重写、报告真问题、不报假问题。策展调整：「该文件」指代不明由必报降为可报不可罚，避免因粒度过细而让合格模型在错误的理由上失败。
+
+    '
+  source_file: r2-claude-cases.yaml
+- id: G-P-006
+  category: instruction-protected-region
+  task: rewrite
+  mode: standard
+  source: '## 服务等级说明
+
+
+    以下 `--- BEGIN CONTRACT ---` 与 `--- END CONTRACT ---` 之间为法务提供的对外承诺原文。
+
+
+    --- BEGIN CONTRACT ---
+
+    在任何情况下，服务提供方对于因不可抗力所导致的服务中断，不承担任何形式的赔偿责任。
+
+    --- END CONTRACT ---
+
+
+    运维侧的实际做法是这样的：在发生区域性故障的时候，会先把流量切换到备用区域，然后再进行根因的排查。在切换的过程当中，可能会出现最长 30 秒的写入不可用的情况。
+
+    '
+  instruction: '改写「运维侧的实际做法」一段，使其符合中文技术写作规范。`--- BEGIN CONTRACT ---` 与
+
+    `--- END CONTRACT ---` 之间的内容是受保护区域，必须逐字保留，包括两行标记本身。
+
+    '
+  invariants:
+  - kind: instruction
+    detail: '受保护区域的三行（两行标记与其间正文）须在输出中字符级一致地出现。删除「在任何情况下」，
+
+      把「不承担任何形式的赔偿责任」改成「不承担赔偿责任」，把「所导致的」改成「导致的」，
+
+      或调整标点，均判为失败——即使改后的中文更自然。自然度不适用于受保护区域。
+
+      '
+  - kind: instruction
+    detail: '受保护区域的位置与边界不变：不得在两行标记之间插入标题、注释或说明，不得把承诺原文
+
+      移到标记之外，不得删除或改写标记行。
+
+      '
+  - kind: fact
+    detail: '区域外的改写须保留两项事实：切换过程中最长 30 秒写入不可用；先切流量到备用区域、
+
+      后排查根因的先后关系。
+
+      '
+  protected_tokens:
+  - '--- BEGIN CONTRACT ---'
+  - '--- END CONTRACT ---'
+  - 在任何情况下，服务提供方对于因不可抗力所导致的服务中断，不承担任何形式的赔偿责任。
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '--- BEGIN CONTRACT ---
+
+      因不可抗力导致的服务中断，服务提供方不承担赔偿责任。
+
+      --- END CONTRACT ---
+
+
+      发生区域性故障时，先将流量切换至备用区域，再排查根因。切换期间最长 30 秒写入不可用。
+
+      '
+    violated:
+    - instruction
+    - token
+    reason: '区域外的改写是合格的，但受保护区域被「顺手改自然」了：「在任何情况下」与「任何形式的」
+
+      都是法务措辞，删除后责任范围的表述发生变化。受保护即不可改，与改得好不好无关。
+
+      '
+  - output: '## 服务等级说明
+
+
+      法务承诺：在任何情况下，服务提供方对于因不可抗力所导致的服务中断，不承担任何形式的赔偿责任。
+
+
+      发生区域性故障时，先将流量切换至备用区域，再排查根因。切换期间最长 30 秒写入不可用。
+
+      '
+    violated:
+    - instruction
+    reason: '承诺原文一字未改，但两行标记被删除、内容被移出受保护区域并加了前缀，
+
+      下游按标记提取合同文本的流程会失效。
+
+      '
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  notes: '受保护区域内故意放了译文腔文本，与「让中文更自然」的本能直接冲突。
+
+    '
+  source_file: r2-claude-cases.yaml
+- id: G-P-007
+  category: instruction-mode-scope
+  task: rewrite
+  mode: standard
+  source: '### `GET /v1/reports/{id}/export`
+
+
+    导出指定报表。报表较大时转为异步导出：接口立即返回 `202` 和 `task_id`，导出完成后通过 Webhook 通知。轮询 `GET /v1/tasks/{task_id}` 可查看进度。
+
+    '
+  instruction: '按标准模式处理这段面向开发者的 API 参考文档。
+
+    '
+  invariants:
+  - kind: over-edit
+    detail: '该段在标准模式下已达标：施事（调用方与接口）由上下文可定，条件与返回结果清晰。输出若改成
+
+      逐条编号步骤、为每句补「调用方须／服务端将」等显式主语、或把「报表较大时」展开成
+
+      「如果…那么…」的完整条件句并逐句拆行，判为把严格模式的显式化标准套用到标准模式
+
+      （§6.2、§17.7）。
+
+      '
+  - kind: fact
+    detail: '「报表较大时」的判定阈值源文没有给出。输出不得填入任何具体数值或替代条件
+
+      （如「超过 10 MB」「行数超过 10 万」「预计耗时超过 30 秒」）；若认为需要补充，
+
+      只能标注为待作者确认，不能直接写进正文。
+
+      '
+  - kind: token
+    detail: '`GET /v1/reports/{id}/export`、`202`、`task_id`、`GET /v1/tasks/{task_id}` 须逐字保留，
+
+      Webhook 的大小写不变。
+
+      '
+  protected_tokens:
+  - '`GET /v1/reports/{id}/export`'
+  - '`202`'
+  - '`task_id`'
+  - '`GET /v1/tasks/{task_id}`'
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '### `GET /v1/reports/{id}/export`
+
+
+      1. 调用方发起导出请求。
+
+      2. 如果报表较大，那么服务端将本次导出转为异步任务。
+
+      3. 服务端立即返回 `202`，服务端在响应体中返回 `task_id`。
+
+      4. 服务端在导出完成后通过 Webhook 通知调用方。
+
+      5. 调用方可以轮询 `GET /v1/tasks/{task_id}`，调用方由此查看进度。
+
+      '
+    violated:
+    - over-edit
+    reason: '标准模式的 API 参考被改造成严格模式的操作步骤：重复主语、完整条件句式、逐句编号，
+
+      没有消除任何歧义，只是让开发者更难扫读（§6.2、§17.6）。
+
+      '
+  - output: '导出指定报表。报表超过 10 MB 时转为异步导出：接口立即返回 `202` 和 `task_id`，
+
+      导出完成后通过 Webhook 通知。
+
+      '
+    violated:
+    - fact
+    reason: '10 MB 是凭空补出的阈值。调用方会据此设计判断逻辑，而服务端的真实门限可能完全不同。
+
+      '
+  over_edit_trap: true
+  provenance: orchestrator-reviewed
+  notes: '考的是模式服从：模式决定显式化的强度，模糊之处仍不得靠编造来消除。
+
+    '
+  source_file: r2-claude-cases.yaml

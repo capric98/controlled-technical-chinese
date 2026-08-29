@@ -1,0 +1,1389 @@
+# Round-2 gold case proposals — Claude Opus, specification-compiler role.
+#
+# Assigned coverage: omitted actor, ambiguous pronoun/demonstrative, modifier and
+# coordination scope, procedure structure, terminology, instruction following.
+# Deliberately NOT covered here (authored independently by other reviewers):
+# modality, conditions, quantifiers, negation scope, thresholds, numbers, protected
+# tokens as a family, causality, temporal order, translationese, general over-editing.
+#
+# invariant `kind` vocabulary used in this file:
+#   actor | reference | scope | fact | procedure | terminology | instruction | over-edit | token
+#
+# Every case is `provenance: model-proposed-unreviewed` and therefore may be run and
+# reported but may not gate a release (decision 002).
+#
+# Central claim encoded in G-A-001, G-A-004, G-A-005, G-A-007, G-A-008, G-P-001:
+# when the source is genuinely ambiguous and context does not resolve it, silently
+# choosing one reading is a failure, not a fix (D001 finding 5).
+cases:
+- id: G-A-001
+  category: actor-omission-ambiguous
+  task: rewrite
+  mode: strict
+  source: '## 上游实例熔断
+
+
+    1. 网关连续 5 次收到上游实例返回的 `503`，判定该实例不健康。
+
+    2. 网关将不健康事件上报调度器，随后把该实例从负载均衡池中摘除。
+
+    3. 摘除后 60 秒内不再向该实例转发请求。
+
+    '
+  invariants:
+  - kind: actor
+    detail: '第 2 步「随后把该实例从负载均衡池中摘除」的施事在源文中不可唯一确定：既可读作承前省略的
+
+      「网关」，也可读作刚刚提及的「调度器」——负载均衡池归谁管辖源文没有说明。输出可以原样保留
+
+      该句，也可以显式标注此处施事待作者确认（例如加注「〔待确认：摘除由网关还是调度器执行〕」）；
+
+      若输出把其中任何一方写成确定施事而源文未提供依据，判为凭空补全事实。
+
+      '
+  - kind: actor
+    detail: '第 1、2 步已显式出现的施事「网关」不得被删除，也不得改写为无施事的被动句
+
+      （如「该实例被判定为不健康」「不健康事件被上报」）。熔断排障需要知道是哪个组件做的判定。
+
+      '
+  - kind: procedure
+    detail: '第 3 步的「摘除后 60 秒内不再转发」是摘除动作的结果约束，不得改写为摘除的前置条件
+
+      （如「摘除前须停止转发 60 秒」）。
+
+      '
+  protected_tokens:
+  - '`503`'
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '2. 网关将不健康事件上报调度器，随后由调度器把该实例从负载均衡池中摘除。
+
+      '
+    violated:
+    - actor
+    - fact
+    reason: '源文没有说明摘除由调度器执行。输出把一种读法固定成事实，值班据此排障会去查错组件。
+
+      '
+  - output: '2. 网关将不健康事件上报调度器，随后网关把该实例从负载均衡池中摘除。
+
+      '
+    violated:
+    - actor
+    - fact
+    reason: '另一种读法同样是凭空指定。不可解的歧义应当报告，而不是替作者决定（D001 发现 5）。
+
+      '
+  - output: '2. 不健康事件被上报后，该实例被从负载均衡池中摘除。
+
+      '
+    violated:
+    - actor
+    reason: '用无施事被动句抹掉了源文已明确的「网关」，删除的正是事故响应需要的信息（D001 发现 3）。
+
+      '
+  over_edit_trap: false
+  provenance: model-proposed-unreviewed
+  notes: '两个失败方向对称：既不能删已知施事，也不能补未知施事。
+
+    '
+- id: G-A-002
+  category: actor-omission-ambiguous
+  task: review
+  mode: review
+  source: '### `auto_renew`
+
+
+    类型：布尔。默认 `false`。
+
+
+    开启后，证书到期前 7 天由续期服务向 CA 发起续期请求；续期失败时通知租户管理员并回滚到上一版本证书。
+
+    '
+  instruction: '审阅这段参数说明并报告问题，不要重写文档。
+
+    '
+  invariants:
+  - kind: instruction
+    detail: '输出须是问题清单（含位置、问题、风险、修改建议），不得返回整段改写后的参数说明。
+
+      若输出的主体是重写文本——即使重写本身正确——判为失败。
+
+      '
+  - kind: actor
+    detail: '清单须指出「回滚到上一版本证书」的执行方不可确定：既可读作续期服务自动回滚，也可读作由被
+
+      通知的租户管理员手动回滚，二者决定该功能是否需要人工介入。若清单只给出一种「正确写法」而
+
+      不说明源文无法判定，判为擅自决定。
+
+      '
+  - kind: over-edit
+    detail: '「由续期服务向 CA 发起续期请求」的施事已明确，不得作为施事缺失或被动语态问题报告；
+
+      报告它判为误报（§17.3 不奖励无谓显式化）。
+
+      '
+  protected_tokens:
+  - '`auto_renew`'
+  - '`false`'
+  authorized_token_changes: []
+  expected_issues:
+  - category: actor-omission-ambiguous
+    severity: ERROR
+    locus: 通知租户管理员并回滚到上一版本证书
+  invalid_transformations:
+  - output: '开启后，续期服务在证书到期前 7 天向 CA 发起续期请求；续期失败时，续期服务通知租户管理员，
+
+      并自动回滚到上一版本证书。
+
+      '
+    violated:
+    - instruction
+    - actor
+    - fact
+    reason: 'review 模式被当成 rewrite 执行；且「自动回滚」是源文没有的事实，把一种读法写成了规格。
+
+      '
+  - output: '问题 1（ERROR，位置：由续期服务向 CA 发起续期请求）：施事表述冗余，建议改为主动句「续期服务向 CA 发起续期请求」。
+
+      问题 2（WARNING，位置：通知租户管理员并回滚到上一版本证书）：建议改为「续期服务通知租户管理员，并回滚到上一版本证书」。
+
+      '
+    violated:
+    - over-edit
+    - actor
+    reason: '问题 1 是误报（施事本已明确）；问题 2 把回滚方定死为续期服务，且未指出源文不足以判定。
+
+      '
+  over_edit_trap: false
+  provenance: model-proposed-unreviewed
+  notes: '同时测两件事：review 不得整篇重写，以及 review 不得用「建议改为」偷偷消歧。
+
+    '
+- id: G-A-003
+  category: actor-omission-single-actor
+  task: rewrite
+  mode: strict
+  source: '## 备库提升（单人值班执行）
+
+
+    1. 停止写入流量，等待 `replication_lag` 降至 0。
+
+    2. 执行 `pg_ctl promote` 提升备库。
+
+    3. 修改 `pgbouncer.ini` 中的 `host` 指向新主库，并 reload `pgbouncer`。
+
+    4. 在 `#oncall` 频道同步切换结果。
+
+    '
+  invariants:
+  - kind: actor
+    detail: '全篇只有一个施事：标题已注明「单人值班执行」，四步都是发给该值班人的祈使句，不存在第二个
+
+      可能的执行方。输出若为任一步补写显式主语（「值班工程师须」「运维人员需要」「你应当」等），
+
+      判为无消歧价值的显式化：源文没有施事歧义可消。
+
+      '
+  - kind: procedure
+    detail: '步骤数须保持 4。每一步已是一个完整操作目标，输出若按「一句一动词」拆分（例如把第 3 步拆成
+
+      「修改 host」与「reload pgbouncer」两步），判为过度切分。
+
+      '
+  - kind: token
+    detail: '`replication_lag`、`pg_ctl promote`、`pgbouncer.ini`、`host`、`pgbouncer`、`#oncall`
+
+      须逐字出现在输出中。
+
+      '
+  protected_tokens:
+  - '`replication_lag`'
+  - '`pg_ctl promote`'
+  - '`pgbouncer.ini`'
+  - '`#oncall`'
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '## 备库提升（单人值班执行）
+
+
+      1. 值班工程师须停止写入流量，值班工程师须等待 `replication_lag` 降至 0。
+
+      2. 值班工程师须执行 `pg_ctl promote` 提升备库。
+
+      3. 值班工程师须修改 `pgbouncer.ini` 中的 `host` 指向新主库，值班工程师须 reload `pgbouncer`。
+
+      4. 值班工程师须在 `#oncall` 频道同步切换结果。
+
+      '
+    violated:
+    - over-edit
+    - actor
+    reason: '唯一施事被重复五次，零消歧收益，切换窗口内的可读性明显下降（§17.6 中「无消歧价值的重复主语」）。
+
+      '
+  - output: '1. 停止写入流量。
+
+      2. 等待 `replication_lag` 降至 0。
+
+      3. 执行 `pg_ctl promote`。
+
+      4. 提升备库。
+
+      5. 修改 `pgbouncer.ini` 中的 `host` 指向新主库。
+
+      6. reload `pgbouncer`。
+
+      7. 在 `#oncall` 频道同步切换结果。
+
+      '
+    violated:
+    - over-edit
+    - procedure
+    reason: '原第 4 步「提升备库」被从命令中剥离成独立步骤，读起来像两个动作；整体切分成 7 步后，
+
+      紧急切换的步骤边界与真实操作边界不再对应。
+
+      '
+  over_edit_trap: true
+  provenance: model-proposed-unreviewed
+  notes: 'G-A-001 的边界样本：施事省略本身不是缺陷，只有在存在第二个可能施事时才是。
+
+    '
+- id: G-A-004
+  category: reference-ambiguous-pronoun
+  task: rewrite
+  mode: strict
+  source: '## 工作节点失联处理
+
+
+    调度器检测到工作节点心跳超时后，会将其上运行中的任务重新入队，并将其状态标记为 `失败`。
+
+    重新入队的任务将在下一轮调度中分配给其他节点。
+
+    '
+  invariants:
+  - kind: reference
+    detail: '第二个「其」的先行词在源文中不唯一：可指「工作节点」（把节点置为失败），也可指「其上运行
+
+      中的任务」的本次执行（把该次执行置为失败）。两种读法在调度系统中都成立，第二句「重新入队
+
+      的任务将在下一轮调度中分配给其他节点」也没有排除任何一种。输出若写成「将该节点状态标记为
+
+      `失败`」或「将这些任务的状态标记为 `失败`」而未标注不确定，判为擅自消歧。
+
+      '
+  - kind: reference
+    detail: '第一个「其上运行中的任务」中的「其」先行词唯一（工作节点），不构成歧义。输出若把它一并改写
+
+      为待确认项、或替换成重复的长名词短语（如「心跳超时的那个工作节点上运行中的任务」），
+
+      判为过度改写。
+
+      '
+  - kind: actor
+    detail: '施事「调度器」在源文中明确，不得删除，也不得改写为无施事被动句
+
+      （如「工作节点心跳超时后，其上运行中的任务会被重新入队」）。
+
+      排查任务重复执行时，需要知道重新入队是调度器发起的。
+
+      '
+  protected_tokens:
+  - '`失败`'
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '调度器检测到工作节点心跳超时后，会将该节点上运行中的任务重新入队，并将该节点状态标记为 `失败`。
+
+      '
+    violated:
+    - reference
+    - fact
+    reason: '「其」被固定为节点。若原意是把本次任务执行标记为失败，输出就凭空规定了节点级状态变更，
+
+      影响后续是否还向该节点派发任务。
+
+      '
+  - output: '调度器检测到工作节点心跳超时后，会将其上运行中的任务重新入队，并将这些任务的状态标记为 `失败`。
+
+      '
+    violated:
+    - reference
+    - fact
+    reason: '「其」被固定为任务。同一句里任务既被重新入队又被标记失败，输出把一种可疑读法确认为规格。
+
+      '
+  over_edit_trap: false
+  provenance: model-proposed-unreviewed
+  notes: '一个案例内同时含歧义代词与非歧义代词，防止规则对所有「其」一律开火。
+
+    '
+- id: G-A-005
+  category: reference-ambiguous-pronoun
+  task: rewrite
+  mode: strict
+  source: '## 每日快照归档
+
+
+    1. 代理在本地生成数据库快照，并计算 SHA-256 校验和。
+
+    2. 代理将快照上传至 `s3://backup-prod/daily/`，上传完成后重新计算校验和并与步骤 1 的结果比对。
+
+    3. 校验和不一致时删除它，并重新执行本任务。
+
+    '
+  invariants:
+  - kind: reference
+    detail: '第 3 步「删除它」的先行词在源文中不可唯一确定：可指本地快照，也可指已上传到
+
+      `s3://backup-prod/daily/` 的对象。两者后果不同——删本地副本意味着重新导出，删远端对象
+
+      意味着当日归档暂时缺失。输出若指定其中之一而源文无依据，判为凭空补全事实；保留原句或
+
+      显式标注待确认均可接受。
+
+      '
+  - kind: procedure
+    detail: '「重新执行本任务」指重跑步骤 1–3（含重新生成快照）。输出不得收窄为「重新上传」
+
+      或「重新计算校验和」，那会跳过快照生成，遇到本地快照损坏时永远无法自愈。
+
+      '
+  - kind: token
+    detail: '`s3://backup-prod/daily/` 与 SHA-256 须逐字保留，不得改成 `s3://backup-prod/daily`
+
+      或「SHA256」。
+
+      '
+  protected_tokens:
+  - '`s3://backup-prod/daily/`'
+  - SHA-256
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '3. 校验和不一致时删除本地快照，并重新执行本任务。
+
+      '
+    violated:
+    - reference
+    - fact
+    reason: '源文未指明删的是本地快照；输出替作者做了删除对象的选择，且删除是不可逆动作。
+
+      '
+  - output: '3. 校验和不一致时，删除对象存储中的副本并重新上传。
+
+      '
+    violated:
+    - reference
+    - procedure
+    - fact
+    reason: '既固定了先行词，又把「重新执行本任务」收窄为「重新上传」，跳过了步骤 1 的快照生成。
+
+      '
+  over_edit_trap: false
+  provenance: model-proposed-unreviewed
+  notes: '指代歧义与删除类不可逆动作叠加，是这类案例里风险最高的形态。
+
+    '
+- id: G-A-006
+  category: reference-unambiguous-pronoun
+  task: rewrite
+  mode: standard
+  source: '### `POST /v2/ingest/batch`
+
+
+    接收一个最多包含 500 条记录的数组。若其中任意一条记录未通过 Schema 校验，该请求整体失败，
+
+    且不写入任何记录。校验失败的下标在响应体 `errors[].index` 中返回。
+
+    '
+  invariants:
+  - kind: reference
+    detail: '「其中」的先行词唯一（前句的数组），「该请求」的先行词唯一（本次 `POST /v2/ingest/batch`
+
+      请求，段内没有第二个请求）。二者都不构成歧义。输出若把它们替换为重复的长名词短语
+
+      （例如反复写「向 `/v2/ingest/batch` 端点发起的批量写入请求」），判为无消歧价值的替换。
+
+      '
+  - kind: fact
+    detail: '「该请求整体失败，且不写入任何记录」是全有或全无语义。输出不得改成部分写入语义
+
+      （如「未通过校验的记录不写入」「跳过非法记录后继续写入」）。
+
+      '
+  - kind: token
+    detail: '`POST /v2/ingest/batch`、`errors[].index`、500 须逐字保留。
+
+      '
+  protected_tokens:
+  - '`POST /v2/ingest/batch`'
+  - '`errors[].index`'
+  - '500'
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '### `POST /v2/ingest/batch`
+
+
+      该批量写入接口接收一个最多包含 500 条记录的数组。若该数组中任意一条记录未通过 Schema 校验，
+
+      则本次向 `POST /v2/ingest/batch` 端点发起的批量写入请求整体失败，且本次向
+
+      `POST /v2/ingest/batch` 端点发起的批量写入请求不写入任何记录。校验失败的下标在本次向
+
+      `POST /v2/ingest/batch` 端点发起的批量写入请求的响应体 `errors[].index` 中返回。
+
+      '
+    violated:
+    - over-edit
+    - reference
+    reason: '用重复长名词短语替换本无歧义的代词，段落长度翻倍而信息不变，正是 §17.3 与 §17.6 要罚的写法。
+
+      '
+  - output: '若其中某条记录未通过 Schema 校验，该记录不写入，其余记录正常写入，失败下标在
+
+      `errors[].index` 中返回。
+
+      '
+    violated:
+    - fact
+    reason: '原子失败被改成部分成功，调用方的重试逻辑（整批重发 vs 补发失败项）会因此写错。
+
+      '
+  over_edit_trap: true
+  provenance: model-proposed-unreviewed
+  notes: 'G-A-004、G-A-005 的边界样本：代词本身不是缺陷，只有先行词不唯一时才是。
+
+    '
+- id: G-A-007
+  category: modifier-scope-coordination
+  task: rewrite
+  mode: strict
+  source: '> **警告**：`cleanup.sh` 会删除超过 30 天的日志文件和临时索引，删除后不可恢复。
+
+    > 执行前请先确认 `/var/lib/search/tmp` 已完成快照。
+
+    '
+  invariants:
+  - kind: scope
+    detail: '「超过 30 天的」是否同时修饰「临时索引」在源文中不可确定。读法一：删除超过 30 天的日志文件，
+
+      外加全部临时索引；读法二：日志文件与临时索引都以 30 天为界。两种读法删除的数据集合不同，
+
+      而删除不可恢复。输出若采用其中任一种写法（无论哪一种）而未标注该处需作者确认，判为擅自消歧。
+
+      '
+  - kind: fact
+    detail: '「删除后不可恢复」这一后果说明，以及「执行前请先确认 `/var/lib/search/tmp` 已完成快照」
+
+      这一前置要求，都必须出现在输出中，不得删除，也不得弱化为「建议先备份」
+
+      或移出告警块之外。
+
+      '
+  - kind: token
+    detail: '`cleanup.sh`、`/var/lib/search/tmp`、30 天须逐字保留。
+
+      '
+  protected_tokens:
+  - '`cleanup.sh`'
+  - '`/var/lib/search/tmp`'
+  - 30 天
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '> **警告**：`cleanup.sh` 会删除超过 30 天的日志文件与超过 30 天的临时索引，删除后不可恢复。
+
+      > 执行前请先确认 `/var/lib/search/tmp` 已完成快照。
+
+      '
+    violated:
+    - scope
+    - fact
+    reason: '静默选定读法二。若实际行为是清空全部临时索引，本告警会让人低估影响范围。
+
+      '
+  - output: '> **警告**：`cleanup.sh` 会删除超过 30 天的日志文件，以及全部临时索引，删除后不可恢复。
+
+      > 执行前请先确认 `/var/lib/search/tmp` 已完成快照。
+
+      '
+    violated:
+    - scope
+    - fact
+    reason: '静默选定读法一，并新增了源文没有的「全部」。修饰语辖域的两个方向都不能凭空钉死。
+
+      '
+  over_edit_trap: false
+  provenance: model-proposed-unreviewed
+  notes: '前置定语辖及并列名词一项还是两项；与 G-A-008 的状语辖域是不同现象。
+
+    '
+- id: G-A-008
+  category: adverbial-scope-coordination
+  task: rewrite
+  mode: standard
+  source: '### `confd-agent`
+
+
+    `confd-agent` 每小时从配置中心拉取一次配置并重启守护进程；拉取失败时保留上一次成功的配置。
+
+    运行日志写入 `/var/log/confd-agent.log`。
+
+    '
+  invariants:
+  - kind: scope
+    detail: '「每小时」是否辖及「重启守护进程」在源文中不可确定，但汉语读者多半会默认「每小时拉取并在同一周期内重启」。因此固定这一默认读法不判为失败。
+
+      本用例只考一件事：输出不得引入源文没有的触发条件（如「配置发生变更时重启」「拉取成功后才重启」）。引入即判为凭空补全事实。
+
+      '
+  - kind: fact
+    detail: '「拉取失败时保留上一次成功的配置」须原样保留其含义，不得改为「拉取失败时重启」
+
+      「拉取失败时使用默认配置」，也不得删除。
+
+      '
+  - kind: token
+    detail: '`confd-agent`、`/var/log/confd-agent.log` 须逐字保留。
+
+      '
+  protected_tokens:
+  - '`confd-agent`'
+  - '`/var/log/confd-agent.log`'
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '`confd-agent` 每小时从配置中心拉取一次配置；配置发生变更时重启守护进程。拉取失败时保留上一次成功的配置。
+
+      '
+    violated:
+    - scope
+    - fact
+    reason: '「配置发生变更时」是源文没有的触发条件。读者会据此认为配置不变就不会重启，而源文并未这样承诺。
+
+      '
+  over_edit_trap: false
+  provenance: model-proposed-unreviewed
+  notes: '状语辖及并列谓语一项还是两项。诱因很强：模型倾向补一个「变更时」使句子看起来更合理。策展调整：原稿同时禁止「固定其中一种读法」，但汉语默认读法足够强，那样会因读者共识而误伤正确输出；现仅保留「不得虚构触发条件」这一无争议的半边。
+
+    '
+- id: G-P-001
+  category: procedure-missing-element
+  task: rewrite
+  mode: strict
+  source: '## 灰度发布
+
+
+    1. 将新版本发布到 5% 流量。
+
+    2. 观察 10 分钟。
+
+    3. 无异常则继续放量至 50%，再观察 10 分钟。
+
+    4. 仍无异常则全量发布。
+
+    '
+  invariants:
+  - kind: procedure
+    detail: '源文缺少「结果」要素：第 2、3 步中「无异常」的判定依据——观察哪些指标、阈值是多少、由谁
+
+      判定——在源文中不存在，也无法从上下文推得，因而每次放量的门禁是不可执行的。输出须让这一
+
+      缺口保持可见：保留原措辞并标注待作者补充，或以问题形式指出。
+
+      '
+  - kind: fact
+    detail: '输出中不得出现源文没有的指标名、阈值或判定方：出现「错误率低于 1%」「P99 延迟无上升」
+
+      「5xx 比例」「无告警触发」「由发布负责人确认」等任何一项，判为凭空补全事实。
+
+      '
+  - kind: procedure
+    detail: '放量档位 5% → 50% → 全量、两次「观察 10 分钟」的次数与时长不得增删或改值，
+
+      也不得把两次观察合并成一次。
+
+      '
+  - kind: fact
+    detail: '源文未规定出现异常时的处置动作。输出不得补写「异常则回滚」「异常则暂停放量」之类的分支。
+
+      '
+  protected_tokens:
+  - 5%
+  - 50%
+  - 10 分钟
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '2. 观察 10 分钟，确认错误率低于 1%、P99 延迟无明显上升。
+
+      '
+    violated:
+    - fact
+    - procedure
+    reason: '指标与阈值均为源文所无。写进 runbook 后会被当成已批准的发布门禁，而没有任何人批准过 1%。
+
+      '
+  - output: '2. 观察 10 分钟；如有异常立即回滚至上一版本。
+
+      '
+    violated:
+    - fact
+    reason: '源文只说「无异常则继续」，没有规定异常时回滚、暂停还是上报。补写等于新增操作规程。
+
+      '
+  - output: '2. 观察一段时间后确认服务稳定。
+
+      '
+    violated:
+    - procedure
+    - fact
+    reason: '把可执行的「10 分钟」抹成「一段时间」，用「稳定」替换同样不可判定的「无异常」，
+
+      缺口没有被暴露，反而更难发现。
+
+      '
+  over_edit_trap: false
+  provenance: model-proposed-unreviewed
+  notes: '考的是：识别出结果要素缺失，且不用自造的阈值把它补上。诱因极强。
+
+    '
+- id: G-P-002
+  category: procedure-step-atomicity
+  task: rewrite
+  mode: strict
+  source: "## 签名密钥轮换\n\n1. 通过单次 `PUT /v1/keyring` 请求完成换位：同一请求内把新密钥写入 `active` 槽位、\n   把当前密钥移入 `previous`\
+    \ 槽位（服务端原子生效）。\n2. 等待边缘节点同步，最长 30 秒。\n3. 确认 `GET /v1/keyring/status` 返回的 `synced_nodes` 等于节点总数后，清空\
+    \ `previous` 槽位。\n"
+  invariants:
+  - kind: procedure
+    detail: '第 1 步的两次槽位写入必须留在同一个步骤、同一次 `PUT /v1/keyring` 请求内。输出若把
+
+      「写入 `active`」与「移入 `previous`」拆成两个步骤或两次请求，判为改变行为：拆分后存在
+
+      两个槽位不一致的中间状态，此期间到达的请求会验签失败。
+
+      '
+  - kind: procedure
+    detail: '第 3 步中「`synced_nodes` 等于节点总数」是清空 `previous` 的前置校验。输出不得删除该校验，
+
+      不得把清空动作提前到第 2 步或与第 2 步合并；未同步完成即清空旧密钥会使落后节点全部验签失败。
+
+      '
+  - kind: token
+    detail: '`PUT /v1/keyring`、`active`、`previous`、`GET /v1/keyring/status`、`synced_nodes`
+
+      须逐字保留。
+
+      '
+  protected_tokens:
+  - '`PUT /v1/keyring`'
+  - '`active`'
+  - '`previous`'
+  - '`synced_nodes`'
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '1. 将新密钥写入 `active` 槽位。
+
+      2. 将当前密钥移入 `previous` 槽位。
+
+      3. 等待边缘节点同步，最长 30 秒。
+
+      4. 确认 `GET /v1/keyring/status` 返回的 `synced_nodes` 等于节点总数后，清空 `previous` 槽位。
+
+      '
+    violated:
+    - procedure
+    - fact
+    reason: '「一步一动作」的机械拆分把一次原子请求写成了两次写入，制造出源文明确排除的中间状态。
+
+      '
+  - output: '2. 等待边缘节点同步（最长 30 秒）后清空 `previous` 槽位。
+
+      3. 通过 `GET /v1/keyring/status` 查看 `synced_nodes`。
+
+      '
+    violated:
+    - procedure
+    reason: '同步校验由清空的前置条件降级为事后查看，未同步完成的节点会在旧密钥被清空后全部失败。
+
+      '
+  over_edit_trap: false
+  provenance: model-proposed-unreviewed
+  notes: '对应 §17.4「拆分或重排步骤不得改变行为」，与 OC-03 的连动句拆分诱因。
+
+    '
+- id: G-P-003
+  category: procedure-checkpoint-preservation
+  task: rewrite
+  mode: strict
+  source: '## 扩容收尾
+
+
+    1. 在新节点上启动 `chunk-server`。
+
+    2. 在管理端确认新节点状态为 `READY`，且分片元数据已全部加载。
+
+    3. 将新节点加入写入路由表。
+
+    4. 观察 15 分钟无写入错误后，下线旧节点。
+
+    '
+  instruction: '合并可以合并的步骤，压缩到不超过 3 步，操作行为保持不变。
+
+    '
+  invariants:
+  - kind: procedure
+    detail: '第 2 步是「加入写入路由表」之前的人工核对点，包含两个必须分别确认的条件：状态为 `READY`、
+
+      分片元数据已全部加载。无论如何压缩，输出中都必须存在一个位于「加入写入路由表」之前、
+
+      由操作者执行、并同时列出这两个条件的确认动作。若两个条件只剩其一，或核对点消失，
+
+      或被改写为不需要操作者动作的陈述（如「节点就绪后加入路由表」），判为删除校验点。
+
+      '
+  - kind: procedure
+    detail: '「观察 15 分钟无写入错误」是下线旧节点的前置条件，不得删除或弱化为「随后下线旧节点」
+
+      「确认无误后下线旧节点」；时长 15 分钟与判据「无写入错误」都必须保留。
+
+      '
+  - kind: instruction
+    detail: '压缩指令不得凌驾于行为保持之上。若为满足「不超过 3 步」而丢掉任一校验条件，判为失败；
+
+      输出步骤数超过 3 但校验完整，优于步骤数达标而校验丢失。
+
+      '
+  - kind: token
+    detail: '`chunk-server`、`READY` 须逐字保留。
+
+      '
+  protected_tokens:
+  - '`chunk-server`'
+  - '`READY`'
+  - 15 分钟
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '1. 在新节点上启动 `chunk-server` 并加入写入路由表。
+
+      2. 观察 15 分钟无写入错误后，下线旧节点。
+
+      '
+    violated:
+    - procedure
+    - instruction
+    reason: '核对点整体消失。元数据尚未加载完就接收写入，会造成分片写到错误位置。
+
+      '
+  - output: '1. 在新节点上启动 `chunk-server`。
+
+      2. 节点就绪后加入写入路由表。
+
+      3. 观察 15 分钟无写入错误后，下线旧节点。
+
+      '
+    violated:
+    - procedure
+    reason: '「节点就绪」把两个具体核对条件压成一个模糊状态词，元数据加载条件丢失，且不再要求
+
+      操作者在管理端主动确认。
+
+      '
+  - output: '1. 在新节点上启动 `chunk-server`，确认状态为 `READY` 后加入写入路由表。
+
+      2. 下线旧节点。
+
+      '
+    violated:
+    - procedure
+    reason: '元数据加载条件与 15 分钟观察窗口同时被压缩掉，旧节点可能在新节点尚未稳定时就下线。
+
+      '
+  over_edit_trap: false
+  provenance: model-proposed-unreviewed
+  notes: '指令本身诱导删校验点，考的是指令服从与行为保持冲突时的优先级。
+
+    '
+- id: G-P-004
+  category: procedure-already-clear
+  task: rewrite
+  mode: strict
+  source: '## 紧急回滚（目标 5 分钟内完成）
+
+
+    1. 在发布平台点击「回滚到上一版本」，确认目标版本号为 `v3.14.2`。
+
+    2. 回滚完成后刷新健康检查页，确认 `/healthz` 连续 3 次返回 `200`。
+
+    3. 在 `#incident` 频道同步回滚结果与影响范围。
+
+    '
+  invariants:
+  - kind: over-edit
+    detail: '三步已含操作者（事故值班人，标题上下文唯一）、动作、对象与可验证结果，条件与顺序清晰，
+
+      不存在歧义。输出若增加步骤数、为任一步补写显式主语、或把动作与确认拆成两句，
+
+      判为过度改写（§17.7）。
+
+      '
+  - kind: procedure
+    detail: '步骤数保持 3。第 2 步的「确认 `/healthz` 连续 3 次返回 `200`」是一个确认动作，
+
+      不得拆成「刷新健康检查页」与「确认返回 200」两步。
+
+      '
+  - kind: fact
+    detail: '输出不得新增源文没有的步骤或分支（例如「若健康检查未通过则联系发布负责人」
+
+      「回滚前先通知业务方」）。
+
+      '
+  - kind: token
+    detail: '`v3.14.2`、`/healthz`、`200`、`#incident` 须逐字保留，「5 分钟」与「3 次」的数值不变。
+
+      '
+  protected_tokens:
+  - '`v3.14.2`'
+  - '`/healthz`'
+  - '`#incident`'
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '## 紧急回滚（目标 5 分钟内完成）
+
+
+      1. 事故值班工程师登录发布平台。
+
+      2. 事故值班工程师点击「回滚到上一版本」。
+
+      3. 事故值班工程师确认目标版本号为 `v3.14.2`。
+
+      4. 如果回滚已经完成，那么事故值班工程师刷新健康检查页。
+
+      5. 事故值班工程师确认 `/healthz` 连续 3 次返回 `200`。
+
+      6. 事故值班工程师在 `#incident` 频道同步回滚结果与影响范围。
+
+      '
+    violated:
+    - over-edit
+    - procedure
+    reason: '目标 5 分钟内完成的清单被膨胀成 6 步并附加了源文没有的登录步骤；重复主语与
+
+      「如果…那么…」句式没有带来任何消歧收益（§17.6、§17.7）。
+
+      '
+  - output: '1. 在发布平台点击「回滚到上一版本」，确认目标版本号为 `v3.14.2`。
+
+      2. 回滚完成后刷新健康检查页，确认 `/healthz` 连续 3 次返回 `200`。
+
+      3. 在 `#incident` 频道同步回滚结果与影响范围。
+
+      4. 若健康检查未通过，联系发布负责人决定是否二次回滚。
+
+      '
+    violated:
+    - fact
+    reason: '第 4 步是新增的操作规程，源文没有规定失败分支，也没有「发布负责人」这一角色。
+
+      '
+  over_edit_trap: true
+  provenance: model-proposed-unreviewed
+  notes: '§17.7 的正面样本：已经合格的流程，正确行为是基本不动。
+
+    '
+- id: G-P-005
+  category: instruction-review-mode
+  task: review
+  mode: review
+  source: '## 告警抑制规则变更
+
+
+    监控平台收到抑制规则更新后通知各采集端，随后重新加载规则文件。加载失败时保留旧规则，并在下一个周期重试。该文件位于 `/etc/alerting/rules.d/`，变更后须在值班群报备。
+
+    '
+  instruction: '以 review 模式审阅这段文档，报告问题，不要输出改写后的文档。
+
+    '
+  invariants:
+  - kind: instruction
+    detail: '输出须是问题清单，每条至少含位置、问题、风险与修改建议。不得返回整段改写后的文档；
+
+      若输出主体是重写文本（即便另附简短说明），判为失败。
+
+      '
+  - kind: actor
+    detail: '清单须报告「随后重新加载规则文件」的施事不可确定：既可读作监控平台重新加载，
+
+      也可读作各采集端各自重新加载，二者决定故障时该查哪一侧。若清单只给出一种「正确写法」
+
+      而不说明源文不足以判定，判为擅自决定。
+
+      '
+  - kind: reference
+    detail: '`/etc/alerting/rules.d/` 是目录，单数「该文件」缺少唯一先行词。清单若报告这一点，属于合理发现，不得计为误报；但不报告它不判为失败——这一层粒度不作为正确审阅的必要条件。
+
+      '
+  - kind: over-edit
+    detail: '「监控平台收到抑制规则更新后通知各采集端」施事明确且承前一致，不得作为施事缺失或
+
+      被动语态问题报告；报告它判为误报。
+
+      '
+  protected_tokens:
+  - '`/etc/alerting/rules.d/`'
+  authorized_token_changes: []
+  expected_issues:
+  - category: actor-omission-ambiguous
+    severity: ERROR
+    locus: 随后重新加载规则文件
+  invalid_transformations:
+  - output: '监控平台收到抑制规则更新后通知各采集端，各采集端随后重新加载 `/etc/alerting/rules.d/`
+
+      下的规则文件。加载失败时保留旧规则，并在下一个采集周期重试。变更后须在值班群报备。
+
+      '
+    violated:
+    - instruction
+    - actor
+    - fact
+    reason: 'review 模式被当成 rewrite；同时把加载方定为采集端、把「下一个周期」定为采集周期，
+
+      两处都是源文没有的事实。
+
+      '
+  - output: '问题 1（ERROR，位置：随后重新加载规则文件）：施事缺失，应改为「各采集端随后重新加载规则文件」。
+
+      问题 2（WARNING，位置：监控平台收到抑制规则更新后通知各采集端）：建议补充主语以避免歧义。
+
+      '
+    violated:
+    - actor
+    - over-edit
+    reason: '问题 1 定位正确但把一种读法当成唯一答案，未说明源文无法判定；问题 2 是误报，
+
+      该处施事已明确，误报会稀释真实问题。
+
+      '
+  over_edit_trap: false
+  provenance: model-proposed-unreviewed
+  notes: '三项同时考：不重写、报告真问题、不报假问题。策展调整：「该文件」指代不明由必报降为可报不可罚，避免因粒度过细而让合格模型在错误的理由上失败。
+
+    '
+- id: G-P-006
+  category: instruction-protected-region
+  task: rewrite
+  mode: standard
+  source: '## 服务等级说明
+
+
+    以下 `--- BEGIN CONTRACT ---` 与 `--- END CONTRACT ---` 之间为法务提供的对外承诺原文。
+
+
+    --- BEGIN CONTRACT ---
+
+    在任何情况下，服务提供方对于因不可抗力所导致的服务中断，不承担任何形式的赔偿责任。
+
+    --- END CONTRACT ---
+
+
+    运维侧的实际做法是这样的：在发生区域性故障的时候，会先把流量切换到备用区域，然后再进行根因的排查。在切换的过程当中，可能会出现最长 30 秒的写入不可用的情况。
+
+    '
+  instruction: '改写「运维侧的实际做法」一段，使其符合中文技术写作规范。`--- BEGIN CONTRACT ---` 与
+
+    `--- END CONTRACT ---` 之间的内容是受保护区域，必须逐字保留，包括两行标记本身。
+
+    '
+  invariants:
+  - kind: instruction
+    detail: '受保护区域的三行（两行标记与其间正文）须在输出中字符级一致地出现。删除「在任何情况下」，
+
+      把「不承担任何形式的赔偿责任」改成「不承担赔偿责任」，把「所导致的」改成「导致的」，
+
+      或调整标点，均判为失败——即使改后的中文更自然。自然度不适用于受保护区域。
+
+      '
+  - kind: instruction
+    detail: '受保护区域的位置与边界不变：不得在两行标记之间插入标题、注释或说明，不得把承诺原文
+
+      移到标记之外，不得删除或改写标记行。
+
+      '
+  - kind: fact
+    detail: '区域外的改写须保留两项事实：切换过程中最长 30 秒写入不可用；先切流量到备用区域、
+
+      后排查根因的先后关系。
+
+      '
+  protected_tokens:
+  - '--- BEGIN CONTRACT ---'
+  - '--- END CONTRACT ---'
+  - 在任何情况下，服务提供方对于因不可抗力所导致的服务中断，不承担任何形式的赔偿责任。
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '--- BEGIN CONTRACT ---
+
+      因不可抗力导致的服务中断，服务提供方不承担赔偿责任。
+
+      --- END CONTRACT ---
+
+
+      发生区域性故障时，先将流量切换至备用区域，再排查根因。切换期间最长 30 秒写入不可用。
+
+      '
+    violated:
+    - instruction
+    - token
+    reason: '区域外的改写是合格的，但受保护区域被「顺手改自然」了：「在任何情况下」与「任何形式的」
+
+      都是法务措辞，删除后责任范围的表述发生变化。受保护即不可改，与改得好不好无关。
+
+      '
+  - output: '## 服务等级说明
+
+
+      法务承诺：在任何情况下，服务提供方对于因不可抗力所导致的服务中断，不承担任何形式的赔偿责任。
+
+
+      发生区域性故障时，先将流量切换至备用区域，再排查根因。切换期间最长 30 秒写入不可用。
+
+      '
+    violated:
+    - instruction
+    reason: '承诺原文一字未改，但两行标记被删除、内容被移出受保护区域并加了前缀，
+
+      下游按标记提取合同文本的流程会失效。
+
+      '
+  over_edit_trap: false
+  provenance: model-proposed-unreviewed
+  notes: '受保护区域内故意放了译文腔文本，与「让中文更自然」的本能直接冲突。
+
+    '
+- id: G-P-007
+  category: instruction-mode-scope
+  task: rewrite
+  mode: standard
+  source: '### `GET /v1/reports/{id}/export`
+
+
+    导出指定报表。报表较大时转为异步导出：接口立即返回 `202` 和 `task_id`，导出完成后通过 Webhook 通知。轮询 `GET /v1/tasks/{task_id}` 可查看进度。
+
+    '
+  instruction: '按标准模式处理这段面向开发者的 API 参考文档。
+
+    '
+  invariants:
+  - kind: over-edit
+    detail: '该段在标准模式下已达标：施事（调用方与接口）由上下文可定，条件与返回结果清晰。输出若改成
+
+      逐条编号步骤、为每句补「调用方须／服务端将」等显式主语、或把「报表较大时」展开成
+
+      「如果…那么…」的完整条件句并逐句拆行，判为把严格模式的显式化标准套用到标准模式
+
+      （§6.2、§17.7）。
+
+      '
+  - kind: fact
+    detail: '「报表较大时」的判定阈值源文没有给出。输出不得填入任何具体数值或替代条件
+
+      （如「超过 10 MB」「行数超过 10 万」「预计耗时超过 30 秒」）；若认为需要补充，
+
+      只能标注为待作者确认，不能直接写进正文。
+
+      '
+  - kind: token
+    detail: '`GET /v1/reports/{id}/export`、`202`、`task_id`、`GET /v1/tasks/{task_id}` 须逐字保留，
+
+      Webhook 的大小写不变。
+
+      '
+  protected_tokens:
+  - '`GET /v1/reports/{id}/export`'
+  - '`202`'
+  - '`task_id`'
+  - '`GET /v1/tasks/{task_id}`'
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '### `GET /v1/reports/{id}/export`
+
+
+      1. 调用方发起导出请求。
+
+      2. 如果报表较大，那么服务端将本次导出转为异步任务。
+
+      3. 服务端立即返回 `202`，服务端在响应体中返回 `task_id`。
+
+      4. 服务端在导出完成后通过 Webhook 通知调用方。
+
+      5. 调用方可以轮询 `GET /v1/tasks/{task_id}`，调用方由此查看进度。
+
+      '
+    violated:
+    - over-edit
+    reason: '标准模式的 API 参考被改造成严格模式的操作步骤：重复主语、完整条件句式、逐句编号，
+
+      没有消除任何歧义，只是让开发者更难扫读（§6.2、§17.6）。
+
+      '
+  - output: '导出指定报表。报表超过 10 MB 时转为异步导出：接口立即返回 `202` 和 `task_id`，
+
+      导出完成后通过 Webhook 通知。
+
+      '
+    violated:
+    - fact
+    reason: '10 MB 是凭空补出的阈值。调用方会据此设计判断逻辑，而服务端的真实门限可能完全不同。
+
+      '
+  over_edit_trap: true
+  provenance: model-proposed-unreviewed
+  notes: '考的是模式服从：模式决定显式化的强度，模糊之处仍不得靠编造来消除。
+
+    '
+- id: G-T-101
+  category: terminology-consistency
+  task: rewrite
+  mode: strict
+  source: '## 发布流程
+
+
+    1. 新版本先以灰度发布上线，覆盖 5% 流量。
+
+    2. 金丝雀发布期间每 5 分钟检查一次错误率。
+
+    3. 小流量验证通过后，按 25%、50% 逐步放量。
+
+    4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+
+    '
+  invariants:
+  - kind: terminology
+    detail: '第 1、2、3 步中的「灰度发布」「金丝雀发布」「小流量验证」在本文中指同一个发布阶段
+
+      （5% 流量的受控放量）。输出须在全文用同一术语指代该阶段；若输出中仍有两个及以上不同术语
+
+      指代它，判为术语不一致。
+
+      '
+  - kind: terminology
+    detail: '第 4 步的「全量发布」指 100% 放量，与上述阶段是不同概念。输出若把它也替换为统一后的
+
+      灰度类术语（例如「灰度发布后保留旧版本实例 24 小时」），判为错误归并（§17.5）。
+
+      '
+  - kind: fact
+    detail: '放量档位 5%、25%、50%、检查间隔 5 分钟、旧实例保留 24 小时的数值与单位不得增删或改动。
+
+      '
+  protected_tokens:
+  - 5%
+  - 25%
+  - 50%
+  - 24 小时
+  authorized_token_changes:
+  - 金丝雀发布
+  - 小流量验证
+  invalid_transformations:
+  - output: '1. 新版本先以灰度发布上线，覆盖 5% 流量。
+
+      2. 灰度发布期间每 5 分钟检查一次错误率。
+
+      3. 灰度发布验证通过后，按 25%、50% 逐步放量。
+
+      4. 灰度发布后保留旧版本实例 24 小时，以便回滚。
+
+      '
+    violated:
+    - terminology
+    - fact
+    reason: '前三步统一是对的，第 4 步的「全量发布」被一并改成「灰度发布」，100% 放量阶段消失，
+
+      读者会以为 5% 阶段结束后就可以下线旧实例。
+
+      '
+  - output: '1. 新版本先以灰度发布上线，覆盖 5% 流量。
+
+      2. 金丝雀发布期间每 5 分钟检查一次错误率。
+
+      3. 小流量验证通过后，按 25%、50% 逐步放量。
+
+      4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+
+      '
+    violated:
+    - terminology
+    reason: '原样返回。同一份发布流程里三个术语指同一阶段，新人无法判断是三个阶段还是一个阶段，
+
+      严格模式下这是必须处理的问题。
+
+      '
+  over_edit_trap: false
+  provenance: model-proposed-unreviewed
+  notes: '一个案例内同时含「须统一」与「不得归并」，防止术语规则一刀切。
+
+    '
+- id: G-T-102
+  category: terminology-false-normalization
+  task: rewrite
+  mode: standard
+  source: '## `confd` 运维须知
+
+
+    - 修改 `upstream` 配置后须重启 `confd`；重启期间约 2 秒不可用。
+
+    - 仅修改日志级别时执行重载（`kill -HUP`），连接不中断。
+
+    - 每晚 02:00 生成一份备份并上传对象存储；集群内的三份副本用于在线容灾，不能替代备份。
+
+    '
+  invariants:
+  - kind: terminology
+    detail: '「重启」与「重载」在本文中是两个不同操作，源文已给出区分依据：重启约 2 秒不可用，
+
+      重载（`kill -HUP`）连接不中断。输出不得把二者统一为其中之一，也不得互换。
+
+      '
+  - kind: terminology
+    detail: '「备份」（每晚上传对象存储的离线拷贝）与「副本」（集群内在线容灾的三份数据）是两个不同
+
+      对象，源文第三条明确写出「不能替代备份」。输出不得把「副本」改称「备份」或反之，
+
+      也不得删除「不能替代备份」这一判断。
+
+      '
+  - kind: over-edit
+    detail: '三条要点术语已一致且区分正确，不存在需要统一的术语问题。任何以「统一术语」为由的替换
+
+      都判为失败。
+
+      '
+  - kind: token
+    detail: '`confd`、`upstream`、`kill -HUP`、02:00 须逐字保留，「2 秒」「三份」的数值不变。
+
+      '
+  protected_tokens:
+  - '`confd`'
+  - '`upstream`'
+  - '`kill -HUP`'
+  - 02:00
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '- 修改 `upstream` 配置后须重启 `confd`；重启期间约 2 秒不可用。
+
+      - 仅修改日志级别时重启 `confd`（`kill -HUP`），连接不中断。
+
+      '
+    violated:
+    - terminology
+    - fact
+    reason: '重载被并入重启。读者要么预期这次也会有 2 秒中断，要么以为 `kill -HUP` 会重启进程；
+
+      两种理解都与实际行为不符。
+
+      '
+  - output: '- 每晚 02:00 生成一份备份并上传对象存储；集群内的三份备份用于在线容灾。
+
+      '
+    violated:
+    - terminology
+    - fact
+    reason: '「副本」被改称「备份」，并删除了「不能替代备份」的结论。在线冗余与离线备份的区别消失后，
+
+      有人会据此认为三副本已经等于有备份，从而停掉夜间备份。
+
+      '
+  over_edit_trap: true
+  provenance: model-proposed-unreviewed
+  notes: '§17.5 的 false normalization 控制点，也是术语规则最容易越界的地方。
+
+    '
+- id: G-T-103
+  category: terminology-referent-drift
+  task: rewrite
+  mode: strict
+  source: '## 积压排查
+
+
+    调度器内部维护一个任务队列（内存，容量上限 10000），用于暂存待分发的作业；跨服务通知走消息队列（Kafka topic `job-events`）。
+
+
+    任务队列积压超过 8000 时，先确认消费者线程数是否被调低，再决定是否扩容调度器。
+
+    消息队列积压通常与下游消费者故障有关，处理路径不同。
+
+    '
+  instruction: '压缩成值班速查条目，每条判断的适用对象保持不变。
+
+    '
+  invariants:
+  - kind: terminology
+    detail: '「任务队列」（调度器内存队列，上限 10000）与「消息队列」（Kafka topic `job-events`）
+
+      是两个不同的系统对象。输出中每条判断必须仍绑定源文指定的那个对象：「积压超过 8000 →
+
+      查消费者线程数 / 扩容调度器」只适用于任务队列；「积压与下游消费者故障有关」只适用于
+
+      消息队列。任何一条挂到另一个对象上，判为失败。
+
+      '
+  - kind: reference
+    detail: '压缩后不得出现无限定的「队列」：若输出中有「队列积压超过 8000」这类表述，
+
+      值班无法判断该查内存队列还是 Kafka，判为失败。近义词替换同样禁止，
+
+      例如把「任务队列」写成「作业队列」「调度队列」以外的名称，或写成「消息队列」。
+
+      '
+  - kind: token
+    detail: '`job-events`、10000、8000 须逐字保留。
+
+      '
+  protected_tokens:
+  - '`job-events`'
+  - '8000'
+  - '10000'
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '- 队列积压超过 8000：先确认消费者线程数是否被调低，再决定是否扩容调度器。
+
+      - 队列积压通常与下游消费者故障有关。
+
+      '
+    violated:
+    - terminology
+    - reference
+    reason: '两个不同对象被压缩成同一个「队列」，两条判断的适用范围互相污染，
+
+      值班在告警页上无法确定该查哪个组件。
+
+      '
+  - output: '- 消息队列积压超过 8000：先确认消费者线程数是否被调低，再决定是否扩容调度器。
+
+      - 任务队列积压通常与下游消费者故障有关。
+
+      '
+    violated:
+    - terminology
+    - fact
+    reason: '阈值与处置动作被挂到了错误的组件上。按此排查会去看 Kafka 消费者，
+
+      而真正积压的是调度器内存队列。
+
+      '
+  - output: '- 作业缓冲区积压超过 8000：先确认消费者线程数是否被调低，再决定是否扩容调度器。
+
+      '
+    violated:
+    - terminology
+    reason: '「作业缓冲区」是源文没有的名称，与监控面板、代码中的「任务队列」对不上，
+
+      近义词替换让被指称的系统对象无法定位。
+
+      '
+  over_edit_trap: false
+  provenance: model-proposed-unreviewed
+  notes: '压缩指令是诱因：把两个限定词都省成「队列」是最自然的压缩方向，也是最危险的。
+
+    '
