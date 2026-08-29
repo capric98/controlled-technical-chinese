@@ -29,6 +29,7 @@ docs/decisions/          long-term rationale; NNN-<slug>.md
 spec/                    canonical semantics (structured, development-only)
 eval/gold/               human-reviewed or accepted gold cases (trusted core)
 eval/mutations/          deliberate defect cases for reviewer testing
+eval/disagreements/      typed cross-model disagreements kept as project memory
 eval/reports/            committed evaluation summaries, not raw transcripts
 dev/prompts/             the exact role prompts given to each model
 dev/inbox/               raw independent model outputs, kept as evidence

@@ -1,0 +1,335 @@
+translationese_patterns:
+  - id: TR-01
+    pattern: "万能轻动词「进行」泛滥，将简单谓语动作名物化"
+    why_it_happens: "受英文 nominalization 结构及「perform/conduct/carry out + noun」直译影响"
+    bad_zh: "系统将对上传的文件进行解析，并通过调用校验接口来进行有效性验证。"
+    natural_zh: "系统会解析上传的文件，并调用校验接口验证其有效性。"
+    meaning_delta: none
+    doc_type: "API 文档"
+
+  - id: TR-02
+    pattern: "机械直译被动语态「被」，破坏汉语默认的主动/无主受事表达"
+    why_it_happens: "机械映射英文被动句「is/are + past participle」"
+    bad_zh: "当连接被断开时，未提交的事务将被自动回滚，并且错误日志会被写入磁盘。"
+    natural_zh: "连接断开后，系统会自动回滚未提交的事务，并将错误日志写入磁盘。"
+    meaning_delta: none
+    doc_type: "排障"
+
+  - id: TR-03
+    pattern: "条件/时间从句模版化套用「在...的情况下」「当...的时候」"
+    why_it_happens: "逐字对译「in case of...」「when...」导致从句外壳臃肿"
+    bad_zh: "在节点发生故障并且无法在超时时间内响应心跳信号的情况下，集群会触发主从切换。"
+    natural_zh: "若节点发生故障且在超时时间内未响应心跳，集群将触发主从切换。"
+    meaning_delta: none
+    doc_type: "SOP"
+
+  - id: TR-04
+    pattern: "介词短语机械充当伪身份主语「作为...」"
+    why_it_happens: "直译「As an optional parameter, ...」"
+    bad_zh: "作为可选参数，timeout 定义了客户端等待响应的最大毫秒数。"
+    natural_zh: "可选参数 timeout 用于指定客户端等待响应的最大毫秒数。"
+    meaning_delta: none
+    doc_type: "工具描述"
+
+  - id: TR-05
+    pattern: "多重介宾短语直译造成「的」字长链修饰"
+    why_it_happens: "顺译英文后置定语从句与介词短语（of / for / with）"
+    bad_zh: "用于处理高并发请求的基于内存的缓存集群的节点的配置参数。"
+    natural_zh: "高并发内存缓存集群的节点配置参数。"
+    meaning_delta: none
+    doc_type: "API 文档"
+
+  - id: TR-06
+    pattern: "副词修饰完成态「成功地」「正确地」充斥技术操作"
+    why_it_happens: "直译「has been successfully created / correctly configured」"
+    bad_zh: "确保数据已被成功备份，并且所有从节点都已正确地同步了主节点的数据。"
+    natural_zh: "确认数据备份完成，且所有从节点已与主节点数据同步。"
+    meaning_delta: none
+    doc_type: "SOP"
+
+  - id: TR-07
+    pattern: "拟人化能力动词「允许你...」「使您能够...」"
+    why_it_happens: "直译「allows you to / enables the user to」等英文营销式技术写作句型"
+    bad_zh: "该接口允许你检索特定用户的历史订单记录，并使你能够按时间范围过滤。"
+    natural_zh: "该接口用于查询指定用户的历史订单，支持按时间范围筛选。"
+    meaning_delta: none
+    doc_type: "API 文档"
+
+  - id: TR-08
+    pattern: "双重条件与冗余主谓套叠「如果你想...，请确保你...」"
+    why_it_happens: "口语化直译英文文档中的「If you want to ..., make sure that you ...」"
+    bad_zh: "如果你想在生产环境中部署该服务，请确保你已经配置了环境变量。"
+    natural_zh: "在生产环境部署该服务前，须完成环境变量配置。"
+    meaning_delta: none
+    doc_type: "agent 指令"
+
+  - id: TR-09
+    pattern: "返回值陈述套用「返回一个代表/表示...的...」固定模版"
+    why_it_happens: "直译「Returns a boolean indicating whether...」"
+    bad_zh: "该方法返回一个表示操作是否成功的布尔值。"
+    natural_zh: "该方法返回布尔值，指示操作是否成功。"
+    meaning_delta: none
+    doc_type: "工具描述"
+
+  - id: TR-10
+    pattern: "情态助词层叠直译「不能被保证」「可能将不会」"
+    why_it_happens: "英文弱情态表达「is not guaranteed to / may not」的逐词直译"
+    bad_zh: "异步通知的到达顺序不能被保证，且某些事件可能将不会被触发。"
+    natural_zh: "异步通知不保证有序到达，部分事件可能不会触发。"
+    meaning_delta: none
+    doc_type: "错误信息"
+
+  - id: TR-11
+    pattern: "机械套用「对于...而言/来说」引入主语"
+    why_it_happens: "直译「For read-only replicas, they do not...」"
+    bad_zh: "对于只读副本而言，其不会处理写请求，且会自动转发写操作给主库。"
+    natural_zh: "只读副本不处理写请求，会自动将写操作转发至主库。"
+    meaning_delta: none
+    doc_type: "API 文档"
+
+  - id: TR-12
+    pattern: "使用「由于...的事实」处理同位语从句"
+    why_it_happens: "硬译「due to the fact that...」"
+    bad_zh: "由于该资源正在被另一个进程占用的事实，当前请求已被拒绝。"
+    natural_zh: "因该资源正被其他进程占用，当前请求已被拒绝。"
+    meaning_delta: none
+    doc_type: "错误信息"
+
+pseudo_legal_patterns:
+  - id: PL-01
+    pattern: "非法律语境滥用兜底套话「包括但不限于」"
+    bad_zh: "支持主流关系型数据库，包括但不限于 MySQL、PostgreSQL、Oracle 以及 SQL Server。"
+    natural_zh: "支持主流关系型数据库（如 MySQL、PostgreSQL、Oracle、SQL Server）。"
+    why_worse: "伪法律套话拖慢阅读速度，在技术文档中通过括号举例或列表已具备同等扩展语义且更紧凑。"
+
+  - id: PL-02
+    pattern: "同义词并列叠用「任何及所有」「全部或部分」"
+    bad_zh: "脚本将清理目标目录下的任何及所有临时文件，防止残留数据引发全部或部分构建失败。"
+    natural_zh: "脚本将清理目标目录下的所有临时文件，防止残留数据导致构建失败。"
+    why_worse: "属于合同文书的防御性冗余，在工程执行指令中稀释了动作焦点。"
+
+  - id: PL-03
+    pattern: "过度使用官僚指代词「前述」「下述」「该等」"
+    bad_zh: "用户须在完成前述第一步操作后，方可依照下述参数配置表对该等节点执行后续配置。"
+    natural_zh: "完成步骤 1 后，请对照下表配置各节点参数。"
+    why_worse: "增加读者的工作记忆负担，不如使用编号、表格和直接名词直观。"
+
+  - id: PL-04
+    pattern: "技术异常中嵌入拟人化免责声明「概不负责 / 将不承担责任」"
+    bad_zh: "因客户端未在握手阶段传递认证 Token 所致的鉴权失败，网关将不承担重试责任并直接终止连接。"
+    natural_zh: "客户端若未在握手阶段传递认证 Token，网关将拒绝连接且不执行重试。"
+    why_worse: "将系统的确定性控制逻辑写成主观免责声明，掩盖了清晰的协议行为定义。"
+
+  - id: PL-05
+    pattern: "夸大限制语堆叠「在任何情况下均不得」"
+    bad_zh: "在任何情况下，Agent 均不得在未获取用户显式授权的前提下对生产数据库执行 DROP 指令。"
+    natural_zh: "未经用户显式授权，禁止在生产数据库执行 DROP。"
+    why_worse: "繁复的情态前缀降低了规则解析的确定性，技术指令使用「禁止」即具备最高约束力。"
+
+  - id: PL-06
+    pattern: "状态判定机械使用法律拟制词「视为」"
+    bad_zh: "响应时间超过 3000ms 的请求将被系统视为超时失败，并计入熔断指标。"
+    natural_zh: "请求响应时间超过 3000ms 判定为超时失败，计入熔断指标。"
+    why_worse: "「视为」带有法律事实推定的意味，技术系统中阈值触发是客观判定事实。"
+
+over_control_damage:
+  - id: OC-01
+    imported_constraint: "每句必须有显式主语（机械套用英文 Subject-Verb 完整性）"
+    damage_to_chinese: "强行插入「你/用户/系统」打碎汉语文脉，破坏汉语自然的零形式主语（话题链）和祈使连贯性，使语言机械呆板。"
+    bad_zh: "当用户打开控制台时，用户必须点击设置菜单。然后用户需要选择网络配置，并且用户应当修改端口号。"
+    natural_zh: "打开控制台后，点击「设置」进入网络配置，修改端口号。"
+    when_the_constraint_IS_justified: "多角色（如管理员与普通用户、客户端与服务端）在同一复合交互流程中交替执行动作时，须显式标注主体以防施事混淆。"
+
+  - id: OC-02
+    imported_constraint: "禁止话题前置，强制遵循「主-谓-宾」固定语序"
+    damage_to_chinese: "破坏汉语「话题-说明」的天然结构，迫使长定语修饰宾语阻塞谓语动词，严重降低技术人员的信息检索速度。"
+    bad_zh: "系统会把包含非法字符并且未通过 Schema 校验的字段直接丢弃。"
+    natural_zh: "包含非法字符且未通过 Schema 校验的字段，系统将直接丢弃。"
+    when_the_constraint_IS_justified: "动作方向单一的超短赋值语句，或在受严格形式化解析器约束的伪代码语法中。"
+
+  - id: OC-03
+    imported_constraint: "单句强制限制动词数量（单句单一动词 / 严禁连动结构）"
+    damage_to_chinese: "强行拆毁汉语自然的连动句（Serial Verb Construction），把连贯的流水操作切成碎裂的孤立短句，破坏因果与时序流。"
+    bad_zh: "保存配置文件。重启服务进程。检查运行状态。"
+    natural_zh: "保存配置文件并重启服务，随后检查运行状态。"
+    when_the_constraint_IS_justified: "交互式 CLI 单步确认向导（每步都需要用户输入回车且具高危物理副作用的停机操作）。"
+
+  - id: OC-04
+    imported_constraint: "一刀切全面禁用被动语态"
+    damage_to_chinese: "当受事为已知焦点、施事未知或无需关心地理机制时，硬造虚拟施事导致表达迂回冗余。"
+    bad_zh: "存储管理机制会在磁盘空间不足时把旧快照数据销毁。"
+    natural_zh: "磁盘空间不足时，旧快照会被自动清理。"
+    when_the_constraint_IS_justified: "故障定责、权限审计或安全控制文本中，必须明确是哪个微服务或哪个凭据主体执行了写操作。"
+
+  - id: OC-05
+    imported_constraint: "词性绝对单一化，严禁名词活用为动词（机械套用英文词类隔离）"
+    damage_to_chinese: "扼杀中文自然的兼类词表达，将原本简洁的动词化技术名词（如备份、镜像、路由、缓存）强行扩写为「执行...操作/功能」。"
+    bad_zh: "在执行对数据库的备份操作后，将流量进行路由操作到备用集群。"
+    natural_zh: "备份数据库后，将流量路由至备用集群。"
+    when_the_constraint_IS_justified: "术语在同一上下文中既作为数据模型实体类名，又作为配置项键名时，为避免语法解析歧义必须词性定型。"
+
+  - id: OC-06
+    imported_constraint: "禁止使用四字格成语与对称紧缩短语"
+    damage_to_chinese: "强行将行业公认的凝练技术四字格（如读写分离、平滑升级、幂等重试）展开为啰唆的大白话解释，拉低专业质感。"
+    bad_zh: "系统支持在不中断服务的情况下升级版本，并且多次执行同一操作会产生完全相同的结果。"
+    natural_zh: "系统支持平滑升级与幂等重试。"
+    when_the_constraint_IS_justified: "面向跨国非母语初学者的本地化入门教程，或可能被机器直译为第三国语言的过渡文本。"
+
+  - id: OC-07
+    imported_constraint: "名词前必须强制添加量词或泛指代词"
+    damage_to_chinese: "汉语集合名词和类指事物天然不需显式量词修饰，强制加「一个/该个」造成语言严重西化。"
+    bad_zh: "客户端需要发送一个心跳包以维持一个连接的活跃状态。"
+    natural_zh: "客户端须发送心跳包以维持连接活跃。"
+    when_the_constraint_IS_justified: "涉及严格的资源配额、并发数限制或单例/多例架构声明时（如「每个租户仅限创建 1 个虚拟网关」）。"
+
+over_editing_examples:
+  - id: OE-01
+    good_source_zh: "修改配置后须重启网关生效。"
+    unnecessary_rewrite_zh: "在您修改了配置文件之后，您必须重新启动网关服务，以使修改后的配置生效。"
+    why_worse: "强加第二人称代词和补足连词，将高度凝练紧凑的操作说明膨胀为冗长会话。"
+    rule_that_would_misfire: "「补全主谓宾完整句型，禁止省略连接词」"
+
+  - id: OE-02
+    good_source_zh: "磁盘用量超 90% 触发告警。"
+    unnecessary_rewrite_zh: "当磁盘的使用量超过百分之九十的时候，系统将会触发告警信息。"
+    why_worse: "告警指标看板要求一眼抓取关键阈值与动作，展开为长复合句大幅降低扫读效率。"
+    rule_that_would_misfire: "「禁止数值符号与紧缩句，从句必须包含完整连接词（当...时）」"
+
+  - id: OE-03
+    good_source_zh: "接口支持批量写入，单次上限 500 条。"
+    unnecessary_rewrite_zh: "该接口允许用户进行批量写入操作，在单次请求中最多可以写入五百条数据记录。"
+    why_worse: "塞入功能动词（进行...操作）和客套主语（允许用户），稀释了参数约束事实。"
+    rule_that_would_misfire: "「动作必须搭配行为主体与功能动词」"
+
+  - id: OE-04
+    good_source_zh: "密码错误，还可重试 3 次。"
+    unnecessary_rewrite_zh: "输入的密码不正确。系统允许您还可以再次尝试输入三次密码。"
+    why_worse: "错误提示要求最短视距完成反馈，改写后拖泥带水且语气生硬。"
+    rule_that_would_misfire: "「一律拆分为单谓语短句并补充动作发出者」"
+
+  - id: OE-05
+    good_source_zh: "节点失联超时将自动下线。"
+    unnecessary_rewrite_zh: "如果节点失去连接的时间超过了预设的时间限制，那么该节点将被系统自动设置为下线状态。"
+    why_worse: "紧凑的因果状态转移被拆解为长连词从句，降低了状态机逻辑的清晰度。"
+    rule_that_would_misfire: "「严格遵循'如果...那么...'完整条件假设句式」"
+
+  - id: OE-06
+    good_source_zh: "抓取日志并分析慢查询。"
+    unnecessary_rewrite_zh: "首先抓取系统日志。然后分析慢查询语句。"
+    why_worse: "强行将连贯的流式复合动作拆断，制造无意义的断句停顿与序数虚词。"
+    rule_that_would_misfire: "「单句必须且仅能包含一个独立操作动词」"
+
+  - id: OE-07
+    good_source_zh: "生产环境禁用调试模式。"
+    unnecessary_rewrite_zh: "在生产环境中，管理员必须禁止开启调试模式。"
+    why_worse: "客观配置约束无需强行指定责任人，强加主语反而缩小了规则适用的系统范围。"
+    rule_that_would_misfire: "「禁止无主祈使句，必须明确指出责任主体」"
+
+genuine_chinese_ambiguity:
+  - id: GA-01
+    phenomenon: "多重定语修饰作用域歧义（前置定语修饰首个名词还是整个并列结构）"
+    ambiguous_zh: "暂停处理未完成的订单和退款请求。"
+    readings:
+      - "读法一：暂停处理「未完成的订单」以及「所有退款请求」（退款请求无论是否完成均被暂停）。"
+      - "读法二：暂停处理「未完成的订单」以及「未完成的退款请求」（修饰语限定两者）。"
+    disambiguated_zh: "暂停处理未完成的订单与未完成的退款请求。（若为全量：暂停处理未完成的订单，并暂停所有退款请求。）"
+    cost_of_over_applying: "若对所有并列结构均机械重复前置定语，会导致文档极度冗长，失去汉语对称美感。"
+
+  - id: GA-02
+    phenomenon: "否定词辖域歧义（否定词是否跨越并列动词或复合连词）"
+    ambiguous_zh: "系统不会在工作时间重启主数据库并清空缓存。"
+    readings:
+      - "读法一：系统在工作时间内既不重启主库，也不清空缓存（全盘否定）。"
+      - "读法二：系统不会在工作时间同时做这两件事，但可能单独执行其中一项（联合否定）。"
+      - "读法三：系统不在工作时间重启主库，但会在工作时间清空缓存（仅否定前项）。"
+    disambiguated_zh: "工作时间内，系统禁止重启主数据库，亦禁止清空缓存。"
+    cost_of_over_applying: "所有否定句全部被重写为分拆的多重断言，句式变极度死板。"
+
+  - id: GA-03
+    phenomenon: "施事承前省略导致的动作执行主体错位"
+    ambiguous_zh: "服务端收到客户端的注销请求后断开连接。"
+    readings:
+      - "读法一：服务端收到请求后，由服务端主动关闭 TCP 连接。"
+      - "读法二：服务端收到请求后，客户端主动关闭 TCP 连接。"
+    disambiguated_zh: "服务端收到客户端的注销请求后，由服务端主动断开连接。"
+    cost_of_over_applying: "每个顺承子句均强制显式重复主语，制造大量代词冗余。"
+
+  - id: GA-04
+    phenomenon: "连词「和/与」在「并列宾语」与「伴随介词」之间的词性混淆"
+    ambiguous_zh: "隔离受感染的主机和网关通信。"
+    readings:
+      - "读法一：同时隔离「受感染的主机」以及「网关通信」（并列关系，隔离两样资产）。"
+      - "读法二：隔离受感染的主机，阻断其「与网关之间的通信」（介宾关系，隔离主机与网关的链路）。"
+    disambiguated_zh: "阻断受感染主机与网关之间的通信链路。"
+    cost_of_over_applying: "彻底禁用日常连词「和」，所有短语均被迫写成生硬的介词框架。"
+
+  - id: GA-05
+    phenomenon: "时序与前置条件界限歧义（「前/后」关联词修饰多动作时的边界不明确）"
+    ambiguous_zh: "迁移元数据前备份旧数据并在从库验证。"
+    readings:
+      - "读法一：在执行「迁移元数据」之前，先完成「备份旧数据」和「从库验证」两步。"
+      - "读法二：先「备份旧数据」，接着「迁移元数据」，最后「在从库验证」。"
+    disambiguated_zh: "在迁移元数据前，须先完成旧数据备份与从库验证。"
+    cost_of_over_applying: "对所有简单动作流强制添加繁琐的序数列表（步骤 1、步骤 2），破坏段落流畅性。"
+
+  - id: GA-06
+    phenomenon: "全称量词辖域与分配性歧义（集合整体 vs 分散到每个个体）"
+    ambiguous_zh: "重置所有集群节点的网络配置和密码。"
+    readings:
+      - "读法一：重置所有节点的网络配置，并将所有节点的密码重置为统一默认密码。"
+      - "读法二：重置所有节点的网络配置，并重置各节点的独立密码。"
+      - "读法三：重置所有节点的网络配置，并重置（全局唯一的集群管理）密码。"
+    disambiguated_zh: "重置全部集群节点的网络配置，并分别重置各节点的独立密码。"
+    cost_of_over_applying: "凡出现量词必加「分别/各自/整体」注记，行文机械冗赘。"
+
+  - id: GA-07
+    phenomenon: "逻辑连词「或者」在相容析取（OR）与排他析取（XOR）间的语义不确定"
+    ambiguous_zh: "用户可通过输入手机验证码或者邮箱验证码完成双因子认证。"
+    readings:
+      - "读法一：相容选择，任选其中一种即可完成，同时输入两种亦可。"
+      - "读法二：排他互斥，必须且仅能选择其中一种方式提交，不可混合。"
+    disambiguated_zh: "用户须任选一种方式完成认证：输入手机验证码，或输入邮箱验证码。"
+    cost_of_over_applying: "日常技术交流中将所有连词一律转化为形式逻辑算子（OR / XOR），破坏行文自然度。"
+
+register_guidance:
+  - doc_type: "agent 指令与提示词"
+    register_notes: "严格确定性、边界封闭、零礼貌客套、条件前置、谓词绝对精准（必须/禁止/仅限）。"
+    good_example_zh: "若用户输入包含 SQL 关键字，须先调用 sanitize_query 过滤，禁止直接拼接字符串。"
+    bad_example_zh: "请您在注意到用户的输入里面好像有 SQL 相关词汇的时候，尽可能帮忙调用一下清理工具哦。"
+    common_mistake: "使用商用对话礼貌语气（请您/帮忙）或概率性模糊词（尽量/最好/可能），导致 Agent 依从性骤降。"
+
+  - doc_type: "工具描述"
+    register_notes: "声明式陈述、动宾直接破题、契约透明、无主语、精确说明输入输出与边界副作用。"
+    good_example_zh: "查询指定时间范围内的系统审计日志。支持按用户 ID 和操作类型筛选，单次最多返回 100 条。"
+    bad_example_zh: "这个工具能够允许调用者去获取各种各样的系统日志，你可以用它来查看谁做了什么操作。"
+    common_mistake: "混入交互对话式引导词（你可以用它来.../本工具旨在帮助...），缺少边界与类型契约。"
+
+  - doc_type: "SOP / Runbook"
+    register_notes: "强动作导向、时序严格、前置条件与预期产出分明、动词置于句首、杜绝操作与原理混写。"
+    good_example_zh: "1. 执行 systemctl stop app 停止服务。\n2. 运行 pgrep app 确认进程已完全退出。\n3. 执行 db_migrate.sh 启动数据迁移。"
+    bad_example_zh: "首先用户需要把服务通过 systemctl 停掉，然后要看一下进程是不是真的没有了，确认之后就可以去跑迁移脚本了。"
+    common_mistake: "叙事口吻松散，混淆「执行动作」与「观察断言」，缺少明确的校验退出依据。"
+
+  - doc_type: "排障步骤"
+    register_notes: "假说验证驱动、现象与排查手段严格绑定、分支条件穷尽、判定阈值量化。"
+    good_example_zh: "若 HTTP 504 错误率 > 5%：\n- 执行 netstat -an | grep :80 | wc -l 检查网关连接数。\n- 若连接数饱和，执行水平扩容；若未饱和，排查后端微服务慢查询。"
+    bad_example_zh: "遇到 504 错误的时候可以先看下网关是不是扛不住了，如果是的话就加点机器，要不然就去看下慢查询吧。"
+    common_mistake: "口语化推测，缺少可直接复制执行的命令与确定性的数值判定阈值。"
+
+  - doc_type: "告警与错误信息"
+    register_notes: "极度凝练、第一视距呈现故障对象与原因、附带上下文参数、提供明确修复指引或代码指向。"
+    good_example_zh: "数据库连接超时（host: 10.0.1.5, port: 5432, timeout: 5000ms）。请检查目标主机网络连通性及安全组规则。"
+    bad_example_zh: "糟糕！由于某些未知的问题，系统好像无法连接到您的数据库服务器了，请稍后再试或者联系管理员。"
+    common_mistake: "拟人化卖萌、情绪化感叹、隐藏关键上下文参数（缺少 IP/端口/状态码）、无有效自愈指引。"
+
+  - doc_type: "API 与开发者文档"
+    register_notes: "客观、精确、去修饰化、术语高度统一、显式标注参数类型与取值范围。"
+    good_example_zh: "limit（integer，可选，默认 20）：单页返回的最大记录数。取值范围：1~100。"
+    bad_example_zh: "limit 参数是你可以传的一个数字，用来控制每页最多给你返回多少条数据，随便传多少但别太大。"
+    common_mistake: "参数描述口语化、缺失数据类型、缺少默认值与上下界边界定义。"
+
+  - doc_type: "技术翻译"
+    register_notes: "语义真值完全保真、符合汉语技术行文逻辑、消解原文从句与被动结构、术语精准对齐行业共识。"
+    good_example_zh: "读写分离架构通过将查询请求路由至从库，可有效降低主库负载。"
+    bad_example_zh: "通过将读取请求进行路由至从属数据库，读写分离架构被用来对主数据库上的负载进行减轻。"
+    common_mistake: "逐字直译造成被动语态泛滥、介词短语嵌套、轻动词堆叠等典型翻译腔。"

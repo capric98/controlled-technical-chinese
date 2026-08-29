@@ -1,0 +1,445 @@
+invariants:
+  - id: INV-01
+    name: '事实状态与认识确定性'
+    definition: '源文本中每个命题的状态——已确认、推测、可能、未知、否定或尚待验证——在输出中保持等价；证据来源和限制条件也属于该状态。'
+    why_it_matters: '把诊断假设写成已确认根因，会导致运维人员跳过验证、执行错误修复，并掩盖仍然存在的故障路径。'
+    detection: semantic
+    detection_test: '语义裁判逐项回答：源文和输出分别把该命题表示为事实、可能性、推测、未知还是否定？输出是否删除了证据限制，或引入了源文没有的确定性？'
+    failing_example:
+      context: '故障分析报告'
+      source_zh: '过去 24 小时的日志表明，超时可能与连接池耗尽有关；根因尚未确认。'
+      bad_output_zh: '过去 24 小时的超时由连接池耗尽导致。'
+      what_broke: '“可能有关”被强化为确定因果关系，“根因尚未确认”被删除。'
+    boundary_example:
+      source_zh: '事故记录已确认根因是数据库连接池耗尽。'
+      acceptable_output_zh: '本次事故的根因是数据库连接池耗尽。'
+      why_not_a_violation: '源文本已经明确标记结论为已确认，省略重复的证据状态不改变命题确定性。'
+
+  - id: INV-02
+    name: '规范模态与行为权限'
+    definition: '每个行为的义务、禁止、建议、许可和可选状态保持不变，包括对应的施事者、触发条件和适用范围。'
+    why_it_matters: '建议被改成强制要求会阻断合法操作；许可被改成义务可能触发不必要或有风险的生产变更。'
+    detection: semantic
+    detection_test: '语义裁判分别从源文和输出重建元组（施事者、行为、对象、条件、模态级别、否定极性）；判断每个元组的模态是否等价，尤其检查“应、建议、可以、必须、不得”之间的强化或弱化。'
+    failing_example:
+      context: '生产变更 SOP'
+      source_zh: '常规变更应先在预发布环境验证；紧急恢复时可以跳过该验证，但需要记录原因。'
+      bad_output_zh: '所有变更都必须先在预发布环境验证，不得跳过。'
+      what_broke: '建议被强化为义务，紧急恢复许可及其记录条件被删除。'
+    boundary_example:
+      source_zh: '维护窗口期间必须禁用自动扩缩容。'
+      acceptable_output_zh: '在维护窗口期间，禁用自动扩缩容是强制要求。'
+      why_not_a_violation: '两种表述都编码同一条件下的强制义务，没有改变行为权限。'
+
+  - id: INV-03
+    name: '条件、前提与触发边界'
+    definition: '行为或结论所依赖的条件集合、逻辑关系和触发阈值保持等价；条件不得被删除、无条件化、移到错误分支或改成仅供参考的信息。'
+    why_it_matters: '条件丢失会让恢复、切换或删除操作在不安全状态下提前执行。'
+    detection: mixed
+    detection_test: '机械提取显式条件标记和比较表达式；语义裁判再重建（条件、逻辑连接、受条件约束的行为），并询问：输出是否允许源文禁止的无条件执行，或拒绝源文允许的条件执行？'
+    failing_example:
+      context: '高可用切换规则'
+      source_zh: '仅当健康检查连续失败 3 次时，系统才自动切换到备用集群。'
+      bad_output_zh: '健康检查失败时，系统自动切换到备用集群。'
+      what_broke: '“连续失败 3 次”这一必要触发条件被放宽为一次失败。'
+    boundary_example:
+      source_zh: '在获得变更单批准且备份完成后，执行升级。'
+      acceptable_output_zh: '备份完成并获得变更单批准后，执行升级。'
+      why_not_a_violation: '两个前提仍以合取关系共同约束升级；源文本没有规定两个前提的完成顺序。'
+
+  - id: INV-04
+    name: '量词、数量域与例外集合'
+    definition: '全称、存在、唯一、至少、至多、仅限等量化关系及其作用域保持不变；被包含和被排除的对象集合保持等价。'
+    why_it_matters: '删除例外或扩大“所有”的作用域，可能让只读节点、豁免租户或受保护资源遭受不适用的操作。'
+    detection: semantic
+    detection_test: '语义裁判为每个量词重建（量词类型、计数约束、对象域、例外集合、受约束谓词），并比较源文与输出所允许的对象集合是否完全相同。'
+    failing_example:
+      context: '数据库轮换 SOP'
+      source_zh: '除只读副本外，所有数据库节点都必须在轮换前停止写入。'
+      bad_output_zh: '所有数据库节点都必须在轮换前停止写入。'
+      what_broke: '只读副本这一例外被删除，义务覆盖范围被扩大。'
+    boundary_example:
+      source_zh: '对每个分片各执行一次校验。'
+      acceptable_output_zh: '所有分片都执行一次校验。'
+      why_not_a_violation: '在同一分片集合内，两种表述都要求每个成员接受一次校验。'
+
+  - id: INV-05
+    name: '否定极性与否定作用域'
+    definition: '否定所支配的谓词、参数、量词和组合关系保持不变，尤其区分“并非全部”“不得同时”“全部不得”和“仅不允许其中一项”。'
+    why_it_matters: '部分禁止被改成全面禁止会阻塞恢复；全面禁止被缩小则可能允许危险的组合操作。'
+    detection: semantic
+    detection_test: '语义裁判分别写出源文和输出的允许集合与禁止集合；若两个集合不相等，或否定从组合整体移到单个成员，则判定失败。'
+    failing_example:
+      context: '集群维护警告'
+      source_zh: '不得同时停用主节点和仲裁节点。'
+      bad_output_zh: '不得停用主节点，也不得停用仲裁节点。'
+      what_broke: '对“同时停用两者”的组合禁止被改成对两个单独行为的全面禁止。'
+    boundary_example:
+      source_zh: '主节点和仲裁节点均不得停用。'
+      acceptable_output_zh: '不得停用主节点；也不得停用仲裁节点。'
+      why_not_a_violation: '源文本本来就分别禁止两个行为，拆分没有改变否定作用域。'
+
+  - id: INV-06
+    name: '逻辑分组与修饰范围'
+    definition: '合取、析取、条件、修饰语和从句与其支配对象之间的结构关系保持等价；句子拆分或合并不得重新挂接条件、属性或动作对象。'
+    why_it_matters: '错误挂接可能让条件只约束一个分支、把告警字段改成日志字段，或把“二选一”变成“两个都做”。'
+    detection: semantic
+    detection_test: '语义裁判将源文和输出转换为带括号的逻辑结构，标出每个条件、修饰语、合取和析取的作用范围；比较两棵结构树是否表达相同的操作集合。'
+    failing_example:
+      context: '副本恢复说明'
+      source_zh: '对处于维护模式且复制延迟超过 30 秒的副本执行重建，或将该副本从流量池移除。'
+      bad_output_zh: '对处于维护模式的副本执行重建；复制延迟超过 30 秒时，将副本从流量池移除。'
+      what_broke: '原来的合取条件共同限定目标副本，输出却把两个条件分别挂接到两个动作，并把析取改成了并列执行。'
+    boundary_example:
+      source_zh: '检查磁盘空间并检查 inode 使用率；两项检查的顺序不限。'
+      acceptable_output_zh: '检查磁盘空间和 inode 使用率，顺序不限。'
+      why_not_a_violation: '两个检查仍是合取关系，且没有新增顺序或条件。'
+
+  - id: INV-07
+    name: '因果强度与因果方向'
+    definition: '因果、促成、相关、时间先后和纯粹并存等关系保持原有强度与方向；输出不把相关性、推测或先后关系升级为因果结论。'
+    why_it_matters: '虚构根因会把排障资源导向错误组件，也可能产生不必要的回滚或配置禁令。'
+    detection: semantic
+    detection_test: '语义裁判对每一对相关事件标注关系类型（直接因果、促成因素、相关、时间先后、未知）和方向；比较输出是否增强、反转或新增关系。'
+    failing_example:
+      context: '性能调查结论'
+      source_zh: '启用压缩与 CPU 使用率升高相关，但现有数据不能证明它导致请求超时。'
+      bad_output_zh: '启用压缩会导致请求超时。'
+      what_broke: '相关性被改成确定因果关系，且忽略了源文明确的证据限制。'
+    boundary_example:
+      source_zh: '受控测试中，启用 `sync_commit` 是唯一变量；每次启用后写入延迟都增加，恢复原值后延迟回落。'
+      acceptable_output_zh: '受控测试表明，启用 `sync_commit` 导致写入延迟增加。'
+      why_not_a_violation: '源文本提供了用于支持该测试范围内因果判断的对照和可逆性证据。'
+
+  - id: INV-08
+    name: '时间顺序、等待点与持续范围'
+    definition: '显式规定的先后、同时、等待、持续、截止和重试时序保持不变；并列动作只有在源文允许时才可重排或并行化。'
+    why_it_matters: '在停止写入前提升备用库，或在异步任务完成前删除资源，可能造成双写、数据丢失或不可恢复状态。'
+    detection: mixed
+    detection_test: '机械提取“先、后、再、直到、期间、完成后、同时”等时序标记；语义裁判建立事件偏序图和等待条件，比较源文与输出的必需先后边是否一致。'
+    failing_example:
+      context: '数据库故障切换步骤'
+      source_zh: '先暂停写入，确认复制延迟归零后，再将备用库提升为主库。'
+      bad_output_zh: '将备用库提升为主库后，暂停写入并等待复制延迟归零。'
+      what_broke: '提升主库被移到暂停写入和等待复制完成之前，关键偏序被反转。'
+    boundary_example:
+      source_zh: '分别检查磁盘容量和证书有效期；两项检查可以并行执行。'
+      acceptable_output_zh: '并行检查磁盘容量与证书有效期。'
+      why_not_a_violation: '源文本明确允许并行，不存在需要保持的先后关系。'
+
+  - id: INV-09
+    name: '指代对象与引用身份'
+    definition: '代词、省略语、路径引用和“该项、其、它、前者”等表达所指向的实体保持唯一且与源文相同；压缩不得改变被传递、读取、安装或删除的对象。'
+    why_it_matters: '指代漂移会让代理删除错误文件、把凭据而非路径传给工具，或把错误状态归给错误组件。'
+    detection: semantic
+    detection_test: '语义裁判列出源文和输出中每个引用表达的候选先行词与最终指向；询问输出是否出现多个合理候选，或最终实体是否与源文不同。'
+    failing_example:
+      context: '补丁分发流程'
+      source_zh: '控制器把补丁写入 `patch.bin`，再把 `patch.bin` 的路径发送给代理。代理安装补丁后删除 `patch.bin`。'
+      bad_output_zh: '控制器把补丁写入文件并将其发送给代理。代理安装它后删除它。'
+      what_broke: '输出无法确定发送的是补丁、文件还是路径，也无法确定两个“它”是否指向同一对象。'
+    boundary_example:
+      source_zh: '客户端收到唯一的响应对象后，将其写入审计日志。'
+      acceptable_output_zh: '客户端收到响应后，把它写入审计日志。'
+      why_not_a_violation: '上下文中只有一个可作为先行词的响应对象，指代没有产生竞争解释。'
+
+  - id: INV-10
+    name: '施事者、动作、对象与结果归属'
+    definition: '每个动作的执行者、承受对象、接收者及结果产生者保持不变；省略主语或改用主动结构不得合并不同组件的职责。'
+    why_it_matters: '角色倒置可能要求控制平面执行只能由节点完成的操作，或让错误组件承担确认、清理和回报职责。'
+    detection: semantic
+    detection_test: '语义裁判从源文和输出构造事件元组（施事者、动作、对象、接收者、结果）；比较每个角色是否一一对应，并检查省略主语后是否存在两个以上合理施事者。'
+    failing_example:
+      context: '节点排空协议'
+      source_zh: '控制平面向节点发送排空命令；节点排空完成后，向控制平面返回完成状态。'
+      bad_output_zh: '控制平面排空节点并返回完成状态。'
+      what_broke: '节点执行排空并返回状态的职责被错误归给控制平面。'
+    boundary_example:
+      source_zh: '代理下载配置包，然后校验其签名，最后安装配置包。'
+      acceptable_output_zh: '代理下载配置包，校验签名后再安装。'
+      why_not_a_violation: '连续动作只有代理这一个合理施事者，动作对象也可唯一恢复。'
+
+  - id: INV-11
+    name: '数值、单位、范围与比较边界'
+    definition: '数值、单位、正负号、百分比、范围端点、端点开闭、阈值比较符、次数和持续时间及其语义绑定保持等价。'
+    why_it_matters: '把毫秒改成秒、把“达到”改成“超过”或改变重试次数，会直接改变超时、扩容和失败恢复行为。'
+    detection: mixed
+    detection_test: '确定性检查：从源文和输出提取规范化元组（数值、单位、比较符、范围下界及开闭、范围上界及开闭），将全角字符和等值数字格式统一，仅对预先列入白名单的精确单位换算使用有理数换算，然后比较元组多重集是否完全相等。机械检查通过后，语义裁判再比较每个元组所绑定的参数、动作或资源是否相同。'
+    failing_example:
+      context: '客户端重试配置'
+      source_zh: '单次请求超时为 250 ms，最多重试 3 次；CPU 利用率达到 80% 时开始扩容。'
+      bad_output_zh: '单次请求超时为 250 s，最多重试 5 次；CPU 利用率超过 80% 后开始扩容。'
+      what_broke: '单位、重试上限和阈值边界均发生变化。'
+    boundary_example:
+      source_zh: '等待时间为 1000 ms。'
+      acceptable_output_zh: '等待时间为 1 s。'
+      why_not_a_violation: '在允许精确单位换算的上下文中，两个持续时间严格相等，没有舍入或边界变化。'
+
+  - id: INV-12
+    name: '受保护技术标记的精确身份'
+    definition: '代码、命令、标志、标识符、字段名、API 路径、文件路径、URL、环境变量和状态码的字符序列及大小写保持不变，除非任务明确授权修改该标记。'
+    why_it_matters: '技术标记中的一个字符变化即可让请求失败、访问错误资源、读取错误字段或执行不同命令。'
+    detection: deterministic
+    detection_test: '从源文和输出按同一词法规则提取代码跨度与代码块、URL、路径、命令行标志、环境变量、API 标识符和状态码；比较每一类别的 UTF-8 字符串多重集及出现次数，要求逐字节相等，包括大小写、连字符、下划线、斜杠和查询参数。仅排除任务显式列出的授权替换。'
+    failing_example:
+      context: 'API 错误处理说明'
+      source_zh: '调用 `POST /v1/jobs/{job_id}:cancel`。若响应为 `409`，读取字段 `retry_after_ms`，并设置环境变量 `JOB_CANCEL_RETRY=1`。'
+      bad_output_zh: '调用 `POST /v1/job/{jobId}/cancel`。若响应为 `400`，读取字段 `retryAfterMs`，并设置环境变量 `JOB_CANCEL_RETRY=true`。'
+      what_broke: 'API 路径、路径参数、动作语法、状态码、字段名和环境变量值均被静默改写。'
+    boundary_example:
+      source_zh: '将请求发送到 `https://api.example.com/v1/jobs`。'
+      acceptable_output_zh: '向作业接口 `https://api.example.com/v1/jobs` 发送请求。'
+      why_not_a_violation: '自然语言说明发生变化，但受保护 URL 的字符序列和出现次数完全相同。'
+
+failure_taxonomy:
+  - id: F-01
+    class: '确定性膨胀'
+    description: '删除“可能、推测、尚未确认”等认识限制，把候选解释写成事实。'
+    why_llms_do_it: '摘要和润色倾向压缩限定语，并偏好简洁、肯定的陈述。'
+    minimal_repro:
+      source_zh: '该错误可能由 DNS 缓存过期引起，仍需抓包确认。'
+      bad_zh: '该错误由 DNS 缓存过期引起。'
+      note: '候选根因被写成已确认根因。'
+    invariant_refs: [INV-01, INV-07]
+
+  - id: F-02
+    class: '规范强度漂移'
+    description: '在义务、禁止、建议、许可和可选行为之间无依据地强化或弱化。'
+    why_llms_do_it: '模型常把不同中文情态词当成风格同义词，或用更正式的词替换原词。'
+    minimal_repro:
+      source_zh: '低流量时段建议执行索引重建。'
+      bad_zh: '低流量时段必须执行索引重建。'
+      note: '建议被改成强制要求。'
+    invariant_refs: [INV-02]
+
+  - id: F-03
+    class: '触发条件丢失或外扩'
+    description: '删除“仅当、除非、连续、完成后”等门控条件，导致行为更早或在更多状态下发生。'
+    why_llms_do_it: '模型在缩句时保留主动作，却把条件从句判断为次要背景。'
+    minimal_repro:
+      source_zh: '仅当两个区域都不可用时，才启用跨境灾备。'
+      bad_zh: '区域不可用时，启用跨境灾备。'
+      note: '双区域条件被放宽成单区域条件。'
+    invariant_refs: [INV-03, INV-04]
+
+  - id: F-04
+    class: '量词域和例外塌缩'
+    description: '丢失“部分、至少一个、仅限、除外”等集合边界，或让量词跨越原来的句法范围。'
+    why_llms_do_it: '模型倾向把复杂集合描述概括为“全部”或“相关资源”。'
+    minimal_repro:
+      source_zh: '除系统租户外，仅迁移已通过校验的租户。'
+      bad_zh: '迁移所有租户。'
+      note: '排除集合和准入条件都被删除。'
+    invariant_refs: [INV-03, INV-04]
+
+  - id: F-05
+    class: '部分否定改成全面否定'
+    description: '把“并非全部”“不得同时”等组合级否定拆成对每个成员的独立否定。'
+    why_llms_do_it: '拆句时容易把否定词复制到各并列项，而忽略原来的逻辑组合。'
+    minimal_repro:
+      source_zh: '不要同时重启两个控制器。'
+      bad_zh: '不要重启控制器 A，也不要重启控制器 B。'
+      note: '禁止并发重启被改成完全禁止重启。'
+    invariant_refs: [INV-05, INV-06]
+
+  - id: F-06
+    class: '并列关系与修饰语重新挂接'
+    description: '句子拆分、合并或调序后，条件、字段或限定语改为修饰另一个动作或对象。'
+    why_llms_do_it: '模型按局部邻近性重建句法，不总能保持源文本的逻辑括号。'
+    minimal_repro:
+      source_zh: '发送包含请求 ID 和租户 ID 的告警，并记录失败原因。'
+      bad_zh: '发送包含请求 ID 的告警，并记录租户 ID 和失败原因。'
+      note: '租户 ID 从告警字段变成日志字段。'
+    invariant_refs: [INV-06]
+
+  - id: F-07
+    class: '相关性升级为因果性'
+    description: '把共现、时间先后或统计相关表述改成确定的原因与结果。'
+    why_llms_do_it: '模型偏好形成完整解释，并可能把“与……相关”渲染成更流畅的“导致”。'
+    minimal_repro:
+      source_zh: '缓存命中率下降与延迟升高同时出现。'
+      bad_zh: '缓存命中率下降导致延迟升高。'
+      note: '共现关系被改成单向因果关系。'
+    invariant_refs: [INV-01, INV-07]
+
+  - id: F-08
+    class: '步骤重排或错误并行化'
+    description: '为了简洁或“优化流程”而交换受约束步骤，或把需要等待的动作改成并发执行。'
+    why_llms_do_it: '模型常把列表视为可编辑的表现形式，而不是带偏序约束的执行计划。'
+    minimal_repro:
+      source_zh: '冻结写入，等待快照完成，然后删除旧卷。'
+      bad_zh: '删除旧卷，同时冻结写入并创建快照。'
+      note: '删除操作越过了两个必要前置步骤。'
+    invariant_refs: [INV-03, INV-08]
+
+  - id: F-09
+    class: '指代压缩导致对象漂移'
+    description: '用“其、它、该项”替代重复名词后，产生多个先行词或指向错误实体。'
+    why_llms_do_it: '模型把避免重复视为自然度提升，却没有验证技术上下文中的唯一指代。'
+    minimal_repro:
+      source_zh: '扫描器读取临时文件后删除该文件，并保留扫描报告。'
+      bad_zh: '扫描器读取临时文件和扫描报告后删除它。'
+      note: '“它”可能指临时文件或扫描报告。'
+    invariant_refs: [INV-09]
+
+  - id: F-10
+    class: '施事者合并或角色倒置'
+    description: '省略主语、改写主动被动关系或合并句子后，把动作和结果归给错误组件。'
+    why_llms_do_it: '中文允许连续省略主语，模型可能默认后句沿用最近施事者。'
+    minimal_repro:
+      source_zh: '调度器通知执行器启动任务；执行器完成后返回摘要。'
+      bad_zh: '调度器启动任务并返回摘要。'
+      note: '执行器的两个职责被归给调度器。'
+    invariant_refs: [INV-10]
+
+  - id: F-11
+    class: '数字、单位和边界的静默归一化'
+    description: '在格式化或单位转换过程中改变数量级、舍入结果、比较符或区间开闭。'
+    why_llms_do_it: '模型可能把相似单位当作可互换文本，或把“达到”和“超过”当作风格变体。'
+    minimal_repro:
+      source_zh: '当队列长度达到 100 时拒绝新任务。'
+      bad_zh: '当队列长度超过 100 时拒绝新任务。'
+      note: '长度恰为 100 时的行为发生变化。'
+    invariant_refs: [INV-03, INV-11]
+
+  - id: F-12
+    class: '技术标记的语言化润色'
+    description: '把字段、路径、命令或状态码改成看似更一致、更现代或更自然的拼写。'
+    why_llms_do_it: '模型把 snake_case、单复数、路径风格和布尔值视为可统一的代码风格问题。'
+    minimal_repro:
+      source_zh: '读取 `created_at_ms`，然后运行 `worker --dry-run`。'
+      bad_zh: '读取 `createdAtMs`，然后运行 `worker --dryrun`。'
+      note: '字段名和命令行标志不再对应真实接口。'
+    invariant_refs: [INV-12]
+
+  - id: F-13
+    class: '无来源限定词或默认值注入'
+    description: '输出新增“通常、默认、最常见、仅需”等源文本未提供的频率、优先级或充分性判断。'
+    why_llms_do_it: '模型倾向补全常见实践，使说明显得更完整或更有指导性。'
+    minimal_repro:
+      source_zh: '收到 `503` 时检查上游状态。'
+      bad_zh: '收到 `503` 时，通常只需重启上游服务。'
+      note: '新增了频率判断、充分性判断和未经支持的恢复动作。'
+    invariant_refs: [INV-01, INV-02, INV-03, INV-07]
+
+  - id: F-14
+    class: '跨段落范围泄漏'
+    description: '列表、标题或警告框中的条件被错误扩展到后续全部步骤，或只约束其中一步的限制被错误缩小。'
+    why_llms_do_it: '模型在扁平化 Markdown、表格或嵌套列表时可能丢失结构携带的语义范围。'
+    minimal_repro:
+      source_zh: '仅用于测试环境：\n- 清空缓存。\n生产环境：\n- 仅查看缓存统计。'
+      bad_zh: '在测试环境和生产环境中清空缓存并查看统计。'
+      note: '测试环境限定泄漏到生产环境操作。'
+    invariant_refs: [INV-03, INV-06]
+
+overreach_risks:
+  - id: OR-01
+    tempting_constraint: '每个句子都显式写出施事者。'
+    damage_to_chinese: '连续步骤中反复重复同一主语会制造机械、冗长的文本，却不增加可判定性。'
+    example_bad_zh: '代理下载配置。代理校验配置。代理安装配置。代理报告安装结果。'
+    better_zh: '代理下载配置，校验通过后安装，并报告安装结果。'
+
+  - id: OR-02
+    tempting_constraint: '一句只能包含一个动词或一个动作。'
+    damage_to_chinese: '会割裂条件、等待点和结果关系，使本来紧密的操作链变成难以追踪的碎片。'
+    example_bad_zh: '停止写入。等待。检查复制延迟。确认延迟为零。执行切换。'
+    better_zh: '停止写入，等待复制延迟归零后执行切换。'
+
+  - id: OR-03
+    tempting_constraint: '禁止使用“其、该、它”等一切指代表达。'
+    damage_to_chinese: '即使先行词唯一，也会强迫重复长名称，降低可读性并增加复制错误。'
+    example_bad_zh: '证书管理服务读取证书管理服务生成的证书请求，并将证书管理服务生成的证书请求发送给签发服务。'
+    better_zh: '证书管理服务读取其生成的证书请求，并将该请求发送给签发服务。'
+
+  - id: OR-04
+    tempting_constraint: '所有相邻步骤都补上显式因果连接词。'
+    damage_to_chinese: '时间先后、并列或流程约定可能被误写成因果关系。'
+    example_bad_zh: '检查日志，因此导出指标；因此通知值班人员。'
+    better_zh: '检查日志并导出指标，然后通知值班人员。'
+
+  - id: OR-05
+    tempting_constraint: '删除“可能、通常、预计”等软限定词，使表述更明确。'
+    damage_to_chinese: '会抹去真实的不确定性、频率限制和预测性质，产生虚假的确定结论。'
+    example_bad_zh: '该告警由网络抖动引起，五分钟内恢复。'
+    better_zh: '该告警可能由网络抖动引起，预计五分钟内恢复。'
+
+  - id: OR-06
+    tempting_constraint: '同一文档中相近概念统一使用一个术语。'
+    damage_to_chinese: '可能把具有不同生命周期或权限语义的领域概念错误合并。'
+    example_bad_zh: '统一将“撤销令牌”和“删除令牌”改为“删除令牌”。'
+    better_zh: '令牌失效但记录保留时使用“撤销”；记录被移除时使用“删除”。'
+
+  - id: OR-07
+    tempting_constraint: '始终保持源句顺序和句法结构，以防语义漂移。'
+    damage_to_chinese: '会保留翻译腔、远距离修饰和不自然的信息结构；某些无序并列本可安全调整。'
+    example_bad_zh: '在其已由管理员被批准之后，该任务可以由代理被执行。'
+    better_zh: '管理员批准后，代理可以执行该任务。'
+
+  - id: OR-08
+    tempting_constraint: '所有“和、或”都拆成编号分支。'
+    damage_to_chinese: '无歧义的简单并列也会被过度结构化，增加篇幅并破坏正常技术中文的节奏。'
+    example_bad_zh: '执行以下操作：一、检查磁盘空间。二、检查 inode 使用率。'
+    better_zh: '检查磁盘空间和 inode 使用率。'
+
+  - id: OR-09
+    tempting_constraint: '数字和单位必须保持原始表面形式，禁止任何换算。'
+    damage_to_chinese: '会拒绝严格等值且更符合目标文档惯例的表达，也妨碍统一单位展示。'
+    example_bad_zh: '等待 60000 ms 后重试。'
+    better_zh: '等待 60 s 后重试。'
+
+  - id: OR-10
+    tempting_constraint: '每个步骤都完整写出条件、施事者、动作、对象和预期结果。'
+    damage_to_chinese: '在条件由标题或上级步骤明确承载时，会产生重复、伪法律式文本，并掩盖真正有风险的差异。'
+    example_bad_zh: '在维护窗口期间，管理员必须在维护窗口期间由管理员执行节点重启，以便节点在维护窗口期间完成重启。'
+    better_zh: '维护窗口内，管理员重启节点并确认节点恢复服务。'
+
+  - id: OR-11
+    tempting_constraint: '凡存在两种理论解析的句子都按高严重度错误处理。'
+    damage_to_chinese: '忽略领域知识、局部上下文和唯一可执行解释，会造成大量误报并诱发无意义改写。'
+    example_bad_zh: '将“收到响应后，将其写入日志”判为错误，尽管上下文中只有响应一个可写入对象。'
+    better_zh: '仅在存在两个以上合理先行词且不同解析会改变操作时报告指代风险。'
+
+open_questions:
+  - question: '当源文本本身存在会改变操作结果的真实歧义时，重写或翻译模式应如何处理？'
+    options:
+      - '保留歧义并显式报告，不擅自选择解释。'
+      - '暂停生成并请求作者澄清。'
+      - '输出带条件标注的多个候选版本。'
+      - '由调用方为不同模式预先指定处理策略。'
+    why_it_matters: '任意选择解释会发明语义，但只报告问题也可能无法满足需要立即生成可执行文本的工作流。'
+
+  - question: '数值和单位的确定性验证应允许哪些等值转换？'
+    options:
+      - '只接受表面形式完全相同。'
+      - '允许预定义白名单中的精确有理数换算。'
+      - '仅在调用方明确授权单位转换时换算。'
+      - '允许领域感知换算，但把舍入和精度变化交给语义审查。'
+    why_it_matters: '过严会拒绝无损改写；过宽会引入舍入、二进制与十进制单位混淆以及阈值边界变化。'
+
+  - question: '哪些字符串默认属于受保护技术标记？'
+    options:
+      - '只保护代码跨度、代码块和调用方显式标注的字符串。'
+      - '使用固定词法模式自动识别路径、URL、命令、标识符和状态码。'
+      - '自动识别并允许调用方增加或移除保护项。'
+    why_it_matters: '保护范围过窄会漏掉真实接口标记；范围过宽会把普通中文标签冻结为不可编辑文本。'
+
+  - question: 'Markdown 标题、嵌套列表、表格单元格和警告框携带的条件范围应如何进入语义比较？'
+    options:
+      - '把文档结构视为语义的一部分，并建立显式范围树。'
+      - '仅比较句内显式条件，结构范围交给单独的文档检查。'
+      - '扁平化前自动把结构条件补入每个受影响步骤。'
+    why_it_matters: '忽略结构会造成条件泄漏；机械补全又可能产生大量重复并改变自然度。'
+
+  - question: '在没有项目自定义定义时，“应、需、需要、务必、建议”应采用固定模态映射还是按上下文解释？'
+    options:
+      - '采用项目级固定映射。'
+      - '优先使用文档自身的术语定义，否则按上下文判断。'
+      - '只固定“必须、不得、可以”，其余词标记为待审。'
+    why_it_matters: '固定映射便于测试但可能误读行业惯例；上下文判断更灵活，却会增加跨模型语义方差。'
+
+  - question: '确定性技术标记比较发现数量相同但位置或语义绑定改变时，由哪一层判定失败？'
+    options:
+      - '确定性检查同时要求标记在对应句段中的位置一致。'
+      - '确定性检查只验证字符串库存，绑定关系交给语义裁判。'
+      - '先通过结构化对齐建立标记与动作的绑定，再进行确定性比较。'
+    why_it_matters: '纯库存比较检测不到两个参数值互换；严格位置比较又会误报合法的句序调整。'
