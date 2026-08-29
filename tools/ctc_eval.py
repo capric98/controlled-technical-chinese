@@ -14,6 +14,7 @@ Run with uv so the dependency is transient:
     uv run tools/ctc_eval.py check  --source FILE --output FILE
     uv run tools/ctc_eval.py run    --model claude|gpt|gemini [--case-id ID ...]
     uv run tools/ctc_eval.py bundle --run RUN_DIR          # build judge input
+    uv run tools/ctc_eval.py judge  --run RUN_DIR --judge gpt
     uv run tools/ctc_eval.py report --run RUN_DIR          # summarise verdicts
 """
 
@@ -35,6 +36,7 @@ ROOT = Path(__file__).resolve().parent.parent
 GOLD = ROOT / "eval" / "gold"
 REPORTS = ROOT / "eval" / "reports"
 SKILL = ROOT / "SKILL.md"
+JUDGE_PROMPT = ROOT / "dev" / "prompts" / "judge-semantic.v1.md"
 
 # ---------------------------------------------------------------- extraction
 
@@ -336,6 +338,55 @@ def cmd_bundle(args) -> int:
     return 0
 
 
+def strip_fences(text: str) -> str:
+    text = text.strip()
+    m = re.match(r"^```(?:ya?ml|json)?\n(.*?)\n```$", text, re.S)
+    return m.group(1) if m else text
+
+
+def cmd_judge(args) -> int:
+    """Semantic judging by a model that did not produce the outputs (decision 002)."""
+    bundle_path = REPORTS / f"bundle-{args.run_id}.json"
+    if not bundle_path.exists():
+        print(f"{bundle_path} missing — run `bundle` first", file=sys.stderr)
+        return 1
+    records = json.loads(bundle_path.read_text(encoding="utf-8"))
+    records = [r for r in records if r["model"] != args.judge] if args.exclude_self else records
+    if not records:
+        print("nothing to judge", file=sys.stderr)
+        return 1
+
+    prompt_head = JUDGE_PROMPT.read_text(encoding="utf-8")
+    verdicts: list[dict] = []
+    for i in range(0, len(records), args.batch):
+        batch = records[i : i + args.batch]
+        ids = ", ".join(r["case_id"] for r in batch)
+        prompt = (prompt_head + "\n\n## Records to judge\n\n```json\n"
+                  + json.dumps(batch, ensure_ascii=False, indent=2) + "\n```\n")
+        print(f"judging batch {i // args.batch + 1}: {ids}")
+        try:
+            raw = call_model(args.judge, prompt)
+            parsed = yaml.safe_load(strip_fences(raw)) or {}
+            got = parsed.get("verdicts", [])
+            if not isinstance(got, list):
+                raise ValueError("verdicts is not a list")
+            verdicts.extend(got)
+        except Exception as exc:  # noqa: BLE001 — one bad batch must not lose the rest
+            print(f"  ERROR judging {ids}: {exc}")
+            (REPORTS / f"judge-error-{args.run_id}-{i}.txt").write_text(
+                str(exc), encoding="utf-8")
+
+    out = REPORTS / f"verdicts-{args.run_id}.{args.judge}.yaml"
+    out.write_text(yaml.dump({"judge": args.judge, "run": args.run_id,
+                              "prompt": JUDGE_PROMPT.name, "verdicts": verdicts},
+                             allow_unicode=True, sort_keys=False), encoding="utf-8")
+    failed = [v for v in verdicts if v.get("overall") == "fail"]
+    print(f"\nwrote {out.relative_to(ROOT)} — {len(verdicts)} verdict(s), {len(failed)} fail")
+    for v in failed:
+        print(f"  fail  {v.get('case_id')} ({v.get('model')}): {v.get('failure_kinds')}")
+    return 0
+
+
 def cmd_report(args) -> int:
     run_dir = REPORTS / "raw" / args.run_id
     rows = [json.loads(p.read_text(encoding="utf-8")) for p in sorted(run_dir.glob("*.json"))]
@@ -373,6 +424,14 @@ def main() -> int:
     b = sub.add_parser("bundle", help="package a run for independent semantic judging")
     b.add_argument("--run-id", default="latest")
     b.set_defaults(fn=cmd_bundle)
+
+    j = sub.add_parser("judge", help="independent semantic judging of a bundle")
+    j.add_argument("--run-id", default="latest")
+    j.add_argument("--judge", required=True, choices=["claude", "gpt", "gemini"])
+    j.add_argument("--batch", type=int, default=6)
+    j.add_argument("--exclude-self", action="store_true",
+                   help="skip records produced by the judging model itself")
+    j.set_defaults(fn=cmd_judge)
 
     p = sub.add_parser("report", help="summarise deterministic outcomes for a run")
     p.add_argument("--run-id", default="latest")
