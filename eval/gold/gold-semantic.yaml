@@ -1,0 +1,375 @@
+# 语义保真：事实状态、情态强度、因果强度、数量
+# 由 tools/curate_cases.py 从 dev/inbox 提升而来；策展变更见 git 历史与 decision 002。
+# provenance: orchestrator-reviewed —— 已由编排者按已接受语义审阅，尚未经人工复核。
+cases:
+- id: G-S-001
+  category: modality-strengthening
+  task: rewrite
+  mode: strict
+  source: '在低流量窗口执行索引重建可以降低对在线请求的影响，因此建议先在只读副本上验证执行计划。若延迟预算紧张，也可以推迟到下一维护窗口。
+
+    '
+  instruction: null
+  invariants:
+  - kind: modality
+    detail: '「建议先在只读副本上验证」是推荐行为，不是索引重建的强制前提；输出若改成「必须验证」「验证后方可执行」或其他强制要求，判为失败。
+
+      '
+  - kind: modality
+    detail: '「也可以推迟」授予推迟操作的许可，不要求操作员必须推迟；输出若把许可改成义务，判为失败。
+
+      '
+  protected_tokens: []
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '为降低对在线请求的影响，必须先在只读副本上验证执行计划。若延迟预算紧张，必须推迟到下一维护窗口。
+
+      '
+    violated:
+    - modality
+    reason: '候选输出把推荐和许可分别强化为两项强制义务。
+
+      '
+  over_edit_trap: true
+  provenance: orchestrator-reviewed
+  source_file: r2-gpt-cases.yaml
+- id: G-S-002
+  category: modality-strengthening
+  task: translate
+  mode: standard
+  source: 'Before enabling the cache, operators are advised to test the eviction policy in staging. A
+    temporary sandbox may skip this test, but the operator must record the reason.
+
+    '
+  instruction: null
+  invariants:
+  - kind: modality
+    detail: '“are advised to test”表示建议，不是强制前提；中文输出若使用「必须」「须」或「只有测试后才能启用」，判为失败。
+
+      '
+  - kind: modality
+    detail: '“may skip”允许临时沙箱跳过测试；“must record”要求记录原因。输出必须同时保留这项许可及其附带的记录义务。
+
+      '
+  - kind: condition
+    detail: '跳过测试的许可仅适用于临时沙箱；输出若允许其他环境跳过测试，判为失败。
+
+      '
+  protected_tokens: []
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '启用缓存前，操作员必须在预发布环境测试淘汰策略。临时沙箱可以跳过测试，但操作员必须记录原因。
+
+      '
+    violated:
+    - modality
+    reason: '“are advised to test”被译成「必须测试」，把建议强化为义务。
+
+      '
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  source_file: r2-gpt-cases.yaml
+- id: G-S-003
+  category: modality-weakening
+  task: rewrite
+  mode: strict
+  source: '轮换主密钥前，操作员必须确认最近一次备份已完成。未确认时不得继续；测试租户可以取消本次轮换。
+
+    '
+  invariants:
+  - kind: modality
+    detail: '轮换主密钥前确认备份完成是强制义务；输出若改成「建议确认」「最好确认」或其他可选行为，判为失败。
+
+      '
+  - kind: modality
+    detail: '「未确认时不得继续」是禁止继续轮换；输出若仅表示不推荐继续，判为失败。
+
+      '
+  - kind: modality
+    detail: '测试租户拥有取消本次轮换的许可，但没有必须取消的义务。
+
+      '
+  protected_tokens: []
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '轮换主密钥前，建议操作员确认最近一次备份已完成。尚未确认时最好不要继续；测试租户应取消本次轮换。
+
+      '
+    violated:
+    - modality
+    reason: '候选输出弱化了确认义务和继续操作禁令，同时把取消许可强化为义务。
+
+      '
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  source_file: r2-gpt-cases.yaml
+- id: G-S-004
+  category: modality-weakening
+  task: review
+  mode: review
+  source: '原文：确保数据已成功备份，并且所有从节点都已正确同步主节点的数据。
+
+    候选改写：确认数据备份完成，且所有从节点已与主节点数据同步。
+
+    '
+  instruction: 下面给出原文与候选改写。审阅候选改写是否忠实于原文；只输出问题清单，不要整体重写。
+  invariants:
+  - kind: modality
+    detail: '正确审阅必须指出：「确保」要求操作员使备份和同步状态成立，必要时还要采取补救；「确认」只要求检查现有状态。把两者判为等价，判为失败。
+
+      '
+  protected_tokens: []
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '未发现问题。候选改写删除了冗余修饰，行为要求与原文相同。
+
+      '
+    violated:
+    - modality
+    reason: '审阅遗漏了「确保」到「确认」造成的义务弱化。
+
+      '
+  expected_issues:
+  - category: modality-weakening
+    severity: ERROR
+    locus: 候选改写中的「确认」
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  source_file: r2-gpt-cases.yaml
+- id: G-S-005
+  category: epistemic-status-collapse
+  task: rewrite
+  mode: strict
+  source: '过去 24 小时的日志显示，超时可能与连接池耗尽有关。目前只确认两者同时出现，根因尚未确定。
+
+    '
+  instruction: null
+  invariants:
+  - kind: fact
+    detail: '源文把连接池耗尽标为可能相关的候选解释，并明确说明根因尚未确定；输出若把它写成已确认根因，判为失败。
+
+      '
+  - kind: causality
+    detail: '源文只确认超时与连接池耗尽同时出现，不确认因果关系；输出若使用「导致」「引起」等确定因果表述，判为失败。
+
+      '
+  - kind: scope
+    detail: '源文没有提供频率结论；输出若新增「通常」「最常见」等频率限定，判为失败。
+
+      '
+  - kind: quantity
+    detail: '证据窗口是过去 24 小时；输出若改变或删除该时间范围，判为失败。
+
+      '
+  protected_tokens: []
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '过去 24 小时的日志确认，连接池耗尽通常会导致这些超时，根因已经确定。
+
+      '
+    violated:
+    - fact
+    - causality
+    - scope
+    reason: '候选输出把可能相关升级为确定因果关系，删除未确认状态，并注入无来源的频率判断。
+
+      '
+  over_edit_trap: true
+  provenance: orchestrator-reviewed
+  source_file: r2-gpt-cases.yaml
+- id: G-S-006
+  category: epistemic-status-collapse
+  task: translate
+  mode: strict
+  source: 'The elevated timeout rate may be associated with DNS cache expiry. Packet captures remain incomplete,
+    so the root cause is still unconfirmed.
+
+    '
+  instruction: null
+  invariants:
+  - kind: fact
+    detail: '“may be associated with”只能译为可能相关，不能译为已确认的关联或根因。
+
+      '
+  - kind: fact
+    detail: '输出必须保留抓包数据不完整以及根因仍未确认这两项认识限制；删除任一项，判为失败。
+
+      '
+  - kind: causality
+    detail: '源文没有断言 DNS 缓存过期导致超时率升高；中文输出若建立确定因果关系，判为失败。
+
+      '
+  protected_tokens: []
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '超时率升高是由 DNS 缓存过期导致的。虽然抓包数据不完整，但根因已经明确。
+
+      '
+    violated:
+    - fact
+    - causality
+    reason: '候选译文把可能关联改成确定因果关系，并反转了根因的确认状态。
+
+      '
+  - output: '超时率升高由 DNS 缓存过期导致。抓包数据尚不完整，具体根因待确认。
+
+      '
+    violated:
+    - causality
+    - fact
+    reason: '候选译文保留了「根因待确认」的表象，却已经把 may be associated with 升级为确定因果；这是更贴近真实模型的失败形态：认识状态未被删除，但因果强度已被改变。
+
+      '
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  source_file: r2-gpt-cases.yaml
+- id: G-S-007
+  category: quantity-drift
+  task: rewrite
+  mode: strict
+  source: '客户端参数：
+
+    - 单次请求超时为 250 ms。
+
+    - 首次失败后等待 2 s；最多重试 3 次。
+
+    - 总等待时间不得超过 10 s。
+
+    '
+  invariants:
+  - kind: quantity
+    detail: '单次请求超时必须保持为 250 ms；输出若改变数值、单位或数量级，判为失败。
+
+      '
+  - kind: quantity
+    detail: '首次失败后的等待时间必须保持为 2 s，总等待上限必须保持为 10 s。
+
+      '
+  - kind: quantity
+    detail: '「最多重试 3 次」允许初始请求之后再重试至多 3 次；输出若改成「总共发送 3 次请求」，判为失败，因为最大总尝试次数从 4 次变为 3 次。
+
+      '
+  - kind: modality
+    detail: '「总等待时间不得超过 10 s」是上限约束；输出若把它写成建议值或固定等待时间，判为失败。
+
+      '
+  protected_tokens: []
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '客户端参数：
+
+      - 单次请求超时为 250 s。
+
+      - 首次失败后等待 2 ms；最多重试 3 次。
+
+      - 总等待时间不得超过 10 s。
+
+      '
+    violated:
+    - quantity
+    reason: '单次超时和失败后等待时间的单位被互换，数量级发生变化。
+
+      '
+  - output: '客户端参数：
+
+      - 单次请求超时为 250 ms。
+
+      - 首次失败后等待 2 s；最多发送 3 次请求。
+
+      - 总等待时间不得超过 10 s。
+
+      '
+    violated:
+    - quantity
+    reason: '重试上限被改成总请求次数上限，最大允许尝试次数减少一次。
+
+      '
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  source_file: r2-gpt-cases.yaml
+- id: G-S-008
+  category: correlation-upgraded-to-causation
+  task: rewrite
+  mode: strict
+  source: '三组观测均显示，启用压缩与 CPU 使用率升高同时出现。现有数据只支持相关性，不能证明压缩导致请求超时。
+
+    '
+  invariants:
+  - kind: causality
+    detail: '源文只断言启用压缩与 CPU 使用率升高共现；输出若断言压缩导致 CPU 使用率升高，判为失败。
+
+      '
+  - kind: causality
+    detail: '源文明示现有数据不能证明压缩导致请求超时；输出若建立该因果关系，判为失败。
+
+      '
+  - kind: fact
+    detail: '证据范围是三组观测，且结论限于相关性；输出不得把观测描述成受控因果实验。
+
+      '
+  protected_tokens: []
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '三组观测证明，启用压缩会提高 CPU 使用率并导致请求超时。
+
+      '
+    violated:
+    - causality
+    - fact
+    reason: '候选输出把共现升级为两项确定因果结论，并夸大了观测证据的能力。
+
+      '
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  source_file: r2-gpt-cases.yaml
+- id: G-S-009
+  category: unsourced-qualifier-injection
+  task: rewrite
+  mode: strict
+  source: '收到 `503` 时，检查上游服务状态和最近一次部署记录。不要自动重启服务；将检查结果附到事件单。
+
+    '
+  instruction: null
+  invariants:
+  - kind: fact
+    detail: '源文没有说明任何原因或恢复动作是「通常」「默认」或「最常见」的；输出若新增此类频率或默认值判断，判为失败。
+
+      '
+  - kind: condition
+    detail: '源文没有声称某个单一动作足以恢复；输出若新增「只需」并把某项操作写成充分条件，判为失败。
+
+      '
+  - kind: modality
+    detail: '源文禁止自动重启服务；输出若建议、允许或要求自动重启，判为失败。
+
+      '
+  - kind: token
+    detail: '状态码 `503` 必须逐字符保留，且仍绑定到检查上游状态和部署记录的触发条件。
+
+      '
+  protected_tokens:
+  - '503'
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '收到 `503` 时，通常只需自动重启上游服务；这是最常见的恢复方式。
+
+      '
+    violated:
+    - fact
+    - condition
+    - modality
+    reason: '候选输出注入了无来源的频率、充分性和常见性判断，并把明确禁止的操作改成恢复建议。
+
+      '
+  - output: '收到 `503` 时，通常只需检查上游服务状态和最近一次部署记录；不要自动重启服务，并将检查结果附到事件单。
+
+      '
+    violated:
+    - fact
+    - condition
+    reason: '候选输出保留了禁止自动重启的约束，因此看起来忠实，但注入了源文没有的频率判断「通常」和充分性判断「只需」，把两项检查写成了充分条件。
+
+      '
+  over_edit_trap: true
+  provenance: orchestrator-reviewed
+  source_file: r2-gpt-cases.yaml

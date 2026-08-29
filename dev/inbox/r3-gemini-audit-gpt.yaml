@@ -1,0 +1,210 @@
+audits:
+  - case_id: G-S-001
+    source_quality: 5
+    source_problems: []
+    bad_output_realism: 5
+    bad_output_problems: []
+    natural_alternative: none
+    verdict: accept
+
+  - case_id: G-S-002
+    source_quality: 5
+    source_problems: []
+    bad_output_realism: 5
+    bad_output_problems: []
+    natural_alternative: none
+    verdict: accept
+
+  - case_id: G-S-003
+    source_quality: 5
+    source_problems: []
+    bad_output_realism: 5
+    bad_output_problems: []
+    natural_alternative: none
+    verdict: accept
+
+  - case_id: G-S-004
+    source_quality: 5
+    source_problems: []
+    bad_output_realism: 5
+    bad_output_problems: []
+    natural_alternative: none
+    verdict: accept
+
+  - case_id: G-S-005
+    source_quality: 5
+    source_problems: []
+    bad_output_realism: 4
+    bad_output_problems:
+      - 真实模型在改写认识状态时，多表现为删除对冲修饰（如直接删去「根因尚未确定」）或将「可能相关」升级为确定因果，较少会在同一处改写中主动无中生有地追加「根因已经确定」这类完全反向的正向断言。
+    natural_alternative: none
+    verdict: accept
+
+  - case_id: G-S-006
+    source_quality: 5
+    source_problems: []
+    bad_output_realism: 3
+    bad_output_problems:
+      - 真实翻译模型极少将明确的否定句 "is still unconfirmed" 直接翻转为字面反义词「已经明确」。典型的翻译塌缩表现为将 "may be associated with" 升级为确定因果「是由……导致的」，同时对后句采取模糊处理（如「抓包不完整，具体根因待确认」），而非直接颠倒事实极性。
+    natural_alternative: none
+    verdict: accept
+
+  - case_id: G-S-007
+    source_quality: 5
+    source_problems: []
+    bad_output_realism: 4
+    bad_output_problems:
+      - 第一个坏输出中将相邻两行的「250 ms」与「2 s」单位直接对调（250 s / 2 ms）带有人工构造的对抗痕迹；第二个坏输出（重试 3 次 -> 最多发送 3 次请求）则高度真实。
+    natural_alternative: none
+    verdict: accept
+
+  - case_id: G-S-008
+    source_quality: 5
+    source_problems: []
+    bad_output_realism: 5
+    bad_output_problems: []
+    natural_alternative: none
+    verdict: accept
+
+  - case_id: G-S-009
+    source_quality: 5
+    source_problems: []
+    bad_output_realism: 3
+    bad_output_problems:
+      - 真实模型在技术改写中注入无来源修饰语时，通常仍会保留原句的基本动作约束（如改写为「收到 503 时，通常只需检查上游服务……切勿自动重启」），而不会在单一改写中把明文禁止的「不要自动重启」直接反转为「只需自动重启」。当前坏输出将否定反转与修饰语注入过度叠加，降低了针对注入问题的检验效力。
+    natural_alternative: none
+    verdict: accept
+
+  - case_id: G-L-001
+    source_quality: 5
+    source_problems: []
+    bad_output_realism: 5
+    bad_output_problems: []
+    natural_alternative: none
+    verdict: accept
+
+  - case_id: G-L-002
+    source_quality: 5
+    source_problems: []
+    bad_output_realism: 5
+    bad_output_problems: []
+    natural_alternative: none
+    verdict: accept
+
+  - case_id: G-L-003
+    source_quality: 5
+    source_problems: []
+    bad_output_realism: 5
+    bad_output_problems: []
+    natural_alternative: none
+    verdict: accept
+
+  - case_id: G-L-004
+    source_quality: 5
+    source_problems: []
+    bad_output_realism: 5
+    bad_output_problems: []
+    natural_alternative: none
+    verdict: accept
+
+  - case_id: G-L-005
+    source_quality: 5
+    source_problems: []
+    bad_output_realism: 5
+    bad_output_problems: []
+    natural_alternative: none
+    verdict: accept
+
+  - case_id: G-L-006
+    source_quality: 3
+    source_problems:
+      - 源文「由于该资源正在被另一个进程占用的事实」存在明显的英式翻译腔（"due to the fact that..." 的逐字直译）。真实生产环境的错误提示或排障文档通常表述为「因该资源正被另一个进程占用」或「该资源当前正被另一个进程占用」。
+    bad_output_realism: 5
+    bad_output_problems: []
+    natural_alternative: |
+      错误 `E_LOCKED`：因该资源正被另一个进程占用，当前请求已被拒绝。释放该进程持有的锁后重试。
+    verdict: accept_with_fix
+
+  - case_id: G-L-007
+    source_quality: 5
+    source_problems: []
+    bad_output_realism: 5
+    bad_output_problems: []
+    natural_alternative: none
+    verdict: accept
+
+  - case_id: G-L-008
+    source_quality: 5
+    source_problems: []
+    bad_output_realism: 4
+    bad_output_problems:
+      - 真实模型在改写此类否定作用域句子时，若发生理解偏差，通常会在保留后半句的同时产生局部逻辑冲突（例如写成「不可重启 A 与 B；但可先重启其中之一」），较少会直接将后半句允许顺序重启的说明彻底删除。
+    natural_alternative: none
+    verdict: accept
+
+  - case_id: G-L-009
+    source_quality: 5
+    source_problems: []
+    bad_output_realism: 5
+    bad_output_problems: []
+    natural_alternative: none
+    verdict: accept
+
+  - case_id: G-L-010
+    source_quality: 5
+    source_problems: []
+    bad_output_realism: 5
+    bad_output_problems: []
+    natural_alternative: none
+    verdict: accept
+
+  - case_id: G-L-011
+    source_quality: 5
+    source_problems: []
+    bad_output_realism: 5
+    bad_output_problems: []
+    natural_alternative: none
+    verdict: accept
+
+  - case_id: G-L-012
+    source_quality: 5
+    source_problems: []
+    bad_output_realism: 3
+    bad_output_problems:
+      - 源文末尾有明确的「警告：第 3 步不得与第 1、2 步并行」，真实模型在改写带编号的有序步骤时，极少会无视警告主动在开头加上「并行执行以下操作：」。真实的失败形态通常是在合并长句或转换为无序列表时模糊了前置等待关系，或者在删去末尾警告后将各动作平铺。
+    natural_alternative: none
+    verdict: accept
+
+  - case_id: G-L-013
+    source_quality: 5
+    source_problems: []
+    bad_output_realism: 5
+    bad_output_problems: []
+    natural_alternative: none
+    verdict: accept
+
+  - case_id: G-T-001
+    source_quality: 5
+    source_problems: []
+    bad_output_realism: 5
+    bad_output_problems: []
+    natural_alternative: none
+    verdict: accept
+
+  - case_id: G-T-002
+    source_quality: 5
+    source_problems: []
+    bad_output_realism: 5
+    bad_output_problems: []
+    natural_alternative: none
+    verdict: accept
+
+summary:
+  mean_source_quality: 4.92
+  mean_bad_output_realism: 4.625
+  systemic_problems:
+    - 坏输出过度人造化（Strawman/Composite Failure）：个别用例（G-S-006, G-S-009, G-L-012）在构造 invalid_transformations 时，为了强制触发违规，采用了直接颠倒极性（unconfirmed -> 已经明确、不要自动重启 -> 只需自动重启）或显式添加反向指令（显式声明「并行执行以下操作」）的手法。真实大模型的典型失败往往是隐蔽的因果强化、条件合并或遗漏等待点，而非明显的对抗性自相矛盾。
+    - 欧化句式残余（Translationese in Source）：G-L-006 源文本出现了直译式套话（「由于……的事实」），不符合中文工程实践的精炼规范。
+    - 整体语言质量优异：绝大部分（23/24）用例的源文本高度符合云原生、分布式系统、API 规范及 SRE 运维的真实生产语境，术语地道且结构严谨。
+  most_realistic_case: G-S-004
+  least_realistic_case: G-L-006

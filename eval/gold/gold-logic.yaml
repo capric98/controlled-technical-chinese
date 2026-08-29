@@ -1,0 +1,532 @@
+# 逻辑与结构：条件、例外、量词、否定辖域、阈值边界、时序
+# 由 tools/curate_cases.py 从 dev/inbox 提升而来；策展变更见 git 历史与 decision 002。
+# provenance: orchestrator-reviewed —— 已由编排者按已接受语义审阅，尚未经人工复核。
+cases:
+- id: G-L-001
+  category: condition-deletion
+  task: rewrite
+  mode: strict
+  source: '故障切换步骤：
+
+    1. 记录本次健康检查结果。
+
+    2. 仅当健康检查在 2 分钟内连续失败 3 次，且主集群已进入只读状态时，才切换到备用集群。
+
+    3. 任一次检查恢复成功后，将连续失败计数清零。
+
+    '
+  invariants:
+  - kind: condition
+    detail: '切换必须同时满足两个前提：健康检查在 2 分钟内连续失败 3 次，以及主集群已经进入只读状态。输出删除任一前提，判为失败。
+
+      '
+  - kind: condition
+    detail: '「连续失败」不等于在时间窗口内累计失败；任一次成功都会按第 3 步清零计数。
+
+      '
+  - kind: quantity
+    detail: '时间窗口必须保持为 2 分钟，连续失败阈值必须保持为 3 次。
+
+      '
+  protected_tokens: []
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '故障切换步骤：
+
+      1. 记录健康检查结果。
+
+      2. 健康检查在 2 分钟内失败 3 次后，切换到备用集群。
+
+      3. 检查恢复成功后，将失败计数清零。
+
+      '
+    violated:
+    - condition
+    reason: '候选输出删除了「连续」要求和主集群只读前提，允许在更多状态下切换。
+
+      '
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  source_file: r2-gpt-cases.yaml
+- id: G-L-002
+  category: condition-deletion
+  task: review
+  mode: review
+  source: '原文：仅当灰度发布完成且错误率已回到基线时，才将全部流量切换到新版本。
+
+    候选改写：灰度发布完成后，将全部流量切换到新版本。
+
+    '
+  instruction: 下面给出原文与候选改写。审阅候选改写是否忠实于原文；只输出问题清单，不要整体重写。
+  invariants:
+  - kind: condition
+    detail: '正确审阅必须指出：原文要求灰度发布完成和错误率回到基线两个条件同时成立；候选仅保留灰度发布完成，删除了错误率条件。
+
+      '
+  - kind: scope
+    detail: '被两个条件共同约束的动作是将全部流量切换到新版本；审阅若把被删除条件误判为仅影响灰度阶段，判为失败。
+
+      '
+  protected_tokens: []
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '未发现问题。候选改写保留了灰度完成后切换流量的主要流程。
+
+      '
+    violated:
+    - condition
+    - scope
+    reason: '审阅遗漏了错误率回到基线这一必要切流条件。
+
+      '
+  expected_issues:
+  - category: condition-deletion
+    severity: ERROR
+    locus: 候选改写删除了「错误率已回到基线」
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  source_file: r2-gpt-cases.yaml
+- id: G-L-003
+  category: condition-broadening
+  task: translate
+  mode: strict
+  source: 'Start cross-region replication only if both the primary and secondary backup checks pass. A
+    failure in either check leaves replication disabled.
+
+    '
+  instruction: null
+  invariants:
+  - kind: condition
+    detail: '启动跨区域复制的必要条件是主备份检查和辅助备份检查都通过；中文输出若允许只通过其中一项就启动，判为失败。
+
+      '
+  - kind: quantifier
+    detail: '“both”作用于两项检查并要求二者全部通过；不得译成「任一」「至少一项」。
+
+      '
+  - kind: condition
+    detail: '任一检查失败时都必须保持复制禁用；输出若把失败后的禁用写成可选行为，判为失败。
+
+      '
+  protected_tokens: []
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '主备份检查或辅助备份检查任一通过后，即可启动跨区域复制；只有两项都失败时才保持禁用。
+
+      '
+    violated:
+    - condition
+    - quantifier
+    reason: '候选译文把两项检查均通过的合取门槛放宽为任一检查通过。
+
+      '
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  source_file: r2-gpt-cases.yaml
+- id: G-L-004
+  category: exception-deletion
+  task: rewrite
+  mode: strict
+  source: '警告：除审计日志和当前活动会话外，执行 `purge` 会删除该租户的所有临时数据。对保留租户不得执行 `purge`。
+
+    '
+  instruction: null
+  invariants:
+  - kind: quantifier
+    detail: '删除范围是该租户的所有临时数据，但审计日志和当前活动会话明确排除在外；输出若声称这两类对象也会被删除，判为失败。
+
+      '
+  - kind: modality
+    detail: '对保留租户执行 `purge` 是被禁止的，不是建议避免。
+
+      '
+  - kind: token
+    detail: '操作名 `purge` 必须逐字符保留，且仍指代删除临时数据的操作。
+
+      '
+  protected_tokens:
+  - purge
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '警告：执行 `purge` 会删除该租户的所有临时数据。对保留租户不得执行 `purge`。
+
+      '
+    violated:
+    - quantifier
+    reason: '候选输出删除了审计日志和当前活动会话这两个排除项，扩大了删除集合。
+
+      '
+  over_edit_trap: true
+  provenance: orchestrator-reviewed
+  source_file: r2-gpt-cases.yaml
+- id: G-L-005
+  category: exception-deletion
+  task: review
+  mode: review
+  source: '原文：向除审计命名空间和计费命名空间之外的所有命名空间应用限流策略。
+
+    候选改写：向所有命名空间应用限流策略。
+
+    '
+  instruction: 下面给出原文与候选改写。审阅候选改写是否忠实于原文；只输出问题清单，不要整体重写。
+  invariants:
+  - kind: quantifier
+    detail: '正确审阅必须指出：审计命名空间和计费命名空间是明确排除项，候选输出把它们纳入限流范围。
+
+      '
+  protected_tokens: []
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '未发现问题。「所有命名空间」是对原文范围的简洁概括。
+
+      '
+    violated:
+    - quantifier
+    reason: '审阅把删除两个排除项的范围扩大误判为无损概括。
+
+      '
+  expected_issues:
+  - category: exception-set-deletion
+    severity: ERROR
+    locus: 候选改写中的「所有命名空间」
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  source_file: r2-gpt-cases.yaml
+- id: G-L-006
+  category: quantifier-scope-drift
+  task: rewrite
+  mode: standard
+  source: '错误 `E_LOCKED`：由于该资源正在被另一个进程占用的事实，当前请求已被拒绝。释放该进程持有的锁后重试。
+
+    '
+  invariants:
+  - kind: quantifier
+    detail: '「另一个进程」指一个特定的其他进程；输出若改成可指多个或任意进程的「其他进程」，判为失败。
+
+      '
+  - kind: reference
+    detail: '后句「该进程」必须继续指向占用资源的同一个进程；输出不得把解锁动作扩展到其他进程。
+
+      '
+  - kind: token
+    detail: '错误标识 `E_LOCKED` 必须逐字符保留。
+
+      '
+  protected_tokens:
+  - E_LOCKED
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '错误 `E_LOCKED`：因该资源正被其他进程占用，当前请求已被拒绝。释放其他进程持有的锁后重试。
+
+      '
+    violated:
+    - quantifier
+    - reference
+    reason: '候选输出把一个特定占用进程泛化为数量和身份均不确定的进程集合。
+
+      '
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  source_file: r2-gpt-cases.yaml
+  notes: 源文刻意保留「由于……的事实」这一翻译腔：本用例同时检验模型能否修复生硬句式，又不把「另一个进程」泛化为「其他进程」。见 eval/disagreements/D002。
+- id: G-L-007
+  category: quantifier-scope-drift
+  task: translate
+  mode: strict
+  source: 'Apply the patch to at least one eligible replica in each region; do not apply it to every replica
+    unless the rollout is approved.
+
+    '
+  instruction: null
+  invariants:
+  - kind: quantifier
+    detail: '“at least one eligible replica in each region”要求每个区域各有至少一个符合条件的副本应用补丁；只在至少一个区域选择副本不满足要求。
+
+      '
+  - kind: negation
+    detail: '未获批准时禁止的是「给每个副本都应用补丁」这一全称操作，不是禁止给任何单个副本应用补丁。
+
+      '
+  - kind: condition
+    detail: '获得发布批准后，给每个副本应用补丁才不再受第二项禁止约束；输出不得删除该批准条件。
+
+      '
+  protected_tokens: []
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '在至少一个区域中，给一个符合条件的副本应用补丁；除非发布获得批准，否则不得给任何副本应用补丁。
+
+      '
+    violated:
+    - quantifier
+    - negation
+    reason: '候选译文把「每个区域至少一个」缩成「至少一个区域一个」，并把禁止全量应用扩大为禁止任何应用。
+
+      '
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  source_file: r2-gpt-cases.yaml
+- id: G-L-008
+  category: negation-scope
+  task: rewrite
+  mode: strict
+  source: '不得同时重启 `controller-a` 和 `controller-b`；可以先重启其中一个，待其恢复后再重启另一个。
+
+    '
+  instruction: null
+  invariants:
+  - kind: negation
+    detail: '禁止对象是同时重启两个控制器这一组合；分别重启任一控制器并未被禁止。输出若分别禁止重启两个控制器，判为失败。
+
+      '
+  - kind: order
+    detail: '顺序重启时，第二个控制器必须等待第一个恢复后才能重启；输出若允许并行或删除等待点，判为失败。
+
+      '
+  - kind: token
+    detail: '`controller-a` 和 `controller-b` 必须逐字符保留并继续指代两个不同控制器。
+
+      '
+  protected_tokens:
+  - controller-a
+  - controller-b
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '不得重启 `controller-a`，也不得重启 `controller-b`。
+
+      '
+    violated:
+    - negation
+    - order
+    reason: '候选输出把组合级禁止拆成两个独立禁止，并删除了允许顺序重启的路径。
+
+      '
+  over_edit_trap: true
+  provenance: orchestrator-reviewed
+  source_file: r2-gpt-cases.yaml
+- id: G-L-009
+  category: negation-scope
+  task: review
+  mode: review
+  source: '原文：系统不会在工作时间重启主数据库并清空缓存。
+
+    候选改写：工作时间内，系统禁止重启主数据库，亦禁止清空缓存。
+
+    '
+  instruction: 下面给出原文与候选改写。审阅候选改写是否忠实于原文；只输出问题清单，不要整体重写。
+  invariants:
+  - kind: negation
+    detail: '正确审阅必须指出：候选输出选择了分别否定重启和清空缓存的解释；原文中的「不会 A 并 B」并未明确给出这一作用域。
+
+      '
+  - kind: modality
+    detail: '正确审阅必须指出：原文描述系统不会发生某行为，候选却改成规范性禁止。行为描述和禁令不等价。
+
+      '
+  protected_tokens: []
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '未发现问题。候选改写消除了歧义，并完整保留了原文语义。
+
+      '
+    violated:
+    - negation
+    - modality
+    reason: '审阅没有识别候选对否定作用域的擅自选择，也没有识别行为描述到禁令的模态变化。
+
+      '
+  expected_issues:
+  - category: negation-scope
+    severity: ERROR
+    locus: 候选改写中的「禁止重启主数据库，亦禁止清空缓存」
+  - category: modality-drift
+    severity: ERROR
+    locus: 原文「不会」与候选「禁止」
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  source_file: r2-gpt-cases.yaml
+- id: G-L-010
+  category: threshold-boundary
+  task: rewrite
+  mode: strict
+  source: '当待处理任务数达到 100 条时，调度器停止接收新任务；降到 80 条以下后恢复接收。
+
+    '
+  instruction: null
+  invariants:
+  - kind: threshold
+    detail: '「达到 100 条」包含任务数恰为 100 的情况；输出若改成「超过 100 条」，判为失败。
+
+      '
+  - kind: threshold
+    detail: '「80 条以下」不包含恰为 80 的情况；输出若改成「不超过 80 条」或「80 条以内」，判为失败。
+
+      '
+  - kind: quantity
+    detail: '停止阈值必须保持为 100 条，恢复阈值必须保持为 80 条，且两者不得互换。
+
+      '
+  protected_tokens: []
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '当待处理任务数超过 100 条时，调度器停止接收新任务；降到不超过 80 条后恢复接收。
+
+      '
+    violated:
+    - threshold
+    reason: '候选输出把停止边界从包含 100 改为排除 100，并把恢复边界从排除 80 改为包含 80。
+
+      '
+  over_edit_trap: true
+  provenance: orchestrator-reviewed
+  source_file: r2-gpt-cases.yaml
+- id: G-L-011
+  category: threshold-boundary
+  task: rewrite
+  mode: strict
+  source: '| 参数 | 行为 |
+
+    | --- | --- |
+
+    | `max_wait` | 等待时间在 30 s 以内时返回结果；超过 30 s 时返回 `timeout`。 |
+
+    '
+  invariants:
+  - kind: threshold
+    detail: '等待时间恰为 30 s 时属于「30 s 以内」，必须返回结果；输出若让 30 s 返回 `timeout`，判为失败。
+
+      '
+  - kind: scope
+    detail: '`timeout` 只绑定到等待时间超过 30 s 的分支；不得绑定到达到或等于 30 s 的分支。
+
+      '
+  - kind: token
+    detail: '参数名 `max_wait` 和返回值 `timeout` 必须逐字符保留。
+
+      '
+  protected_tokens:
+  - max_wait
+  - timeout
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '| 参数 | 行为 |
+
+      | --- | --- |
+
+      | `max_wait` | 等待时间小于 30 s 时返回结果；达到 30 s 时返回 `timeout`。 |
+
+      '
+    violated:
+    - threshold
+    - scope
+    reason: '候选输出把恰为 30 s 的行为从返回结果改成返回超时。
+
+      '
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  source_file: r2-gpt-cases.yaml
+- id: G-L-012
+  category: temporal-order
+  task: rewrite
+  mode: strict
+  source: '故障切换步骤：
+
+    1. 暂停写入。
+
+    2. 等待 `replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`。
+
+    3. 将备用库提升为主库。
+
+
+    警告：第 3 步不得与第 1、2 步并行。
+
+    '
+  instruction: null
+  invariants:
+  - kind: order
+    detail: '提升备用库前必须先暂停写入；输出若在暂停写入之前或同时提升备用库，判为失败。
+
+      '
+  - kind: order
+    detail: '提升备用库必须等待复制延迟降为 `0` 且快照状态成为 `COMPLETED`；未满足任一等待条件就提升，判为失败。
+
+      '
+  - kind: negation
+    detail: '警告明确禁止第 3 步与前两步并行；输出若把三项操作写成并行任务，判为失败。
+
+      '
+  - kind: token
+    detail: '`replica_lag_ms`、`0` 和 `COMPLETED` 必须逐字符保留，且仍分别绑定到复制延迟和值、快照状态和值。
+
+      '
+  protected_tokens:
+  - replica_lag_ms
+  - '0'
+  - COMPLETED
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '并行执行以下操作：暂停写入；等待 `replica_lag_ms` 降为 `0` 并确认快照状态为 `COMPLETED`；将备用库提升为主库。
+
+      '
+    violated:
+    - order
+    - negation
+    reason: '候选输出把提升主库与两个必要前置步骤并行化，删除了等待边。
+
+      '
+  - output: '故障切换步骤：
+
+      1. 暂停写入。
+
+      2. 等待 `replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`。
+
+      3. 将备用库提升为主库。
+
+      '
+    violated:
+    - negation
+    - order
+    reason: '候选输出逐字保留了三个步骤和全部受保护标记，只删除了末尾的并行禁止警告；顺序在纸面上仍然成立，但禁止并行执行的约束已经消失。
+
+      '
+  over_edit_trap: true
+  provenance: orchestrator-reviewed
+  source_file: r2-gpt-cases.yaml
+- id: G-L-013
+  category: temporal-order
+  task: review
+  mode: review
+  source: '原文：冻结写入，等待快照完成后删除旧卷。
+
+    候选改写：冻结写入并删除旧卷，同时等待快照完成。
+
+    '
+  instruction: 下面给出原文与候选改写。审阅候选改写是否忠实于原文；只输出问题清单，不要整体重写。
+  invariants:
+  - kind: order
+    detail: '正确审阅必须指出：原文要求先冻结写入，再等待快照完成，最后删除旧卷；候选允许删除旧卷与等待快照并行。
+
+      '
+  - kind: condition
+    detail: '快照完成是删除旧卷的必要前提；审阅若只把差异描述成行文顺序变化，判为失败。
+
+      '
+  protected_tokens: []
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '未发现问题。候选改写合并了步骤，但仍包含冻结写入、等待快照和删除旧卷三个动作。
+
+      '
+    violated:
+    - order
+    - condition
+    reason: '审阅只核对动作是否出现，没有识别删除操作越过等待点。
+
+      '
+  expected_issues:
+  - category: temporal-order
+    severity: ERROR
+    locus: 候选改写中的「删除旧卷，同时等待快照完成」
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  source_file: r2-gpt-cases.yaml

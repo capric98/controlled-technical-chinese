@@ -1,0 +1,98 @@
+# 受保护技术标记与术语
+# 由 tools/curate_cases.py 从 dev/inbox 提升而来；策展变更见 git 历史与 decision 002。
+# provenance: orchestrator-reviewed —— 已由编排者按已接受语义审阅，尚未经人工复核。
+cases:
+- id: G-T-001
+  category: protected-token-mutation
+  task: rewrite
+  mode: strict
+  source: '取消作业接口：调用 `POST /v1/jobs/{job_id}:cancel`。
+
+
+    | 响应 | 客户端行为 |
+
+    | --- | --- |
+
+    | `409` | 读取字段 `retry_after_ms`，并设置 `JOB_CANCEL_RETRY=1`。 |
+
+    '
+  invariants:
+  - kind: token
+    detail: 'API 方法和路径必须保持为 `POST /v1/jobs/{job_id}:cancel`；单复数、路径参数、斜杠和冒号动作语法中的任一字符变化都判为失败。
+
+      '
+  - kind: token
+    detail: '状态码必须保持为 `409`，字段名必须保持为 `retry_after_ms`，环境变量赋值必须保持为 `JOB_CANCEL_RETRY=1`。
+
+      '
+  - kind: scope
+    detail: '读取字段和设置环境变量两项行为仍必须绑定到 `409` 响应分支。
+
+      '
+  protected_tokens:
+  - POST /v1/jobs/{job_id}:cancel
+  - '409'
+  - retry_after_ms
+  - JOB_CANCEL_RETRY=1
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '取消作业接口：调用 `POST /v1/job/{jobId}/cancel`。
+
+
+      | 响应 | 客户端行为 |
+
+      | --- | --- |
+
+      | `400` | 读取字段 `retryAfterMs`，并设置 `JOB_CANCEL_RETRY=true`。 |
+
+      '
+    violated:
+    - token
+    reason: 'API 路径、路径参数、动作语法、状态码、字段名和环境变量值均被静默改写。
+
+      '
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  source_file: r2-gpt-cases.yaml
+- id: G-T-002
+  category: protected-token-mutation
+  task: rewrite
+  mode: strict
+  source: '工具 `sync-config` 接受 `--dry-run` 和 `--config=/etc/ctc/agent.yaml`。仅当 `CTC_SYNC_MODE=verify`
+    时，工具执行验证而不写入；验证失败时返回退出码 `2`。
+
+    '
+  invariants:
+  - kind: token
+    detail: '工具名必须保持为 `sync-config`，标志必须保持为 `--dry-run`，带值参数必须保持为 `--config=/etc/ctc/agent.yaml`。
+
+      '
+  - kind: token
+    detail: '环境变量赋值必须保持为 `CTC_SYNC_MODE=verify`，包括大小写；验证失败退出码必须保持为 `2`。
+
+      '
+  - kind: condition
+    detail: '不写入行为仅在 `CTC_SYNC_MODE=verify` 时成立；输出若把验证模式写成默认行为或无条件行为，判为失败。
+
+      '
+  protected_tokens:
+  - sync-config
+  - --dry-run
+  - --config=/etc/ctc/agent.yaml
+  - CTC_SYNC_MODE=verify
+  - '2'
+  authorized_token_changes: []
+  invalid_transformations:
+  - output: '工具 `sync_config` 接受 `--dryrun` 和 `--config=/etc/ctc/agent.yml`。当 `CTC_SYNC_MODE=VERIFY` 时，工具默认只执行验证；验证失败时返回退出码
+      `0`。
+
+      '
+    violated:
+    - token
+    - condition
+    reason: '工具名、标志、配置路径、环境变量值和退出码均被修改，并且新增了无来源的默认行为。
+
+      '
+  over_edit_trap: false
+  provenance: orchestrator-reviewed
+  source_file: r2-gpt-cases.yaml

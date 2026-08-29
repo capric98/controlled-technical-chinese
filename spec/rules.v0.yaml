@@ -1,0 +1,576 @@
+# Controlled Technical Chinese — canonical semantics, v0
+#
+# This file is the development-time structured form of CTC. It is NOT the runtime SKILL.md.
+# SKILL.md renders these semantics into concise Chinese; a renderer may change wording but
+# may not change anything in this file without a rule-change review (000-design.md §9, §20).
+
+meta:
+  version: v0
+  author_role: specification-compiler
+  status: draft-independent-first-pass
+  date: 2026-08-28
+  produced_as: independent-first-pass
+  inputs_read:
+    - docs/decisions/000-design.md
+    - AGENTS.md
+    - docs/decisions/002-gold-case-schema.md
+    - eval/disagreements/D001-naturalness-vs-modality.md
+  not_read_on_purpose:
+    - dev/inbox/*        # parallel independent passes; independence before discussion (000 §12)
+  rule_count: 30
+  family_counts: {S: 7, A: 6, P: 5, T: 2, L: 4, R: 6}
+  level_counts: {MUST: 18, SHOULD: 11, MAY: 1}
+  conventions:
+    pending_block: >-
+      「待确认」is the single channel through which a rewrite reports what it refused to decide.
+      Rules A006 / P003 / P005 / R004 depend on it existing; see modes[].output_contract.
+    severity_mapping: MUST -> ERROR, SHOULD -> WARNING, MAY -> STYLE (000-design.md §28)
+    detection_note: >-
+      Per 002-gold-case-schema.md, `deterministic` is reserved for properties decidable by string
+      or number comparison alone. Where a deterministic signal exists but the verdict needs
+      judgement, the rule is `mixed` and `detection_note` names the computable part.
+
+families:
+  S: semantic preservation — truth conditions, modality, quantity, tokens, causality, scope
+  A: ambiguity and reference — actor, reference expression, modifier/negation/coordination scope
+  P: procedures and action structure — steps, operability, verification, guarded actions
+  T: terminology — consistency of the concept-to-term mapping in both directions
+  L: logic, conditions, temporal order
+  R: rendering and controlled style — minimal intervention, naturalness, structure, typography
+
+priority_ladder:
+  - level: 1
+    name: truth-and-semantic-invariants
+    means: >-
+      The output asserts the same propositions as the source, with the same modal strength and
+      speech-act type, the same conditions, exceptions and applicability scope, the same numbers,
+      units, thresholds and comparators, the same causal strength, the same temporal relations,
+      the same actor-action-object relations, and byte-identical protected tokens.
+    overrides: >-
+      Overrides levels 2-5 unconditionally. If a clearer, more consistent, more natural or more
+      house-style-conformant wording changes any property above, the change is abandoned, not
+      negotiated. Clarity gained by inventing content is not clarity (see A006).
+  - level: 2
+    name: operational-clarity
+    means: >-
+      A competent reader of the target document type can determine, without guessing, who does
+      what to which object, under what condition, in what order, and how success is recognised.
+    overrides: >-
+      Overrides levels 3-5. May not be purchased by adding facts, actors, parameters or criteria
+      not recoverable from the source or the invoking context; when clarity would require such an
+      addition, level 1 wins and the gap is reported under 「待确认」.
+  - level: 3
+    name: terminology-consistency
+    means: >-
+      One concept keeps one term inside the unit of work; two distinct concepts keep two distinct
+      terms. The preferred term is chosen from what the source and the invoking context already
+      use, never from the model's own habit.
+    overrides: >-
+      Overrides levels 4-5. Yields to level 1 when unifying two surface forms would merge two
+      concepts (T002) and to level 2 when the consistent term is genuinely ambiguous in context.
+  - level: 4
+    name: natural-technical-chinese
+    means: >-
+      Professional Chinese technical register: no translationese, no pseudo-legal padding, no
+      mechanically repeated subjects, no artificial fragmentation, no needless passive.
+    overrides: >-
+      Overrides level 5 only. Naturalness may change wording; it may not change meaning
+      (000-design.md §33). D001 is the demonstrated case of this boundary being crossed.
+  - level: 5
+    name: project-editorial-style
+    means: >-
+      Punctuation width, spacing between Chinese and Latin script, heading style, person and
+      voice preferences, brand naming.
+    overrides: none
+priority_tie_breaks:
+    - within_same_level: >-
+        When two candidate edits sit at the same level, keep the form already present in the
+        source. Minimal intervention (R001) is the tie-break, not the model's preference.
+    - level_2_versus_level_4: >-
+        An explicitness gain at level 2 outranks a naturalness loss at level 4 only when it removes
+        a demonstrated divergent reading. Explicitness that removes no divergent reading is an
+        R002 violation, not a level-2 win.
+    - level_1_unreachable: >-
+        If level 2 cannot be reached without violating level 1, do not rewrite that span: leave it
+        and report it. Silence about an ambiguity is a lesser failure than deciding it (D001 §5).
+    - no_post_hoc_appeal: >-
+        The ladder resolves conflicts between rules; it does not authorise edits by itself. Every
+        edit must cite a rule id (R001). "This is more natural" is not a rule id.
+    - level_confusion: >-
+        A house-style or locale preference may not be promoted into a semantic rule to win an
+        argument (000-design.md §7.5). Report it as STYLE or not at all.
+
+modes:
+  - id: strict
+    use_for:
+      - agent instructions and system prompts
+      - tool and function descriptions
+      - SOPs, runbooks, change procedures
+      - operational and safety-sensitive procedures
+      - troubleshooting instructions
+      - warnings, alerts and error messages
+    behavior: >-
+      All rules apply. The ambiguity threshold is at its lowest: a reading counts as divergent if
+      any plausible operator reading would lead to a different action, even a careful one. SHOULD
+      rules in families A and P are enforced as if MUST whenever the omission would change what
+      an operator does; this changes the trigger threshold, not the rule level recorded here.
+      Conditions, prerequisites, exceptions, guards and success criteria are never dropped for
+      brevity. Strict is not maximal verbosity (000-design.md §6.1).
+    must_not: >-
+      Must not invent an actor, parameter, threshold, criterion or failure cause in order to look
+      explicit; must not repeat a subject that disambiguates nothing; must not split clauses into
+      one-line fragments; must not raise descriptive text to normative text or a request to an
+      obligation; must not add defensive warnings absent from the source.
+    output_contract: >-
+      Return the rewritten Chinese text only, preserving the source's Markdown structure, list
+      granularity, code fences and inline code. No preamble, no explanation of the changes. If and
+      only if unresolved items exist, append one final section headed 「待确认」 containing at most
+      one line per item, each as: 位置 | 问题 | 需要的信息. Items are limited to ambiguities that
+      could not be resolved from evidence (A006), success criteria the source never stated (P003),
+      trigger conditions missing from a tool description (P005), and undefined normative criteria
+      (R004). If there are none, the section is absent.
+  - id: standard
+    use_for:
+      - API documentation
+      - README-style technical documentation
+      - developer guides
+      - FAQs
+      - release notes
+      - explanatory technical prose
+    behavior: >-
+      All S, L and T rules apply unchanged: semantic invariants are mode-independent. A and P rules
+      apply at their recorded level with a higher ambiguity threshold: a reading counts as divergent
+      when an ordinary technical reader would plausibly disagree about it, not when a reading is
+      merely constructible. Idiomatic compression, clause merging and topic-chaining are permitted
+      wherever interpretation stays stable.
+    must_not: >-
+      Must not drop a condition, exception, threshold, default value or protected token in the name
+      of concision; must not generalise an example or a specific value into a summary claim; must
+      not treat compression as a licence to re-decide meaning.
+    output_contract: >-
+      Same as strict: rewritten text only, source structure preserved, optional trailing 「待确认」
+      section under the same field format.
+  - id: review
+    use_for:
+      - auditing existing Chinese technical text
+      - reviewing a candidate SKILL.md (self-hosting, 000-design.md §15)
+      - pre-release gates
+      - checking another model's rewrite
+    behavior: >-
+      Report; do not rewrite. Every finding cites one rule id, and a span of the reviewed text that
+      is quoted verbatim. Severity follows the recorded level: MUST -> ERROR, SHOULD -> WARNING,
+      MAY -> STYLE. Suggested corrections are fragment-level and are proposals, not applied edits.
+      Text that triggers no rule produces no finding; absence of findings is a valid result.
+    must_not: >-
+      Must not emit a whole-document rewrite; must not report a finding without a rule id; must not
+      classify a style preference as ERROR (000-design.md §28); must not manufacture findings to
+      appear thorough; must not edit the reviewed text, the gold cases, or the acceptance criteria
+      after detecting a conflict (000-design.md §8, §15; 002 no-silent-edit rule).
+    output_contract: >-
+      A list of findings, each with exactly these fields: rule, severity, location (verbatim quoted
+      span), problem, risk, suggestion. Ordered by severity then by document position. When nothing
+      is found, return 「未发现违规」 followed by at most three STYLE observations.
+
+rules:
+
+  # ---------------------------------------------------------------- S: semantic preservation
+
+  - id: CTC-S001
+    family: S
+    concept: assertion-set-preservation
+    level: MUST
+    scope: [rewrite, translate, review]
+    modes: [strict, standard, review]
+    trigger: "改写、压缩、合并或翻译一段已包含具体断言的技术文本。"
+    requirement: "输出必须能还原来源中的每一条独立断言：对象、属性、行为、数值、条件、结果、失败分支。压缩只允许删除同一断言的重复表述与纯修饰成分。"
+    prohibition: "删除一条独立断言；把一组并列断言概括为上位表述；把具体值或具体示例替换为「相关配置」「若干」「一些情况下」之类的占位说法；在合并句子时丢弃其中一个谓词。"
+    exceptions: "调用方明确要求摘要或给定长度上限时可以删除断言，但删除顺序必须遵守优先级阶梯：条件、例外、阈值、告警与失败分支最后删除，且删除事实必须在「待确认」中说明。"
+    invariant: "assertion-set-complete — 来源断言集合包含于输出断言集合。"
+    detection: semantic
+    detection_note: "确定性层可提供两个信号：输出长度显著下降；来源中出现的数值或标识符未出现在输出中（与 S004/S005 共用检查）。是否构成断言丢失由语义层判定。"
+    examples:
+      positive:
+        source_zh: "网关在连续 3 次健康检查失败后将实例标记为不可用，并在 30 秒后重新检查该实例。"
+        good_zh: "连续 3 次健康检查失败后，网关将实例标记为不可用，并在 30 秒后重新检查。"
+      negative:
+        source_zh: "网关在连续 3 次健康检查失败后将实例标记为不可用，并在 30 秒后重新检查该实例。"
+        bad_zh: "健康检查失败后，网关会将实例标记为不可用。"
+        why_bad: "「连续 3 次」与「30 秒后重新检查」两条断言被删除。读者会认为单次失败即摘除实例、且实例不会自动恢复，于是对一个本可自愈的抖动执行人工干预。"
+      boundary:
+        source_zh: "该接口返回 JSON 格式的响应，响应体使用 JSON 编码。"
+        output_zh: "该接口返回 JSON 格式的响应。"
+        why_not_triggered: "删除的是同一断言的重复表述，断言集合未变；这属于 R001 允许的最小改动。"
+    justification: "压缩型改写最常见的失败：读者据以决策的限定条件被当作冗余删掉。"
+    gate_evidence:
+      failing_input: "网关在连续 3 次健康检查失败后将实例标记为不可用，并在 30 秒后重新检查该实例。"
+      observed_bad_output: "健康检查失败后，网关会将实例标记为不可用。"
+      risk: "运维据此判断实例不会自动恢复而手动重建实例，扩大故障影响面。"
+      not_covered_by: "S004 只保护数值本身在输出中出现，不要求整条断言存在；把「30 秒后重新检查」整句删除时不会有数值被改写。L001 只覆盖条件与例外，不覆盖普通陈述性断言。"
+      distinguishing_criterion: "逐条列出来源断言后在输出中定位；有一条无法定位且不属于重复表述，即失败。"
+
+  - id: CTC-S002
+    family: S
+    concept: no-unsupported-addition
+    level: MUST
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: "输出中出现一条来源与调用上下文都没有给出、也无法由二者推出的命题。"
+    requirement: "输出中的每一条命题必须可追溯到来源文本或调用方提供的上下文。缺失的信息以「待确认」提出，不以补写方式填平。"
+    prohibition: "补写频率或典型性断言（「最常见的原因是」「通常」「一般来说」）；补写来源未给的默认值、上限、超时、重试次数；补写未经说明的失败原因；补写来源没有的告警或免责声明；把推测写成陈述。"
+    exceptions: "author 模式下调用方提供的素材即为来源；把素材中的事实写入正文不算新增。翻译中补出目标语言必需的显性成分（如量词、连接词）在不引入新命题时不算新增。"
+    invariant: "proposition-provenance — 输出命题集合包含于（来源 ∪ 上下文）命题集合的推论闭包。"
+    detection: semantic
+    detection_note: "确定性层可对一个小的高风险词表（通常、一般来说、最常见、大多数、默认、建议值）做出现差分并给出 WARNING；是否属于无据新增由语义层判定。"
+    examples:
+      positive:
+        source_zh: "如果连接失败，检查代理配置。"
+        good_zh: "连接失败时，请检查代理配置。"
+      negative:
+        source_zh: "如果连接失败，检查代理配置。"
+        bad_zh: "连接失败时，请检查代理配置；该问题最常见的原因是代理地址配置错误。"
+        why_bad: "来源未给出原因分布，「最常见的原因」是凭空引入的经验性断言。读者会先排查代理地址而跳过真正的原因，且无法分辨这一判断来自文档还是改写者。"
+      boundary:
+        source_zh: "磁盘写满会导致写入失败。请清理归档日志。"
+        output_zh: "磁盘写满会导致写入失败，因此请先清理归档日志。"
+        why_not_triggered: "「因此」表达的因果已由来源的「导致」给出，显式化未引入新命题，因果强度也未提升（参见 S006）。"
+    justification: "解释性补全是改写模型最强的自发倾向，且补出的内容与原文在体例上无法区分。"
+    gate_evidence:
+      failing_input: "如果连接失败，检查代理配置。"
+      observed_bad_output: "连接失败时，请检查代理配置；该问题最常见的原因是代理地址配置错误。"
+      risk: "虚构的先验概率改变排查顺序；错误信息中的虚构原因会直接误导用户操作。"
+      not_covered_by: "S001 是保留方向的规则（不得少），对多出来的内容不置一词。S006 只约束因果强度的改变，不覆盖新增的频率、默认值、参数等非因果命题。"
+      distinguishing_criterion: "对输出中的每条命题回答「它在来源或上下文的哪一处」；答不出即失败。"
+
+  - id: CTC-S003
+    family: S
+    concept: modality-and-speech-act-preservation
+    level: MUST
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: "来源含有情态词、义务表述、请求、许可、禁止、建议或对系统行为的描述性陈述。"
+    requirement: "输出必须保持三项：认识情态强度（可能／会／一定）、道义情态强度（必须／应／建议／可以／不得）、以及言语行为类型（描述陈述／规范要求／请求／许可）。要求的行为类型本身也必须保持：要求「使其为真」不得降级为要求「核对是否为真」。"
+    prohibition: "可能→会；建议→必须；请→须；确保→确认；不会→禁止；禁止→不建议；必须→应；描述性陈述→规范条款；规范条款→描述性陈述；把可选步骤写成必需步骤或反之。"
+    exceptions: "同强度同类型的词形替换允许（不得↔禁止，应↔应当）。调用方明确要求调整规范强度时允许，且该调整不属于渲染决定。"
+    invariant: "modality-profile — (认识强度, 道义强度, 言语行为类型) 三元组逐处不变。"
+    detection: mixed
+    detection_note: "确定性层对情态词表做出现剖面差分（可能／会／必须／应／建议／请／确保／确认／禁止／不得／可以），差异输出 WARNING；强度是否真的改变由语义层判定，因为合法改写可以改变表层词形。"
+    examples:
+      positive:
+        source_zh: "如果证书已过期，握手可能失败。请确保在到期前 7 天完成轮换。"
+        good_zh: "证书过期时，握手可能失败。请在到期前 7 天完成轮换。"
+      negative:
+        source_zh: "确保数据已备份，并且所有从节点都已同步主节点数据。"
+        bad_zh: "确认数据备份完成，且所有从节点已与主节点数据同步。"
+        why_bad: "「确保」要求操作者促成该状态，包含未达成时的补救义务；「确认」只要求观察当前是否为真。改写静默删除了补救义务，操作者在从节点未同步时会直接继续执行后续步骤。"
+      boundary:
+        source_zh: "不得在生产环境启用调试日志。"
+        output_zh: "禁止在生产环境启用调试日志。"
+        why_not_triggered: "「不得」与「禁止」同为禁止级道义情态，言语行为类型同为规范条款，词形变化未改变强度。"
+    justification: "情态是中文技术文本中最容易被自然度改写顺手替换的成分，且替换后句子完全通顺，读者无从察觉。"
+    gate_evidence:
+      failing_input: "D001 §1: 确保数据已被成功备份，并且所有从节点都已正确地同步了主节点的数据。 / D001 §2: 如果你想在生产环境中部署该服务，请确保你已经配置了环境变量。 / D001 §4: 系统不会在工作时间重启主数据库并清空缓存。"
+      observed_bad_output: "确认数据备份完成，且所有从节点已与主节点数据同步。 / 在生产环境部署该服务前，须完成环境变量配置。 / 工作时间内，系统禁止重启主数据库，亦禁止清空缓存。"
+      risk: "义务降级为核验会删除补救责任；请求升级为义务会替作者做出规范决定；描述升级为禁令改变了真值条件与受众——前者描述系统行为，后者向人下达规则。"
+      not_covered_by: "三例都发生在一次自称 meaning_delta: none 的自然度改写中（D001），即「保持语义」的一般性要求不足以阻止它。S001 不触发：没有任何断言消失，只是强度与言语行为类型变了。R003 反译文腔规则本身就是驱动这些替换的力量，不可能同时约束它们。"
+      distinguishing_criterion: "对来源与输出逐句抽取 (认识强度, 道义强度, 言语行为类型)；任一处不同即失败。该判据可作为 gold case 的 invariant kind: modality 直接使用。"
+
+  - id: CTC-S004
+    family: S
+    concept: quantity-preservation
+    level: MUST
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: "来源含有数值、单位、范围、精度、日期、时长、次数、大小、比例或状态码。"
+    requirement: "数值与其单位必须逐一保留且不改变精度。范围的两端、日期、时长、重试次数、超时值与配额都按来源给出的形式保留。"
+    prohibition: "把精确值改为约数（500 ms→约 0.5 秒）；静默换算单位；提高或降低精度；把可枚举的次数写成「若干」「多次」；把两个数值合并为一个区间；改动状态码。"
+    exceptions: "呈现层的数字形式变化允许（三次→3 次，1,000→1000）。来源自身给出换算（5000 毫秒（5 秒））时，保留任一形式都可以。"
+    invariant: "quantity-multiset — (数值, 单位) 多重集不变；精度不变。"
+    detection: mixed
+    detection_note: "确定性层做 (value, unit) 多重集相等比较，不等即 ERROR（002 两层验证）。仅当来源与输出使用不同表达形式（中文数字、换算单位）时需要语义层确认等值。"
+    examples:
+      positive:
+        source_zh: "重试间隔为 500 ms，最多重试 3 次；两次重试之间不做退避。"
+        good_zh: "重试间隔 500 ms，最多重试 3 次，两次重试之间不做退避。"
+      negative:
+        source_zh: "重试间隔为 500 ms，最多重试 3 次；两次重试之间不做退避。"
+        bad_zh: "重试间隔约 0.5 秒，可重试若干次，其间不做退避。"
+        why_bad: "「3 次」被抹成「若干」，实施者无法配置；单位由毫秒静默换算为秒，而对应配置项以毫秒为单位，按 0.5 填写会得到 0.5 ms 的重试间隔。"
+      boundary:
+        source_zh: "最多重试三次。"
+        output_zh: "最多重试 3 次。"
+        why_not_triggered: "中文数字改为阿拉伯数字属于呈现层格式，数值、单位与精度均未改变。"
+    justification: "数值是技术文档中唯一可以被确定性验证的语义成分，也是被「读起来更顺」改写顺手模糊掉的成分。"
+    gate_evidence:
+      failing_input: "超时时间为 5000 毫秒，超过该值的请求按失败处理。"
+      observed_bad_output: "超时时间约为 5 秒，超时的请求按失败处理。"
+      risk: "配置字段单位为毫秒，读者按「5」填写得到 5 毫秒超时，所有请求立即失败；「约」还把一个精确配置值变成了估计值。"
+      not_covered_by: "S001 不触发：断言仍在，只是值被替换。S005 只保护标记形式的内容，裸露在中文句子里的数值不属于受保护标记。S003 不覆盖数值。"
+      distinguishing_criterion: "抽取来源与输出的 (数值, 单位) 多重集并比较；差异即失败，除非语义层确认为等值的呈现形式变化。"
+
+  - id: CTC-S005
+    family: S
+    concept: protected-token-and-region-preservation
+    level: MUST
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: "文本含有代码、命令、路径、标识符、字段名、API 名、URL、状态码、占位符、正则、配置键、错误码，或行内代码与代码块。"
+    requirement: "受保护标记逐字符不变，包括大小写、连字符、下划线、点号与斜杠。行内代码与围栏代码块的内部内容整体不改动，语言标注保留。占位符（`{project_id}`、`<region>`）按原形保留。"
+    prohibition: "翻译标识符；改动大小写或分隔符；把标记内的半角符号改为全角；改写代码块内容；把命令替换为对命令的描述；替换或补全占位符；规范化 URL。"
+    exceptions: "调用方显式授权的改动（对应 002 的 `authorized_token_changes`）；代码块之外的自然语言照常改写；来源自身的拼写错误保持原样并在「待确认」中提出。"
+    invariant: "protected-token-multiset — 受保护标记多重集在来源与输出之间相等。"
+    detection: deterministic
+    detection_note: "002 确定性层：受保护标记多重集相等，不等即 ERROR。无需语义判断。"
+    examples:
+      positive:
+        source_zh: "执行 `kubectl rollout restart deployment/api-gateway`，然后检查 `/healthz` 是否返回 200。"
+        good_zh: "执行 `kubectl rollout restart deployment/api-gateway`，随后确认 `/healthz` 返回 200。"
+      negative:
+        source_zh: "执行 `kubectl rollout restart deployment/api-gateway`，然后检查 `/healthz` 是否返回 200。"
+        bad_zh: "执行 `kubectl rollout restart deployment/api网关`，然后检查健康检查接口是否返回 200。"
+        why_bad: "标识符被部分翻译，命令粘贴后不可执行；`/healthz` 被替换为描述性说法，读者无法知道该请求哪个路径。"
+      boundary:
+        source_zh: "把 `retry_count` 配置项改为 5。"
+        output_zh: "将配置项 `retry_count` 改为 5。"
+        why_not_triggered: "标识符原样保留，只调整了它周围中文成分的语序。"
+    justification: "机器可读内容一旦被自然语言化处理就不可逆地失效，且这是全部规则中唯一可以完全脱离模型判断来验证的一类。"
+    gate_evidence:
+      failing_input: "执行 `kubectl rollout restart deployment/api-gateway`，然后检查 `/healthz` 是否返回 200。"
+      observed_bad_output: "执行 `kubectl rollout restart deployment/api网关`，然后检查健康检查接口是否返回 200。"
+      risk: "命令失败或作用于错误对象；在运维场景下这可能是不可逆操作作用于错误目标。"
+      not_covered_by: "S001 与 S002 都是语义层规则，需要模型判断；标记突变必须在语义层之前被确定性地拦截（000-design.md §24，002 两层验证）。R006 是 MAY 级排版规则，强度不足以承担此项。"
+      distinguishing_criterion: "抽取两侧受保护标记多重集比较相等；差异即 ERROR，不进入语义层讨论。"
+
+  - id: CTC-S006
+    family: S
+    concept: causal-strength-preservation
+    level: MUST
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: "来源陈述了两个事件、状态或指标之间的关系，或多处并列陈述可能被读作因果链。"
+    requirement: "因果强度与方向保持不变：同现保持同现，可能导致保持可能，机制性因果保持因果，一种原因不写成唯一原因。"
+    prohibition: "同现或相关升格为因果；「可能导致」写成「导致」；「一种原因」写成「根本原因」；因果方向反转；把仅有时间先后的两句用「因此／从而／由于」连成因果；把因果降级为单纯时序。"
+    exceptions: "来源已明确给出因果时，可以改换连接词（由于／因此／导致／引起）而不改变强度；补出的连接词所表达的关系必须已由来源给出。"
+    invariant: "causal-profile — (原因, 结果, 强度∈{同现, 可能导致, 导致, 唯一原因}) 三元组不变。"
+    detection: semantic
+    detection_note: "确定性层可对因果连接词（导致、引起、因此、由于、从而、根本原因）做出现差分并给出 WARNING；强度是否改变由语义层判定。"
+    examples:
+      positive:
+        source_zh: "在这些实例上，超时错误与磁盘 IO 饱和同时出现。"
+        good_zh: "这些实例上的超时错误与磁盘 IO 饱和同时出现。"
+      negative:
+        source_zh: "在这些实例上，超时错误与磁盘 IO 饱和同时出现。"
+        bad_zh: "磁盘 IO 饱和导致这些实例出现超时错误。"
+        why_bad: "同现被升格为因果。排障人员据此扩容磁盘，真正的原因（例如连接池耗尽）未被处理，故障持续，而文档看起来已经给出了结论。"
+      boundary:
+        source_zh: "该错误通常由证书过期引起。"
+        output_zh: "证书过期通常会引起该错误。"
+        why_not_triggered: "只调换了因果句的语序，强度限定词「通常」保留，因果方向与强度均未变。"
+    justification: "因果升级让文本显得更有解释力，因此是自发改写的强吸引子；而降级（因果写成时序）同样常见于压缩改写。"
+    gate_evidence:
+      failing_input: "在这些实例上，超时错误与磁盘 IO 饱和同时出现。"
+      observed_bad_output: "磁盘 IO 饱和导致这些实例出现超时错误。"
+      risk: "排障方向被错误锁定；在故障复盘文档中，虚假因果会固化为组织认知。"
+      not_covered_by: "S002 只覆盖新增命题；此处没有新增句子，而是改变了两个既有成分之间关系的强度，且反方向的失败（导致→之后）是一次弱化而非新增，S002 在结构上无法覆盖。S003 覆盖情态强度，不覆盖因果强度。"
+      distinguishing_criterion: "抽取两侧的 (原因, 结果, 强度) 三元组比较；强度档位不同即失败。"
+
+  - id: CTC-S007
+    family: S
+    concept: quantifier-and-applicability-scope-preservation
+    level: MUST
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: "来源含有量化词（所有、每个、部分、某些、任一、另一个、仅、只有）或对适用对象集合的限定。"
+    requirement: "量化强度（全称／存在／特指／排他）与规则适用的对象集合保持不变。"
+    prohibition: "部分→全部；全部→部分；特指的「另一个 X」→开放集合的「其他 X」；带限定的适用范围→无限定；每次→首次；把「仅限于某类对象」的限定删除。"
+    exceptions: "同强度量化词的替换允许（所有↔每个↔任何一个）。"
+    invariant: "quantification-profile — 每个量化位置的 (量化类型, 论域) 不变。"
+    detection: mixed
+    detection_note: "确定性层可对量化词表（所有、全部、每个、部分、某些、任一、另一个、其他、仅、只有、首次、每次）做出现差分并给出 WARNING；论域是否改变由语义层判定。"
+    examples:
+      positive:
+        source_zh: "部分区域尚未开放该功能。"
+        good_zh: "该功能在部分区域尚未开放。"
+      negative:
+        source_zh: "由于该资源正在被另一个进程占用的事实，当前请求已被拒绝。"
+        bad_zh: "因该资源正被其他进程占用，当前请求已被拒绝。"
+        why_bad: "删除「的事实」这一文腔结构是正当改进，但「另一个进程」特指某一个占用者，「其他进程」是开放集合。在错误信息中读者据此决定是否重试：特指单个占用者时重试通常很快成功，开放集合则暗示持续争用。"
+      boundary:
+        source_zh: "所有请求都必须携带 `Authorization` 头。"
+        output_zh: "每个请求都必须携带 `Authorization` 头。"
+        why_not_triggered: "「所有」与「每个」在此同为全称量化，论域同为请求集合，量化剖面未变。"
+    justification: "量化词短、无重音、在中文里常被视作可省的赘词，因此是压缩改写中最不设防的语义成分。"
+    gate_evidence:
+      failing_input: "D001 §6: 由于该资源正在被另一个进程占用的事实，当前请求已被拒绝。 另一例：部分区域尚未开放该功能。"
+      observed_bad_output: "因该资源正被其他进程占用，当前请求已被拒绝。 / 该功能尚未开放。"
+      risk: "第一例改变用户的重试决策；第二例把存在量化升格为全称，用户与支持人员会认为该功能在所有区域都不可用，从而放弃可用区域的部署。"
+      not_covered_by: "D001 §6 是在一次自称保持语义的自然度改写中发生的，说明一般性的保义要求不足。S001 不触发：没有断言消失，句子结构完整。S003 不覆盖量化，L002 覆盖的是条件的逻辑方向而非论域大小。"
+      distinguishing_criterion: "抽取每个量化位置的 (量化类型, 论域) 比较；类型或论域不同即失败，可直接用作 gold case 的 invariant kind: quantifier。"
+
+  # ---------------------------------------------------------- A: ambiguity and reference
+
+  - id: CTC-A001
+    family: A
+    concept: actor-preservation-and-disambiguation
+    level: MUST
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: "来源指明了某个动作的执行者；或来源省略了执行者，而上下文中存在两个以上可能的执行者，且不同读法会改变由谁执行。"
+    requirement: "来源中出现的执行者必须在输出中仍可定位，包括被动句中的施事。省略执行者的句子，只有在存在多个可能执行者且不同读法改变谁去做时才补出执行者，且补出的执行者必须能从来源或上下文确定。"
+    prohibition: "删除具名执行者（包括在改为被动、自动化或无主句表述时）；把具名组件替换为更笼统的称呼（存储管理机制→系统）；在只有一个可能执行者时逐句补出主语；凭猜测补出执行者。"
+    exceptions: "本规则不要求每个句子都有显性主语（000-design.md §7.2）；中文话题链中承前省略主语是正常且首选的。被动句本身不受限制：受限制的是删除施事，不是使用被动（参见 R003）。"
+    invariant: "actor-binding — 每个动作的 (施事, 受事) 绑定不变；来源中的具名施事在输出中仍可定位。"
+    detection: semantic
+    examples:
+      positive:
+        source_zh: "存储管理机制会在磁盘空间不足时把旧快照数据销毁。"
+        good_zh: "磁盘空间不足时，存储管理机制会自动清理旧快照。"
+      negative:
+        source_zh: "存储管理机制会在磁盘空间不足时把旧快照数据销毁。"
+        bad_zh: "磁盘空间不足时，旧快照会被自动清理。"
+        why_bad: "具名执行者「存储管理机制」被删除。事故响应人需要知道是哪个组件在删数据，才能查它的日志、改它的策略；「会被自动清理」把一个可定位的组件变成了不可定位的系统行为。"
+      boundary:
+        source_zh: "调用 `GET /v1/jobs/{id}` 查询任务状态；若状态为 `failed`，读取 `error.code` 定位原因。"
+        output_zh: "调用 `GET /v1/jobs/{id}` 查询任务状态；若状态为 `failed`，读取 `error.code` 定位原因。"
+        why_not_triggered: "上下文中只有一个可能的执行者（接口调用方）。补出主语不消除任何歧义，只会造成逐句重复的主语（R002）。"
+    justification: "执行者既会在压缩时被删掉，也会在追求显式时被无据补出；两种失败方向都需要同一条规则来界定。"
+    gate_evidence:
+      failing_input: "D001 §3: 存储管理机制会在磁盘空间不足时把旧快照数据销毁。"
+      observed_bad_output: "磁盘空间不足时，旧快照会被自动清理。"
+      risk: "排障时无法定位是哪个组件删除了数据，也无法找到对应的保留策略配置；在数据丢失事件中这是关键信息。"
+      not_covered_by: "该删除发生在一次正当的去被动化改进中（D001 §3 明确指出被动本身无问题），因此 R003 反译文腔规则不但不能拦截它，反而是它的动机。S001 不触发：改写后动作与受事仍在，消失的是施事这一成分而非一条断言，语义层若只比对断言集合会判为通过。"
+      distinguishing_criterion: "列出来源中所有具名施事，在输出中逐一定位；有一个无法定位即失败（gold case 的 invariant kind: actor）。"
+
+  - id: CTC-A002
+    family: A
+    concept: reference-resolvability
+    level: MUST
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: "输出中出现指代成分（它、其、该、这、此、上述、前者、后者），且在其可及范围内存在两个以上可能的先行词。"
+    requirement: "每个指代成分必须有唯一可确定的先行词。若合并句子或压缩会造成先行词竞争，改用名词回指或调整语序。"
+    prohibition: "通过合并句子制造指代竞争；把唯一明确的名词替换为「其」「该」；在存在多个先行词时按就近原则默认取一个（该情形转 A005）。"
+    exceptions: "先行词唯一时保持指代成分不变；不得为求显式把每个「其」都展开为名词，那会造成 R002 的冗余。"
+    invariant: "reference-binding — 每个指代成分到先行词的映射唯一且与来源一致。"
+    detection: semantic
+    examples:
+      positive:
+        source_zh: "任务队列积压时，先扩容消费者，再清理死信队列。清理前必须确认死信队列已停止写入。"
+        good_zh: "任务队列积压时，先扩容消费者，再清理死信队列；清理前必须确认死信队列已停止写入。"
+      negative:
+        source_zh: "任务队列积压时，先扩容消费者，再清理死信队列。清理前必须确认死信队列已停止写入。"
+        bad_zh: "任务队列积压时，先扩容消费者，再清理死信队列；清理前必须确认其已停止写入。"
+        why_bad: "「其」可指消费者、死信队列或任务队列。若读作任务队列，操作员会等待一个在积压场景下不会满足的条件，流程停滞在一个没有出口的等待上。"
+      boundary:
+        source_zh: "该接口返回分页结果，其中 `next_cursor` 为空表示没有更多数据。"
+        output_zh: "该接口返回分页结果，其中 `next_cursor` 为空表示没有更多数据。"
+        why_not_triggered: "「其中」只有一个可能先行词（分页结果），不存在竞争；展开为名词只会增加冗余。"
+    justification: "句子合并是改写最常见的操作，而中文的「其／该」在合并后极易同时获得多个可及先行词。"
+    gate_evidence:
+      failing_input: "任务队列积压时，先扩容消费者，再清理死信队列。清理前必须确认死信队列已停止写入。"
+      observed_bad_output: "…；清理前必须确认其已停止写入。"
+      risk: "前置条件被绑定到错误对象，操作员或者停滞、或者跳过一个真实的前置检查执行清理，造成消息丢失。"
+      not_covered_by: "S001 不触发：信息在理论上仍可从上下文推断，没有断言消失。A001 只覆盖施事，此处被指代的是受事对象。这是改写动作本身制造出的新歧义，任何保留型规则都不覆盖。"
+      distinguishing_criterion: "对输出中每个指代成分枚举其可及先行词；数量大于 1 且不同选择改变操作对象即失败。"
+
+  - id: CTC-A003
+    family: A
+    concept: attachment-scope-ambiguity
+    level: SHOULD
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: "一个修饰或限定成分（定语、数量限定、时间限定、路径限定、否定以外的算子）在字面上可以只作用于第一个并列项，也可以作用于全部并列项，且两种结合方式对应不同的操作对象集合。"
+    requirement: "当两种结合方式导致不同操作结果时，应通过重复中心语、拆分并列项、调整语序或分句消除结合歧义。所选读法必须有来源或上下文证据；无证据时转 A005 报告，不得改写。"
+    prohibition: "在无证据的情况下通过改写把某一种结合读法固化；把原本只作用于一项的限定扩展到全部并列项。"
+    exceptions: "两种读法导致相同操作结果时不触发；正常的中文多层定语不因长度或嵌套触发本规则。"
+    invariant: "attachment-set — 每个限定成分所作用的成分集合与来源一致。"
+    detection: semantic
+    examples:
+      positive:
+        source_zh: "清理超过 7 天的容器日志和镜像缓存。两者的保留期相同。"
+        good_zh: "清理超过 7 天的容器日志，以及超过 7 天的镜像缓存。"
+      negative:
+        source_zh: "清理超过 7 天的容器日志和镜像缓存。镜像缓存的回收由 `image_gc` 策略单独控制。"
+        bad_zh: "清理超过 7 天的容器日志与镜像缓存，两者均按 7 天保留。"
+        why_bad: "限定被固化为作用于两个并列项，与下一句「由 `image_gc` 单独控制」直接矛盾；仍在被引用的镜像缓存会被删除，随后的部署因缺少基础镜像而失败。"
+      boundary:
+        source_zh: "备份数据库的配置文件和数据目录。"
+        output_zh: "备份数据库的配置文件和数据目录。"
+        why_not_triggered: "「数据库的」作用于两个并列项是唯一合理读法；另一读法（备份任意位置的配置文件）不对应任何可执行操作，不产生分歧的操作结果。"
+    justification: "中文并列结构不标记分组，「A 的 B 和 C」在技术文本里是稳定的歧义源，且改写时极易被顺手统一。"
+    gate_evidence:
+      failing_input: "清理超过 7 天的容器日志和镜像缓存。镜像缓存的回收由 `image_gc` 策略单独控制。"
+      observed_bad_output: "清理超过 7 天的容器日志与镜像缓存，两者均按 7 天保留。"
+      risk: "删除范围被扩大到仍在使用的对象；在清理类脚本文档中这是不可逆操作。"
+      not_covered_by: "S007 覆盖量化词本身的强度，不覆盖修饰语与并列项的结合方式。A005 规定无证据时不得择一，但不给出有证据时的修复方式，也不把结合歧义定义为一个需要主动识别的触发条件。"
+      why_defeasible: "结合歧义的判定依赖领域知识：某些结合在专业读者看来只有一种读法。定为 MUST 会让规则在正常多层定语上大量误触发，产生 R002 式的过度显式化。strict 模式下当两种读法改变操作对象时按 MUST 执行。"
+      distinguishing_criterion: "对每个限定成分枚举可能的作用集合；集合数大于 1 且对应不同操作对象，而输出未消歧或消歧无证据，即为 WARNING。"
+
+  - id: CTC-A004
+    family: A
+    concept: negation-scope-preservation
+    level: MUST
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: "否定或禁止成分（不、未、不会、不得、禁止、无需）在其后跟随并列成分、条件成分或范围限定成分。"
+    requirement: "否定的作用域必须与来源一致：分别否定保持分别否定，对合取的否定保持对合取的否定。改写时通过重复否定词或拆句把作用域固定下来。"
+    prohibition: "把「禁止 A，也禁止 B」改写为「禁止同时 A 和 B」或反向；把「不在条件 C 下做 A」改写为「不做 A」；把否定移到条件之外或之内从而改变其覆盖范围。"
+    exceptions: "作用域唯一时保持原表述；当来源的否定作用域本身歧义且无证据可判时，转 A005 报告，不得择一改写。"
+    invariant: "negation-scope — 否定算子所辖成分集合不变。"
+    detection: semantic
+    detection_note: "确定性层可对否定词出现次数做差分（分别否定改为合取否定时否定词数量通常从 2 降为 1），作为 WARNING 信号；作用域判定属语义层。"
+    examples:
+      positive:
+        source_zh: "维护窗口外，系统不会重启主数据库并清空缓存。两项操作都只在维护窗口内执行。"
+        good_zh: "维护窗口外，系统不会重启主数据库，也不会清空缓存；两项操作都只在维护窗口内执行。"
+      negative:
+        source_zh: "业务高峰期禁止重启网关，也禁止清空缓存。"
+        bad_zh: "业务高峰期禁止同时重启网关和清空缓存。"
+        why_bad: "两项分别的禁止被改写为只禁止并发执行，操作员会认为高峰期单独清空缓存是允许的，从而在高峰期触发缓存击穿。"
+      boundary:
+        source_zh: "未通过健康检查的实例不会接收流量。"
+        output_zh: "健康检查未通过的实例不接收流量。"
+        why_not_triggered: "两个否定各自作用于原来的成分，改写只调整了定语语序，不存在竞争作用域。"
+    justification: "否定作用域的错误会反转一条禁令的适用范围，而句子在两种读法下都完全通顺。"
+    gate_evidence:
+      failing_input: "业务高峰期禁止重启网关，也禁止清空缓存。（相关歧义源见 D001 §4：系统不会在工作时间重启主数据库并清空缓存。）"
+      observed_bad_output: "业务高峰期禁止同时重启网关和清空缓存。"
+      risk: "一条禁令被缩小到只覆盖并发情形，被禁止的单项操作变为看似允许；这类错误在告警与安全策略文本中直接导致违规操作。"
+      not_covered_by: "S001 不触发：两个动作与否定词都还在。S003 不触发：情态仍为禁止级、言语行为类型仍是规范条款，变的是所辖范围。A003 覆盖修饰语与并列项的结合，但其判据是操作对象集合，无法表达「否定覆盖合取还是覆盖各项」这一区别。"
+      distinguishing_criterion: "把两侧的否定表达式还原为 ¬(A∧B) 或 (¬A)∧(¬B) 后比较；形式不同即失败。"
+
+  - id: CTC-A005
+    family: A
+    concept: ambiguity-resolution-requires-evidence
+    level: MUST
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: "来源存在两种以上读法且导致不同行为，而来源与调用上下文都不足以确定作者意图；或来源缺少执行所需的参数、阈值、接收方、判据。"
+    requirement: "保持原有表述不做消歧改写，并在「待确认」中给出：位置、两种（或多种）读法或缺失项、判定所需的信息。review 模式下作为一条 finding 报告。"
+    prohibition: "静默选定一种读法；用改写把歧义掩盖成流畅句子；补出缺失参数以使文本看起来可执行；在同一处既消歧又替换关键动词，使两处改动无法分别审查。"
+    exceptions: "调用方明确授权在指定读法下改写时，按授权执行并在「待确认」中记录所选读法。当一种读法在该领域中不可能成立（不对应任何可执行操作）时，不算真歧义。"
+    invariant: "ambiguity-conserved — 未获证据的歧义在输出中仍然存在，且被显式报告。"
+    detection: semantic
+    examples:
+      positive:
+        source_zh: "超时后重试，多次失败则升级处理。"
+        good_zh: |-
+          超时后重试；多次失败则升级处理。
+
+          待确认
+          - 多次失败 | 「多次」未给出具体次数 | 触发升级的失败次数阈值
+          - 升级处理 | 未给出升级的接收方与方式 | 升级对象（值班组／工单系统）
+      negative:
+        source_zh: "隔离受感染的主机和网关通信。"
+        bad_zh: "阻断受感染主机与网关之间的通信链路。"
+        why_bad: "来源有两种读法：(a) 隔离受感染主机，并隔离网关通信；(b) 切断受感染主机与网关之间的通信。改写静默选定 (b)，同时把「隔离」换成「阻断」。应急响应中两种读法对应不同的处置范围，选错会留下未隔离的主机，而输出读起来完全确定，审查者不会再回头看原文。"
+      boundary:
+        source_zh: "若响应返回 429，按 `Retry-After` 指定的秒数等待后重试。"
+        output_zh: "若响应返回 429，按 `Retry-After` 指定的秒数等待后重试。"
+        why_not_triggered: "「指定的秒数」由响应头在运行时唯一确定，不是未定义参数；把它替换成一个具体数字才会触发本规则（同时违反 S002）。"
+    justification: "A001-A004 都要求消除歧义，本规则给出它们的上限：消歧不得以制造事实为代价，且必须留下可审查的痕迹。"
+    gate_evidence:
+      failing_input: "D001 §5: 隔离受感染的主机和网关通信。"
+      observed_bad_output: "阻断受感染主机与网关之间的通信链路。"
+      risk: "选定一种读法等于替作者做出未经授权的技术决定，且改写后的文本不再显示曾经存在过歧义，后续审查者失去了发现它的机会。"
+      not_covered_by: "S002 禁止新增命题，但不规定遇到歧义时应当做什么；没有本规则，S002 的合规做法可以是「什么都不改也不说」，歧义随之被静默带入下游。A001-A004 单独作用时都会推动模型去消歧，需要一条明确的兜底规则来约束它们。"
+      distinguishing_criterion: "对来源可枚举出多于一种导致不同行为的读法，而输出只呈现一种且「待确认」中无对应条目，即失败。"
