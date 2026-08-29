@@ -1,101 +1,78 @@
-# Controlled Technical Chinese (CTC)
+# 受控技术中文（CTC）
 
-An Agent Skill for writing, rewriting, translating, and reviewing Chinese technical content with
-semantic fidelity, low ambiguity, consistent terminology, and controlled procedural language.
+> [English](./README.en.md)
 
-CTC is not "good Chinese" in the general sense, and it is not a Chinese translation of ASD-STE100.
-It is a constrained technical language system for text where a misreading costs something: agent
-instructions, tool descriptions, SOPs, runbooks, troubleshooting steps, warnings and error
-messages, API documentation, and technical translation into Chinese.
+用于写作、改写、翻译和审阅中文技术内容的 Agent Skill，具备语义保真、低歧义、术语一致与受控的流程语言。
 
-The runtime deliverable is a single self-contained file: [`SKILL.md`](./SKILL.md).
+CTC 不是一般意义上的「好中文」，也不是 ASD-STE100 的中文翻译。它是一套受限的技术语言系统，适用于误读会产生代价的文本：agent 指令、工具描述、SOP、runbook、排障步骤、告警与错误信息、API 文档，以及技术内容的中文翻译。
 
-## What it does
+运行时交付物是一个自包含的单文件：[`SKILL.md`](./SKILL.md)。
 
-CTC follows one priority order, and a lower layer may never override a higher one:
+## 它做什么
+
+CTC 遵循单一的优先级顺序，低层不得覆盖高层：
 
 ```text
-truth and semantic invariants → operational clarity → terminology consistency
-→ natural technical Chinese → project style
+真值与语义不变量 → 操作清晰度 → 术语一致
+→ 自然的技术中文 → 项目体例
 ```
 
-Three tie-breaks make that operational:
+三条判据使其具备可操作性：
 
-- A more natural sentence is not an improvement if it changes truth conditions.
-- A more explicit sentence is not an improvement if it invents a requirement.
-- A shorter sentence is not an improvement if it drops a condition or an exception.
+- 更自然的句子若改变了真值条件，就不是改进。
+- 更显式的句子若凭空造出一项要求，就不是改进。
+- 更短的句子若丢掉一个条件或例外，就不是改进。
 
-It runs in three modes. **strict** for agent instructions, SOPs, runbooks, and safety-sensitive
-procedures. **standard** for API docs, guides, and explanatory prose. **review** for auditing
-existing text, which reports findings and rewrites nothing. Modes change the ambiguity threshold,
-not the strength of any rule.
+它以三种模式运行。**strict** 适用于 agent 指令、SOP、runbook 以及安全敏感操作。**standard** 适用于 API 文档、指南和说明性散文。**review** 适用于审计既有文本，只报告 finding，不改写任何内容。模式改变的是歧义阈值，而不是任何规则的强度。
 
-Twenty-nine rules across six families — semantics, ambiguity, procedure, terminology, logic, and
-rendering — sit under one that governs the rest: **every edit must be attributable to a rule, and
-text that triggers no rule is returned unchanged.**
+29 条规则分属六族——语义、歧义、步骤、术语、逻辑与渲染——并统一受一条总则约束：**每一处改动必须能归因到一条规则，未触发任何规则的文本原样返回。**
 
-## What it deliberately does not do
+## 它刻意不做什么
 
-A controlled-language spec is easy to make worse by making it stricter. CTC refuses a specific list
-of tempting constraints, each because it damages Chinese without buying precision:
+受控语言规范很容易因变得更严格而劣化。CTC 明确拒绝了一系列诱人的约束，因为其中的每一项都会损害中文表达，却换不来任何精确度：
 
-- it does not require an explicit subject in every sentence — topic-chain subject omission is normal
-  and preferred in Chinese;
-- it does not enforce "one sentence, one verb", which shatters serial-verb constructions;
-- it does not ban the passive, which is natural when the patient is the focus;
-- it does not force connectives between adjacent steps, which turns sequence into causation;
-- it does not convert units, even when the arithmetic is exact;
-- it does not unify near-synonyms that denote different concepts;
-- it does not resolve a genuine ambiguity by picking a reading — it reports it and stops.
+- 不要求每句都有显式主语——汉语中通过话题链承前省略主语是正常且首选的；
+- 不强制「一句一动词」，否则会割裂连动结构；
+- 不禁用被动语态，当受事是焦点时被动是自然的；
+- 不强行在相邻步骤之间添加连接词，否则会将时序误升为因果；
+- 不换算单位，即便算术上完全精确；
+- 不统合指称不同概念的近义词；
+- 不通过擅自选定一种读法来消解真歧义——只报告歧义并停手。
 
-The last one is the sharpest. When the source is ambiguous and context cannot settle it, CTC keeps
-the original wording and appends a `待确认` list naming the competing readings and the information
-that would resolve them. Choosing for the author manufactures a fact.
+最后一条最为严格。当来源存在歧义且上下文无法确定时，CTC 保留原表述，并追加一个 `待确认` 列表，指明分歧读法以及可判定所需的信息。替作者做选择等于凭空制造事实。
 
-## Using it
+## 使用方法
 
-Copy `SKILL.md` into your agent's skills directory, or package it for installation:
+将 `SKILL.md` 复制到你的 agent skills 目录中，或者将其打包以供安装：
 
 ```bash
 bash tools/package.sh      # writes dist/controlled-technical-chinese/ and validates it
 ```
 
-The skill is self-contained and model-agnostic. It has no runtime dependency on anything else in
-this repository.
+该 skill 自包含，且与模型无关。它在运行时不依赖本仓库中的任何其他内容。
 
-## How it was built
+## 构建方式
 
-The central risk in this project is that a model designing a writing standard reproduces its own
-blind spots inside the standard. The development protocol is built around that risk.
+本项目面临的核心风险是：由模型设计写作标准时，会把自身的盲点复刻到标准之中。开发流程正是围绕这一风险而构建的。
 
-Three models work in asymmetric roles — Claude Opus compiles the specification, GPT-5.6 Sol
-formalizes invariants and attacks them, Gemini 3.7 Flash renders and audits the Chinese — and each
-produces its first pass **independently**, before seeing any other model's work. Disagreements are
-classified by type and resolved by the appropriate authority, never by majority vote. The ones worth
-keeping live in [`eval/disagreements/`](./eval/disagreements/).
+三个模型承担不对称的角色——Claude Opus 编写规范，GPT-5.6 Sol 形式化不变量并对其发起攻击，Gemini 3.7 Flash 进行中文渲染与审阅——每个模型在看到其他模型的工作之前，均**独立**生成初稿。分歧按类型归类，并由对应的权威方解决，绝不采取多数表决。值得保留的分歧记录保存在 [`eval/disagreements/`](./eval/disagreements/) 中。
 
-That protocol earned its keep immediately. In round one, the naturalness auditor was asked to
-catalogue Chinese writing failures under an explicit instruction not to change meaning, and declared
-`meaning_delta: none` on every entry. Independent review found six entries that changed modality,
-deleted an actor, converted a description into a prohibition, or generalized a quantity
-([D001](./eval/disagreements/D001-naturalness-vs-modality.md)). That is why `SKILL.md` states that a
-model's own assessment of whether it preserved meaning is not admissible evidence, and why semantic
-verification is a separate pass with the source in hand.
+该流程立竿见影。在第一轮中，自然度审阅方被要求在明确不改变语义的指令下列出中文写作缺陷，并对每个条目声明了 `meaning_delta: none`。独立审阅发现了六处改变情态、删除执行者、将描述转为禁令或泛化数量的条目（[D001](./eval/disagreements/D001-naturalness-vs-modality.md)）。`SKILL.md` 因此写明：模型自身关于是否保持语义的评估不得作为证据采纳；语义验证必须是对照来源的独立一遍。
 
-### Development layout
+### 开发目录结构
 
 ```text
-SKILL.md              the runtime artifact — the only released file
-docs/decisions/       why each choice was made; 000 is the foundational design
-spec/                 canonical rule semantics in structured form, and the frozen rule IDs
-eval/gold/            56 gold cases across the twelve failure categories
-eval/mutations/       generated single-defect mutants for per-class detection rates
-eval/disagreements/   typed cross-model disagreements kept as project memory
-tools/                deterministic checkers and the evaluation harness
-dev/                  role prompts, and raw independent model output kept as evidence
+SKILL.md              运行时产物——唯一的发布文件
+docs/decisions/       做出各项选择的原因；000 为基础设计
+spec/                 结构化形式的权威规则语义，以及冻结的规则 ID
+eval/gold/            涵盖 12 个缺陷类别的 56 个 gold 用例
+eval/mutations/       用于评估各类检出率而生成的单缺陷变异体
+eval/disagreements/   作为项目记忆保留的分类型跨模型分歧
+tools/                确定性检查工具与评测框架
+dev/                  角色提示词，以及作为证据保留的原始独立模型输出
 ```
 
-### Running the checks
+### 运行检查
 
 ```bash
 python3 tools/check_skill.py                          # format and rule-ID gates
@@ -106,34 +83,18 @@ uv run tools/ctc_eval.py judge  --run-id r1 --judge gpt --exclude-self
 uv run tools/mutate.py --from eval/gold --out eval/mutations/generated.yaml
 ```
 
-Deterministic properties — protected tokens, quantities, threshold boundaries — are checked in code.
-Whether an omitted actor is ambiguous, or whether a rewrite added an unsupported implication, is
-judged by a model that did not produce the output.
+确定性属性——受保护标记、数量、阈值边界——由代码进行检查。省略的执行者是否存在歧义，或者改写是否引入了无依据的隐含命题，则由未参与生成该输出的模型来判定。
 
-About one case in three is an **over-edit trap**: the source is already correct, and any rewrite is
-the failure. Without them an evaluation quietly rewards maximal explicitness, which is the failure
-mode this project exists to prevent.
+大约每三个用例中就有一个是**过度编辑陷阱**：来源本身已经正确，任何改写都算失败。如果没有这些用例，评测就会悄然奖励最大程度的显式化，而这正是本项目旨在防止的失败模式。
 
-## Status
+## 状态
 
-`SKILL.md` passes the format, semantic, ambiguity, naturalness, and self-hosting gates. Across 147
-outputs from three models there were no deterministic failures, semantic pass rates were 80–88%,
-and a mutation corpus of 45 single-defect mutants was detected 45/45. Full assessment in
-[`eval/reports/release-gates.md`](./eval/reports/release-gates.md).
+`SKILL.md` 通过了格式、语义、歧义、自然度以及自托管门禁。在来自三个模型的 147 个输出中，未出现任何确定性失败，语义通过率为 80–88%，由 45 个单缺陷变异体构成的变异语料库检出率为 45/45。完整评估见 [`eval/reports/release-gates.md`](./eval/reports/release-gates.md)。
 
-It is **not** a validated release. The gold corpus is agent-reviewed and cross-audited between two
-models but **not human-reviewed**, and every other gate is measured against that corpus — so a gate
-measured against unreviewed expectations reports the expectations, not the artifact. That is the
-blocking item. Three narrower gaps are recorded alongside it: GPT's outputs went unjudged for want
-of a fourth model, one model's sweep covered 35 of 56 cases, and the reverse-decoding pass was
-Claude reading Claude-rendered prose.
+这**不是**经过验证的发布版本。gold 语料库经过了 agent 审阅以及两个模型之间的交叉审计，但**未经人工审阅**，而所有其他门禁都是对照该语料库进行衡量的——对照未经审阅的预期来衡量，门禁反映的是预期本身，而不是产物。这是当前的阻塞项。与此并行记录了三个更小范围的差距：因缺少第四个模型，GPT 的输出未被裁决；一个模型的扫描覆盖了 56 个用例中的 35 个；反向解码阶段是由 Claude 阅读 Claude 渲染出的散文。
 
-Contributor guidance is in [`AGENTS.md`](./AGENTS.md). New hard rules must clear the admission gate
-in [`docs/decisions/000-design.md`](./docs/decisions/000-design.md) §20: a concrete failing input, a
-concrete bad output, the risk, evidence that existing rules do not cover it, a test that
-distinguishes good from bad, and a boundary example where the rule must not fire. "This would be
-safer" is not sufficient.
+贡献者指南见 [`AGENTS.md`](./AGENTS.md)。新增的硬规则必须通过 [`docs/decisions/000-design.md`](./docs/decisions/000-design.md) §20 中的准入门禁：具体的失败输入、具体的错误输出、风险、现有规则未能覆盖该情况的证据、能够区分好坏的测试，以及规则不得触发的边界示例。「这样更安全」不足以作为理由。
 
-## License
+## 许可证
 
 [MIT](./LICENSE)

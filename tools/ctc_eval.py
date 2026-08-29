@@ -41,6 +41,9 @@ JUDGE_PROMPT = ROOT / "dev" / "prompts" / "judge-semantic.v1.md"
 # ---------------------------------------------------------------- extraction
 
 CODE_BLOCK = re.compile(r"```.*?```", re.S)
+# a fence tagged text/plain/none carries prose — a directory legend, a ladder diagram.
+# The skill permits translating that prose; a fence tagged bash or json does not.
+PROSE_FENCE = re.compile(r"^```(?:text|plain|txt)?\s*$", re.M)
 CODE_SPAN = re.compile(r"`([^`\n]+)`")
 URL = re.compile(r"https?://[^\s，。；：）】」』、,]+")
 PATH = re.compile(r"(?<![\w`])(?:\.{0,2}/)[\w./{}\-]+")
@@ -50,7 +53,9 @@ DOTTED = re.compile(r"(?<![\w`])[A-Za-z_][\w]*(?:\.[A-Za-z_][\w]*)+(?![\w`])")
 SNAKE = re.compile(r"(?<![\w`])[a-z][a-z0-9]*(?:_[a-z0-9]+)+(?![\w`])")
 
 # numbers keep their unit; a bare number is still compared, with unit ""
-UNIT = r"(?:ms|s|m|h|d|%|KB|MB|GB|TB|KiB|MiB|GiB|rpm|qps|次|条|个|台|秒|分钟|小时|天|毫秒|字节)"
+# single-letter units need a right boundary, or "45 single-defect" yields (45, "s")
+UNIT = (r"(?:ms|KB|MB|GB|TB|KiB|MiB|GiB|rpm|qps|次|条|个|台|秒|分钟|小时|天|毫秒|字节|%"
+        r"|[smhd](?![A-Za-z]))")
 NUMBER = re.compile(rf"(\d+(?:\.\d+)?)\s*({UNIT})?")
 
 # threshold boundary vocabulary — an open/closed interval flip is a real defect (F-11)
@@ -67,7 +72,9 @@ MODALITY_CLASSES: dict[str, tuple[str, ...]] = {
     "permission": ("可以", "允许", "可选", "支持"),
     "possibility": ("可能", "或许", "也许", "有可能", "预计"),
     "certainty": ("一定", "必然", "总是", "始终", "肯定"),
-    "unsourced_frequency": ("通常", "一般", "默认情况下", "大多数情况下", "最常见"),
+    # bare 一般 also matches 一般意义 ("in the general sense"), which claims no frequency
+    "unsourced_frequency": ("通常", "一般来说", "一般情况下", "默认情况下",
+                            "大多数情况下", "最常见", "往往"),
 }
 
 
@@ -167,10 +174,19 @@ def diff_counter(a: Counter, b: Counter) -> str:
     return "; ".join(parts)
 
 
+def is_prose_fence(block: str) -> bool:
+    first = block.split("\n", 1)[0]
+    return PROSE_FENCE.match(first + "\n") is not None
+
+
 def deterministic_checks(source: str, output: str, case: dict | None = None) -> CheckResult:
     res = CheckResult()
     case = case or {}
     review = case.get("mode") == "review"
+    # Translation legitimately changes the units attached to a number (Chinese adds a
+    # classifier: 147 -> 147 个) and rewrites the prose inside an untagged fence. Comparing
+    # those across languages measures the language pair, not the translation.
+    translate = case.get("task") == "translate"
 
     allowed = set(case.get("authorized_token_changes", []) or [])
 
@@ -178,6 +194,25 @@ def deterministic_checks(source: str, output: str, case: dict | None = None) -> 
     st = Counter({k: v for k, v in st.items() if k[1] not in allowed})
     ot = Counter({k: v for k, v in ot.items() if k[1] not in allowed})
     sq, oq = quantities(source), quantities(output)
+
+    if translate:
+        # keep tagged code fences byte-identical; replace each prose fence by the
+        # machine-readable strings inside it, which must still survive verbatim
+        def unfold(counter: Counter, text: str) -> Counter:
+            out: Counter = Counter()
+            for (kind, val), n in counter.items():
+                if kind == "code_block" and is_prose_fence(val):
+                    for inner_kind, pattern in (("url", URL), ("path", PATH),
+                                                ("flag", FLAG), ("env", ENV_VAR),
+                                                ("dotted", DOTTED), ("snake", SNAKE)):
+                        for m in pattern.findall(val):
+                            out[(inner_kind, m)] += n
+                else:
+                    out[(kind, val)] += n
+            return out
+        st, ot = unfold(st, source), unfold(ot, output)
+        sq = Counter({(v, ""): n for (v, _u), n in sq.items()})
+        oq = Counter({(v, ""): n for (v, _u), n in oq.items()})
 
     if review:
         # A review output is a findings list, not the document. Comparing its token
@@ -193,15 +228,17 @@ def deterministic_checks(source: str, output: str, case: dict | None = None) -> 
         # repeating a modifier across both conjuncts is the correct repair for an
         # attachment ambiguity, and it raises the count of a quantity already present.
         res.checks.append(Check(
-            "protected_tokens_lost", "ERROR", not (st - ot), diff_counter(st, ot & st)))
+            "protected_tokens_lost", "ERROR", not (set(st) - set(ot)),
+            "lost " + ", ".join(f"{k!r}" for k in sorted(set(st) - set(ot), key=str))))
         res.checks.append(Check(
             "protected_tokens_added", "WARNING", not (set(ot) - set(st)),
-            diff_counter(Counter({k: v for k, v in st.items() if k in ot}), ot)))
+            "added " + ", ".join(f"{k!r}" for k in sorted(set(ot) - set(st), key=str))))
         res.checks.append(Check(
-            "quantities_lost", "ERROR", not (set(sq) - set(oq)), diff_counter(sq, oq & sq)))
+            "quantities_lost", "ERROR", not (set(sq) - set(oq)),
+            "lost " + ", ".join(f"{k!r}" for k in sorted(set(sq) - set(oq), key=str))))
         res.checks.append(Check(
             "quantities_added", "WARNING", not (set(oq) - set(sq)),
-            diff_counter(Counter({k: v for k, v in sq.items() if k in oq}), oq)))
+            "added " + ", ".join(f"{k!r}" for k in sorted(set(oq) - set(sq), key=str))))
 
     sc, oc = comparators(source), comparators(output)
     res.checks.append(Check(
@@ -298,10 +335,10 @@ def load_cases(case_ids: list[str] | None = None, cases_dir: Path | None = None)
 def cmd_check(args) -> int:
     source = Path(args.source).read_text(encoding="utf-8")
     output = Path(args.output).read_text(encoding="utf-8")
-    res = deterministic_checks(source, output)
+    res = deterministic_checks(source, output, {"task": args.task, "mode": args.mode})
     for c in res.checks:
         mark = "pass" if c.passed else c.severity
-        print(f"{mark:8} {c.name}" + (f"  — {c.detail}" if c.detail else ""))
+        print(f"{mark:8} {c.name}" + (f"  — {c.detail}" if c.detail and not c.passed else ""))
     return 1 if res.errors else 0
 
 
@@ -460,6 +497,9 @@ def main() -> int:
     c = sub.add_parser("check", help="deterministic checks on one source/output pair")
     c.add_argument("--source", required=True)
     c.add_argument("--output", required=True)
+    c.add_argument("--task", default="rewrite",
+                   choices=["rewrite", "translate", "review", "author"])
+    c.add_argument("--mode", default="strict", choices=["strict", "standard", "review"])
     c.set_defaults(fn=cmd_check)
 
     r = sub.add_parser("run", help="run gold cases through SKILL.md with one model")
