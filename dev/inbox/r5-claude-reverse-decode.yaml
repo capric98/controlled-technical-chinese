@@ -896,7 +896,7 @@ rules:
       overlong 「的」 chains, residual English clause order (「由于…的事实」), or literally-translated
       connectives.
     required_behavior: |-
-      Replace with ordinary Chinese technical usage, with semantics完全 unchanged.
+      Replace with ordinary Chinese technical usage, with semantics fully unchanged.
     prohibited_behavior: |-
       Blanket passive avoidance. Passive is natural when the patient is the focus, when the agent is
       unknown, or when the agent is already given in the same clause.
@@ -1063,7 +1063,7 @@ cross_cutting:
     alerts and error messages. All rules in force. Lowest threshold: if ANY reasonable operator
     reading would lead to a different action, treat it as a divergent reading. Conditions, premises,
     exceptions, guards and success criteria may not be deleted for brevity. And a severity clause
-    that sits awkwardly with the claim above: 應-level rules in the A and P families are handled as
+    that sits awkwardly with the claim above: 应-level rules in the A and P families are handled as
     ERROR when the omission would change operator behaviour — described as raising the trigger
     threshold rather than the rule level. Strict explicitly does NOT mean maximum verbosity: no
     invented executors/parameters/thresholds/criteria/failure causes, no non-disambiguating subject
@@ -1199,10 +1199,358 @@ cross_cutting:
     STYLE — naturalness or consistency issues that do not affect meaning.
 
     Exactly one escalation is permitted: a 应-level violation may be reported as ERROR if that
-    finding's 風險 field names the specific different action the operator would take as a result. No
+    finding's 风险 field names the specific different action the operator would take as a result. No
     other escalation, and no de-escalation at all. Typography must never be reported as ERROR.
 
-    Three things break this cleanly: §3's strict clause escalates A/P 應-level rules on a differently
+    Three things break this cleanly: §3's strict clause escalates A/P 应-level rules on a differently
     worded condition and a narrower family scope; §6 grades A005 (a 必须 rule) findings down to
-    WARNING; and §4 declares four rules that §7 grades 應 (A003, P003, T001, R005) to be semantic
+    WARNING; and §4 declares four rules that §7 grades 应 (A003, P003, T001, R005) to be semantic
     invariants whose violation is a 语义失败.
+
+contradictions:
+  - id: C1
+    what: |-
+      The 待确认 section has a CLOSED admissible list of four categories, and at least four other
+      passages route reports into it that are not on that list. The output contract is therefore
+      unsatisfiable as written.
+    quote_a: |-
+      §3: 「可进入该小节的只有四类：证据不足的歧义（CTC-A005）、来源从未给出的成功判据（CTC-P003）、
+      工具描述缺失的触发条件（CTC-P005）、无判据的规范条件（CTC-R004）。」
+    quote_b: |-
+      §5: 「来源自身的拼写错误保持原样，并在「待确认」中提出。」
+      §7 CTC-S001: 「条件、例外、阈值、告警与失败分支最后删除，并在「待确认」中说明删除事实。」
+      §7 CTC-S002: 「缺失信息在「待确认」中提出，不得以补写填平。」
+      §7 T 族说明: 「不明确时报告差异，不合并。」（strict/standard 下无任何其他报告通道）
+    why_material: |-
+      A model that honours §3 drops the spelling-error report, the length-cap disclosure, the generic
+      missing-information report and the terminology-divergence report. A model that honours the rules
+      emits 待确认 entries the output contract forbids. This is the most machine-checkable clause in
+      the document and it fails against the document itself.
+
+  - id: C2
+    what: A 必须-level rule is graded down to WARNING, which the severity section says never happens.
+    quote_a: |-
+      §10: 「映射：必须 → ERROR，应 → WARNING，可以 → STYLE。唯一允许的升级：一条「应」级违规可以按
+      ERROR 报告…没有其他升级，也没有降级。」
+    quote_b: |-
+      §6: 「review 模式作为一条 finding：两种读法对应不同操作时为 ERROR，否则为 WARNING。」
+      (CTC-A005 is 必须.)
+    why_material: |-
+      Either A005 findings can be WARNING (a downgrade §10 denies), or the WARNING branch describes
+      ambiguities whose readings do not change operations — which §6's own 「不算真歧义」 paragraph and
+      §8.13 say must not be reported at all, making the branch dead text. A reviewer cannot tell
+      whether a low-impact ambiguity is a WARNING or a false positive.
+
+  - id: C3
+    what: |-
+      §4 declares itself top priority and every deviation a semantic failure, while §7 grades four of
+      the rules backing those invariants as 应 — which §10 maps to WARNING.
+    quote_a: |-
+      §4: 「**本节优先级最高。** 下列各项在改写、压缩与翻译之后必须逐项成立。任一项改变即为语义失败，
+      无论输出读起来多自然。」 — with rows 修饰结合域 → CTC-A003, 判据绑定 → CTC-P003,
+      概念与术语 → CTC-T001 / T002, 结构作用域 → CTC-R005.
+    quote_b: |-
+      §7: CTC-A003 级别「应」; CTC-P003 级别「应」; CTC-T001 级别「应」; CTC-R005 级别「应」.
+      §7: 「级别与严重级别一一对应：…**应** = 默认要求，可被更高优先级或明确边界推翻（WARNING）」
+    why_material: |-
+      The same defect — a criterion detached from its step, a modifier re-attached, a structural
+      condition flattened — is a blocking ERROR under §4 and a waivable WARNING under §7/§10. Release
+      gates built on either reading disagree.
+
+  - id: C4
+    what: |-
+      CTC-S001 contemplates deleting conditions and exceptions under a caller length cap; three other
+      passages forbid it outright.
+    quote_a: |-
+      §7 CTC-S001: 「调用方给定长度上限时，条件、例外、阈值、告警与失败分支最后删除，并在「待确认」中
+      说明删除事实。」
+    quote_b: |-
+      §7 CTC-L001 (必须): 「不得删除例外（「只读副本除外」）」
+      §2: 「更短的句子若丢掉一个条件或例外，就不是改进。」
+      §3 standard: 「**不得** — 以简洁为名删除条件、例外、阈值、默认值或受保护标记」
+      §3: 「授权改变的是允许做什么，不改变任何语义不变量的验证方式。」
+    why_material: |-
+      Under a hard length cap on a runbook — the realistic case — one branch cuts the exception with a
+      disclosure and the other refuses the cap. Nothing adjudicates, and §2's 「第 1 层不可达」 tie-break
+      would say to report rather than cut, contradicting S001's own last-resort ordering.
+
+  - id: C5
+    what: |-
+      §2's layer-2-vs-layer-4 tie-break makes non-disambiguating explicitation an R002 violation;
+      CTC-P002 requires exactly that explicitation.
+    quote_a: |-
+      §2: 「**第 2 层对第 4 层** — 显式化只有在消除了一处真实的分歧读法时才压过自然度；不消除任何分歧
+      读法的显式化是 CTC-R002 违规。」
+    quote_b: |-
+      §7 CTC-P002: 「目标文本是可执行步骤而某一步缺少动作、对象或位置时，来源或上下文中可确定的部分
+      应写出。」
+    why_material: |-
+      When a step says 「重启服务」 and only one service exists, naming it removes no divergent reading.
+      P002 requires the addition; §2 classes it as an R002 violation. Both are citable rule IDs, so
+      R001 is satisfied either way and the model has no basis to choose.
+
+  - id: C6
+    what: |-
+      §5's identifier test and §5's exclusion list classify the same tokens oppositely.
+    quote_a: |-
+      §5: 「**默认受保护，逐字符不变**：…以及含 `_`、`-`、`.` 或内部大写的标识符。」
+    quote_b: |-
+      §5: 「**不属于受保护标记**：普通中文名词短语、界面文案、章节标题、未加代码标记的产品名。」
+    why_material: |-
+      Node-RED, GitLab, PostgreSQL, Log4j, .NET, Kubernetes v1.29 — every product name that contains a
+      hyphen, a dot or an internal capital satisfies both clauses. §5 itself names the two opposite
+      damage modes (blocked legitimate rewriting vs irreversible identifier corruption) and then leaves
+      the case that produces them undecided.
+
+  - id: C7
+    what: |-
+      strict mode changes severity while both §3 and §7 assert that severity tracks level and that
+      modes do not change levels.
+    quote_a: |-
+      §3: 「模式改变的是**歧义阈值**，不是规则级别。strict 不把「应」提升为「必须」。」
+      §7: 「级别与严重级别一一对应」
+    quote_b: |-
+      §3 strict: 「A、P 两族中的「应」级规则，在遗漏会改变操作者行为时按 ERROR 处理，这改变的是触发
+      门槛，不是规则级别。」
+    why_material: |-
+      If severity corresponds one-to-one with level, then handling a 应 rule as ERROR is by definition
+      handling it as 必须. The disclaimer asserts the opposite of what the mechanism does. It also
+      conflicts in scope and condition with §10's escalation clause, which covers ANY 应 violation and
+      conditions on the 风险 field naming the divergent action, not on family membership.
+
+  - id: C8
+    what: |-
+      CTC-R005 is given three mutually incompatible characterisations — different subject matter,
+      different level, different waivability.
+    quote_a: |-
+      §7 CTC-R005 (应): 「结构保持 | 来源含 Markdown 结构时，标题层级、列表项数、表格行列…应保持其粒度…
+      调用方明确要求改变格式时按要求执行。」
+    quote_b: |-
+      §4: 「结构作用域 | 标题与父级列表项建立的条件仍管辖其子树 | 「仅用于测试环境」被拍平后，清空缓存
+      在生产环境获得授权 | CTC-R005」
+      §3 输出契约: 「保留来源的 Markdown 结构、列表粒度、代码围栏与行内代码。」(unconditional, no
+      caller exception)
+    why_material: |-
+      Flattening a table is: a waivable 应/WARNING (§7), an unconditional contract breach (§3), and a
+      semantic failure that grants production authorisation to a test-only instruction (§4). The
+      caller-format exception in §7 would, under §4's reading, let a caller authorise a semantic
+      invariant violation — which §3 says authorisation can never do.
+
+underspecified:
+  - id: cross-cutting / all rules
+    what_is_missing: |-
+      No rule is assigned to a priority-ladder layer. Only CTC-R003 states its position
+      (「本规则永远低于 S 族」).
+    what_a_reader_would_have_to_guess: |-
+      Which rule wins in every conflict other than same-layer ties and the one published 2-vs-4 case.
+      The definition of 应 — 「可被更高优先级或明确边界推翻」 — is inapplicable without a layer
+      assignment, so in practice a reader guesses that S/A/L rules are layer 1, P rules are layer 2,
+      T rules layer 3, R002/R003 layer 4 and R005/R006 layer 5 — but R005 is listed in §4 as layer 1
+      material, which breaks the guess.
+
+  - id: task 新写 (author)
+    what_is_missing: |-
+      §1 declares 新写 one of four tasks, but §7's table, §9's flow and §11's checklist are all written
+      around a 来源. Only CTC-P005 and CTC-R004 contain a 「新写时」 branch.
+    what_a_reader_would_have_to_guess: |-
+      Whether S001/S003/S004/S006/S007/L001–L004 fire at all when there is no source; whether the
+      §9 seven-step pipeline (steps 2, 5 and 7 all compare against a source skeleton) applies; and
+      what S002's 「可追溯到来源或调用上下文」 permits when the caller gave only a one-line brief.
+
+  - id: mode standard / R family
+    what_is_missing: |-
+      §3 standard's 行为 clause enumerates S/L/T and A/P and never mentions the R family.
+    what_a_reader_would_have_to_guess: |-
+      Whether R001 (minimal change) and R002/R003 (de-verbosing, de-translationese) are in force when
+      rewriting a README. Since R001 is the rule that stops the model from restyling everything, its
+      status under the most common mode is the highest-stakes gap in §3.
+
+  - id: mode strict / severity
+    what_is_missing: |-
+      What 「按 ERROR 处理」 means in a mode whose output contract is bare prose with no findings.
+    what_a_reader_would_have_to_guess: |-
+      Either that it means 「treat as non-compressible / blocking」, or that such sites must be surfaced
+      somewhere — and the only surface available, 待确认, admits four categories that do not include it.
+
+  - id: CTC-S003
+    what_is_missing: A strength ordering for Chinese modals.
+    what_a_reader_would_have_to_guess: |-
+      Whether 须/必须, 应/应当, 建议/宜, 可/可以, 不可/不得 are same-strength pairs. Six crossings are
+      forbidden by example and one pair is allowed by example; everything else is guesswork on a
+      必须-level rule.
+
+  - id: CTC-A002
+    what_is_missing: A definition of 「可及范围」 for antecedent counting.
+    what_a_reader_would_have_to_guess: |-
+      Clause, sentence, sentence pair, paragraph, list item, or section. The rule fires rarely under the
+      narrowest reading and constantly under the widest, and the widest reading forces exactly the
+      repetitive nominalisation §8.10 forbids.
+
+  - id: CTC-P003 / §3
+    what_is_missing: |-
+      A rule that creates the duty behind §3's 待确认 category 「来源从未给出的成功判据（CTC-P003）」.
+      P003's own trigger requires the source to HAVE given a criterion.
+    what_a_reader_would_have_to_guess: |-
+      Whether every step lacking an acceptance criterion must be reported, only steps in strict-mode
+      documents, or only destructive steps. The three answers differ by an order of magnitude in
+      output volume.
+
+  - id: CTC-T001
+    what_is_missing: A tie-break inside the second selection criterion 「最明确且出现最多的形式」.
+    what_a_reader_would_have_to_guess: |-
+      Which wins when the clearest form appears twice and a vaguer form appears nine times. Also the
+      boundary of 工作单位 across turns and files.
+
+  - id: CTC-P004
+    what_is_missing: |-
+      Whether the destructive-operation list 「（删除、DROP、覆盖、重启、扩缩容、发布、回滚、密钥轮换、
+      清空缓存）」 is closed. It carries no 等.
+    what_a_reader_would_have_to_guess: |-
+      Whether TRUNCATE, DNS cutover, certificate replacement, token revocation, quota reduction,
+      schema migration and 「关闭只读模式」 are guarded operations. Also whether an adjacent callout
+      block satisfies 「紧邻的上一句」.
+
+  - id: CTC-R004
+    what_is_missing: Whether the 无判据词 list is closed, and what level the rule really carries.
+    what_a_reader_would_have_to_guess: |-
+      Whether 及时、尽快、酌情、视情况、充分、必要的 count. And whether §6's 「必须报告…并给出建议」
+      overrides §7's 应, given that §3's 待确认 format has no field for a 建议.
+
+  - id: authorisation set
+    what_is_missing: |-
+      §3 fixes the caller-authorisable changes at four and says 「未获授权的同类改动一律不得做」, but
+      CTC-R005 adds 「调用方明确要求改变格式时按要求执行」 and §5 adds appending strings to the
+      protected set.
+    what_a_reader_would_have_to_guess: |-
+      Whether the four-item list is exhaustive. If it is, R005's format exception is void; if it is
+      not, the phrase 「四类」 carries no force and the caller may authorise anything.
+
+  - id: CTC-S001 / §8.11
+    what_is_missing: The boundary between 「纯修饰成分」 (deletable) and 「软限定词」 (not deletable).
+    what_a_reader_would_have_to_guess: |-
+      Whether 「通常」「预计」「大致」「一般」 are modifiers or modality carriers. S001 permits deleting the
+      first class; §8.11 and S003/S006 forbid deleting the second; the two classes are described in
+      grammatical terms that overlap.
+
+  - id: review / STYLE volume
+    what_is_missing: A cap on STYLE findings when other findings exist.
+    what_a_reader_would_have_to_guess: |-
+      §10 caps STYLE observations at three only for the 「未发现违规」 case. Whether a review with two
+      ERRORs may also carry forty STYLE findings is unstated, and 「不得…为显得周全而制造 finding」 is
+      an intent test, not an observable one.
+
+self_demonstration:
+  violations:
+    - line_quote: |-
+        §12 执行者删除 — 来源：「存储管理机制会在磁盘空间不足时把旧快照数据销毁。」
+        正例：「磁盘空间不足时，存储管理机制会清理旧快照。」
+      rule_it_violates: CTC-R001, CTC-T002, CTC-S001 (and §6's 「既消歧又替换关键动词」 prohibition)
+      why: |-
+        The example is about restoring a deleted executor. Its 正例 silently also changes 销毁 to 清理
+        and 旧快照数据 to 旧快照. 销毁 (destroy) and 清理 (clean up) are exactly the kind of near-synonym
+        pair T002 says may not be merged without confirming co-reference, and the verb was in fact
+        inherited from the 反例 rather than restored from the source — the precise failure mode the
+        document warns about. Neither edit is attributable to any rule, and bundling an unrelated verb
+        change with the demonstrated fix is what §6 and R001 both forbid.
+
+    - line_quote: |-
+        §10 finding 示例 — 位置：「确认数据备份完成，且所有从节点已与主节点数据同步。」
+        建议修改：「确保数据已备份，且所有从节点已同步主节点数据。」
+      rule_it_violates: CTC-R001, and arguably CTC-A001 / §2 layer 1 (施事—动作—受事关系)
+      why: |-
+        The finding is a CTC-S003 modality finding; only 确认 -> 确保 is licensed by it. The 建议修改
+        additionally rewrites 数据备份完成 -> 数据已备份 and, more seriously, 已与主节点数据同步 ->
+        已同步主节点数据 — turning a comitative relation (in sync WITH the master's data) into a
+        transitive one (has synchronised the master's data), which is a predicate-argument change. This
+        is the document's own model answer for how a finding should look, and it demonstrates the
+        multi-edit bundling R001 prohibits inside a field whose whole purpose is auditable
+        one-rule-one-change review.
+
+    - line_quote: |-
+        §12 例外删除 — 来源：「所有实例都需重启，只读副本除外。」
+        正例：「除只读副本外，所有实例都需重启。」
+      rule_it_violates: CTC-R001
+      why: |-
+        The source was already compliant; the 反例 was the defect. Under the document's own
+        过度编辑 example the correct 正例 is 原样返回. Instead the exception is moved to the front with
+        no rule triggered — 「更清楚」 is not a rule ID.
+
+    - line_quote: |-
+        §3 strict: 「只要存在一种**合理的**操作者读法会导致不同动作，即按分歧读法处理。」
+      rule_it_violates: CTC-R004
+      why: |-
+        「合理」 is on R004's own list of criterion-free words, and here it carries the decision
+        condition of the strict-mode ambiguity gate — a normative instruction in an agent-instruction
+        document, i.e. exactly R004's trigger. Related instances: §3 standard's 「普通技术读者会就此产生
+        分歧」 (undefined judge), §7 A003's 「正常的中文多层定语」, §7 T001's 「最明确且出现最多的形式」,
+        §2's 「两个候选改动在同一层上等价时」, §5's 「会挡住正当改写」, §10's 「为显得周全而制造 finding」.
+        None supplies an observable threshold.
+
+    - line_quote: |-
+        §9 步骤 7: 「自述无效——在一次明确要求保持语义、且逐条自称语义未变的渲染中，仍有六处语义被改变。」
+      rule_it_violates: CTC-S002
+      why: |-
+        A specific empirical claim with a count and no traceable source, presented inside a normative
+        document. S002 forbids exactly this class of addition (「不得补写频率断言…未经说明的失败原因」),
+        and the reader has no way to distinguish it from a figure of speech.
+
+    - line_quote: |-
+        §5: 「技术数值经常被复制进单位由字段名固定的配置项，而文档通常不说明哪些值是这样的。」
+      rule_it_violates: CTC-S002 (frequency assertions)
+      why: |-
+        「经常」 and 「通常」 are the two frequency markers S002 names as forbidden additions. The clause
+        is the sole justification offered for the no-conversion rule, so the rule's rationale rests on
+        the kind of claim the rule set treats as unsupported.
+
+    - line_quote: |-
+        §7 preamble: 「**CTC-R001 约束全部六族的应用方式**：无规则触发即无改动。」
+        §7 CTC-R001 row: 「**本规则约束全部六族的应用方式。**」
+      rule_it_violates: CTC-S001 (「只可删除同一断言的重复表述」) / CTC-R002
+      why: |-
+        The same normative sentence appears twice within one section — a repeated expression of one
+        assertion, the category S001 identifies as the only safely deletable material. §8 then restates
+        §7 a third time as a fifteen-item prose list, and §11 restates §4 a fourth time as a checklist.
+        Four parallel statements of one rule set is exactly the structure that produced contradictions
+        C3 and C8: §4 and §7 have already drifted apart on four rules' levels.
+
+    - line_quote: |-
+        §11: 「1. 来源的每条独立断言，我都能在输出中定位吗？ 2. 输出中的每条命题，我都能指出它在来源或
+        调用上下文的哪一处吗？」
+      rule_it_violates: CTC-R002 / §8.1 (机械重复的主语)
+      why: |-
+        Adjacent items repeat the subject 我 with a single, unchanging actor and no alternation — the
+        exact configuration §8.1 says a topic chain should absorb. Items 3–6, 8 and 12 in the same list
+        drop it, so the repetition is not even a consistent register choice.
+
+    - line_quote: |-
+        §2 layer 1: 「输出所断言的命题、情态强度与言语行为类型、条件与例外、数值与阈值、因果强度、时序、
+        施事—动作—受事关系、受保护标记，都与来源相同」
+      rule_it_violates: Priority layer 2 (操作清晰度) — a 55-character subject before its predicate
+      why: |-
+        Layer 2's own test is that 「合格读者无需猜测即可判断」. An eight-item coordinate subject deferring
+        its predicate to the end is the construction the document elsewhere warns about as 过长的「的」
+        字串 territory; a reader must hold all eight items open. Not a rule violation in the strict
+        sense, but the document's own clarity standard applied to its own definition of that standard.
+
+  assessment: |-
+    Mixed, and the failures cluster where they matter most.
+
+    Where SKILL.md obeys itself well: it does not demand overt subjects, it does not split clauses one
+    verb per line, its passives are motivated, it avoids 进行／作出／予以 nominalisation almost entirely,
+    it keeps its numbers in surface form, its code-marked tokens are consistent, and its tables preserve
+    structure rather than flattening into prose. The register is dense but genuinely Chinese-native;
+    there is no visible translationese.
+
+    Where it does not: (1) three of its seven worked 正例 in §12 and its single worked finding in §10
+    contain unattributed edits — the document's own demonstrations of minimal, attributable change are
+    not minimal or attributable. Since these examples are the highest-signal training material in the
+    file, they teach the opposite of R001. (2) Its normative gates are hung on criterion-free words
+    (合理、正常、普通技术读者、最明确、等价) that R004 forbids in exactly this document type. (3) It states
+    its rule set four times — §4 table, §7 table, §8 prose list, §11 checklist — and the copies have
+    already diverged on the levels of A003, P003, T001 and R005 and on what R005 is even about. A
+    document whose central claim is that redundant restatement destroys semantic control demonstrates
+    that claim on itself.
+
+    The pseudo-legal register (不得 / 一律 / 未获授权…不得做) is defensible here — this IS a normative
+    document — but §2 lists 无伪法律赘语 as a property of good technical Chinese without exempting
+    normative text, so by its own layer-4 standard the document scores against itself.

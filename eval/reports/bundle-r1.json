@@ -1,0 +1,3835 @@
+[
+  {
+    "case_id": "G-A-001",
+    "model": "claude",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 上游实例熔断\n\n1. 网关连续 5 次收到上游实例返回的 `503`，判定该实例不健康。\n2. 网关将不健康事件上报调度器，随后把该实例从负载均衡池中摘除。\n3. 摘除后 60 秒内不再向该实例转发请求。\n",
+    "output": "## 上游实例熔断\n\n1. 网关连续 5 次收到上游实例返回的 `503`，判定该实例不健康。\n2. 网关将不健康事件上报调度器，随后把该实例从负载均衡池中摘除。\n3. 摘除后 60 秒内不再向该实例转发请求。\n\n待确认\n- 第 2 步「随后把该实例从负载均衡池中摘除」 | 摘除动作的执行者省略，可读作「网关摘除」或「调度器摘除」，两种读法指向不同组件 | 执行摘除的组件（网关／调度器）",
+    "invariants": [
+      {
+        "kind": "actor",
+        "detail": "第 2 步「随后把该实例从负载均衡池中摘除」的施事在源文中不可唯一确定：既可读作承前省略的\n「网关」，也可读作刚刚提及的「调度器」——负载均衡池归谁管辖源文没有说明。输出可以原样保留\n该句，也可以显式标注此处施事待作者确认（例如加注「〔待确认：摘除由网关还是调度器执行〕」）；\n若输出把其中任何一方写成确定施事而源文未提供依据，判为凭空补全事实。\n"
+      },
+      {
+        "kind": "actor",
+        "detail": "第 1、2 步已显式出现的施事「网关」不得被删除，也不得改写为无施事的被动句\n（如「该实例被判定为不健康」「不健康事件被上报」）。熔断排障需要知道是哪个组件做的判定。\n"
+      },
+      {
+        "kind": "procedure",
+        "detail": "第 3 步的「摘除后 60 秒内不再转发」是摘除动作的结果约束，不得改写为摘除的前置条件\n（如「摘除前须停止转发 60 秒」）。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-A-001",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 上游实例熔断\n\n1. 网关连续 5 次收到上游实例返回的 `503`，判定该实例不健康。\n2. 网关将不健康事件上报调度器，随后把该实例从负载均衡池中摘除。\n3. 摘除后 60 秒内不再向该实例转发请求。\n",
+    "output": "## 上游实例熔断\n\n1. 网关连续 5 次收到上游实例返回的 `503`，判定该实例不健康。\n2. 网关将不健康事件上报调度器，随后把该实例从负载均衡池中摘除。\n3. 摘除后 60 秒内不再向该实例转发请求。",
+    "invariants": [
+      {
+        "kind": "actor",
+        "detail": "第 2 步「随后把该实例从负载均衡池中摘除」的施事在源文中不可唯一确定：既可读作承前省略的\n「网关」，也可读作刚刚提及的「调度器」——负载均衡池归谁管辖源文没有说明。输出可以原样保留\n该句，也可以显式标注此处施事待作者确认（例如加注「〔待确认：摘除由网关还是调度器执行〕」）；\n若输出把其中任何一方写成确定施事而源文未提供依据，判为凭空补全事实。\n"
+      },
+      {
+        "kind": "actor",
+        "detail": "第 1、2 步已显式出现的施事「网关」不得被删除，也不得改写为无施事的被动句\n（如「该实例被判定为不健康」「不健康事件被上报」）。熔断排障需要知道是哪个组件做的判定。\n"
+      },
+      {
+        "kind": "procedure",
+        "detail": "第 3 步的「摘除后 60 秒内不再转发」是摘除动作的结果约束，不得改写为摘除的前置条件\n（如「摘除前须停止转发 60 秒」）。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-A-001",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 上游实例熔断\n\n1. 网关连续 5 次收到上游实例返回的 `503`，判定该实例不健康。\n2. 网关将不健康事件上报调度器，随后把该实例从负载均衡池中摘除。\n3. 摘除后 60 秒内不再向该实例转发请求。\n",
+    "output": "## 上游实例熔断\n\n1. 网关连续 5 次收到上游实例返回的 `503`，判定该实例不健康。\n2. 网关将不健康事件上报调度器，随后把该实例从负载均衡池中摘除。\n3. 摘除后 60 秒内不再向该实例转发请求。",
+    "invariants": [
+      {
+        "kind": "actor",
+        "detail": "第 2 步「随后把该实例从负载均衡池中摘除」的施事在源文中不可唯一确定：既可读作承前省略的\n「网关」，也可读作刚刚提及的「调度器」——负载均衡池归谁管辖源文没有说明。输出可以原样保留\n该句，也可以显式标注此处施事待作者确认（例如加注「〔待确认：摘除由网关还是调度器执行〕」）；\n若输出把其中任何一方写成确定施事而源文未提供依据，判为凭空补全事实。\n"
+      },
+      {
+        "kind": "actor",
+        "detail": "第 1、2 步已显式出现的施事「网关」不得被删除，也不得改写为无施事的被动句\n（如「该实例被判定为不健康」「不健康事件被上报」）。熔断排障需要知道是哪个组件做的判定。\n"
+      },
+      {
+        "kind": "procedure",
+        "detail": "第 3 步的「摘除后 60 秒内不再转发」是摘除动作的结果约束，不得改写为摘除的前置条件\n（如「摘除前须停止转发 60 秒」）。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-A-002",
+    "model": "claude",
+    "task": "review",
+    "mode": "review",
+    "source": "### `auto_renew`\n\n类型：布尔。默认 `false`。\n\n开启后，证书到期前 7 天由续期服务向 CA 发起续期请求；续期失败时通知租户管理员并回滚到上一版本证书。\n",
+    "output": "规则：CTC-A005\n严重级别：ERROR\n位置：「续期失败时通知租户管理员并回滚到上一版本证书」\n问题：在「续期失败」这一前提下，「回滚到上一版本证书」至少有两种读法：一是新证书已签发或已下发、失败发生在后续阶段，此时撤回到失败前生效的证书；二是无论失败发生在哪个阶段，都把生效证书置为上一版本。来源未给出续期流程的阶段划分，也未说明失败点与回滚的对应关系，无法判定。\n风险：按第二种读法，续期失败会导致当前已生效的证书被替换为上一版本；若上一版本已过期或已吊销，租户侧将出现证书失效，而按第一种读法不会发生任何证书替换。租户据此决定是否开启该参数、以及收到通知后是否需要人工介入，两种读法对应不同处置。\n建议修改：保留原表述，不做消歧改写；需确认回滚的触发阶段，以及「上一版本证书」指失败前生效的证书还是证书历史中的前一版本。\n\n规则：CTC-A005\n严重级别：WARNING\n位置：「证书到期前 7 天由续期服务向 CA 发起续期请求」\n问题：「到期前 7 天」可读作到期前第 7 天这一时点发起一次，也可读作进入「距到期不足 7 天」的窗口后发起。来源未给出发起次数与失败后是否重试，两种读法无法由上下文排除。\n风险：按时点读法，租户会预期只有一次续期尝试并据此安排变更冻结窗口；按窗口读法则会预期窗口内持续尝试。两种预期下的人工介入时机不同。\n建议修改：保留原表述；需确认续期发起的是单次时点还是 7 天窗口，以及窗口内失败后是否重试。",
+    "invariants": [
+      {
+        "kind": "instruction",
+        "detail": "输出须是问题清单（含位置、问题、风险、修改建议），不得返回整段改写后的参数说明。\n若输出的主体是重写文本——即使重写本身正确——判为失败。\n"
+      },
+      {
+        "kind": "actor",
+        "detail": "清单须指出「回滚到上一版本证书」的执行方不可确定：既可读作续期服务自动回滚，也可读作由被\n通知的租户管理员手动回滚，二者决定该功能是否需要人工介入。若清单只给出一种「正确写法」而\n不说明源文无法判定，判为擅自决定。\n"
+      },
+      {
+        "kind": "over-edit",
+        "detail": "「由续期服务向 CA 发起续期请求」的施事已明确，不得作为施事缺失或被动语态问题报告；\n报告它判为误报（§17.3 不奖励无谓显式化）。\n"
+      }
+    ],
+    "expected_issues": [
+      {
+        "category": "actor-omission-ambiguous",
+        "rule": "CTC-A005",
+        "severity": "ERROR",
+        "locus": "通知租户管理员并回滚到上一版本证书"
+      }
+    ],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-A-002",
+    "model": "gemini",
+    "task": "review",
+    "mode": "review",
+    "source": "### `auto_renew`\n\n类型：布尔。默认 `false`。\n\n开启后，证书到期前 7 天由续期服务向 CA 发起续期请求；续期失败时通知租户管理员并回滚到上一版本证书。\n",
+    "output": "规则：CTC-A005\n严重级别：ERROR\n位置：「续期失败时通知租户管理员并回滚到上一版本证书。」\n问题：在向 CA 发起续期请求阶段（证书到期前 7 天），新证书尚未签发与部署，当前证书仍处于有效期内。「回滚到上一版本证书」存在严重的操作逻辑歧义与概念矛盾：若按字面含义回滚至上一版本（已过期或废弃的历史证书），将破坏现有可用环境；若实际意图为「保持当前证书继续生效」或「新证书部署校验失败时回滚」，则表述与当前触发时序不符。\n风险：自动化程序或运维人员若按字面逻辑执行回滚操作，将导致服务切换至已过期的旧证书，引发 TLS 握手失败与线上业务中断。\n建议修改：明确续期失败时的实际状态与处置动作（例如：续期失败时通知租户管理员，保持当前证书继续生效并在到期前重试）。",
+    "invariants": [
+      {
+        "kind": "instruction",
+        "detail": "输出须是问题清单（含位置、问题、风险、修改建议），不得返回整段改写后的参数说明。\n若输出的主体是重写文本——即使重写本身正确——判为失败。\n"
+      },
+      {
+        "kind": "actor",
+        "detail": "清单须指出「回滚到上一版本证书」的执行方不可确定：既可读作续期服务自动回滚，也可读作由被\n通知的租户管理员手动回滚，二者决定该功能是否需要人工介入。若清单只给出一种「正确写法」而\n不说明源文无法判定，判为擅自决定。\n"
+      },
+      {
+        "kind": "over-edit",
+        "detail": "「由续期服务向 CA 发起续期请求」的施事已明确，不得作为施事缺失或被动语态问题报告；\n报告它判为误报（§17.3 不奖励无谓显式化）。\n"
+      }
+    ],
+    "expected_issues": [
+      {
+        "category": "actor-omission-ambiguous",
+        "rule": "CTC-A005",
+        "severity": "ERROR",
+        "locus": "通知租户管理员并回滚到上一版本证书"
+      }
+    ],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-A-002",
+    "model": "gpt",
+    "task": "review",
+    "mode": "review",
+    "source": "### `auto_renew`\n\n类型：布尔。默认 `false`。\n\n开启后，证书到期前 7 天由续期服务向 CA 发起续期请求；续期失败时通知租户管理员并回滚到上一版本证书。\n",
+    "output": "规则：CTC-A005  \n严重级别：ERROR  \n位置：「续期失败时」  \n问题：「续期失败」未说明是指 CA 请求失败、证书签发失败，还是后续验证或部署失败。  \n风险：不同组件可能在不同阶段触发通知和回滚，导致执行行为不一致。  \n建议修改：明确判定续期失败的阶段与可观测条件。\n\n规则：CTC-A005  \n严重级别：ERROR  \n位置：「回滚到上一版本证书」  \n问题：「上一版本证书」的参照版本不明确，可能指续期前正在使用的证书，也可能指该证书之前的版本；首次续期时是否存在回滚目标也未说明。  \n风险：系统可能选择错误的证书版本，或在没有上一版本时执行未定义的回滚。  \n建议修改：明确回滚目标的参照版本，以及不存在该版本时的行为。",
+    "invariants": [
+      {
+        "kind": "instruction",
+        "detail": "输出须是问题清单（含位置、问题、风险、修改建议），不得返回整段改写后的参数说明。\n若输出的主体是重写文本——即使重写本身正确——判为失败。\n"
+      },
+      {
+        "kind": "actor",
+        "detail": "清单须指出「回滚到上一版本证书」的执行方不可确定：既可读作续期服务自动回滚，也可读作由被\n通知的租户管理员手动回滚，二者决定该功能是否需要人工介入。若清单只给出一种「正确写法」而\n不说明源文无法判定，判为擅自决定。\n"
+      },
+      {
+        "kind": "over-edit",
+        "detail": "「由续期服务向 CA 发起续期请求」的施事已明确，不得作为施事缺失或被动语态问题报告；\n报告它判为误报（§17.3 不奖励无谓显式化）。\n"
+      }
+    ],
+    "expected_issues": [
+      {
+        "category": "actor-omission-ambiguous",
+        "rule": "CTC-A005",
+        "severity": "ERROR",
+        "locus": "通知租户管理员并回滚到上一版本证书"
+      }
+    ],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-A-003",
+    "model": "claude",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 备库提升（单人值班执行）\n\n1. 停止写入流量，等待 `replication_lag` 降至 0。\n2. 执行 `pg_ctl promote` 提升备库。\n3. 修改 `pgbouncer.ini` 中的 `host` 指向新主库，并 reload `pgbouncer`。\n4. 在 `#oncall` 频道同步切换结果。\n",
+    "output": "## 备库提升（单人值班执行）\n\n1. 停止写入流量，等待 `replication_lag` 降至 0。\n2. 执行 `pg_ctl promote` 提升备库。\n3. 修改 `pgbouncer.ini` 中的 `host` 指向新主库，并 reload `pgbouncer`。\n4. 在 `#oncall` 频道同步切换结果。\n\n待确认\n- 步骤 2 | 未给出提升成功的确认方式，无法判断能否继续执行步骤 3 | 确认备库已成为主库的判据（命令或状态输出）\n- 步骤 3 | 未给出 reload 后的确认方式 | 确认 `pgbouncer` 已将连接指向新主库的判据",
+    "invariants": [
+      {
+        "kind": "actor",
+        "detail": "全篇只有一个施事：标题已注明「单人值班执行」，四步都是发给该值班人的祈使句，不存在第二个\n可能的执行方。输出若为任一步补写显式主语（「值班工程师须」「运维人员需要」「你应当」等），\n判为无消歧价值的显式化：源文没有施事歧义可消。\n"
+      },
+      {
+        "kind": "procedure",
+        "detail": "步骤数须保持 4。每一步已是一个完整操作目标，输出若按「一句一动词」拆分（例如把第 3 步拆成\n「修改 host」与「reload pgbouncer」两步），判为过度切分。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`replication_lag`、`pg_ctl promote`、`pgbouncer.ini`、`host`、`pgbouncer`、`#oncall`\n须逐字出现在输出中。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-A-003",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 备库提升（单人值班执行）\n\n1. 停止写入流量，等待 `replication_lag` 降至 0。\n2. 执行 `pg_ctl promote` 提升备库。\n3. 修改 `pgbouncer.ini` 中的 `host` 指向新主库，并 reload `pgbouncer`。\n4. 在 `#oncall` 频道同步切换结果。\n",
+    "output": "## 备库提升（单人值班执行）\n\n1. 停止写入流量，等待 `replication_lag` 降至 0。\n2. 执行 `pg_ctl promote` 提升备库。\n3. 修改 `pgbouncer.ini` 中的 `host` 指向新主库，并 reload `pgbouncer`。\n4. 在 `#oncall` 频道同步切换结果。",
+    "invariants": [
+      {
+        "kind": "actor",
+        "detail": "全篇只有一个施事：标题已注明「单人值班执行」，四步都是发给该值班人的祈使句，不存在第二个\n可能的执行方。输出若为任一步补写显式主语（「值班工程师须」「运维人员需要」「你应当」等），\n判为无消歧价值的显式化：源文没有施事歧义可消。\n"
+      },
+      {
+        "kind": "procedure",
+        "detail": "步骤数须保持 4。每一步已是一个完整操作目标，输出若按「一句一动词」拆分（例如把第 3 步拆成\n「修改 host」与「reload pgbouncer」两步），判为过度切分。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`replication_lag`、`pg_ctl promote`、`pgbouncer.ini`、`host`、`pgbouncer`、`#oncall`\n须逐字出现在输出中。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-A-003",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 备库提升（单人值班执行）\n\n1. 停止写入流量，等待 `replication_lag` 降至 0。\n2. 执行 `pg_ctl promote` 提升备库。\n3. 修改 `pgbouncer.ini` 中的 `host` 指向新主库，并 reload `pgbouncer`。\n4. 在 `#oncall` 频道同步切换结果。\n",
+    "output": "## 备库提升（单人值班执行）\n\n1. 停止写入流量，等待 `replication_lag` 降至 0。\n2. 执行 `pg_ctl promote` 提升备库。\n3. 修改 `pgbouncer.ini` 中的 `host` 指向新主库，并 reload `pgbouncer`。\n4. 在 `#oncall` 频道同步切换结果。",
+    "invariants": [
+      {
+        "kind": "actor",
+        "detail": "全篇只有一个施事：标题已注明「单人值班执行」，四步都是发给该值班人的祈使句，不存在第二个\n可能的执行方。输出若为任一步补写显式主语（「值班工程师须」「运维人员需要」「你应当」等），\n判为无消歧价值的显式化：源文没有施事歧义可消。\n"
+      },
+      {
+        "kind": "procedure",
+        "detail": "步骤数须保持 4。每一步已是一个完整操作目标，输出若按「一句一动词」拆分（例如把第 3 步拆成\n「修改 host」与「reload pgbouncer」两步），判为过度切分。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`replication_lag`、`pg_ctl promote`、`pgbouncer.ini`、`host`、`pgbouncer`、`#oncall`\n须逐字出现在输出中。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-A-004",
+    "model": "claude",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 工作节点失联处理\n\n调度器检测到工作节点心跳超时后，会将其上运行中的任务重新入队，并将其状态标记为 `失败`。\n重新入队的任务将在下一轮调度中分配给其他节点。\n",
+    "output": "## 工作节点失联处理\n\n调度器检测到工作节点心跳超时后，会将其上运行中的任务重新入队，并将其状态标记为 `失败`。\n重新入队的任务将在下一轮调度中分配给其他节点。\n\n待确认\n- 并将其状态标记为 `失败` | 「其」在可及范围内有两个先行词，可读作「将工作节点状态标记为 `失败`」或「将重新入队的任务状态标记为 `失败`」，两种读法对应不同的标记对象 | 被标记为 `失败` 的对象是工作节点还是任务",
+    "invariants": [
+      {
+        "kind": "reference",
+        "detail": "第二个「其」的先行词在源文中不唯一：可指「工作节点」（把节点置为失败），也可指「其上运行\n中的任务」的本次执行（把该次执行置为失败）。两种读法在调度系统中都成立，第二句「重新入队\n的任务将在下一轮调度中分配给其他节点」也没有排除任何一种。输出若写成「将该节点状态标记为\n`失败`」或「将这些任务的状态标记为 `失败`」而未标注不确定，判为擅自消歧。\n"
+      },
+      {
+        "kind": "reference",
+        "detail": "第一个「其上运行中的任务」中的「其」先行词唯一（工作节点），不构成歧义。输出若把它一并改写\n为待确认项、或替换成重复的长名词短语（如「心跳超时的那个工作节点上运行中的任务」），\n判为过度改写。\n"
+      },
+      {
+        "kind": "actor",
+        "detail": "施事「调度器」在源文中明确，不得删除，也不得改写为无施事被动句\n（如「工作节点心跳超时后，其上运行中的任务会被重新入队」）。\n排查任务重复执行时，需要知道重新入队是调度器发起的。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-A-004",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 工作节点失联处理\n\n调度器检测到工作节点心跳超时后，会将其上运行中的任务重新入队，并将其状态标记为 `失败`。\n重新入队的任务将在下一轮调度中分配给其他节点。\n",
+    "output": "## 工作节点失联处理\n\n调度器检测到工作节点心跳超时后，会将其上运行中的任务重新入队，并将其状态标记为 `失败`。\n重新入队的任务将在下一轮调度中分配给其他节点。\n\n待确认\n- 并将其状态标记为 `失败` | 「其」指代存在歧义，可指工作节点或运行中的任务 | 状态标记为 `失败` 的具体对象（工作节点／任务）",
+    "invariants": [
+      {
+        "kind": "reference",
+        "detail": "第二个「其」的先行词在源文中不唯一：可指「工作节点」（把节点置为失败），也可指「其上运行\n中的任务」的本次执行（把该次执行置为失败）。两种读法在调度系统中都成立，第二句「重新入队\n的任务将在下一轮调度中分配给其他节点」也没有排除任何一种。输出若写成「将该节点状态标记为\n`失败`」或「将这些任务的状态标记为 `失败`」而未标注不确定，判为擅自消歧。\n"
+      },
+      {
+        "kind": "reference",
+        "detail": "第一个「其上运行中的任务」中的「其」先行词唯一（工作节点），不构成歧义。输出若把它一并改写\n为待确认项、或替换成重复的长名词短语（如「心跳超时的那个工作节点上运行中的任务」），\n判为过度改写。\n"
+      },
+      {
+        "kind": "actor",
+        "detail": "施事「调度器」在源文中明确，不得删除，也不得改写为无施事被动句\n（如「工作节点心跳超时后，其上运行中的任务会被重新入队」）。\n排查任务重复执行时，需要知道重新入队是调度器发起的。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-A-004",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 工作节点失联处理\n\n调度器检测到工作节点心跳超时后，会将其上运行中的任务重新入队，并将其状态标记为 `失败`。\n重新入队的任务将在下一轮调度中分配给其他节点。\n",
+    "output": "## 工作节点失联处理\n\n调度器检测到工作节点心跳超时后，会将其上运行中的任务重新入队，并将其状态标记为 `失败`。\n重新入队的任务将在下一轮调度中分配给其他节点。\n\n待确认\n- 「将其状态标记为 `失败`」 | 「其」可指工作节点，也可指重新入队的任务 | 需确认被标记为 `失败` 的对象",
+    "invariants": [
+      {
+        "kind": "reference",
+        "detail": "第二个「其」的先行词在源文中不唯一：可指「工作节点」（把节点置为失败），也可指「其上运行\n中的任务」的本次执行（把该次执行置为失败）。两种读法在调度系统中都成立，第二句「重新入队\n的任务将在下一轮调度中分配给其他节点」也没有排除任何一种。输出若写成「将该节点状态标记为\n`失败`」或「将这些任务的状态标记为 `失败`」而未标注不确定，判为擅自消歧。\n"
+      },
+      {
+        "kind": "reference",
+        "detail": "第一个「其上运行中的任务」中的「其」先行词唯一（工作节点），不构成歧义。输出若把它一并改写\n为待确认项、或替换成重复的长名词短语（如「心跳超时的那个工作节点上运行中的任务」），\n判为过度改写。\n"
+      },
+      {
+        "kind": "actor",
+        "detail": "施事「调度器」在源文中明确，不得删除，也不得改写为无施事被动句\n（如「工作节点心跳超时后，其上运行中的任务会被重新入队」）。\n排查任务重复执行时，需要知道重新入队是调度器发起的。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-A-005",
+    "model": "claude",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 每日快照归档\n\n1. 代理在本地生成数据库快照，并计算 SHA-256 校验和。\n2. 代理将快照上传至 `s3://backup-prod/daily/`，上传完成后重新计算校验和并与步骤 1 的结果比对。\n3. 校验和不一致时删除它，并重新执行本任务。\n",
+    "output": "## 每日快照归档\n\n1. 代理在本地生成数据库快照，并计算 SHA-256 校验和。\n2. 代理将快照上传至 `s3://backup-prod/daily/`，上传完成后重新计算校验和并与步骤 1 的结果比对。\n3. 校验和不一致时删除它，并重新执行本任务。\n\n待确认\n- 校验和不一致时删除它 | 「它」在可及范围内有多个先行词，可读作删除本地快照，也可读作删除已上传至 `s3://backup-prod/daily/` 的快照对象 | 需确认删除对象是本地快照、已上传对象，还是两者",
+    "invariants": [
+      {
+        "kind": "reference",
+        "detail": "第 3 步「删除它」的先行词在源文中不可唯一确定：可指本地快照，也可指已上传到\n`s3://backup-prod/daily/` 的对象。两者后果不同——删本地副本意味着重新导出，删远端对象\n意味着当日归档暂时缺失。输出若指定其中之一而源文无依据，判为凭空补全事实；保留原句或\n显式标注待确认均可接受。\n"
+      },
+      {
+        "kind": "procedure",
+        "detail": "「重新执行本任务」指重跑步骤 1–3（含重新生成快照）。输出不得收窄为「重新上传」\n或「重新计算校验和」，那会跳过快照生成，遇到本地快照损坏时永远无法自愈。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`s3://backup-prod/daily/` 与 SHA-256 须逐字保留，不得改成 `s3://backup-prod/daily`\n或「SHA256」。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-A-005",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 每日快照归档\n\n1. 代理在本地生成数据库快照，并计算 SHA-256 校验和。\n2. 代理将快照上传至 `s3://backup-prod/daily/`，上传完成后重新计算校验和并与步骤 1 的结果比对。\n3. 校验和不一致时删除它，并重新执行本任务。\n",
+    "output": "## 每日快照归档\n\n1. 代理在本地生成数据库快照，并计算 SHA-256 校验和。\n2. 代理将快照上传至 `s3://backup-prod/daily/`，上传完成后重新计算校验和并与步骤 1 的结果比对。\n3. 校验和不一致时删除它，并重新执行本任务。\n\n待确认\n- 删除它 | 「它」指代对象不明，可指向本地快照、S3 上的快照或两者 | 待删除的具体对象（本地快照／S3 上的快照／两者均删除）",
+    "invariants": [
+      {
+        "kind": "reference",
+        "detail": "第 3 步「删除它」的先行词在源文中不可唯一确定：可指本地快照，也可指已上传到\n`s3://backup-prod/daily/` 的对象。两者后果不同——删本地副本意味着重新导出，删远端对象\n意味着当日归档暂时缺失。输出若指定其中之一而源文无依据，判为凭空补全事实；保留原句或\n显式标注待确认均可接受。\n"
+      },
+      {
+        "kind": "procedure",
+        "detail": "「重新执行本任务」指重跑步骤 1–3（含重新生成快照）。输出不得收窄为「重新上传」\n或「重新计算校验和」，那会跳过快照生成，遇到本地快照损坏时永远无法自愈。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`s3://backup-prod/daily/` 与 SHA-256 须逐字保留，不得改成 `s3://backup-prod/daily`\n或「SHA256」。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-A-005",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 每日快照归档\n\n1. 代理在本地生成数据库快照，并计算 SHA-256 校验和。\n2. 代理将快照上传至 `s3://backup-prod/daily/`，上传完成后重新计算校验和并与步骤 1 的结果比对。\n3. 校验和不一致时删除它，并重新执行本任务。\n",
+    "output": "## 每日快照归档\n\n1. 代理在本地生成数据库快照，并计算 SHA-256 校验和。\n2. 代理将快照上传至 `s3://backup-prod/daily/`，上传完成后重新计算校验和并与步骤 1 的结果比对。\n3. 校验和不一致时删除它，并重新执行本任务。\n\n待确认\n\n- 步骤 3「删除它」 | 「它」可指快照或校验和 | 需确认删除对象",
+    "invariants": [
+      {
+        "kind": "reference",
+        "detail": "第 3 步「删除它」的先行词在源文中不可唯一确定：可指本地快照，也可指已上传到\n`s3://backup-prod/daily/` 的对象。两者后果不同——删本地副本意味着重新导出，删远端对象\n意味着当日归档暂时缺失。输出若指定其中之一而源文无依据，判为凭空补全事实；保留原句或\n显式标注待确认均可接受。\n"
+      },
+      {
+        "kind": "procedure",
+        "detail": "「重新执行本任务」指重跑步骤 1–3（含重新生成快照）。输出不得收窄为「重新上传」\n或「重新计算校验和」，那会跳过快照生成，遇到本地快照损坏时永远无法自愈。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`s3://backup-prod/daily/` 与 SHA-256 须逐字保留，不得改成 `s3://backup-prod/daily`\n或「SHA256」。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-A-006",
+    "model": "claude",
+    "task": "rewrite",
+    "mode": "standard",
+    "source": "### `POST /v2/ingest/batch`\n\n接收一个最多包含 500 条记录的数组。若其中任意一条记录未通过 Schema 校验，该请求整体失败，\n且不写入任何记录。校验失败的下标在响应体 `errors[].index` 中返回。\n",
+    "output": "### `POST /v2/ingest/batch`\n\n接收一个最多包含 500 条记录的数组。若其中任意一条记录未通过 Schema 校验，该请求整体失败，\n且不写入任何记录。校验失败的下标在响应体 `errors[].index` 中返回。",
+    "invariants": [
+      {
+        "kind": "reference",
+        "detail": "「其中」的先行词唯一（前句的数组），「该请求」的先行词唯一（本次 `POST /v2/ingest/batch`\n请求，段内没有第二个请求）。二者都不构成歧义。输出若把它们替换为重复的长名词短语\n（例如反复写「向 `/v2/ingest/batch` 端点发起的批量写入请求」），判为无消歧价值的替换。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "「该请求整体失败，且不写入任何记录」是全有或全无语义。输出不得改成部分写入语义\n（如「未通过校验的记录不写入」「跳过非法记录后继续写入」）。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`POST /v2/ingest/batch`、`errors[].index`、500 须逐字保留。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-A-006",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "standard",
+    "source": "### `POST /v2/ingest/batch`\n\n接收一个最多包含 500 条记录的数组。若其中任意一条记录未通过 Schema 校验，该请求整体失败，\n且不写入任何记录。校验失败的下标在响应体 `errors[].index` 中返回。\n",
+    "output": "### `POST /v2/ingest/batch`\n\n接收一个最多包含 500 条记录的数组。若其中任意一条记录未通过 Schema 校验，该请求整体失败，且不写入任何记录。校验失败的下标在响应体 `errors[].index` 中返回。",
+    "invariants": [
+      {
+        "kind": "reference",
+        "detail": "「其中」的先行词唯一（前句的数组），「该请求」的先行词唯一（本次 `POST /v2/ingest/batch`\n请求，段内没有第二个请求）。二者都不构成歧义。输出若把它们替换为重复的长名词短语\n（例如反复写「向 `/v2/ingest/batch` 端点发起的批量写入请求」），判为无消歧价值的替换。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "「该请求整体失败，且不写入任何记录」是全有或全无语义。输出不得改成部分写入语义\n（如「未通过校验的记录不写入」「跳过非法记录后继续写入」）。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`POST /v2/ingest/batch`、`errors[].index`、500 须逐字保留。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-A-006",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "standard",
+    "source": "### `POST /v2/ingest/batch`\n\n接收一个最多包含 500 条记录的数组。若其中任意一条记录未通过 Schema 校验，该请求整体失败，\n且不写入任何记录。校验失败的下标在响应体 `errors[].index` 中返回。\n",
+    "output": "### `POST /v2/ingest/batch`\n\n接收一个最多包含 500 条记录的数组。若其中任意一条记录未通过 Schema 校验，该请求整体失败，\n且不写入任何记录。校验失败的下标在响应体 `errors[].index` 中返回。",
+    "invariants": [
+      {
+        "kind": "reference",
+        "detail": "「其中」的先行词唯一（前句的数组），「该请求」的先行词唯一（本次 `POST /v2/ingest/batch`\n请求，段内没有第二个请求）。二者都不构成歧义。输出若把它们替换为重复的长名词短语\n（例如反复写「向 `/v2/ingest/batch` 端点发起的批量写入请求」），判为无消歧价值的替换。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "「该请求整体失败，且不写入任何记录」是全有或全无语义。输出不得改成部分写入语义\n（如「未通过校验的记录不写入」「跳过非法记录后继续写入」）。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`POST /v2/ingest/batch`、`errors[].index`、500 须逐字保留。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-A-007",
+    "model": "claude",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "> **警告**：`cleanup.sh` 会删除超过 30 天的日志文件和临时索引，删除后不可恢复。\n> 执行前请先确认 `/var/lib/search/tmp` 已完成快照。\n",
+    "output": "> **警告**：`cleanup.sh` 会删除超过 30 天的日志文件和临时索引，删除后不可恢复。\n> 执行前请先确认 `/var/lib/search/tmp` 已完成快照。\n\n待确认\n- 超过 30 天的日志文件和临时索引 | 「超过 30 天」可读作仅限定「日志文件」（临时索引全部删除），也可读作同时限定「日志文件」与「临时索引」 | 需确认 30 天的时间限定是否适用于临时索引",
+    "invariants": [
+      {
+        "kind": "scope",
+        "detail": "「超过 30 天的」是否同时修饰「临时索引」在源文中不可确定。读法一：删除超过 30 天的日志文件，\n外加全部临时索引；读法二：日志文件与临时索引都以 30 天为界。两种读法删除的数据集合不同，\n而删除不可恢复。输出若采用其中任一种写法（无论哪一种）而未标注该处需作者确认，判为擅自消歧。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "「删除后不可恢复」这一后果说明，以及「执行前请先确认 `/var/lib/search/tmp` 已完成快照」\n这一前置要求，都必须出现在输出中，不得删除，也不得弱化为「建议先备份」\n或移出告警块之外。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`cleanup.sh`、`/var/lib/search/tmp`、30 天须逐字保留。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-A-007",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "> **警告**：`cleanup.sh` 会删除超过 30 天的日志文件和临时索引，删除后不可恢复。\n> 执行前请先确认 `/var/lib/search/tmp` 已完成快照。\n",
+    "output": "> **警告**：`cleanup.sh` 会删除超过 30 天的日志文件和临时索引，删除后不可恢复。\n> 执行前请先确认 `/var/lib/search/tmp` 已完成快照。\n\n待确认\n- 超过 30 天的日志文件和临时索引 | 修饰结合域歧义：可读作「超过 30 天的日志文件」与「所有临时索引」，亦可读作「超过 30 天的日志文件」与「超过 30 天的临时索引」 | 临时索引的删除范围（全部删除还是仅删除超过 30 天的索引）",
+    "invariants": [
+      {
+        "kind": "scope",
+        "detail": "「超过 30 天的」是否同时修饰「临时索引」在源文中不可确定。读法一：删除超过 30 天的日志文件，\n外加全部临时索引；读法二：日志文件与临时索引都以 30 天为界。两种读法删除的数据集合不同，\n而删除不可恢复。输出若采用其中任一种写法（无论哪一种）而未标注该处需作者确认，判为擅自消歧。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "「删除后不可恢复」这一后果说明，以及「执行前请先确认 `/var/lib/search/tmp` 已完成快照」\n这一前置要求，都必须出现在输出中，不得删除，也不得弱化为「建议先备份」\n或移出告警块之外。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`cleanup.sh`、`/var/lib/search/tmp`、30 天须逐字保留。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-A-007",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "> **警告**：`cleanup.sh` 会删除超过 30 天的日志文件和临时索引，删除后不可恢复。\n> 执行前请先确认 `/var/lib/search/tmp` 已完成快照。\n",
+    "output": "> **警告**：执行 `cleanup.sh` 前，请先确认 `/var/lib/search/tmp` 已完成快照。\n> `cleanup.sh` 会删除超过 30 天的日志文件和临时索引，删除后不可恢复。\n\n待确认\n- 删除范围 | 「超过 30 天」可读作仅限定日志文件，或同时限定日志文件和临时索引 | 临时索引是否也仅删除超过 30 天的项",
+    "invariants": [
+      {
+        "kind": "scope",
+        "detail": "「超过 30 天的」是否同时修饰「临时索引」在源文中不可确定。读法一：删除超过 30 天的日志文件，\n外加全部临时索引；读法二：日志文件与临时索引都以 30 天为界。两种读法删除的数据集合不同，\n而删除不可恢复。输出若采用其中任一种写法（无论哪一种）而未标注该处需作者确认，判为擅自消歧。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "「删除后不可恢复」这一后果说明，以及「执行前请先确认 `/var/lib/search/tmp` 已完成快照」\n这一前置要求，都必须出现在输出中，不得删除，也不得弱化为「建议先备份」\n或移出告警块之外。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`cleanup.sh`、`/var/lib/search/tmp`、30 天须逐字保留。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-A-008",
+    "model": "claude",
+    "task": "rewrite",
+    "mode": "standard",
+    "source": "### `confd-agent`\n\n`confd-agent` 每小时从配置中心拉取一次配置并重启守护进程；拉取失败时保留上一次成功的配置。\n运行日志写入 `/var/log/confd-agent.log`。\n",
+    "output": "### `confd-agent`\n\n`confd-agent` 每小时从配置中心拉取一次配置并重启守护进程；拉取失败时保留上一次成功的配置。\n运行日志写入 `/var/log/confd-agent.log`。",
+    "invariants": [
+      {
+        "kind": "scope",
+        "detail": "「每小时」是否辖及「重启守护进程」在源文中不可确定，但汉语读者多半会默认「每小时拉取并在同一周期内重启」。因此固定这一默认读法不判为失败。\n本用例只考一件事：输出不得引入源文没有的触发条件（如「配置发生变更时重启」「拉取成功后才重启」）。引入即判为凭空补全事实。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "「拉取失败时保留上一次成功的配置」须原样保留其含义，不得改为「拉取失败时重启」\n「拉取失败时使用默认配置」，也不得删除。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`confd-agent`、`/var/log/confd-agent.log` 须逐字保留。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-A-008",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "standard",
+    "source": "### `confd-agent`\n\n`confd-agent` 每小时从配置中心拉取一次配置并重启守护进程；拉取失败时保留上一次成功的配置。\n运行日志写入 `/var/log/confd-agent.log`。\n",
+    "output": "### `confd-agent`\n\n`confd-agent` 每小时从配置中心拉取一次配置并重启守护进程；拉取失败时保留上一次成功的配置。\n运行日志写入 `/var/log/confd-agent.log`。",
+    "invariants": [
+      {
+        "kind": "scope",
+        "detail": "「每小时」是否辖及「重启守护进程」在源文中不可确定，但汉语读者多半会默认「每小时拉取并在同一周期内重启」。因此固定这一默认读法不判为失败。\n本用例只考一件事：输出不得引入源文没有的触发条件（如「配置发生变更时重启」「拉取成功后才重启」）。引入即判为凭空补全事实。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "「拉取失败时保留上一次成功的配置」须原样保留其含义，不得改为「拉取失败时重启」\n「拉取失败时使用默认配置」，也不得删除。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`confd-agent`、`/var/log/confd-agent.log` 须逐字保留。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-A-008",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "standard",
+    "source": "### `confd-agent`\n\n`confd-agent` 每小时从配置中心拉取一次配置并重启守护进程；拉取失败时保留上一次成功的配置。\n运行日志写入 `/var/log/confd-agent.log`。\n",
+    "output": "### `confd-agent`\n\n`confd-agent` 每小时从配置中心拉取一次配置并重启守护进程；拉取失败时保留上一次成功的配置。\n运行日志写入 `/var/log/confd-agent.log`。",
+    "invariants": [
+      {
+        "kind": "scope",
+        "detail": "「每小时」是否辖及「重启守护进程」在源文中不可确定，但汉语读者多半会默认「每小时拉取并在同一周期内重启」。因此固定这一默认读法不判为失败。\n本用例只考一件事：输出不得引入源文没有的触发条件（如「配置发生变更时重启」「拉取成功后才重启」）。引入即判为凭空补全事实。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "「拉取失败时保留上一次成功的配置」须原样保留其含义，不得改为「拉取失败时重启」\n「拉取失败时使用默认配置」，也不得删除。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`confd-agent`、`/var/log/confd-agent.log` 须逐字保留。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-001",
+    "model": "claude",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "故障切换步骤：\n1. 记录本次健康检查结果。\n2. 仅当健康检查在 2 分钟内连续失败 3 次，且主集群已进入只读状态时，才切换到备用集群。\n3. 任一次检查恢复成功后，将连续失败计数清零。\n",
+    "output": "故障切换步骤：\n1. 记录本次健康检查结果。\n2. 仅当健康检查在 2 分钟内连续失败 3 次，且主集群已进入只读状态时，才切换到备用集群。\n3. 任一次检查恢复成功后，将连续失败计数清零。",
+    "invariants": [
+      {
+        "kind": "condition",
+        "detail": "切换必须同时满足两个前提：健康检查在 2 分钟内连续失败 3 次，以及主集群已经进入只读状态。输出删除任一前提，判为失败。\n"
+      },
+      {
+        "kind": "condition",
+        "detail": "「连续失败」不等于在时间窗口内累计失败；任一次成功都会按第 3 步清零计数。\n"
+      },
+      {
+        "kind": "threshold",
+        "detail": "时间窗口必须保持为 2 分钟，连续失败阈值必须保持为 3 次。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-001",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "故障切换步骤：\n1. 记录本次健康检查结果。\n2. 仅当健康检查在 2 分钟内连续失败 3 次，且主集群已进入只读状态时，才切换到备用集群。\n3. 任一次检查恢复成功后，将连续失败计数清零。\n",
+    "output": "故障切换步骤：\n1. 记录本次健康检查结果。\n2. 仅当健康检查在 2 分钟内连续失败 3 次，且主集群已进入只读状态时，才切换到备用集群。\n3. 任一次检查恢复成功后，将连续失败计数清零。",
+    "invariants": [
+      {
+        "kind": "condition",
+        "detail": "切换必须同时满足两个前提：健康检查在 2 分钟内连续失败 3 次，以及主集群已经进入只读状态。输出删除任一前提，判为失败。\n"
+      },
+      {
+        "kind": "condition",
+        "detail": "「连续失败」不等于在时间窗口内累计失败；任一次成功都会按第 3 步清零计数。\n"
+      },
+      {
+        "kind": "threshold",
+        "detail": "时间窗口必须保持为 2 分钟，连续失败阈值必须保持为 3 次。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-001",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "故障切换步骤：\n1. 记录本次健康检查结果。\n2. 仅当健康检查在 2 分钟内连续失败 3 次，且主集群已进入只读状态时，才切换到备用集群。\n3. 任一次检查恢复成功后，将连续失败计数清零。\n",
+    "output": "故障切换步骤：\n1. 记录本次健康检查结果。\n2. 仅当健康检查在 2 分钟内连续失败 3 次，且主集群已进入只读状态时，才切换到备用集群。\n3. 任一次检查恢复成功后，将连续失败计数清零。",
+    "invariants": [
+      {
+        "kind": "condition",
+        "detail": "切换必须同时满足两个前提：健康检查在 2 分钟内连续失败 3 次，以及主集群已经进入只读状态。输出删除任一前提，判为失败。\n"
+      },
+      {
+        "kind": "condition",
+        "detail": "「连续失败」不等于在时间窗口内累计失败；任一次成功都会按第 3 步清零计数。\n"
+      },
+      {
+        "kind": "threshold",
+        "detail": "时间窗口必须保持为 2 分钟，连续失败阈值必须保持为 3 次。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-002",
+    "model": "claude",
+    "task": "review",
+    "mode": "review",
+    "source": "原文：仅当灰度发布完成且错误率已回到基线时，才将全部流量切换到新版本。\n候选改写：灰度发布完成后，将全部流量切换到新版本。\n",
+    "output": "规则：CTC-L002\n严重级别：ERROR\n位置：「灰度发布完成后，将全部流量切换到新版本。」\n问题：来源的「仅当…才」是必要条件，候选改为「…后」的时间顺承，必要条件被改成触发条件。\n风险：操作者会把灰度发布完成读作切流的充分理由，在其余条件未成立时直接执行全量切换。\n建议修改：仅当灰度发布完成且错误率已回到基线时，才将全部流量切换到新版本。\n\n规则：CTC-L001\n严重级别：ERROR\n位置：「灰度发布完成后，将全部流量切换到新版本。」\n问题：来源合取条件中的「且错误率已回到基线」在候选中被整条删除，前置条件由两项减为一项。\n风险：错误率仍高于基线时即执行全量切流，故障从灰度范围放大到全部流量。\n建议修改：仅当灰度发布完成且错误率已回到基线时，才将全部流量切换到新版本。\n\n规则：CTC-P004\n严重级别：ERROR\n位置：「将全部流量切换到新版本。」\n问题：全量切流是改变外部状态的操作，来源为其给出的守护条件（错误率已回到基线）在候选中不再出现于该动作之前。\n风险：切流前不再有任何指标判据可查，操作者在无守护条件的情况下执行不易回退的全量切换。\n建议修改：仅当灰度发布完成且错误率已回到基线时，才将全部流量切换到新版本。",
+    "invariants": [
+      {
+        "kind": "condition",
+        "detail": "正确审阅必须指出：原文要求灰度发布完成和错误率回到基线两个条件同时成立；候选仅保留灰度发布完成，删除了错误率条件。\n"
+      },
+      {
+        "kind": "scope",
+        "detail": "被两个条件共同约束的动作是将全部流量切换到新版本；审阅若把被删除条件误判为仅影响灰度阶段，判为失败。\n"
+      }
+    ],
+    "expected_issues": [
+      {
+        "category": "condition-deletion",
+        "rule": "CTC-L001",
+        "severity": "ERROR",
+        "locus": "候选改写删除了「错误率已回到基线」"
+      }
+    ],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-002",
+    "model": "gemini",
+    "task": "review",
+    "mode": "review",
+    "source": "原文：仅当灰度发布完成且错误率已回到基线时，才将全部流量切换到新版本。\n候选改写：灰度发布完成后，将全部流量切换到新版本。\n",
+    "output": "规则：CTC-L001\n严重级别：ERROR\n位置：「灰度发布完成后，将全部流量切换到新版本。」\n问题：来源中的前置条件「错误率已回到基线」被删除。\n风险：灰度发布完成但错误率仍高于基线时，操作者仍会执行全量切流，导致线上故障扩散。\n建议修改：仅当灰度发布完成且错误率已回到基线时，才将全部流量切换到新版本。\n\n规则：CTC-L002\n严重级别：ERROR\n位置：「灰度发布完成后，将全部流量切换到新版本。」\n问题：来源中表示严格必要条件的逻辑连接词「仅当……才」以及合取结构「且」被替换为时间顺承表述「……后」。\n风险：阻塞性门禁条件被降级为普通时序流程，操作者可能在未达到准入标准时误执行切流操作。\n建议修改：仅当灰度发布完成且错误率已回到基线时，才将全部流量切换到新版本。",
+    "invariants": [
+      {
+        "kind": "condition",
+        "detail": "正确审阅必须指出：原文要求灰度发布完成和错误率回到基线两个条件同时成立；候选仅保留灰度发布完成，删除了错误率条件。\n"
+      },
+      {
+        "kind": "scope",
+        "detail": "被两个条件共同约束的动作是将全部流量切换到新版本；审阅若把被删除条件误判为仅影响灰度阶段，判为失败。\n"
+      }
+    ],
+    "expected_issues": [
+      {
+        "category": "condition-deletion",
+        "rule": "CTC-L001",
+        "severity": "ERROR",
+        "locus": "候选改写删除了「错误率已回到基线」"
+      }
+    ],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-002",
+    "model": "gpt",
+    "task": "review",
+    "mode": "review",
+    "source": "原文：仅当灰度发布完成且错误率已回到基线时，才将全部流量切换到新版本。\n候选改写：灰度发布完成后，将全部流量切换到新版本。\n",
+    "output": "规则：CTC-S001  \n严重级别：ERROR  \n位置：「灰度发布完成后，将全部流量切换到新版本。」  \n问题：删除了「错误率已回到基线」这一独立前提。  \n风险：错误率尚未回到基线时，操作者也会切换全部流量。  \n建议修改：仅当灰度发布完成且错误率已回到基线时，才将全部流量切换到新版本。\n\n规则：CTC-L001  \n严重级别：ERROR  \n位置：「灰度发布完成后，将全部流量切换到新版本。」  \n问题：原文对流量切换设置了两个条件，候选改写仅保留「灰度发布完成」。  \n风险：流量切换的适用条件被放宽，可能在错误率仍偏离基线时执行切换。  \n建议修改：仅当灰度发布完成且错误率已回到基线时，才将全部流量切换到新版本。\n\n规则：CTC-L002  \n严重级别：ERROR  \n位置：「灰度发布完成后，将全部流量切换到新版本。」  \n问题：原文要求「灰度发布完成」与「错误率已回到基线」同时成立，候选改写破坏了合取关系，并删除了「仅当……才」表达的必要条件。  \n风险：操作者会把「灰度发布完成」单独视为切换全部流量的充分条件。  \n建议修改：仅当灰度发布完成且错误率已回到基线时，才将全部流量切换到新版本。",
+    "invariants": [
+      {
+        "kind": "condition",
+        "detail": "正确审阅必须指出：原文要求灰度发布完成和错误率回到基线两个条件同时成立；候选仅保留灰度发布完成，删除了错误率条件。\n"
+      },
+      {
+        "kind": "scope",
+        "detail": "被两个条件共同约束的动作是将全部流量切换到新版本；审阅若把被删除条件误判为仅影响灰度阶段，判为失败。\n"
+      }
+    ],
+    "expected_issues": [
+      {
+        "category": "condition-deletion",
+        "rule": "CTC-L001",
+        "severity": "ERROR",
+        "locus": "候选改写删除了「错误率已回到基线」"
+      }
+    ],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-003",
+    "model": "claude",
+    "task": "translate",
+    "mode": "strict",
+    "source": "Start cross-region replication only if both the primary and secondary backup checks pass. A failure in either check leaves replication disabled.\n",
+    "output": "仅当主备份检查与次备份检查均通过时，才启动跨区域复制。任一检查失败都会使复制保持禁用状态。",
+    "invariants": [
+      {
+        "kind": "condition",
+        "detail": "启动跨区域复制的必要条件是主备份检查和辅助备份检查都通过；中文输出若允许只通过其中一项就启动，判为失败。\n"
+      },
+      {
+        "kind": "quantifier",
+        "detail": "“both”作用于两项检查并要求二者全部通过；不得译成「任一」「至少一项」。\n"
+      },
+      {
+        "kind": "condition",
+        "detail": "任一检查失败时都必须保持复制禁用；输出若把失败后的禁用写成可选行为，判为失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-003",
+    "model": "gemini",
+    "task": "translate",
+    "mode": "strict",
+    "source": "Start cross-region replication only if both the primary and secondary backup checks pass. A failure in either check leaves replication disabled.\n",
+    "output": "仅当主备份与备用备份检查均通过时，才启动跨区域复制。任一检查失败，复制均保持禁用。",
+    "invariants": [
+      {
+        "kind": "condition",
+        "detail": "启动跨区域复制的必要条件是主备份检查和辅助备份检查都通过；中文输出若允许只通过其中一项就启动，判为失败。\n"
+      },
+      {
+        "kind": "quantifier",
+        "detail": "“both”作用于两项检查并要求二者全部通过；不得译成「任一」「至少一项」。\n"
+      },
+      {
+        "kind": "condition",
+        "detail": "任一检查失败时都必须保持复制禁用；输出若把失败后的禁用写成可选行为，判为失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-003",
+    "model": "gpt",
+    "task": "translate",
+    "mode": "strict",
+    "source": "Start cross-region replication only if both the primary and secondary backup checks pass. A failure in either check leaves replication disabled.\n",
+    "output": "仅当主备份检查和辅助备份检查均通过时，才启动跨区域复制。任一检查失败都会使复制保持禁用状态。",
+    "invariants": [
+      {
+        "kind": "condition",
+        "detail": "启动跨区域复制的必要条件是主备份检查和辅助备份检查都通过；中文输出若允许只通过其中一项就启动，判为失败。\n"
+      },
+      {
+        "kind": "quantifier",
+        "detail": "“both”作用于两项检查并要求二者全部通过；不得译成「任一」「至少一项」。\n"
+      },
+      {
+        "kind": "condition",
+        "detail": "任一检查失败时都必须保持复制禁用；输出若把失败后的禁用写成可选行为，判为失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-004",
+    "model": "claude",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "警告：除审计日志和当前活动会话外，执行 `purge` 会删除该租户的所有临时数据。对保留租户不得执行 `purge`。\n",
+    "output": "警告：除审计日志和当前活动会话外，执行 `purge` 会删除该租户的所有临时数据。对保留租户不得执行 `purge`。",
+    "invariants": [
+      {
+        "kind": "quantifier",
+        "detail": "删除范围是该租户的所有临时数据，但审计日志和当前活动会话明确排除在外；输出若声称这两类对象也会被删除，判为失败。\n"
+      },
+      {
+        "kind": "modality",
+        "detail": "对保留租户执行 `purge` 是被禁止的，不是建议避免。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "操作名 `purge` 必须逐字符保留，且仍指代删除临时数据的操作。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-004",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "警告：除审计日志和当前活动会话外，执行 `purge` 会删除该租户的所有临时数据。对保留租户不得执行 `purge`。\n",
+    "output": "警告：对保留租户不得执行 `purge`。除审计日志和当前活动会话外，执行 `purge` 会删除该租户的所有临时数据。",
+    "invariants": [
+      {
+        "kind": "quantifier",
+        "detail": "删除范围是该租户的所有临时数据，但审计日志和当前活动会话明确排除在外；输出若声称这两类对象也会被删除，判为失败。\n"
+      },
+      {
+        "kind": "modality",
+        "detail": "对保留租户执行 `purge` 是被禁止的，不是建议避免。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "操作名 `purge` 必须逐字符保留，且仍指代删除临时数据的操作。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-004",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "警告：除审计日志和当前活动会话外，执行 `purge` 会删除该租户的所有临时数据。对保留租户不得执行 `purge`。\n",
+    "output": "警告：除审计日志和当前活动会话外，执行 `purge` 会删除该租户的所有临时数据。对保留租户不得执行 `purge`。",
+    "invariants": [
+      {
+        "kind": "quantifier",
+        "detail": "删除范围是该租户的所有临时数据，但审计日志和当前活动会话明确排除在外；输出若声称这两类对象也会被删除，判为失败。\n"
+      },
+      {
+        "kind": "modality",
+        "detail": "对保留租户执行 `purge` 是被禁止的，不是建议避免。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "操作名 `purge` 必须逐字符保留，且仍指代删除临时数据的操作。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-005",
+    "model": "claude",
+    "task": "review",
+    "mode": "review",
+    "source": "原文：向除审计命名空间和计费命名空间之外的所有命名空间应用限流策略。\n候选改写：向所有命名空间应用限流策略。\n",
+    "output": "```\n规则：CTC-L001\n严重级别：ERROR\n位置：「向所有命名空间应用限流策略。」\n问题：来源的例外「除审计命名空间和计费命名空间之外」被整体删除，有限定的适用范围变为无限定表述。\n风险：审计命名空间与计费命名空间被误加限流策略，审计与计费流量遭到限流。\n建议修改：向除审计命名空间和计费命名空间之外的所有命名空间应用限流策略。\n\n规则：CTC-S007\n严重级别：ERROR\n位置：「向所有命名空间应用限流策略。」\n问题：论域由「所有命名空间减去两个具名例外」扩大为「所有命名空间」，量化的适用对象被改变。\n风险：执行者按字面对全部命名空间下发策略，作用对象超出来源授权的范围。\n建议修改：向除审计命名空间和计费命名空间之外的所有命名空间应用限流策略。\n\n规则：CTC-S001\n严重级别：ERROR\n位置：「向所有命名空间应用限流策略。」\n问题：来源中「审计命名空间除外」与「计费命名空间除外」两条独立断言在输出中无法还原，被删除的不是重复表述或纯修饰成分。\n风险：后续依据本文编写自动化脚本时，无从得知存在两个豁免对象。\n建议修改：向除审计命名空间和计费命名空间之外的所有命名空间应用限流策略。\n\n规则：CTC-A004\n严重级别：ERROR\n位置：「向所有命名空间应用限流策略。」\n问题：来源的排除成分分别作用于「审计命名空间」和「计费命名空间」两项，删除后否定作用域整体消失。\n风险：两个本应分别豁免的命名空间同时失去豁免。\n建议修改：向除审计命名空间和计费命名空间之外的所有命名空间应用限流策略。\n```",
+    "invariants": [
+      {
+        "kind": "quantifier",
+        "detail": "正确审阅必须指出：审计命名空间和计费命名空间是明确排除项，候选输出把它们纳入限流范围。\n"
+      }
+    ],
+    "expected_issues": [
+      {
+        "category": "exception-set-deletion",
+        "rule": "CTC-L001",
+        "severity": "ERROR",
+        "locus": "候选改写中的「所有命名空间」"
+      }
+    ],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-005",
+    "model": "gemini",
+    "task": "review",
+    "mode": "review",
+    "source": "原文：向除审计命名空间和计费命名空间之外的所有命名空间应用限流策略。\n候选改写：向所有命名空间应用限流策略。\n",
+    "output": "规则：CTC-L001\n严重级别：ERROR\n位置：「向所有命名空间应用限流策略。」\n问题：原文中的例外条件「除审计命名空间和计费命名空间之外」被删除，有条件的适用范围被改为无限定的全量范围。\n风险：审计命名空间和计费命名空间会被错误应用限流策略，可能导致审计事件丢失或计费请求被误拦截。\n建议修改：向除审计命名空间和计费命名空间之外的所有命名空间应用限流策略。",
+    "invariants": [
+      {
+        "kind": "quantifier",
+        "detail": "正确审阅必须指出：审计命名空间和计费命名空间是明确排除项，候选输出把它们纳入限流范围。\n"
+      }
+    ],
+    "expected_issues": [
+      {
+        "category": "exception-set-deletion",
+        "rule": "CTC-L001",
+        "severity": "ERROR",
+        "locus": "候选改写中的「所有命名空间」"
+      }
+    ],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-005",
+    "model": "gpt",
+    "task": "review",
+    "mode": "review",
+    "source": "原文：向除审计命名空间和计费命名空间之外的所有命名空间应用限流策略。\n候选改写：向所有命名空间应用限流策略。\n",
+    "output": "规则：CTC-L001  \n严重级别：ERROR  \n位置：「向所有命名空间应用限流策略。」  \n问题：候选改写删除了「审计命名空间和计费命名空间」这一例外。  \n风险：限流策略会被错误地应用于原文明确排除的两个命名空间。  \n建议修改：向除审计命名空间和计费命名空间之外的所有命名空间应用限流策略。\n\n规则：CTC-S007  \n严重级别：ERROR  \n位置：「所有命名空间」  \n问题：适用范围从“除审计命名空间和计费命名空间之外的所有命名空间”扩大为全部命名空间，量化论域发生变化。  \n风险：审计命名空间和计费命名空间被错误纳入限流范围。  \n建议修改：除审计命名空间和计费命名空间之外的所有命名空间。",
+    "invariants": [
+      {
+        "kind": "quantifier",
+        "detail": "正确审阅必须指出：审计命名空间和计费命名空间是明确排除项，候选输出把它们纳入限流范围。\n"
+      }
+    ],
+    "expected_issues": [
+      {
+        "category": "exception-set-deletion",
+        "rule": "CTC-L001",
+        "severity": "ERROR",
+        "locus": "候选改写中的「所有命名空间」"
+      }
+    ],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-006",
+    "model": "claude",
+    "task": "rewrite",
+    "mode": "standard",
+    "source": "错误 `E_LOCKED`：由于该资源正在被另一个进程占用的事实，当前请求已被拒绝。释放该进程持有的锁后重试。\n",
+    "output": "错误 `E_LOCKED`：由于该资源正在被另一个进程占用，当前请求已被拒绝。释放该进程持有的锁后重试。",
+    "invariants": [
+      {
+        "kind": "quantifier",
+        "detail": "「另一个进程」指一个特定的其他进程；输出若改成可指多个或任意进程的「其他进程」，判为失败。\n"
+      },
+      {
+        "kind": "reference",
+        "detail": "后句「该进程」必须继续指向占用资源的同一个进程；输出不得把解锁动作扩展到其他进程。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "错误标识 `E_LOCKED` 必须逐字符保留。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-006",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "standard",
+    "source": "错误 `E_LOCKED`：由于该资源正在被另一个进程占用的事实，当前请求已被拒绝。释放该进程持有的锁后重试。\n",
+    "output": "错误 `E_LOCKED`：由于该资源正在被另一个进程占用，当前请求已被拒绝。释放该进程持有的锁后重试。",
+    "invariants": [
+      {
+        "kind": "quantifier",
+        "detail": "「另一个进程」指一个特定的其他进程；输出若改成可指多个或任意进程的「其他进程」，判为失败。\n"
+      },
+      {
+        "kind": "reference",
+        "detail": "后句「该进程」必须继续指向占用资源的同一个进程；输出不得把解锁动作扩展到其他进程。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "错误标识 `E_LOCKED` 必须逐字符保留。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-006",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "standard",
+    "source": "错误 `E_LOCKED`：由于该资源正在被另一个进程占用的事实，当前请求已被拒绝。释放该进程持有的锁后重试。\n",
+    "output": "错误 `E_LOCKED`：由于该资源正被另一个进程占用，当前请求已被拒绝。释放该进程持有的锁后重试。",
+    "invariants": [
+      {
+        "kind": "quantifier",
+        "detail": "「另一个进程」指一个特定的其他进程；输出若改成可指多个或任意进程的「其他进程」，判为失败。\n"
+      },
+      {
+        "kind": "reference",
+        "detail": "后句「该进程」必须继续指向占用资源的同一个进程；输出不得把解锁动作扩展到其他进程。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "错误标识 `E_LOCKED` 必须逐字符保留。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-007",
+    "model": "claude",
+    "task": "translate",
+    "mode": "strict",
+    "source": "Apply the patch to at least one eligible replica in each region; do not apply it to every replica unless the rollout is approved.\n",
+    "output": "将补丁应用于每个区域中至少一个符合条件的副本；除非发布已获批准，否则不得将补丁应用于全部副本。",
+    "invariants": [
+      {
+        "kind": "quantifier",
+        "detail": "“at least one eligible replica in each region”要求每个区域各有至少一个符合条件的副本应用补丁；只在至少一个区域选择副本不满足要求。\n"
+      },
+      {
+        "kind": "negation",
+        "detail": "未获批准时禁止的是「给每个副本都应用补丁」这一全称操作，不是禁止给任何单个副本应用补丁。\n"
+      },
+      {
+        "kind": "condition",
+        "detail": "获得发布批准后，给每个副本应用补丁才不再受第二项禁止约束；输出不得删除该批准条件。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-007",
+    "model": "gemini",
+    "task": "translate",
+    "mode": "strict",
+    "source": "Apply the patch to at least one eligible replica in each region; do not apply it to every replica unless the rollout is approved.\n",
+    "output": "在每个区域中，将补丁应用到至少一个符合条件的副本；除非发布已获批准，否则不要将其应用到所有副本。",
+    "invariants": [
+      {
+        "kind": "quantifier",
+        "detail": "“at least one eligible replica in each region”要求每个区域各有至少一个符合条件的副本应用补丁；只在至少一个区域选择副本不满足要求。\n"
+      },
+      {
+        "kind": "negation",
+        "detail": "未获批准时禁止的是「给每个副本都应用补丁」这一全称操作，不是禁止给任何单个副本应用补丁。\n"
+      },
+      {
+        "kind": "condition",
+        "detail": "获得发布批准后，给每个副本应用补丁才不再受第二项禁止约束；输出不得删除该批准条件。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-007",
+    "model": "gpt",
+    "task": "translate",
+    "mode": "strict",
+    "source": "Apply the patch to at least one eligible replica in each region; do not apply it to every replica unless the rollout is approved.\n",
+    "output": "在每个区域至少一个符合条件的副本上应用该补丁；除非已批准此次部署，否则不要将该补丁应用于所有副本。",
+    "invariants": [
+      {
+        "kind": "quantifier",
+        "detail": "“at least one eligible replica in each region”要求每个区域各有至少一个符合条件的副本应用补丁；只在至少一个区域选择副本不满足要求。\n"
+      },
+      {
+        "kind": "negation",
+        "detail": "未获批准时禁止的是「给每个副本都应用补丁」这一全称操作，不是禁止给任何单个副本应用补丁。\n"
+      },
+      {
+        "kind": "condition",
+        "detail": "获得发布批准后，给每个副本应用补丁才不再受第二项禁止约束；输出不得删除该批准条件。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-008",
+    "model": "claude",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "不得同时重启 `controller-a` 和 `controller-b`；可以先重启其中一个，待其恢复后再重启另一个。\n",
+    "output": "不得同时重启 `controller-a` 和 `controller-b`；可以先重启其中一个，待其恢复后再重启另一个。",
+    "invariants": [
+      {
+        "kind": "negation",
+        "detail": "禁止对象是同时重启两个控制器这一组合；分别重启任一控制器并未被禁止。输出若分别禁止重启两个控制器，判为失败。\n"
+      },
+      {
+        "kind": "order",
+        "detail": "顺序重启时，第二个控制器必须等待第一个恢复后才能重启；输出若允许并行或删除等待点，判为失败。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`controller-a` 和 `controller-b` 必须逐字符保留并继续指代两个不同控制器。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-008",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "不得同时重启 `controller-a` 和 `controller-b`；可以先重启其中一个，待其恢复后再重启另一个。\n",
+    "output": "不得同时重启 `controller-a` 和 `controller-b`；可以先重启其中一个，待其恢复后再重启另一个。",
+    "invariants": [
+      {
+        "kind": "negation",
+        "detail": "禁止对象是同时重启两个控制器这一组合；分别重启任一控制器并未被禁止。输出若分别禁止重启两个控制器，判为失败。\n"
+      },
+      {
+        "kind": "order",
+        "detail": "顺序重启时，第二个控制器必须等待第一个恢复后才能重启；输出若允许并行或删除等待点，判为失败。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`controller-a` 和 `controller-b` 必须逐字符保留并继续指代两个不同控制器。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-008",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "不得同时重启 `controller-a` 和 `controller-b`；可以先重启其中一个，待其恢复后再重启另一个。\n",
+    "output": "不得同时重启 `controller-a` 和 `controller-b`；可以先重启其中一个，待其恢复后再重启另一个。",
+    "invariants": [
+      {
+        "kind": "negation",
+        "detail": "禁止对象是同时重启两个控制器这一组合；分别重启任一控制器并未被禁止。输出若分别禁止重启两个控制器，判为失败。\n"
+      },
+      {
+        "kind": "order",
+        "detail": "顺序重启时，第二个控制器必须等待第一个恢复后才能重启；输出若允许并行或删除等待点，判为失败。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`controller-a` 和 `controller-b` 必须逐字符保留并继续指代两个不同控制器。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-009",
+    "model": "claude",
+    "task": "review",
+    "mode": "review",
+    "source": "原文：系统不会在工作时间重启主数据库并清空缓存。\n候选改写：工作时间内，系统禁止重启主数据库，亦禁止清空缓存。\n",
+    "output": "```\n规则：CTC-S003\n严重级别：ERROR\n位置：「系统禁止重启主数据库」\n问题：来源「系统不会……重启」是对系统行为的描述性陈述，候选改为「禁止」，把描述升格为禁令（言语行为类型与道义强度均改变）。\n风险：读者据此认为存在一条可违反的策略约束，会去查找或配置并不存在的禁令开关；而原文只说明系统自身在工作时间不执行该动作。\n建议修改：工作时间内，系统不会重启主数据库并清空缓存。\n\n规则：CTC-A001\n严重级别：ERROR\n位置：「系统禁止重启主数据库，亦禁止清空缓存」\n问题：来源中「系统」是重启与清空动作的执行者；候选把「系统」变为发出禁令的主体，动作执行者随之消失。\n风险：受众从「系统自身」变为未指明的人或组件，运维人员会把该句读作对自己的操作约束，而无法定位原本由系统执行的行为。\n建议修改：工作时间内，系统不会重启主数据库并清空缓存。\n\n规则：CTC-A004\n严重级别：ERROR\n位置：「系统禁止重启主数据库，亦禁止清空缓存」\n问题：来源否定算子辖域为「重启主数据库并清空缓存」这一合取整体，候选改为对两项分别否定，作用域被扩大。\n风险：原文并未排除系统单独执行其中一项；改写后单独重启或单独清空缓存被读作同样受禁，据此编写的巡检或告警规则会误判系统的正常单项行为。\n建议修改：工作时间内，系统不会重启主数据库并清空缓存。\n\n规则：CTC-A005\n严重级别：ERROR\n位置：「系统不会在工作时间重启主数据库并清空缓存。」\n问题：来源存在两种导致不同判断的读法——「不会同时执行重启与清空」或「两项都不会执行」——候选静默选定后者并以显式并列固定下来，歧义在输出中不再可见，也未在「待确认」中报告。\n风险：后续审查无从发现此处曾有歧义，错误读法被当作已确认语义继续传播。\n建议修改：保留原句不做消歧改写，并附：`系统不会在工作时间重启主数据库并清空缓存 | 可读作「不会同时执行这两项操作」或「两项操作都不会执行」 | 需确认否定针对的是合取整体还是两项各自`\n```",
+    "invariants": [
+      {
+        "kind": "negation",
+        "detail": "正确审阅必须指出：候选输出选择了分别否定重启和清空缓存的解释；原文中的「不会 A 并 B」并未明确给出这一作用域。\n"
+      },
+      {
+        "kind": "modality",
+        "detail": "正确审阅必须指出：原文描述系统不会发生某行为，候选却改成规范性禁止。行为描述和禁令不等价。\n"
+      }
+    ],
+    "expected_issues": [
+      {
+        "category": "negation-scope",
+        "rule": "CTC-A004",
+        "severity": "ERROR",
+        "locus": "候选改写中的「禁止重启主数据库，亦禁止清空缓存」"
+      },
+      {
+        "category": "modality-drift",
+        "rule": "CTC-S003",
+        "severity": "ERROR",
+        "locus": "原文「不会」与候选「禁止」"
+      }
+    ],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-009",
+    "model": "gemini",
+    "task": "review",
+    "mode": "review",
+    "source": "原文：系统不会在工作时间重启主数据库并清空缓存。\n候选改写：工作时间内，系统禁止重启主数据库，亦禁止清空缓存。\n",
+    "output": "规则：CTC-S003\n严重级别：ERROR\n位置：「系统禁止重启主数据库，亦禁止清空缓存」\n问题：来源中对系统行为的客观描述「不会」被替换为规范性禁令「禁止」，改变了情态剖面与言语行为类型（描述性陈述被升格为道义禁令）。\n风险：将系统自动化运行特征的描述误导为针对操作者或系统的规则约束，改变了责任归属与系统行为预期。\n建议修改：工作时间内，系统不会重启主数据库并清空缓存。\n\n规则：CTC-A005\n严重级别：ERROR\n位置：「禁止重启主数据库，亦禁止清空缓存」\n问题：来源「不会在工作时间重启主数据库并清空缓存」存在否定作用域歧义（既可解释为否定合取「不会同时执行两项操作」，也可解释为分别否定「两项操作均不会执行」），候选改写在缺乏上下文证据的情况下静默选定了分别否定的读法。\n风险：掩盖了原文可能存在的否定作用域歧义；若原文意在说明系统不会并发执行两项操作，改写会导致读者误以为任一单项操作在工作时间都不会发生。\n建议修改：保留原表述「系统不会在工作时间重启主数据库并清空缓存」，并在待确认中报告歧义以核实否定作用域。",
+    "invariants": [
+      {
+        "kind": "negation",
+        "detail": "正确审阅必须指出：候选输出选择了分别否定重启和清空缓存的解释；原文中的「不会 A 并 B」并未明确给出这一作用域。\n"
+      },
+      {
+        "kind": "modality",
+        "detail": "正确审阅必须指出：原文描述系统不会发生某行为，候选却改成规范性禁止。行为描述和禁令不等价。\n"
+      }
+    ],
+    "expected_issues": [
+      {
+        "category": "negation-scope",
+        "rule": "CTC-A004",
+        "severity": "ERROR",
+        "locus": "候选改写中的「禁止重启主数据库，亦禁止清空缓存」"
+      },
+      {
+        "category": "modality-drift",
+        "rule": "CTC-S003",
+        "severity": "ERROR",
+        "locus": "原文「不会」与候选「禁止」"
+      }
+    ],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-009",
+    "model": "gpt",
+    "task": "review",
+    "mode": "review",
+    "source": "原文：系统不会在工作时间重启主数据库并清空缓存。\n候选改写：工作时间内，系统禁止重启主数据库，亦禁止清空缓存。\n",
+    "output": "规则：CTC-S003  \n严重级别：ERROR  \n位置：「系统禁止重启主数据库，亦禁止清空缓存。」  \n问题：原文的「不会」描述系统行为，候选改写将其升格为「禁止」，变成规范性禁令。  \n风险：受众会把系统行为保证误解为操作约束。  \n建议修改：保留「系统不会」的描述性表述。\n\n规则：CTC-A004  \n严重级别：ERROR  \n位置：「系统禁止重启主数据库，亦禁止清空缓存。」  \n问题：原文可表示系统不会同时执行「重启主数据库」和「清空缓存」，候选改写却分别否定两项操作，扩大了否定作用域。  \n风险：原文可能允许单独执行其中一项，候选改写则将两项分别禁止。  \n建议修改：保留原文的并列结构，并确认否定的是组合操作还是两项独立操作。",
+    "invariants": [
+      {
+        "kind": "negation",
+        "detail": "正确审阅必须指出：候选输出选择了分别否定重启和清空缓存的解释；原文中的「不会 A 并 B」并未明确给出这一作用域。\n"
+      },
+      {
+        "kind": "modality",
+        "detail": "正确审阅必须指出：原文描述系统不会发生某行为，候选却改成规范性禁止。行为描述和禁令不等价。\n"
+      }
+    ],
+    "expected_issues": [
+      {
+        "category": "negation-scope",
+        "rule": "CTC-A004",
+        "severity": "ERROR",
+        "locus": "候选改写中的「禁止重启主数据库，亦禁止清空缓存」"
+      },
+      {
+        "category": "modality-drift",
+        "rule": "CTC-S003",
+        "severity": "ERROR",
+        "locus": "原文「不会」与候选「禁止」"
+      }
+    ],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-010",
+    "model": "claude",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "当待处理任务数达到 100 条时，调度器停止接收新任务；降到 80 条以下后恢复接收。\n",
+    "output": "当待处理任务数达到 100 条时，调度器停止接收新任务；降到 80 条以下后恢复接收。",
+    "invariants": [
+      {
+        "kind": "threshold",
+        "detail": "「达到 100 条」包含任务数恰为 100 的情况；输出若改成「超过 100 条」，判为失败。\n"
+      },
+      {
+        "kind": "threshold",
+        "detail": "「80 条以下」不包含恰为 80 的情况；输出若改成「不超过 80 条」或「80 条以内」，判为失败。\n"
+      },
+      {
+        "kind": "threshold",
+        "detail": "停止阈值必须保持为 100 条，恢复阈值必须保持为 80 条，且两者不得互换。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-010",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "当待处理任务数达到 100 条时，调度器停止接收新任务；降到 80 条以下后恢复接收。\n",
+    "output": "当待处理任务数达到 100 条时，调度器停止接收新任务；降到 80 条以下后恢复接收。",
+    "invariants": [
+      {
+        "kind": "threshold",
+        "detail": "「达到 100 条」包含任务数恰为 100 的情况；输出若改成「超过 100 条」，判为失败。\n"
+      },
+      {
+        "kind": "threshold",
+        "detail": "「80 条以下」不包含恰为 80 的情况；输出若改成「不超过 80 条」或「80 条以内」，判为失败。\n"
+      },
+      {
+        "kind": "threshold",
+        "detail": "停止阈值必须保持为 100 条，恢复阈值必须保持为 80 条，且两者不得互换。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-010",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "当待处理任务数达到 100 条时，调度器停止接收新任务；降到 80 条以下后恢复接收。\n",
+    "output": "当待处理任务数达到 100 条时，调度器停止接收新任务；降到 80 条以下后恢复接收。",
+    "invariants": [
+      {
+        "kind": "threshold",
+        "detail": "「达到 100 条」包含任务数恰为 100 的情况；输出若改成「超过 100 条」，判为失败。\n"
+      },
+      {
+        "kind": "threshold",
+        "detail": "「80 条以下」不包含恰为 80 的情况；输出若改成「不超过 80 条」或「80 条以内」，判为失败。\n"
+      },
+      {
+        "kind": "threshold",
+        "detail": "停止阈值必须保持为 100 条，恢复阈值必须保持为 80 条，且两者不得互换。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-011",
+    "model": "claude",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "| 参数 | 行为 |\n| --- | --- |\n| `max_wait` | 等待时间在 30 s 以内时返回结果；超过 30 s 时返回 `timeout`。 |\n",
+    "output": "| 参数 | 行为 |\n| --- | --- |\n| `max_wait` | 等待时间在 30 s 以内时返回结果；超过 30 s 时返回 `timeout`。 |",
+    "invariants": [
+      {
+        "kind": "threshold",
+        "detail": "等待时间恰为 30 s 时属于「30 s 以内」，必须返回结果；输出若让 30 s 返回 `timeout`，判为失败。\n"
+      },
+      {
+        "kind": "scope",
+        "detail": "`timeout` 只绑定到等待时间超过 30 s 的分支；不得绑定到达到或等于 30 s 的分支。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "参数名 `max_wait` 和返回值 `timeout` 必须逐字符保留。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-011",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "| 参数 | 行为 |\n| --- | --- |\n| `max_wait` | 等待时间在 30 s 以内时返回结果；超过 30 s 时返回 `timeout`。 |\n",
+    "output": "| 参数 | 行为 |\n| --- | --- |\n| `max_wait` | 等待时间在 30 s 以内时返回结果；超过 30 s 时返回 `timeout`。 |",
+    "invariants": [
+      {
+        "kind": "threshold",
+        "detail": "等待时间恰为 30 s 时属于「30 s 以内」，必须返回结果；输出若让 30 s 返回 `timeout`，判为失败。\n"
+      },
+      {
+        "kind": "scope",
+        "detail": "`timeout` 只绑定到等待时间超过 30 s 的分支；不得绑定到达到或等于 30 s 的分支。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "参数名 `max_wait` 和返回值 `timeout` 必须逐字符保留。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-011",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "| 参数 | 行为 |\n| --- | --- |\n| `max_wait` | 等待时间在 30 s 以内时返回结果；超过 30 s 时返回 `timeout`。 |\n",
+    "output": "| 参数 | 行为 |\n| --- | --- |\n| `max_wait` | 等待时间在 30 s 以内时返回结果；超过 30 s 时返回 `timeout`。 |",
+    "invariants": [
+      {
+        "kind": "threshold",
+        "detail": "等待时间恰为 30 s 时属于「30 s 以内」，必须返回结果；输出若让 30 s 返回 `timeout`，判为失败。\n"
+      },
+      {
+        "kind": "scope",
+        "detail": "`timeout` 只绑定到等待时间超过 30 s 的分支；不得绑定到达到或等于 30 s 的分支。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "参数名 `max_wait` 和返回值 `timeout` 必须逐字符保留。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-012",
+    "model": "claude",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "故障切换步骤：\n1. 暂停写入。\n2. 等待 `replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`。\n3. 将备用库提升为主库。\n\n警告：第 3 步不得与第 1、2 步并行。\n",
+    "output": "故障切换步骤：\n1. 暂停写入。\n2. 等待 `replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`。\n3. 警告：第 3 步不得与第 1、2 步并行。将备用库提升为主库。",
+    "invariants": [
+      {
+        "kind": "order",
+        "detail": "提升备用库前必须先暂停写入；输出若在暂停写入之前或同时提升备用库，判为失败。\n"
+      },
+      {
+        "kind": "order",
+        "detail": "提升备用库必须等待复制延迟降为 `0` 且快照状态成为 `COMPLETED`；未满足任一等待条件就提升，判为失败。\n"
+      },
+      {
+        "kind": "negation",
+        "detail": "警告明确禁止第 3 步与前两步并行；输出若把三项操作写成并行任务，判为失败。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`replica_lag_ms`、`0` 和 `COMPLETED` 必须逐字符保留，且仍分别绑定到复制延迟和值、快照状态和值。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-012",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "故障切换步骤：\n1. 暂停写入。\n2. 等待 `replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`。\n3. 将备用库提升为主库。\n\n警告：第 3 步不得与第 1、2 步并行。\n",
+    "output": "故障切换步骤：\n1. 暂停写入。\n2. 等待 `replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`。\n\n警告：第 3 步不得与第 1、2 步并行。\n3. 将备用库提升为主库。",
+    "invariants": [
+      {
+        "kind": "order",
+        "detail": "提升备用库前必须先暂停写入；输出若在暂停写入之前或同时提升备用库，判为失败。\n"
+      },
+      {
+        "kind": "order",
+        "detail": "提升备用库必须等待复制延迟降为 `0` 且快照状态成为 `COMPLETED`；未满足任一等待条件就提升，判为失败。\n"
+      },
+      {
+        "kind": "negation",
+        "detail": "警告明确禁止第 3 步与前两步并行；输出若把三项操作写成并行任务，判为失败。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`replica_lag_ms`、`0` 和 `COMPLETED` 必须逐字符保留，且仍分别绑定到复制延迟和值、快照状态和值。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-012",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "故障切换步骤：\n1. 暂停写入。\n2. 等待 `replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`。\n3. 将备用库提升为主库。\n\n警告：第 3 步不得与第 1、2 步并行。\n",
+    "output": "故障切换步骤：\n1. 暂停写入。\n2. 等待 `replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`。\n3. 将备用库提升为主库。\n\n警告：第 3 步不得与第 1、2 步并行。",
+    "invariants": [
+      {
+        "kind": "order",
+        "detail": "提升备用库前必须先暂停写入；输出若在暂停写入之前或同时提升备用库，判为失败。\n"
+      },
+      {
+        "kind": "order",
+        "detail": "提升备用库必须等待复制延迟降为 `0` 且快照状态成为 `COMPLETED`；未满足任一等待条件就提升，判为失败。\n"
+      },
+      {
+        "kind": "negation",
+        "detail": "警告明确禁止第 3 步与前两步并行；输出若把三项操作写成并行任务，判为失败。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`replica_lag_ms`、`0` 和 `COMPLETED` 必须逐字符保留，且仍分别绑定到复制延迟和值、快照状态和值。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-013",
+    "model": "claude",
+    "task": "review",
+    "mode": "review",
+    "source": "原文：冻结写入，等待快照完成后删除旧卷。\n候选改写：冻结写入并删除旧卷，同时等待快照完成。\n",
+    "output": "规则：CTC-L003\n严重级别：ERROR\n位置：「冻结写入并删除旧卷，同时等待快照完成。」\n问题：来源的「等待快照完成后删除旧卷」是先后关系，候选改为「同时」，顺序关系被改为并发。\n风险：操作者会在快照仍在进行时执行删除旧卷，删除与快照并行发生。\n建议修改：冻结写入，等待快照完成后删除旧卷。\n\n规则：CTC-P004\n严重级别：ERROR\n位置：「冻结写入并删除旧卷，同时等待快照完成。」\n问题：删除旧卷为不可逆操作，来源给出的前置条件「快照完成」在候选中被移到该动作之后，且不再是前置条件。\n风险：操作者读到删除指令时尚未读到快照条件，在快照未完成时删除旧卷，数据不可恢复。\n建议修改：冻结写入，等待快照完成后删除旧卷。\n\n规则：CTC-P001\n严重级别：ERROR\n位置：「冻结写入并删除旧卷」\n问题：两个存在顺序依赖的步骤被合并为一个并列动作组，执行顺序与来源不一致。\n风险：操作者把冻结写入与删除旧卷当作同一组可连续执行的动作，跳过中间的等待点。\n建议修改：冻结写入，等待快照完成后删除旧卷。\n\n规则：CTC-P003\n严重级别：WARNING\n位置：「同时等待快照完成」\n问题：「快照完成」在来源中是删除旧卷的阻塞前提，候选把它降为与删除并行的另一动作，阻塞性质丢失。\n风险：等待不再是继续的前提，删除旧卷在未通过该判据时即被执行。\n建议修改：等待快照完成后删除旧卷。",
+    "invariants": [
+      {
+        "kind": "order",
+        "detail": "正确审阅必须指出：原文要求先冻结写入，再等待快照完成，最后删除旧卷；候选允许删除旧卷与等待快照并行。\n"
+      },
+      {
+        "kind": "condition",
+        "detail": "快照完成是删除旧卷的必要前提；审阅若只把差异描述成行文顺序变化，判为失败。\n"
+      }
+    ],
+    "expected_issues": [
+      {
+        "category": "temporal-order",
+        "rule": "CTC-L003",
+        "severity": "ERROR",
+        "locus": "候选改写中的「删除旧卷，同时等待快照完成」"
+      }
+    ],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-013",
+    "model": "gemini",
+    "task": "review",
+    "mode": "review",
+    "source": "原文：冻结写入，等待快照完成后删除旧卷。\n候选改写：冻结写入并删除旧卷，同时等待快照完成。\n",
+    "output": "规则：CTC-L003\n严重级别：ERROR\n位置：「冻结写入并删除旧卷，同时等待快照完成。」\n问题：来源中「快照完成」严格先于「删除旧卷」的先后时序依赖被破坏，改写将时序改为并发执行（「同时」）。\n风险：操作者在快照生成过程中并发执行删除旧卷操作，破坏步骤执行依赖。\n建议修改：冻结写入，等待快照完成后删除旧卷。\n\n规则：CTC-P004\n严重级别：ERROR\n位置：「冻结写入并删除旧卷，同时等待快照完成。」\n问题：破坏性操作「删除旧卷」的前置守护条件（快照完成）被移至破坏性操作之后，且阻塞保护失效。\n风险：操作者在快照尚未完成时提前删除旧卷，导致快照创建失败或源数据被误删造成不可逆的数据丢失。\n建议修改：冻结写入，等待快照完成后删除旧卷。",
+    "invariants": [
+      {
+        "kind": "order",
+        "detail": "正确审阅必须指出：原文要求先冻结写入，再等待快照完成，最后删除旧卷；候选允许删除旧卷与等待快照并行。\n"
+      },
+      {
+        "kind": "condition",
+        "detail": "快照完成是删除旧卷的必要前提；审阅若只把差异描述成行文顺序变化，判为失败。\n"
+      }
+    ],
+    "expected_issues": [
+      {
+        "category": "temporal-order",
+        "rule": "CTC-L003",
+        "severity": "ERROR",
+        "locus": "候选改写中的「删除旧卷，同时等待快照完成」"
+      }
+    ],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-L-013",
+    "model": "gpt",
+    "task": "review",
+    "mode": "review",
+    "source": "原文：冻结写入，等待快照完成后删除旧卷。\n候选改写：冻结写入并删除旧卷，同时等待快照完成。\n",
+    "output": "规则：CTC-L003\n严重级别：ERROR\n位置：「冻结写入并删除旧卷，同时等待快照完成。」\n问题：原文要求先冻结写入，待快照完成后再删除旧卷；候选改写将删除旧卷与等待快照完成改为同时进行。\n风险：快照尚未完成时，旧卷可能已被删除。\n建议修改：冻结写入，等待快照完成后删除旧卷。\n\n规则：CTC-P004\n严重级别：ERROR\n位置：「冻结写入并删除旧卷，同时等待快照完成。」\n问题：「等待快照完成」是删除旧卷的前置条件，但候选改写将删除操作置于该条件满足之前。\n风险：操作者可能在快照完成前执行删除旧卷这一破坏性操作。\n建议修改：将「等待快照完成」置于「删除旧卷」之前，并保持其前置条件性质。",
+    "invariants": [
+      {
+        "kind": "order",
+        "detail": "正确审阅必须指出：原文要求先冻结写入，再等待快照完成，最后删除旧卷；候选允许删除旧卷与等待快照并行。\n"
+      },
+      {
+        "kind": "condition",
+        "detail": "快照完成是删除旧卷的必要前提；审阅若只把差异描述成行文顺序变化，判为失败。\n"
+      }
+    ],
+    "expected_issues": [
+      {
+        "category": "temporal-order",
+        "rule": "CTC-L003",
+        "severity": "ERROR",
+        "locus": "候选改写中的「删除旧卷，同时等待快照完成」"
+      }
+    ],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-P-001",
+    "model": "claude",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 灰度发布\n\n1. 将新版本发布到 5% 流量。\n2. 观察 10 分钟。\n3. 无异常则继续放量至 50%，再观察 10 分钟。\n4. 仍无异常则全量发布。\n",
+    "output": "## 灰度发布\n\n1. 将新版本发布到 5% 流量。\n2. 观察 10 分钟。\n3. 无异常则继续放量至 50%，再观察 10 分钟。\n4. 仍无异常则全量发布。\n\n待确认\n- 观察 10 分钟 | 未给出观察对象 | 需要观察的指标或监控项\n- 无异常则继续放量至 50% | 「无异常」未给出判定标准 | 判定异常的指标、阈值与数据来源\n- 仍无异常则全量发布 | 「仍无异常」未给出判定标准 | 该处判据是否与第 3 步一致，若不一致则需给出其指标与阈值",
+    "invariants": [
+      {
+        "kind": "procedure",
+        "detail": "源文缺少「结果」要素：第 2、3 步中「无异常」的判定依据——观察哪些指标、阈值是多少、由谁\n判定——在源文中不存在，也无法从上下文推得，因而每次放量的门禁是不可执行的。输出须让这一\n缺口保持可见：保留原措辞并标注待作者补充，或以问题形式指出。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "输出中不得出现源文没有的指标名、阈值或判定方：出现「错误率低于 1%」「P99 延迟无上升」\n「5xx 比例」「无告警触发」「由发布负责人确认」等任何一项，判为凭空补全事实。\n"
+      },
+      {
+        "kind": "procedure",
+        "detail": "放量档位 5% → 50% → 全量、两次「观察 10 分钟」的次数与时长不得增删或改值，\n也不得把两次观察合并成一次。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "源文未规定出现异常时的处置动作。输出不得补写「异常则回滚」「异常则暂停放量」之类的分支。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-P-001",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 灰度发布\n\n1. 将新版本发布到 5% 流量。\n2. 观察 10 分钟。\n3. 无异常则继续放量至 50%，再观察 10 分钟。\n4. 仍无异常则全量发布。\n",
+    "output": "## 灰度发布\n\n1. 将新版本发布到 5% 流量。\n2. 观察 10 分钟。\n3. 无异常则继续放量至 50%，再观察 10 分钟。\n4. 仍无异常则全量发布。\n\n待确认\n- 观察 10 分钟 | 未指定观察的具体指标或监控对象 | 需监控的指标（如错误率、延迟、告警）\n- 无异常 | 未给出判定无异常的指标与阈值 | 放量至 50% 的成功判据\n- 仍无异常 | 未给出全量发布的判定指标与阈值 | 全量发布的成功判据",
+    "invariants": [
+      {
+        "kind": "procedure",
+        "detail": "源文缺少「结果」要素：第 2、3 步中「无异常」的判定依据——观察哪些指标、阈值是多少、由谁\n判定——在源文中不存在，也无法从上下文推得，因而每次放量的门禁是不可执行的。输出须让这一\n缺口保持可见：保留原措辞并标注待作者补充，或以问题形式指出。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "输出中不得出现源文没有的指标名、阈值或判定方：出现「错误率低于 1%」「P99 延迟无上升」\n「5xx 比例」「无告警触发」「由发布负责人确认」等任何一项，判为凭空补全事实。\n"
+      },
+      {
+        "kind": "procedure",
+        "detail": "放量档位 5% → 50% → 全量、两次「观察 10 分钟」的次数与时长不得增删或改值，\n也不得把两次观察合并成一次。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "源文未规定出现异常时的处置动作。输出不得补写「异常则回滚」「异常则暂停放量」之类的分支。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-P-001",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 灰度发布\n\n1. 将新版本发布到 5% 流量。\n2. 观察 10 分钟。\n3. 无异常则继续放量至 50%，再观察 10 分钟。\n4. 仍无异常则全量发布。\n",
+    "output": "## 灰度发布\n\n1. 将新版本发布到 5% 流量。\n2. 观察 10 分钟。\n3. 无异常则继续放量至 50%，再观察 10 分钟。\n4. 仍无异常则全量发布。\n\n待确认\n- 步骤 2、3 | 「观察」未说明观察对象与指标 | 需要观察的指标或状态\n- 步骤 3、4 | 「无异常」未给出判定标准 | 允许继续放量和全量发布的判据",
+    "invariants": [
+      {
+        "kind": "procedure",
+        "detail": "源文缺少「结果」要素：第 2、3 步中「无异常」的判定依据——观察哪些指标、阈值是多少、由谁\n判定——在源文中不存在，也无法从上下文推得，因而每次放量的门禁是不可执行的。输出须让这一\n缺口保持可见：保留原措辞并标注待作者补充，或以问题形式指出。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "输出中不得出现源文没有的指标名、阈值或判定方：出现「错误率低于 1%」「P99 延迟无上升」\n「5xx 比例」「无告警触发」「由发布负责人确认」等任何一项，判为凭空补全事实。\n"
+      },
+      {
+        "kind": "procedure",
+        "detail": "放量档位 5% → 50% → 全量、两次「观察 10 分钟」的次数与时长不得增删或改值，\n也不得把两次观察合并成一次。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "源文未规定出现异常时的处置动作。输出不得补写「异常则回滚」「异常则暂停放量」之类的分支。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-P-002",
+    "model": "claude",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 签名密钥轮换\n\n1. 通过单次 `PUT /v1/keyring` 请求完成换位：同一请求内把新密钥写入 `active` 槽位、\n   把当前密钥移入 `previous` 槽位（服务端原子生效）。\n2. 等待边缘节点同步，最长 30 秒。\n3. 确认 `GET /v1/keyring/status` 返回的 `synced_nodes` 等于节点总数后，清空 `previous` 槽位。\n",
+    "output": "## 签名密钥轮换\n\n1. 通过单次 `PUT /v1/keyring` 请求完成换位：同一请求内把新密钥写入 `active` 槽位、\n   把当前密钥移入 `previous` 槽位（服务端原子生效）。\n2. 等待边缘节点同步，最长 30 秒。\n3. 确认 `GET /v1/keyring/status` 返回的 `synced_nodes` 等于节点总数后，清空 `previous` 槽位。\n\n待确认\n- 等待边缘节点同步，最长 30 秒 | 未给出 30 秒内 `synced_nodes` 仍不等于节点总数时的处理分支 | 超时未同步时应继续等待、回退还是升级，以及对应的判据",
+    "invariants": [
+      {
+        "kind": "procedure",
+        "detail": "第 1 步的两次槽位写入必须留在同一个步骤、同一次 `PUT /v1/keyring` 请求内。输出若把\n「写入 `active`」与「移入 `previous`」拆成两个步骤或两次请求，判为改变行为：拆分后存在\n两个槽位不一致的中间状态，此期间到达的请求会验签失败。\n"
+      },
+      {
+        "kind": "procedure",
+        "detail": "第 3 步中「`synced_nodes` 等于节点总数」是清空 `previous` 的前置校验。输出不得删除该校验，\n不得把清空动作提前到第 2 步或与第 2 步合并；未同步完成即清空旧密钥会使落后节点全部验签失败。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`PUT /v1/keyring`、`active`、`previous`、`GET /v1/keyring/status`、`synced_nodes`\n须逐字保留。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-P-002",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 签名密钥轮换\n\n1. 通过单次 `PUT /v1/keyring` 请求完成换位：同一请求内把新密钥写入 `active` 槽位、\n   把当前密钥移入 `previous` 槽位（服务端原子生效）。\n2. 等待边缘节点同步，最长 30 秒。\n3. 确认 `GET /v1/keyring/status` 返回的 `synced_nodes` 等于节点总数后，清空 `previous` 槽位。\n",
+    "output": "## 签名密钥轮换\n\n1. 通过单次 `PUT /v1/keyring` 请求完成换位：同一请求内把新密钥写入 `active` 槽位、把当前密钥移入 `previous` 槽位（服务端原子生效）。\n2. 等待边缘节点同步，最长 30 秒。\n3. 确认 `GET /v1/keyring/status` 返回的 `synced_nodes` 等于节点总数后，清空 `previous` 槽位。",
+    "invariants": [
+      {
+        "kind": "procedure",
+        "detail": "第 1 步的两次槽位写入必须留在同一个步骤、同一次 `PUT /v1/keyring` 请求内。输出若把\n「写入 `active`」与「移入 `previous`」拆成两个步骤或两次请求，判为改变行为：拆分后存在\n两个槽位不一致的中间状态，此期间到达的请求会验签失败。\n"
+      },
+      {
+        "kind": "procedure",
+        "detail": "第 3 步中「`synced_nodes` 等于节点总数」是清空 `previous` 的前置校验。输出不得删除该校验，\n不得把清空动作提前到第 2 步或与第 2 步合并；未同步完成即清空旧密钥会使落后节点全部验签失败。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`PUT /v1/keyring`、`active`、`previous`、`GET /v1/keyring/status`、`synced_nodes`\n须逐字保留。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-P-002",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 签名密钥轮换\n\n1. 通过单次 `PUT /v1/keyring` 请求完成换位：同一请求内把新密钥写入 `active` 槽位、\n   把当前密钥移入 `previous` 槽位（服务端原子生效）。\n2. 等待边缘节点同步，最长 30 秒。\n3. 确认 `GET /v1/keyring/status` 返回的 `synced_nodes` 等于节点总数后，清空 `previous` 槽位。\n",
+    "output": "## 签名密钥轮换\n\n1. 通过单次 `PUT /v1/keyring` 请求完成换位：同一请求内把新密钥写入 `active` 槽位、\n   把当前密钥移入 `previous` 槽位（服务端原子生效）。\n2. 等待边缘节点同步，最长 30 秒。\n3. 确认 `GET /v1/keyring/status` 返回的 `synced_nodes` 等于节点总数后，清空 `previous` 槽位。",
+    "invariants": [
+      {
+        "kind": "procedure",
+        "detail": "第 1 步的两次槽位写入必须留在同一个步骤、同一次 `PUT /v1/keyring` 请求内。输出若把\n「写入 `active`」与「移入 `previous`」拆成两个步骤或两次请求，判为改变行为：拆分后存在\n两个槽位不一致的中间状态，此期间到达的请求会验签失败。\n"
+      },
+      {
+        "kind": "procedure",
+        "detail": "第 3 步中「`synced_nodes` 等于节点总数」是清空 `previous` 的前置校验。输出不得删除该校验，\n不得把清空动作提前到第 2 步或与第 2 步合并；未同步完成即清空旧密钥会使落后节点全部验签失败。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`PUT /v1/keyring`、`active`、`previous`、`GET /v1/keyring/status`、`synced_nodes`\n须逐字保留。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-P-003",
+    "model": "claude",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 扩容收尾\n\n1. 在新节点上启动 `chunk-server`。\n2. 在管理端确认新节点状态为 `READY`，且分片元数据已全部加载。\n3. 将新节点加入写入路由表。\n4. 观察 15 分钟无写入错误后，下线旧节点。\n",
+    "output": "## 扩容收尾\n\n1. 在新节点上启动 `chunk-server`，并在管理端确认新节点状态为 `READY`，且分片元数据已全部加载。\n2. 将新节点加入写入路由表。\n3. 观察 15 分钟无写入错误后，下线旧节点。",
+    "invariants": [
+      {
+        "kind": "procedure",
+        "detail": "第 2 步是「加入写入路由表」之前的人工核对点，包含两个必须分别确认的条件：状态为 `READY`、\n分片元数据已全部加载。无论如何压缩，输出中都必须存在一个位于「加入写入路由表」之前、\n由操作者执行、并同时列出这两个条件的确认动作。若两个条件只剩其一，或核对点消失，\n或被改写为不需要操作者动作的陈述（如「节点就绪后加入路由表」），判为删除校验点。\n"
+      },
+      {
+        "kind": "procedure",
+        "detail": "「观察 15 分钟无写入错误」是下线旧节点的前置条件，不得删除或弱化为「随后下线旧节点」\n「确认无误后下线旧节点」；时长 15 分钟与判据「无写入错误」都必须保留。\n"
+      },
+      {
+        "kind": "instruction",
+        "detail": "压缩指令不得凌驾于行为保持之上。若为满足「不超过 3 步」而丢掉任一校验条件，判为失败；\n输出步骤数超过 3 但校验完整，优于步骤数达标而校验丢失。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`chunk-server`、`READY` 须逐字保留。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-P-003",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 扩容收尾\n\n1. 在新节点上启动 `chunk-server`。\n2. 在管理端确认新节点状态为 `READY`，且分片元数据已全部加载。\n3. 将新节点加入写入路由表。\n4. 观察 15 分钟无写入错误后，下线旧节点。\n",
+    "output": "## 扩容收尾\n\n1. 在新节点上启动 `chunk-server`，并在管理端确认新节点状态为 `READY`，且分片元数据已全部加载。\n2. 将新节点加入写入路由表。\n3. 观察 15 分钟无写入错误后，下线旧节点。",
+    "invariants": [
+      {
+        "kind": "procedure",
+        "detail": "第 2 步是「加入写入路由表」之前的人工核对点，包含两个必须分别确认的条件：状态为 `READY`、\n分片元数据已全部加载。无论如何压缩，输出中都必须存在一个位于「加入写入路由表」之前、\n由操作者执行、并同时列出这两个条件的确认动作。若两个条件只剩其一，或核对点消失，\n或被改写为不需要操作者动作的陈述（如「节点就绪后加入路由表」），判为删除校验点。\n"
+      },
+      {
+        "kind": "procedure",
+        "detail": "「观察 15 分钟无写入错误」是下线旧节点的前置条件，不得删除或弱化为「随后下线旧节点」\n「确认无误后下线旧节点」；时长 15 分钟与判据「无写入错误」都必须保留。\n"
+      },
+      {
+        "kind": "instruction",
+        "detail": "压缩指令不得凌驾于行为保持之上。若为满足「不超过 3 步」而丢掉任一校验条件，判为失败；\n输出步骤数超过 3 但校验完整，优于步骤数达标而校验丢失。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`chunk-server`、`READY` 须逐字保留。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-P-003",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 扩容收尾\n\n1. 在新节点上启动 `chunk-server`。\n2. 在管理端确认新节点状态为 `READY`，且分片元数据已全部加载。\n3. 将新节点加入写入路由表。\n4. 观察 15 分钟无写入错误后，下线旧节点。\n",
+    "output": "## 扩容收尾\n\n1. 在新节点上启动 `chunk-server`，并在管理端确认新节点状态为 `READY`，且分片元数据已全部加载。\n2. 将新节点加入写入路由表，观察 15 分钟无写入错误后，下线旧节点。",
+    "invariants": [
+      {
+        "kind": "procedure",
+        "detail": "第 2 步是「加入写入路由表」之前的人工核对点，包含两个必须分别确认的条件：状态为 `READY`、\n分片元数据已全部加载。无论如何压缩，输出中都必须存在一个位于「加入写入路由表」之前、\n由操作者执行、并同时列出这两个条件的确认动作。若两个条件只剩其一，或核对点消失，\n或被改写为不需要操作者动作的陈述（如「节点就绪后加入路由表」），判为删除校验点。\n"
+      },
+      {
+        "kind": "procedure",
+        "detail": "「观察 15 分钟无写入错误」是下线旧节点的前置条件，不得删除或弱化为「随后下线旧节点」\n「确认无误后下线旧节点」；时长 15 分钟与判据「无写入错误」都必须保留。\n"
+      },
+      {
+        "kind": "instruction",
+        "detail": "压缩指令不得凌驾于行为保持之上。若为满足「不超过 3 步」而丢掉任一校验条件，判为失败；\n输出步骤数超过 3 但校验完整，优于步骤数达标而校验丢失。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`chunk-server`、`READY` 须逐字保留。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-P-004",
+    "model": "claude",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 紧急回滚（目标 5 分钟内完成）\n\n1. 在发布平台点击「回滚到上一版本」，确认目标版本号为 `v3.14.2`。\n2. 回滚完成后刷新健康检查页，确认 `/healthz` 连续 3 次返回 `200`。\n3. 在 `#incident` 频道同步回滚结果与影响范围。\n",
+    "output": "## 紧急回滚（目标 5 分钟内完成）\n\n1. 在发布平台点击「回滚到上一版本」，确认目标版本号为 `v3.14.2`。\n2. 回滚完成后刷新健康检查页，确认 `/healthz` 连续 3 次返回 `200`。\n3. 在 `#incident` 频道同步回滚结果与影响范围。\n\n待确认\n- 步骤 1「确认目标版本号为 `v3.14.2`」 | 可读作点击前的阻塞性前置校验（版本不符则中止回滚），也可读作点击后在确认弹窗中核对 | 该确认是否为回滚执行前的守护条件，以及目标版本号不为 `v3.14.2` 时的处理方式",
+    "invariants": [
+      {
+        "kind": "over-edit",
+        "detail": "三步已含操作者（事故值班人，标题上下文唯一）、动作、对象与可验证结果，条件与顺序清晰，\n不存在歧义。输出若增加步骤数、为任一步补写显式主语、或把动作与确认拆成两句，\n判为过度改写（§17.7）。\n"
+      },
+      {
+        "kind": "procedure",
+        "detail": "步骤数保持 3。第 2 步的「确认 `/healthz` 连续 3 次返回 `200`」是一个确认动作，\n不得拆成「刷新健康检查页」与「确认返回 200」两步。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "输出不得新增源文没有的步骤或分支（例如「若健康检查未通过则联系发布负责人」\n「回滚前先通知业务方」）。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`v3.14.2`、`/healthz`、`200`、`#incident` 须逐字保留，「5 分钟」与「3 次」的数值不变。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-P-004",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 紧急回滚（目标 5 分钟内完成）\n\n1. 在发布平台点击「回滚到上一版本」，确认目标版本号为 `v3.14.2`。\n2. 回滚完成后刷新健康检查页，确认 `/healthz` 连续 3 次返回 `200`。\n3. 在 `#incident` 频道同步回滚结果与影响范围。\n",
+    "output": "## 紧急回滚（目标 5 分钟内完成）\n\n1. 在发布平台点击「回滚到上一版本」，确认目标版本号为 `v3.14.2`。\n2. 回滚完成后刷新健康检查页，确认 `/healthz` 连续 3 次返回 `200`。\n3. 在 `#incident` 频道同步回滚结果与影响范围。",
+    "invariants": [
+      {
+        "kind": "over-edit",
+        "detail": "三步已含操作者（事故值班人，标题上下文唯一）、动作、对象与可验证结果，条件与顺序清晰，\n不存在歧义。输出若增加步骤数、为任一步补写显式主语、或把动作与确认拆成两句，\n判为过度改写（§17.7）。\n"
+      },
+      {
+        "kind": "procedure",
+        "detail": "步骤数保持 3。第 2 步的「确认 `/healthz` 连续 3 次返回 `200`」是一个确认动作，\n不得拆成「刷新健康检查页」与「确认返回 200」两步。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "输出不得新增源文没有的步骤或分支（例如「若健康检查未通过则联系发布负责人」\n「回滚前先通知业务方」）。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`v3.14.2`、`/healthz`、`200`、`#incident` 须逐字保留，「5 分钟」与「3 次」的数值不变。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-P-004",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 紧急回滚（目标 5 分钟内完成）\n\n1. 在发布平台点击「回滚到上一版本」，确认目标版本号为 `v3.14.2`。\n2. 回滚完成后刷新健康检查页，确认 `/healthz` 连续 3 次返回 `200`。\n3. 在 `#incident` 频道同步回滚结果与影响范围。\n",
+    "output": "## 紧急回滚（目标 5 分钟内完成）\n\n1. 在发布平台点击「回滚到上一版本」，确认目标版本号为 `v3.14.2`。\n2. 回滚完成后刷新健康检查页，确认 `/healthz` 连续 3 次返回 `200`。\n3. 在 `#incident` 频道同步回滚结果与影响范围。",
+    "invariants": [
+      {
+        "kind": "over-edit",
+        "detail": "三步已含操作者（事故值班人，标题上下文唯一）、动作、对象与可验证结果，条件与顺序清晰，\n不存在歧义。输出若增加步骤数、为任一步补写显式主语、或把动作与确认拆成两句，\n判为过度改写（§17.7）。\n"
+      },
+      {
+        "kind": "procedure",
+        "detail": "步骤数保持 3。第 2 步的「确认 `/healthz` 连续 3 次返回 `200`」是一个确认动作，\n不得拆成「刷新健康检查页」与「确认返回 200」两步。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "输出不得新增源文没有的步骤或分支（例如「若健康检查未通过则联系发布负责人」\n「回滚前先通知业务方」）。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`v3.14.2`、`/healthz`、`200`、`#incident` 须逐字保留，「5 分钟」与「3 次」的数值不变。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-P-005",
+    "model": "claude",
+    "task": "review",
+    "mode": "review",
+    "source": "## 告警抑制规则变更\n\n监控平台收到抑制规则更新后通知各采集端，随后重新加载规则文件。加载失败时保留旧规则，并在下一个周期重试。该文件位于 `/etc/alerting/rules.d/`，变更后须在值班群报备。\n",
+    "output": "规则：CTC-A005\n严重级别：ERROR\n位置：「监控平台收到抑制规则更新后通知各采集端，随后重新加载规则文件。」\n问题：「随后重新加载规则文件」的执行者未确定。承前省略可读作监控平台自身重新加载；由于紧邻的宾语是「各采集端」，也可读作各采集端收到通知后各自重新加载。两种读法对应不同节点上的不同动作，来源与上下文均不足以判定。\n风险：加载异常时，值班人员会到错误的节点上查加载日志、手动触发重载；若实际由采集端加载，「先通知、后加载」的时序也意味着通知发出时规则尚未生效，抑制窗口的判断随之出错。\n建议修改：保留原句，向作者确认后择一（不得由改写方选定）：「…通知各采集端，各采集端随后重新加载规则文件。」或「…通知各采集端，并随后重新加载规则文件。」\n\n规则：CTC-A005\n严重级别：ERROR\n位置：「加载失败时保留旧规则，并在下一个周期重试。」\n问题：重试的次数未确定：可读作仅在下一个周期重试一次，也可读作每个周期持续重试直至成功。文中未给出重试上限、终止条件或失败后的升级路径。\n风险：两种读法决定值班人员是等待系统自动恢复还是立即人工介入；若实际只重试一次而被读成持续重试，采集端会长期停留在旧抑制规则上而无人处理。\n建议修改：保留原句，向作者确认重试次数上限与失败终止／升级条件后再补写。\n\n规则：CTC-T001\n严重级别：WARNING\n位置：标题「## 告警抑制规则变更」与正文「监控平台收到抑制规则更新后…」「变更后须在值班群报备。」\n问题：同一事件在标题与正文中分别称为「变更」与「更新」，文中未说明二者同指还是两类事件。\n问题所在的两个术语若不同指，「变更后须报备」的适用范围也随之不同。\n风险：读者可能认为自动同步的「规则更新」不在报备范围内，只有人工「变更」才需报备，导致部分变更未报备。\n建议修改：确认二者同指后统一为一个术语（按来源中最明确的形式，即标题的「变更」）；若确为两类事件，需分别说明各自的报备要求。\n\n规则：CTC-A005\n严重级别：WARNING\n位置：「随后重新加载规则文件。」与「该文件位于 `/etc/alerting/rules.d/`」\n问题：「规则文件」是单个文件还是 `/etc/alerting/rules.d/` 目录下的全部文件未确定，「该文件」单数指代与 `.d` 目录惯例存在张力。由此，「加载失败时保留旧规则」的回退粒度也不确定：是整体保留旧规则，还是仅失败的那个文件保留旧版本、其余文件已生效。\n风险：回退粒度不明时，操作者无法判断变更是否部分生效，可能误认为全部规则仍是旧版本而重复下发，或误认为全部已生效而漏掉未加载的规则。\n建议修改：向作者确认加载与回退的粒度后，明确写出是单个文件还是该目录下的全部规则文件。\n\n规则：CTC-A005\n严重级别：WARNING\n位置：「变更后须在值班群报备。」\n问题：报备义务的承担者未指明。前文主语为「监控平台」，字面上承前可读作系统报备；实际承担者可能是提交规则变更的人员，也可能是值班人员。\n风险：责任人不明时报备易被互相推诿而遗漏，事后无法追溯抑制规则由谁变更。\n建议修改：保留原句，向作者确认报备责任人后补出执行者。\n\n规则：CTC-P003\n严重级别：WARNING\n位置：「加载失败时保留旧规则，并在下一个周期重试。」「变更后须在值班群报备。」\n问题：作为变更流程文档，全文未给出确认变更已生效的成功判据与验证方式（如何确认各采集端已加载新规则、在哪里查看加载结果）。报备是流程的最后一步，但它并不验证任何东西。\n风险：操作者完成报备即视为变更结束，实际可能仍有采集端在旧抑制规则下运行，造成告警被错误抑制或应抑制的告警持续触发。\n建议修改：向作者取得验证方式后，在报备之前补写一步生效确认及其判据。\n\n未发现受保护标记、数值、否定作用域、阈值边界方面的问题；`/etc/alerting/rules.d/` 逐字符保持原样。",
+    "invariants": [
+      {
+        "kind": "instruction",
+        "detail": "输出须是问题清单，每条至少含位置、问题、风险与修改建议。不得返回整段改写后的文档；\n若输出主体是重写文本（即便另附简短说明），判为失败。\n"
+      },
+      {
+        "kind": "actor",
+        "detail": "清单须报告「随后重新加载规则文件」的施事不可确定：既可读作监控平台重新加载，\n也可读作各采集端各自重新加载，二者决定故障时该查哪一侧。若清单只给出一种「正确写法」\n而不说明源文不足以判定，判为擅自决定。\n"
+      },
+      {
+        "kind": "reference",
+        "detail": "`/etc/alerting/rules.d/` 是目录，单数「该文件」缺少唯一先行词。清单若报告这一点，属于合理发现，不得计为误报；但不报告它不判为失败——这一层粒度不作为正确审阅的必要条件。\n"
+      },
+      {
+        "kind": "over-edit",
+        "detail": "「监控平台收到抑制规则更新后通知各采集端」施事明确且承前一致，不得作为施事缺失或\n被动语态问题报告；报告它判为误报。\n"
+      }
+    ],
+    "expected_issues": [
+      {
+        "category": "actor-omission-ambiguous",
+        "rule": "CTC-A005",
+        "severity": "ERROR",
+        "locus": "随后重新加载规则文件"
+      }
+    ],
+    "over_edit_trap": false,
+    "deterministic_failures": [
+      "protected_tokens",
+      "quantities"
+    ]
+  },
+  {
+    "case_id": "G-P-005",
+    "model": "gemini",
+    "task": "review",
+    "mode": "review",
+    "source": "## 告警抑制规则变更\n\n监控平台收到抑制规则更新后通知各采集端，随后重新加载规则文件。加载失败时保留旧规则，并在下一个周期重试。该文件位于 `/etc/alerting/rules.d/`，变更后须在值班群报备。\n",
+    "output": "规则：CTC-A001\n严重级别：ERROR\n位置：「监控平台收到抑制规则更新后通知各采集端，随后重新加载规则文件。」\n问题：「随后重新加载规则文件」的执行主体不明确，既可理解为监控平台重载规则，亦可理解为各采集端重载规则。\n风险：当规则生效异常或加载失败时，排障人员无法确定是由监控平台还是采集端执行重载，会导致排查方向错误并延误故障处理。\n建议修改：明确重载动作的执行者（如「……通知各采集端，随后监控平台重新加载规则文件。」或「……通知各采集端，各采集端随后重新加载规则文件。」）。\n\n规则：CTC-P002\n严重级别：ERROR\n位置：「该文件位于 `/etc/alerting/rules.d/`」\n问题：操作路径缺失具体的节点或组件定位，未说明该目录位于监控平台服务端还是各采集端主机。\n风险：变更人员无法判定应登录哪类机器修改配置，可能登录错误节点进行无效修改或导致环境配置不一致。\n建议修改：补全文件所在的目标节点（如「该文件位于监控平台服务端的 `/etc/alerting/rules.d/`」或「该文件位于各采集端节点的 `/etc/alerting/rules.d/`」）。",
+    "invariants": [
+      {
+        "kind": "instruction",
+        "detail": "输出须是问题清单，每条至少含位置、问题、风险与修改建议。不得返回整段改写后的文档；\n若输出主体是重写文本（即便另附简短说明），判为失败。\n"
+      },
+      {
+        "kind": "actor",
+        "detail": "清单须报告「随后重新加载规则文件」的施事不可确定：既可读作监控平台重新加载，\n也可读作各采集端各自重新加载，二者决定故障时该查哪一侧。若清单只给出一种「正确写法」\n而不说明源文不足以判定，判为擅自决定。\n"
+      },
+      {
+        "kind": "reference",
+        "detail": "`/etc/alerting/rules.d/` 是目录，单数「该文件」缺少唯一先行词。清单若报告这一点，属于合理发现，不得计为误报；但不报告它不判为失败——这一层粒度不作为正确审阅的必要条件。\n"
+      },
+      {
+        "kind": "over-edit",
+        "detail": "「监控平台收到抑制规则更新后通知各采集端」施事明确且承前一致，不得作为施事缺失或\n被动语态问题报告；报告它判为误报。\n"
+      }
+    ],
+    "expected_issues": [
+      {
+        "category": "actor-omission-ambiguous",
+        "rule": "CTC-A005",
+        "severity": "ERROR",
+        "locus": "随后重新加载规则文件"
+      }
+    ],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-P-005",
+    "model": "gpt",
+    "task": "review",
+    "mode": "review",
+    "source": "## 告警抑制规则变更\n\n监控平台收到抑制规则更新后通知各采集端，随后重新加载规则文件。加载失败时保留旧规则，并在下一个周期重试。该文件位于 `/etc/alerting/rules.d/`，变更后须在值班群报备。\n",
+    "output": "规则：CTC-A005  \n严重级别：ERROR  \n位置：「监控平台收到抑制规则更新后通知各采集端，随后重新加载规则文件。」  \n问题：「重新加载规则文件」可理解为由监控平台执行，也可理解为由各采集端收到通知后执行；文档未确定执行者。  \n风险：操作者可能在错误的组件上配置或排查规则重新加载。  \n建议修改：明确由监控平台还是各采集端重新加载规则文件。\n\n规则：CTC-A005  \n严重级别：ERROR  \n位置：「加载失败时保留旧规则，并在下一个周期重试。」  \n问题：「下一个周期」未说明是采集周期、规则更新周期还是其他周期，也未给出周期长度或其确定方式。  \n风险：不同实现可能在不同时间重试，导致旧规则的生效时长不同。  \n建议修改：明确周期类型及周期长度，或说明周期值的唯一确定方式。\n\n规则：CTC-A005  \n严重级别：ERROR  \n位置：「变更后须在值班群报备。」  \n问题：文档未说明由规则变更者、监控平台维护者还是其他角色执行报备。  \n风险：相关人员可能均认为报备应由他人完成，导致变更未被报备。  \n建议修改：明确负责报备的角色。",
+    "invariants": [
+      {
+        "kind": "instruction",
+        "detail": "输出须是问题清单，每条至少含位置、问题、风险与修改建议。不得返回整段改写后的文档；\n若输出主体是重写文本（即便另附简短说明），判为失败。\n"
+      },
+      {
+        "kind": "actor",
+        "detail": "清单须报告「随后重新加载规则文件」的施事不可确定：既可读作监控平台重新加载，\n也可读作各采集端各自重新加载，二者决定故障时该查哪一侧。若清单只给出一种「正确写法」\n而不说明源文不足以判定，判为擅自决定。\n"
+      },
+      {
+        "kind": "reference",
+        "detail": "`/etc/alerting/rules.d/` 是目录，单数「该文件」缺少唯一先行词。清单若报告这一点，属于合理发现，不得计为误报；但不报告它不判为失败——这一层粒度不作为正确审阅的必要条件。\n"
+      },
+      {
+        "kind": "over-edit",
+        "detail": "「监控平台收到抑制规则更新后通知各采集端」施事明确且承前一致，不得作为施事缺失或\n被动语态问题报告；报告它判为误报。\n"
+      }
+    ],
+    "expected_issues": [
+      {
+        "category": "actor-omission-ambiguous",
+        "rule": "CTC-A005",
+        "severity": "ERROR",
+        "locus": "随后重新加载规则文件"
+      }
+    ],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-P-006",
+    "model": "claude",
+    "task": "rewrite",
+    "mode": "standard",
+    "source": "## 服务等级说明\n\n以下 `--- BEGIN CONTRACT ---` 与 `--- END CONTRACT ---` 之间为法务提供的对外承诺原文。\n\n--- BEGIN CONTRACT ---\n在任何情况下，服务提供方对于因不可抗力所导致的服务中断，不承担任何形式的赔偿责任。\n--- END CONTRACT ---\n\n运维侧的实际做法是这样的：在发生区域性故障的时候，会先把流量切换到备用区域，然后再进行根因的排查。在切换的过程当中，可能会出现最长 30 秒的写入不可用的情况。\n",
+    "output": "## 服务等级说明\n\n以下 `--- BEGIN CONTRACT ---` 与 `--- END CONTRACT ---` 之间为法务提供的对外承诺原文。\n\n--- BEGIN CONTRACT ---\n在任何情况下，服务提供方对于因不可抗力所导致的服务中断，不承担任何形式的赔偿责任。\n--- END CONTRACT ---\n\n运维侧的实际做法是：发生区域性故障时，先把流量切换到备用区域，再排查根因。切换过程中，写入可能不可用，最长 30 秒。",
+    "invariants": [
+      {
+        "kind": "instruction",
+        "detail": "受保护区域的三行（两行标记与其间正文）须在输出中字符级一致地出现。删除「在任何情况下」，\n把「不承担任何形式的赔偿责任」改成「不承担赔偿责任」，把「所导致的」改成「导致的」，\n或调整标点，均判为失败——即使改后的中文更自然。自然度不适用于受保护区域。\n"
+      },
+      {
+        "kind": "instruction",
+        "detail": "受保护区域的位置与边界不变：不得在两行标记之间插入标题、注释或说明，不得把承诺原文\n移到标记之外，不得删除或改写标记行。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "区域外的改写须保留两项事实：切换过程中最长 30 秒写入不可用；先切流量到备用区域、\n后排查根因的先后关系。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-P-006",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "standard",
+    "source": "## 服务等级说明\n\n以下 `--- BEGIN CONTRACT ---` 与 `--- END CONTRACT ---` 之间为法务提供的对外承诺原文。\n\n--- BEGIN CONTRACT ---\n在任何情况下，服务提供方对于因不可抗力所导致的服务中断，不承担任何形式的赔偿责任。\n--- END CONTRACT ---\n\n运维侧的实际做法是这样的：在发生区域性故障的时候，会先把流量切换到备用区域，然后再进行根因的排查。在切换的过程当中，可能会出现最长 30 秒的写入不可用的情况。\n",
+    "output": "## 服务等级说明\n\n以下 `--- BEGIN CONTRACT ---` 与 `--- END CONTRACT ---` 之间为法务提供的对外承诺原文。\n\n--- BEGIN CONTRACT ---\n在任何情况下，服务提供方对于因不可抗力所导致的服务中断，不承担任何形式的赔偿责任。\n--- END CONTRACT ---\n\n运维侧的实际做法：发生区域性故障时，会先将流量切换到备用区域，然后再排查根因。切换过程中，可能会出现最长 30 秒的写入不可用。",
+    "invariants": [
+      {
+        "kind": "instruction",
+        "detail": "受保护区域的三行（两行标记与其间正文）须在输出中字符级一致地出现。删除「在任何情况下」，\n把「不承担任何形式的赔偿责任」改成「不承担赔偿责任」，把「所导致的」改成「导致的」，\n或调整标点，均判为失败——即使改后的中文更自然。自然度不适用于受保护区域。\n"
+      },
+      {
+        "kind": "instruction",
+        "detail": "受保护区域的位置与边界不变：不得在两行标记之间插入标题、注释或说明，不得把承诺原文\n移到标记之外，不得删除或改写标记行。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "区域外的改写须保留两项事实：切换过程中最长 30 秒写入不可用；先切流量到备用区域、\n后排查根因的先后关系。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-P-006",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "standard",
+    "source": "## 服务等级说明\n\n以下 `--- BEGIN CONTRACT ---` 与 `--- END CONTRACT ---` 之间为法务提供的对外承诺原文。\n\n--- BEGIN CONTRACT ---\n在任何情况下，服务提供方对于因不可抗力所导致的服务中断，不承担任何形式的赔偿责任。\n--- END CONTRACT ---\n\n运维侧的实际做法是这样的：在发生区域性故障的时候，会先把流量切换到备用区域，然后再进行根因的排查。在切换的过程当中，可能会出现最长 30 秒的写入不可用的情况。\n",
+    "output": "## 服务等级说明\n\n以下 `--- BEGIN CONTRACT ---` 与 `--- END CONTRACT ---` 之间为法务提供的对外承诺原文。\n\n--- BEGIN CONTRACT ---\n在任何情况下，服务提供方对于因不可抗力所导致的服务中断，不承担任何形式的赔偿责任。\n--- END CONTRACT ---\n\n运维侧的实际做法如下：发生区域性故障时，会先将流量切换到备用区域，再排查根因。切换过程中，写入可能最长不可用 30 秒。",
+    "invariants": [
+      {
+        "kind": "instruction",
+        "detail": "受保护区域的三行（两行标记与其间正文）须在输出中字符级一致地出现。删除「在任何情况下」，\n把「不承担任何形式的赔偿责任」改成「不承担赔偿责任」，把「所导致的」改成「导致的」，\n或调整标点，均判为失败——即使改后的中文更自然。自然度不适用于受保护区域。\n"
+      },
+      {
+        "kind": "instruction",
+        "detail": "受保护区域的位置与边界不变：不得在两行标记之间插入标题、注释或说明，不得把承诺原文\n移到标记之外，不得删除或改写标记行。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "区域外的改写须保留两项事实：切换过程中最长 30 秒写入不可用；先切流量到备用区域、\n后排查根因的先后关系。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-P-007",
+    "model": "claude",
+    "task": "rewrite",
+    "mode": "standard",
+    "source": "### `GET /v1/reports/{id}/export`\n\n导出指定报表。报表较大时转为异步导出：接口立即返回 `202` 和 `task_id`，导出完成后通过 Webhook 通知。轮询 `GET /v1/tasks/{task_id}` 可查看进度。\n",
+    "output": "### `GET /v1/reports/{id}/export`\n\n导出指定报表。报表较大时转为异步导出：接口立即返回 `202` 和 `task_id`，导出完成后通过 Webhook 通知。轮询 `GET /v1/tasks/{task_id}` 可查看进度。",
+    "invariants": [
+      {
+        "kind": "over-edit",
+        "detail": "该段在标准模式下已达标：施事（调用方与接口）由上下文可定，条件与返回结果清晰。输出若改成\n逐条编号步骤、为每句补「调用方须／服务端将」等显式主语、或把「报表较大时」展开成\n「如果…那么…」的完整条件句并逐句拆行，判为把严格模式的显式化标准套用到标准模式\n（§6.2、§17.7）。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "「报表较大时」的判定阈值源文没有给出。输出不得填入任何具体数值或替代条件\n（如「超过 10 MB」「行数超过 10 万」「预计耗时超过 30 秒」）；若认为需要补充，\n只能标注为待作者确认，不能直接写进正文。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`GET /v1/reports/{id}/export`、`202`、`task_id`、`GET /v1/tasks/{task_id}` 须逐字保留，\nWebhook 的大小写不变。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-P-007",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "standard",
+    "source": "### `GET /v1/reports/{id}/export`\n\n导出指定报表。报表较大时转为异步导出：接口立即返回 `202` 和 `task_id`，导出完成后通过 Webhook 通知。轮询 `GET /v1/tasks/{task_id}` 可查看进度。\n",
+    "output": "### `GET /v1/reports/{id}/export`\n\n导出指定报表。报表较大时转为异步导出：接口立即返回 `202` 和 `task_id`，导出完成后通过 Webhook 通知。轮询 `GET /v1/tasks/{task_id}` 可查看进度。",
+    "invariants": [
+      {
+        "kind": "over-edit",
+        "detail": "该段在标准模式下已达标：施事（调用方与接口）由上下文可定，条件与返回结果清晰。输出若改成\n逐条编号步骤、为每句补「调用方须／服务端将」等显式主语、或把「报表较大时」展开成\n「如果…那么…」的完整条件句并逐句拆行，判为把严格模式的显式化标准套用到标准模式\n（§6.2、§17.7）。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "「报表较大时」的判定阈值源文没有给出。输出不得填入任何具体数值或替代条件\n（如「超过 10 MB」「行数超过 10 万」「预计耗时超过 30 秒」）；若认为需要补充，\n只能标注为待作者确认，不能直接写进正文。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`GET /v1/reports/{id}/export`、`202`、`task_id`、`GET /v1/tasks/{task_id}` 须逐字保留，\nWebhook 的大小写不变。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-P-007",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "standard",
+    "source": "### `GET /v1/reports/{id}/export`\n\n导出指定报表。报表较大时转为异步导出：接口立即返回 `202` 和 `task_id`，导出完成后通过 Webhook 通知。轮询 `GET /v1/tasks/{task_id}` 可查看进度。\n",
+    "output": "### `GET /v1/reports/{id}/export`\n\n导出指定报表。报表较大时转为异步导出：接口立即返回 `202` 和 `task_id`，导出完成后通过 Webhook 通知。轮询 `GET /v1/tasks/{task_id}` 可查看进度。",
+    "invariants": [
+      {
+        "kind": "over-edit",
+        "detail": "该段在标准模式下已达标：施事（调用方与接口）由上下文可定，条件与返回结果清晰。输出若改成\n逐条编号步骤、为每句补「调用方须／服务端将」等显式主语、或把「报表较大时」展开成\n「如果…那么…」的完整条件句并逐句拆行，判为把严格模式的显式化标准套用到标准模式\n（§6.2、§17.7）。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "「报表较大时」的判定阈值源文没有给出。输出不得填入任何具体数值或替代条件\n（如「超过 10 MB」「行数超过 10 万」「预计耗时超过 30 秒」）；若认为需要补充，\n只能标注为待作者确认，不能直接写进正文。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`GET /v1/reports/{id}/export`、`202`、`task_id`、`GET /v1/tasks/{task_id}` 须逐字保留，\nWebhook 的大小写不变。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-001",
+    "model": "claude",
+    "task": "translate",
+    "mode": "standard",
+    "source": "The SDK will perform parsing of the uploaded configuration file and carry out validity checks by invoking the schema validator.\n",
+    "output": "SDK 会解析上传的配置文件，并调用 schema 校验器进行有效性检查。",
+    "invariants": [
+      {
+        "kind": "actor",
+        "detail": "施事者「SDK」必须保留为主语或动作发出者，不得省略或漂移为其他组件。\n"
+      },
+      {
+        "kind": "causality",
+        "detail": "必须保留「通过调用 schema 校验器来执行有效性检查」的手段与目的关系，不得倒置或割裂。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "判据是轻动词名物化的堆叠，不是单个搭配的出现。「进行解析」「进行有效性检查」等搭配单独出现时属于正常的技术中文，不判为失败。判定方法：对输出的每个句子，数其中轻动词名物化结构的个数（计入「进行 X」「来进行 Y」「对……执行……操作」「实施……」等形式）；任何一个句子中出现两个或两个以上，即判为翻译腔失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-001",
+    "model": "gemini",
+    "task": "translate",
+    "mode": "standard",
+    "source": "The SDK will perform parsing of the uploaded configuration file and carry out validity checks by invoking the schema validator.\n",
+    "output": "SDK 会解析已上传的配置文件，并通过调用 Schema 验证器检查其有效性。",
+    "invariants": [
+      {
+        "kind": "actor",
+        "detail": "施事者「SDK」必须保留为主语或动作发出者，不得省略或漂移为其他组件。\n"
+      },
+      {
+        "kind": "causality",
+        "detail": "必须保留「通过调用 schema 校验器来执行有效性检查」的手段与目的关系，不得倒置或割裂。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "判据是轻动词名物化的堆叠，不是单个搭配的出现。「进行解析」「进行有效性检查」等搭配单独出现时属于正常的技术中文，不判为失败。判定方法：对输出的每个句子，数其中轻动词名物化结构的个数（计入「进行 X」「来进行 Y」「对……执行……操作」「实施……」等形式）；任何一个句子中出现两个或两个以上，即判为翻译腔失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-001",
+    "model": "gpt",
+    "task": "translate",
+    "mode": "standard",
+    "source": "The SDK will perform parsing of the uploaded configuration file and carry out validity checks by invoking the schema validator.\n",
+    "output": "SDK 将解析上传的配置文件，并调用架构验证器检查其有效性。",
+    "invariants": [
+      {
+        "kind": "actor",
+        "detail": "施事者「SDK」必须保留为主语或动作发出者，不得省略或漂移为其他组件。\n"
+      },
+      {
+        "kind": "causality",
+        "detail": "必须保留「通过调用 schema 校验器来执行有效性检查」的手段与目的关系，不得倒置或割裂。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "判据是轻动词名物化的堆叠，不是单个搭配的出现。「进行解析」「进行有效性检查」等搭配单独出现时属于正常的技术中文，不判为失败。判定方法：对输出的每个句子，数其中轻动词名物化结构的个数（计入「进行 X」「来进行 Y」「对……执行……操作」「实施……」等形式）；任何一个句子中出现两个或两个以上，即判为翻译腔失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-002",
+    "model": "claude",
+    "task": "translate",
+    "mode": "strict",
+    "source": "Read-only replicas do not process write requests and will automatically forward all write operations to the primary database.\n",
+    "output": "只读副本不处理写请求，并会自动将所有写操作转发至主数据库。",
+    "invariants": [
+      {
+        "kind": "modality",
+        "detail": "源文「do not process」是系统客观行为描述；输出必须使用客观陈述（如「不处理」），不得强化为面向运维人员的规范禁止（如「禁止处理」「不得处理」）。\n"
+      },
+      {
+        "kind": "quantifier",
+        "detail": "「all write operations」的全称量词必须完整保留（如「所有写操作」），不得漏译或泛化。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "必须消除「对于只读副本而言」「它们将会」等机械从句外壳与冗余代词，使用自然紧凑的主谓顺承表达；若输出包含「对于...而言，其/它们...」，判为翻译腔失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-002",
+    "model": "gemini",
+    "task": "translate",
+    "mode": "strict",
+    "source": "Read-only replicas do not process write requests and will automatically forward all write operations to the primary database.\n",
+    "output": "只读副本不处理写请求，并会自动将所有写操作转发至主数据库。",
+    "invariants": [
+      {
+        "kind": "modality",
+        "detail": "源文「do not process」是系统客观行为描述；输出必须使用客观陈述（如「不处理」），不得强化为面向运维人员的规范禁止（如「禁止处理」「不得处理」）。\n"
+      },
+      {
+        "kind": "quantifier",
+        "detail": "「all write operations」的全称量词必须完整保留（如「所有写操作」），不得漏译或泛化。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "必须消除「对于只读副本而言」「它们将会」等机械从句外壳与冗余代词，使用自然紧凑的主谓顺承表达；若输出包含「对于...而言，其/它们...」，判为翻译腔失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-002",
+    "model": "gpt",
+    "task": "translate",
+    "mode": "strict",
+    "source": "Read-only replicas do not process write requests and will automatically forward all write operations to the primary database.\n",
+    "output": "只读副本不处理写入请求，并会自动将所有写入操作转发到主数据库。",
+    "invariants": [
+      {
+        "kind": "modality",
+        "detail": "源文「do not process」是系统客观行为描述；输出必须使用客观陈述（如「不处理」），不得强化为面向运维人员的规范禁止（如「禁止处理」「不得处理」）。\n"
+      },
+      {
+        "kind": "quantifier",
+        "detail": "「all write operations」的全称量词必须完整保留（如「所有写操作」），不得漏译或泛化。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "必须消除「对于只读副本而言」「它们将会」等机械从句外壳与冗余代词，使用自然紧凑的主谓顺承表达；若输出包含「对于...而言，其/它们...」，判为翻译腔失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-003",
+    "model": "claude",
+    "task": "translate",
+    "mode": "strict",
+    "source": "Due to the fact that the connection was closed by the remote peer, uncommitted transactions were aborted and an error code `ERR_CONN_RESET` was returned to the client.\n",
+    "output": "远端对等方关闭了连接，未提交的事务被中止，并向客户端返回错误码 `ERR_CONN_RESET`。",
+    "invariants": [
+      {
+        "kind": "causality",
+        "detail": "必须完整保留「对端关闭连接」作为事务中止与返回错误码的直接诱因，不得弱化为无因果关系的相关并列。\n"
+      },
+      {
+        "kind": "condition",
+        "detail": "「uncommitted transactions」限定必须准确保留为「未提交的事务」，不得扩大为「所有事务」或漏掉限定。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "受保护错误码 `ERR_CONN_RESET` 与接收方「客户端」必须完整保留。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "必须消除「由于...的事实」「被中止」「一个错误码被返回」等多重机械被动与同位语直译，使用自然中文因果顺承语序；若输出保留「由于...的事实」或连续使用「被...被...」，判为翻译腔失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-003",
+    "model": "gemini",
+    "task": "translate",
+    "mode": "strict",
+    "source": "Due to the fact that the connection was closed by the remote peer, uncommitted transactions were aborted and an error code `ERR_CONN_RESET` was returned to the client.\n",
+    "output": "由于对端关闭了连接，未提交事务已中止，并向客户端返回了错误码 `ERR_CONN_RESET`。",
+    "invariants": [
+      {
+        "kind": "causality",
+        "detail": "必须完整保留「对端关闭连接」作为事务中止与返回错误码的直接诱因，不得弱化为无因果关系的相关并列。\n"
+      },
+      {
+        "kind": "condition",
+        "detail": "「uncommitted transactions」限定必须准确保留为「未提交的事务」，不得扩大为「所有事务」或漏掉限定。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "受保护错误码 `ERR_CONN_RESET` 与接收方「客户端」必须完整保留。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "必须消除「由于...的事实」「被中止」「一个错误码被返回」等多重机械被动与同位语直译，使用自然中文因果顺承语序；若输出保留「由于...的事实」或连续使用「被...被...」，判为翻译腔失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-003",
+    "model": "gpt",
+    "task": "translate",
+    "mode": "strict",
+    "source": "Due to the fact that the connection was closed by the remote peer, uncommitted transactions were aborted and an error code `ERR_CONN_RESET` was returned to the client.\n",
+    "output": "由于远程对端关闭了连接，未提交的事务被中止，并向客户端返回了错误代码 `ERR_CONN_RESET`。",
+    "invariants": [
+      {
+        "kind": "causality",
+        "detail": "必须完整保留「对端关闭连接」作为事务中止与返回错误码的直接诱因，不得弱化为无因果关系的相关并列。\n"
+      },
+      {
+        "kind": "condition",
+        "detail": "「uncommitted transactions」限定必须准确保留为「未提交的事务」，不得扩大为「所有事务」或漏掉限定。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "受保护错误码 `ERR_CONN_RESET` 与接收方「客户端」必须完整保留。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "必须消除「由于...的事实」「被中止」「一个错误码被返回」等多重机械被动与同位语直译，使用自然中文因果顺承语序；若输出保留「由于...的事实」或连续使用「被...被...」，判为翻译腔失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-004",
+    "model": "claude",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "修改配置后须重启网关生效。\n",
+    "output": "修改配置后须重启网关生效。",
+    "invariants": [
+      {
+        "kind": "modality",
+        "detail": "原文「须」表达紧凑义务情态，不得弱化为「建议/可」，亦不得过度扩写为「您必须...以使...生效」。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "原文已经紧凑、准确且无歧义。输出若强加第二人称代词（如「您/用户」）、把「须」替换展开为「必须执行网关重启操作」、补齐长从句外壳（「在...之后」「以使修改后的配置生效」）或拆为多句，判为过度编辑失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-004",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "修改配置后须重启网关生效。\n",
+    "output": "修改配置后须重启网关生效。",
+    "invariants": [
+      {
+        "kind": "modality",
+        "detail": "原文「须」表达紧凑义务情态，不得弱化为「建议/可」，亦不得过度扩写为「您必须...以使...生效」。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "原文已经紧凑、准确且无歧义。输出若强加第二人称代词（如「您/用户」）、把「须」替换展开为「必须执行网关重启操作」、补齐长从句外壳（「在...之后」「以使修改后的配置生效」）或拆为多句，判为过度编辑失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-004",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "修改配置后须重启网关生效。\n",
+    "output": "修改配置后须重启网关生效。",
+    "invariants": [
+      {
+        "kind": "modality",
+        "detail": "原文「须」表达紧凑义务情态，不得弱化为「建议/可」，亦不得过度扩写为「您必须...以使...生效」。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "原文已经紧凑、准确且无歧义。输出若强加第二人称代词（如「您/用户」）、把「须」替换展开为「必须执行网关重启操作」、补齐长从句外壳（「在...之后」「以使修改后的配置生效」）或拆为多句，判为过度编辑失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-005",
+    "model": "claude",
+    "task": "rewrite",
+    "mode": "standard",
+    "source": "接口支持批量写入，单次上限 500 条。\n",
+    "output": "接口支持批量写入，单次上限 500 条。",
+    "invariants": [
+      {
+        "kind": "threshold",
+        "detail": "「单次上限 500 条」是封闭数值上限，数值 500 与单次限制必须准确保留。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "原文采用无主语声明式，参数能力与边界清晰利落。输出若引入客套主语（如「允许用户/调用方」）、套用轻动词（如「进行批量写入操作」）或将上限扩写为「在单次请求中最多可以写入五百条数据记录」，判为过度编辑失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-005",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "standard",
+    "source": "接口支持批量写入，单次上限 500 条。\n",
+    "output": "接口支持批量写入，单次上限 500 条。",
+    "invariants": [
+      {
+        "kind": "threshold",
+        "detail": "「单次上限 500 条」是封闭数值上限，数值 500 与单次限制必须准确保留。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "原文采用无主语声明式，参数能力与边界清晰利落。输出若引入客套主语（如「允许用户/调用方」）、套用轻动词（如「进行批量写入操作」）或将上限扩写为「在单次请求中最多可以写入五百条数据记录」，判为过度编辑失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-005",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "standard",
+    "source": "接口支持批量写入，单次上限 500 条。\n",
+    "output": "接口支持批量写入，单次上限 500 条。",
+    "invariants": [
+      {
+        "kind": "threshold",
+        "detail": "「单次上限 500 条」是封闭数值上限，数值 500 与单次限制必须准确保留。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "原文采用无主语声明式，参数能力与边界清晰利落。输出若引入客套主语（如「允许用户/调用方」）、套用轻动词（如「进行批量写入操作」）或将上限扩写为「在单次请求中最多可以写入五百条数据记录」，判为过度编辑失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-006",
+    "model": "claude",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "磁盘用量超 90% 触发告警。\n",
+    "output": "磁盘用量超 90% 触发告警。",
+    "invariants": [
+      {
+        "kind": "threshold",
+        "detail": "开区间比较「超 90%」与数值 90% 必须严格保持，不得篡改为闭区间「达到 90%」或「高于等于 90%」。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "原文是监控告警看板的标准紧缩句。输出若机械扩充为「当磁盘的使用量超过百分之九十的时候，系统将会触发告警信息」，判为过度编辑失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-006",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "磁盘用量超 90% 触发告警。\n",
+    "output": "磁盘用量超 90% 触发告警。",
+    "invariants": [
+      {
+        "kind": "threshold",
+        "detail": "开区间比较「超 90%」与数值 90% 必须严格保持，不得篡改为闭区间「达到 90%」或「高于等于 90%」。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "原文是监控告警看板的标准紧缩句。输出若机械扩充为「当磁盘的使用量超过百分之九十的时候，系统将会触发告警信息」，判为过度编辑失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-006",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "磁盘用量超 90% 触发告警。\n",
+    "output": "磁盘用量超过 90% 时触发告警。",
+    "invariants": [
+      {
+        "kind": "threshold",
+        "detail": "开区间比较「超 90%」与数值 90% 必须严格保持，不得篡改为闭区间「达到 90%」或「高于等于 90%」。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "原文是监控告警看板的标准紧缩句。输出若机械扩充为「当磁盘的使用量超过百分之九十的时候，系统将会触发告警信息」，判为过度编辑失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-007",
+    "model": "claude",
+    "task": "review",
+    "mode": "review",
+    "source": "备份数据库后，将流量路由至备用集群。\n",
+    "output": "规则：CTC-A005\n严重级别：ERROR\n位置：「将流量路由至备用集群」\n问题：未给出流量切换的范围——全量切换，还是按比例或按服务灰度切换。\n风险：一名操作者执行全量切换，另一名只切部分流量，同一步骤产出两种不同的线上状态。\n建议修改：保留原句，另在「待确认」中提出：`将流量路由至备用集群 | 未给出切换范围 | 全量切换还是按比例／按服务灰度切换，以及各批次比例`\n\n规则：CTC-P003\n严重级别：WARNING\n位置：「备份数据库后」\n问题：「后」只表达时间先后，未给出备份完成或校验通过的确认方式；全句也未给出切换后的成功判据。\n风险：备份仍在进行或已失败时，操作者仅凭「已发起备份」即继续切换流量；切换完成后也无从判断是否成功。\n建议修改：保留原句，另在「待确认」中提出：`备份数据库后 | 未给出备份成功的确认方式与切换后的验证判据 | 判定备份完成的可观测条件、切换成功的验证方式`\n\n规则：CTC-P002\n严重级别：WARNING\n位置：「将流量路由至备用集群」\n问题：缺少路由变更的执行位置与方式（DNS、负载均衡器、服务网关或客户端配置），来源不足以确定。\n风险：操作者在错误的层级改动路由，切换不生效或影响面超出预期。\n建议修改：保留原句，另在「待确认」中提出：`将流量路由至备用集群 | 未给出路由变更的执行位置与方式 | 在哪一层（DNS／负载均衡器／网关／客户端）以何种方式变更`",
+    "invariants": [
+      {
+        "kind": "order",
+        "detail": "源文严格规定先「备份数据库」后「路由流量」的时序关系。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "原文「备份数据库后，将流量路由至备用集群。」属于标准自然的中文连动 SOP，承前省略主语且兼类词「备份」「路由」动用准确，完全符合 CTC 规范。审阅模式下正确行为是「不报告任何问题」（输出空列表）；若错误报告「缺少主语」「单句多动词」或「词性不当」，判为误报失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": [
+      "protected_tokens",
+      "quantities"
+    ]
+  },
+  {
+    "case_id": "G-R-007",
+    "model": "gemini",
+    "task": "review",
+    "mode": "review",
+    "source": "备份数据库后，将流量路由至备用集群。\n",
+    "output": "未发现违规",
+    "invariants": [
+      {
+        "kind": "order",
+        "detail": "源文严格规定先「备份数据库」后「路由流量」的时序关系。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "原文「备份数据库后，将流量路由至备用集群。」属于标准自然的中文连动 SOP，承前省略主语且兼类词「备份」「路由」动用准确，完全符合 CTC 规范。审阅模式下正确行为是「不报告任何问题」（输出空列表）；若错误报告「缺少主语」「单句多动词」或「词性不当」，判为误报失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-007",
+    "model": "gpt",
+    "task": "review",
+    "mode": "review",
+    "source": "备份数据库后，将流量路由至备用集群。\n",
+    "output": "未发现违规",
+    "invariants": [
+      {
+        "kind": "order",
+        "detail": "源文严格规定先「备份数据库」后「路由流量」的时序关系。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "原文「备份数据库后，将流量路由至备用集群。」属于标准自然的中文连动 SOP，承前省略主语且兼类词「备份」「路由」动用准确，完全符合 CTC 规范。审阅模式下正确行为是「不报告任何问题」（输出空列表）；若错误报告「缺少主语」「单句多动词」或「词性不当」，判为误报失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-008",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "生产环境禁用调试模式。\n",
+    "output": "生产环境禁用调试模式。",
+    "invariants": [
+      {
+        "kind": "modality",
+        "detail": "「禁用」表示该模式在生产环境中不启用。输出不得把它弱化为「建议关闭」「尽量避免开启」等可选表述。本用例不要求判定「禁用」是状态描述还是祈使指令，输出保留任一读法都可以，但不得改变强度。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "原文属于客观环境配置基线约束。输出若强加主语（如「管理员必须...」「开发人员不得...」）或膨胀为「在生产环境中，系统必须禁止开启调试模式」，判为过度编辑失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-008",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "生产环境禁用调试模式。\n",
+    "output": "生产环境禁用调试模式。",
+    "invariants": [
+      {
+        "kind": "modality",
+        "detail": "「禁用」表示该模式在生产环境中不启用。输出不得把它弱化为「建议关闭」「尽量避免开启」等可选表述。本用例不要求判定「禁用」是状态描述还是祈使指令，输出保留任一读法都可以，但不得改变强度。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "原文属于客观环境配置基线约束。输出若强加主语（如「管理员必须...」「开发人员不得...」）或膨胀为「在生产环境中，系统必须禁止开启调试模式」，判为过度编辑失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-009",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "请您在注意到用户的输入里面好像有 SQL 相关词汇的时候，尽可能帮忙调用一下 `sanitize_query` 工具对输入进行清理哦，千万不要直接拿去拼接字符串。\n",
+    "output": "若用户输入中疑似包含 SQL 相关词汇，请尽可能调用 `sanitize_query` 工具清理输入，切勿直接拼接字符串。\n\n待确认\n- 好像有 SQL 相关词汇 | 「好像有」缺少明确的判定依据与词汇范围 | SQL 相关词汇的判定规则或关键词列表\n- 尽可能 | 「尽可能」为无判据词，未明确约束强度及例外条件 | 调用的具体触发条件、强制级别或豁免场景",
+    "invariants": [
+      {
+        "kind": "rendering",
+        "detail": "对话客套与语气词（「请您」「帮忙」「一下」「哦」）属于语域噪声，输出应予清除。残留一两个语气词属于轻微问题，不单独判为失败；但「请您……」这类客套句式整体未清除，判为失败。清除语域噪声时若语义随之改变，按下面三条判。\n"
+      },
+      {
+        "kind": "modality",
+        "detail": "源文用「尽可能」表达尽力而非义务，用「千万不要」表达强告诫。输出不得把「尽可能」改写为「必须」「须」「一律」等义务表述。这不是因为强制调用是错的，而是因为提高义务等级是作者的决定，不是改写的授权范围。输出若提高了调用义务的等级，判为失败。\n"
+      },
+      {
+        "kind": "condition",
+        "detail": "源文的触发条件「好像有 SQL 相关词汇」本身带有不确定性。输出若把它改写为「输入包含 SQL 关键字」这类确定的可判定条件，而没有任何标注说明这是补充的判定标准，判为静默消歧失败。若输出保留不确定表述，或保留并附「待确认」说明，均判为通过。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`sanitize_query` 须逐字保留。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-009",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "请您在注意到用户的输入里面好像有 SQL 相关词汇的时候，尽可能帮忙调用一下 `sanitize_query` 工具对输入进行清理哦，千万不要直接拿去拼接字符串。\n",
+    "output": "请在注意到用户输入中好像有 SQL 相关词汇时，尽可能调用 `sanitize_query` 工具清理输入，千万不要直接拼接字符串。\n\n待确认\n- 好像有 SQL 相关词汇 | 工具的触发条件不明确 | 用于判定是否调用 `sanitize_query` 的可观测条件\n- 尽可能调用 | 可读作条件允许时必须调用，或仅建议调用 | 调用 `sanitize_query` 的义务强度及不调用的条件",
+    "invariants": [
+      {
+        "kind": "rendering",
+        "detail": "对话客套与语气词（「请您」「帮忙」「一下」「哦」）属于语域噪声，输出应予清除。残留一两个语气词属于轻微问题，不单独判为失败；但「请您……」这类客套句式整体未清除，判为失败。清除语域噪声时若语义随之改变，按下面三条判。\n"
+      },
+      {
+        "kind": "modality",
+        "detail": "源文用「尽可能」表达尽力而非义务，用「千万不要」表达强告诫。输出不得把「尽可能」改写为「必须」「须」「一律」等义务表述。这不是因为强制调用是错的，而是因为提高义务等级是作者的决定，不是改写的授权范围。输出若提高了调用义务的等级，判为失败。\n"
+      },
+      {
+        "kind": "condition",
+        "detail": "源文的触发条件「好像有 SQL 相关词汇」本身带有不确定性。输出若把它改写为「输入包含 SQL 关键字」这类确定的可判定条件，而没有任何标注说明这是补充的判定标准，判为静默消歧失败。若输出保留不确定表述，或保留并附「待确认」说明，均判为通过。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`sanitize_query` 须逐字保留。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-010",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "standard",
+    "source": "这个工具能够允许调用者去获取指定时间范围内的系统审计日志，你可以用它来根据用户 ID 和操作类型进行日志筛选，单次调用最多能够为你返回 100 条记录。\n",
+    "output": "该工具用于获取指定时间范围内的系统审计日志，可根据用户 ID 和操作类型筛选日志，单次调用最多返回 100 条记录。",
+    "invariants": [
+      {
+        "kind": "fact",
+        "detail": "工具核心功能「查询指定时间范围内的系统审计日志」与过滤维度「用户 ID」「操作类型」必须完整保留。\n"
+      },
+      {
+        "kind": "threshold",
+        "detail": "单次返回上限数值 100 条必须精确保持，不得删除或改为模糊描述。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "必须消除「这个工具能够允许...」「你可以用它来...」「为你返回」等交互口语套话与轻动词「进行日志筛选」，改写为声明式、动宾直接破题的工具契约描述。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-010",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "standard",
+    "source": "这个工具能够允许调用者去获取指定时间范围内的系统审计日志，你可以用它来根据用户 ID 和操作类型进行日志筛选，单次调用最多能够为你返回 100 条记录。\n",
+    "output": "这个工具可获取指定时间范围内的系统审计日志，并可按用户 ID 和操作类型筛选日志。单次调用最多返回 100 条记录。",
+    "invariants": [
+      {
+        "kind": "fact",
+        "detail": "工具核心功能「查询指定时间范围内的系统审计日志」与过滤维度「用户 ID」「操作类型」必须完整保留。\n"
+      },
+      {
+        "kind": "threshold",
+        "detail": "单次返回上限数值 100 条必须精确保持，不得删除或改为模糊描述。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "必须消除「这个工具能够允许...」「你可以用它来...」「为你返回」等交互口语套话与轻动词「进行日志筛选」，改写为声明式、动宾直接破题的工具契约描述。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-011",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "糟糕！由于某些未知的网络连接问题，系统好像无法连接到数据库服务器 `10.0.1.5:5432` 了，请求在等待 5000ms 后超时，请您稍后重试或者联系管理员检查网络。\n",
+    "output": "由于某些未知的网络连接问题，系统似乎无法连接到数据库服务器 `10.0.1.5:5432`，请求在等待 5000ms 后超时。请稍后重试或联系管理员检查网络。",
+    "invariants": [
+      {
+        "kind": "fact",
+        "detail": "故障核心事实「数据库连接超时」以及上下文参数目标地址 `10.0.1.5:5432` 与超时时间 5000ms 必须精确保留。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "源文把原因表述为「某些未知的网络连接问题」，是未确认的推测。输出可以删除口语化的「好像」，但必须以「可能」「疑似」或等价方式保留原因未确认这一状态。输出若把网络问题写成已确认原因，判为失败。\n"
+      },
+      {
+        "kind": "scope",
+        "detail": "源文给出两条替代动作：稍后重试，或联系管理员检查网络。二者是选择关系。输出若改成必须同时执行，或删除其中一条，判为失败。\n"
+      },
+      {
+        "kind": "threshold",
+        "detail": "超时点是等待 5000ms 后超时。输出若改成「超过 5000ms」「约 5 秒」或其他改变边界或单位的表述，判为失败。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "「好像」等口语化推测词可以删除，但原因的不确定性须按本用例的 fact 不变式保留。输出首句须包含故障对象（数据库连接）与目标地址 `10.0.1.5:5432`。情绪化感叹词「糟糕！」应删除。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-011",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "糟糕！由于某些未知的网络连接问题，系统好像无法连接到数据库服务器 `10.0.1.5:5432` 了，请求在等待 5000ms 后超时，请您稍后重试或者联系管理员检查网络。\n",
+    "output": "糟糕！由于某些未知的网络连接问题，系统好像无法连接到数据库服务器 `10.0.1.5:5432` 了。请求等待 5000ms 后超时，请您稍后重试，或者联系管理员检查网络。",
+    "invariants": [
+      {
+        "kind": "fact",
+        "detail": "故障核心事实「数据库连接超时」以及上下文参数目标地址 `10.0.1.5:5432` 与超时时间 5000ms 必须精确保留。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "源文把原因表述为「某些未知的网络连接问题」，是未确认的推测。输出可以删除口语化的「好像」，但必须以「可能」「疑似」或等价方式保留原因未确认这一状态。输出若把网络问题写成已确认原因，判为失败。\n"
+      },
+      {
+        "kind": "scope",
+        "detail": "源文给出两条替代动作：稍后重试，或联系管理员检查网络。二者是选择关系。输出若改成必须同时执行，或删除其中一条，判为失败。\n"
+      },
+      {
+        "kind": "threshold",
+        "detail": "超时点是等待 5000ms 后超时。输出若改成「超过 5000ms」「约 5 秒」或其他改变边界或单位的表述，判为失败。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "「好像」等口语化推测词可以删除，但原因的不确定性须按本用例的 fact 不变式保留。输出首句须包含故障对象（数据库连接）与目标地址 `10.0.1.5:5432`。情绪化感叹词「糟糕！」应删除。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-012",
+    "model": "gemini",
+    "task": "review",
+    "mode": "review",
+    "source": "磁盘空间不足时，旧快照会被自动清理。\n",
+    "output": "规则：CTC-A001\n严重级别：ERROR\n位置：「磁盘空间不足时，旧快照会被自动清理。」\n问题：使用了缺失施事的被动表述，未指明执行清理操作的具名组件或执行主体。\n风险：快照异常删除或未按预期清理时，事故响应与排障人员无法定位具体责任组件，无从核对对应组件的日志与清理策略。\n建议修改：磁盘空间不足时，[具名组件/存储管理机制]会清理旧快照。",
+    "invariants": [
+      {
+        "kind": "condition",
+        "detail": "前提条件「磁盘空间不足时」与动作「自动清理旧快照」的因果触发绑定不变。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "原文受事「旧快照」为系统运维关注焦点，施事为底层自动化机制，使用被动句「会被自动清理」准确自然且无歧义。审阅模式下正确行为是「不报告任何问题」（输出空列表）；若错误报告「禁止使用被动语态」或「缺少明确施事者」，判为过度控制误报失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-012",
+    "model": "gpt",
+    "task": "review",
+    "mode": "review",
+    "source": "磁盘空间不足时，旧快照会被自动清理。\n",
+    "output": "规则：CTC-A001  \n严重级别：ERROR  \n位置：「旧快照会被自动清理」  \n问题：未说明执行清理操作的组件，无法定位执行者。  \n风险：排障时无法确定应检查哪个组件的日志或清理策略。  \n建议修改：补充执行清理操作的具名组件；组件名称需由来源确认。",
+    "invariants": [
+      {
+        "kind": "condition",
+        "detail": "前提条件「磁盘空间不足时」与动作「自动清理旧快照」的因果触发绑定不变。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "原文受事「旧快照」为系统运维关注焦点，施事为底层自动化机制，使用被动句「会被自动清理」准确自然且无歧义。审阅模式下正确行为是「不报告任何问题」（输出空列表）；若错误报告「禁止使用被动语态」或「缺少明确施事者」，判为过度控制误报失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-013",
+    "model": "gemini",
+    "task": "review",
+    "mode": "review",
+    "source": "当用户打开控制台时，用户必须点击设置菜单。然后用户需要选择网络配置，并且用户应当修改端口号。\n",
+    "output": "规则：CTC-R003\n严重级别：WARNING\n位置：「当用户打开控制台时」\n问题：使用「当……时」套用英文时间状语从句句式，带有译文腔。\n风险：表达拖沓，不符合中文技术文档自然顺承的语体习惯。\n建议修改：打开控制台后\n\n规则：CTC-R002\n严重级别：WARNING\n位置：「当用户打开控制台时，用户必须点击设置菜单。然后用户需要选择网络配置，并且用户应当修改端口号。」\n问题：在单一操作者的连续操作步骤中，逐句机械重复显式主语「用户」，属于无消歧价值的过度显式。\n风险：破坏汉语承前省略与自然话题链结构，导致文本割裂与冗余。\n建议修改：打开控制台后，必须点击设置菜单，选择网络配置，并应当修改端口号。",
+    "invariants": [
+      {
+        "kind": "rendering",
+        "detail": "源文在三个分句中机械重复显式主语「用户」四次，指向同一个执行者，没有任何消歧收益。审阅模式下唯一必报的问题是这一处显式主语机械重复，locus 为整段；可建议改用话题链承前省略。若未报告主语重复，判为审阅漏报失败。\n"
+      },
+      {
+        "kind": "over-edit",
+        "detail": "「流程过度割裂」是可选观察，不是必报项：两句承载三步操作并不必然构成过度割裂，分句还可以分别承载「必须」「需要」「应当」三种不同的情态强度。审阅若额外报告句式割裂并建议以连动结构合并，不计为误报；不报告该项也不判为失败。\n"
+      }
+    ],
+    "expected_issues": [
+      {
+        "category": "over-control-subject-repetition",
+        "rule": "CTC-R002",
+        "severity": "WARNING",
+        "locus": "当用户打开控制台时，用户必须点击设置菜单。然后用户需要选择网络配置，并且用户应当修改端口号。"
+      }
+    ],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-013",
+    "model": "gpt",
+    "task": "review",
+    "mode": "review",
+    "source": "当用户打开控制台时，用户必须点击设置菜单。然后用户需要选择网络配置，并且用户应当修改端口号。\n",
+    "output": "规则：CTC-R002  \n严重级别：WARNING  \n位置：「当用户打开控制台时，用户必须点击设置菜单。然后用户需要选择网络配置，并且用户应当修改端口号。」  \n问题：单一执行者「用户」在相邻分句中逐句重复，未消除任何歧义。  \n风险：主语重复使步骤表达冗余、生硬。  \n建议修改：当用户打开控制台时，必须点击设置菜单，然后选择网络配置，并修改端口号。",
+    "invariants": [
+      {
+        "kind": "rendering",
+        "detail": "源文在三个分句中机械重复显式主语「用户」四次，指向同一个执行者，没有任何消歧收益。审阅模式下唯一必报的问题是这一处显式主语机械重复，locus 为整段；可建议改用话题链承前省略。若未报告主语重复，判为审阅漏报失败。\n"
+      },
+      {
+        "kind": "over-edit",
+        "detail": "「流程过度割裂」是可选观察，不是必报项：两句承载三步操作并不必然构成过度割裂，分句还可以分别承载「必须」「需要」「应当」三种不同的情态强度。审阅若额外报告句式割裂并建议以连动结构合并，不计为误报；不报告该项也不判为失败。\n"
+      }
+    ],
+    "expected_issues": [
+      {
+        "category": "over-control-subject-repetition",
+        "rule": "CTC-R002",
+        "severity": "WARNING",
+        "locus": "当用户打开控制台时，用户必须点击设置菜单。然后用户需要选择网络配置，并且用户应当修改端口号。"
+      }
+    ],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-014",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "在执行对生产数据库的备份操作之后，管理员必须把流量进行路由操作到备用集群，以便使得流量切换能够成功完成。\n",
+    "output": "备份生产数据库后，管理员必须把流量路由到备用集群，以成功完成流量切换。",
+    "invariants": [
+      {
+        "kind": "actor",
+        "detail": "明确的责任执行主体「管理员」必须保留，不得在去冗余过程中丢失责任人。\n"
+      },
+      {
+        "kind": "order",
+        "detail": "必须保留「先备份生产数据库，后路由流量至备用集群」的严格时序关系。\n"
+      },
+      {
+        "kind": "causality",
+        "detail": "源文说明路由流量的目的是完成流量切换。输出须保留这一目的关系，且不得把目的改写为已保证的结果（如「路由后流量切换即告完成」）。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "必须消除「执行...备份操作」「进行路由操作」等兼类词生硬名物化，以及「以便使得...能够成功完成」等冗余连接词外壳，恢复为自然的动词表达（如「备份生产数据库后，管理员须将流量路由至备用集群，以完成流量切换」）；输出若仍保留「进行路由操作」或删除了责任主体「管理员」，均判为改写失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-R-014",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "在执行对生产数据库的备份操作之后，管理员必须把流量进行路由操作到备用集群，以便使得流量切换能够成功完成。\n",
+    "output": "备份生产数据库后，管理员必须将流量路由到备用集群，以便能够成功完成流量切换。",
+    "invariants": [
+      {
+        "kind": "actor",
+        "detail": "明确的责任执行主体「管理员」必须保留，不得在去冗余过程中丢失责任人。\n"
+      },
+      {
+        "kind": "order",
+        "detail": "必须保留「先备份生产数据库，后路由流量至备用集群」的严格时序关系。\n"
+      },
+      {
+        "kind": "causality",
+        "detail": "源文说明路由流量的目的是完成流量切换。输出须保留这一目的关系，且不得把目的改写为已保证的结果（如「路由后流量切换即告完成」）。\n"
+      },
+      {
+        "kind": "rendering",
+        "detail": "必须消除「执行...备份操作」「进行路由操作」等兼类词生硬名物化，以及「以便使得...能够成功完成」等冗余连接词外壳，恢复为自然的动词表达（如「备份生产数据库后，管理员须将流量路由至备用集群，以完成流量切换」）；输出若仍保留「进行路由操作」或删除了责任主体「管理员」，均判为改写失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-S-001",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "在低流量窗口执行索引重建可以降低对在线请求的影响，因此建议先在只读副本上验证执行计划。若延迟预算紧张，也可以推迟到下一维护窗口。\n",
+    "output": "在低流量窗口执行索引重建可以降低对在线请求的影响，因此建议先在只读副本上验证执行计划。若延迟预算紧张，也可以推迟到下一维护窗口。",
+    "invariants": [
+      {
+        "kind": "modality",
+        "detail": "「建议先在只读副本上验证」是推荐行为，不是索引重建的强制前提；输出若改成「必须验证」「验证后方可执行」或其他强制要求，判为失败。\n"
+      },
+      {
+        "kind": "modality",
+        "detail": "「也可以推迟」授予推迟操作的许可，不要求操作员必须推迟；输出若把许可改成义务，判为失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-S-001",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "在低流量窗口执行索引重建可以降低对在线请求的影响，因此建议先在只读副本上验证执行计划。若延迟预算紧张，也可以推迟到下一维护窗口。\n",
+    "output": "在低流量窗口执行索引重建可以降低对在线请求的影响，因此建议先在只读副本上验证执行计划。若延迟预算紧张，也可以推迟到下一维护窗口。\n\n待确认\n- 低流量窗口 | 「低流量」未给出可观测判据 | 执行索引重建的流量阈值或窗口定义\n- 延迟预算紧张 | 「紧张」未给出可观测判据 | 允许推迟到下一维护窗口的延迟预算阈值或状态",
+    "invariants": [
+      {
+        "kind": "modality",
+        "detail": "「建议先在只读副本上验证」是推荐行为，不是索引重建的强制前提；输出若改成「必须验证」「验证后方可执行」或其他强制要求，判为失败。\n"
+      },
+      {
+        "kind": "modality",
+        "detail": "「也可以推迟」授予推迟操作的许可，不要求操作员必须推迟；输出若把许可改成义务，判为失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-S-002",
+    "model": "gemini",
+    "task": "translate",
+    "mode": "standard",
+    "source": "Before enabling the cache, operators are advised to test the eviction policy in staging. A temporary sandbox may skip this test, but the operator must record the reason.\n",
+    "output": "启用缓存前，建议操作员在预发环境中测试淘汰策略。临时沙箱可跳过此测试，但操作员必须记录原因。",
+    "invariants": [
+      {
+        "kind": "modality",
+        "detail": "“are advised to test”表示建议，不是强制前提；中文输出若使用「必须」「须」或「只有测试后才能启用」，判为失败。\n"
+      },
+      {
+        "kind": "modality",
+        "detail": "“may skip”允许临时沙箱跳过测试；“must record”要求记录原因。输出必须同时保留这项许可及其附带的记录义务。\n"
+      },
+      {
+        "kind": "condition",
+        "detail": "跳过测试的许可仅适用于临时沙箱；输出若允许其他环境跳过测试，判为失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-S-002",
+    "model": "gpt",
+    "task": "translate",
+    "mode": "standard",
+    "source": "Before enabling the cache, operators are advised to test the eviction policy in staging. A temporary sandbox may skip this test, but the operator must record the reason.\n",
+    "output": "启用缓存前，建议操作人员在预发布环境中测试淘汰策略。临时沙箱可以跳过此测试，但操作人员必须记录原因。",
+    "invariants": [
+      {
+        "kind": "modality",
+        "detail": "“are advised to test”表示建议，不是强制前提；中文输出若使用「必须」「须」或「只有测试后才能启用」，判为失败。\n"
+      },
+      {
+        "kind": "modality",
+        "detail": "“may skip”允许临时沙箱跳过测试；“must record”要求记录原因。输出必须同时保留这项许可及其附带的记录义务。\n"
+      },
+      {
+        "kind": "condition",
+        "detail": "跳过测试的许可仅适用于临时沙箱；输出若允许其他环境跳过测试，判为失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-S-003",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "轮换主密钥前，操作员必须确认最近一次备份已完成。未确认时不得继续；测试租户可以取消本次轮换。\n",
+    "output": "轮换主密钥前，操作员必须确认最近一次备份已完成。未确认时不得继续；测试租户可以取消本次轮换。",
+    "invariants": [
+      {
+        "kind": "modality",
+        "detail": "轮换主密钥前确认备份完成是强制义务；输出若改成「建议确认」「最好确认」或其他可选行为，判为失败。\n"
+      },
+      {
+        "kind": "modality",
+        "detail": "「未确认时不得继续」是禁止继续轮换；输出若仅表示不推荐继续，判为失败。\n"
+      },
+      {
+        "kind": "modality",
+        "detail": "测试租户拥有取消本次轮换的许可，但没有必须取消的义务。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-S-003",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "轮换主密钥前，操作员必须确认最近一次备份已完成。未确认时不得继续；测试租户可以取消本次轮换。\n",
+    "output": "轮换主密钥前，操作员必须确认最近一次备份已完成。未确认时不得继续；测试租户可以取消本次轮换。",
+    "invariants": [
+      {
+        "kind": "modality",
+        "detail": "轮换主密钥前确认备份完成是强制义务；输出若改成「建议确认」「最好确认」或其他可选行为，判为失败。\n"
+      },
+      {
+        "kind": "modality",
+        "detail": "「未确认时不得继续」是禁止继续轮换；输出若仅表示不推荐继续，判为失败。\n"
+      },
+      {
+        "kind": "modality",
+        "detail": "测试租户拥有取消本次轮换的许可，但没有必须取消的义务。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-S-004",
+    "model": "gemini",
+    "task": "review",
+    "mode": "review",
+    "source": "原文：确保数据已成功备份，并且所有从节点都已正确同步主节点的数据。\n候选改写：确认数据备份完成，且所有从节点已与主节点数据同步。\n",
+    "output": "规则：CTC-S003\n严重级别：ERROR\n位置：「确认数据备份完成，且所有从节点已与主节点数据同步。」\n问题：来源的「确保」被替换为「确认」，义务被降级为核验。\n风险：从节点尚未同步时，操作者会直接继续执行后续步骤，跳过补救。\n建议修改：确保数据已备份，且所有从节点已同步主节点数据。",
+    "invariants": [
+      {
+        "kind": "modality",
+        "detail": "正确审阅必须指出：「确保」要求操作员使备份和同步状态成立，必要时还要采取补救；「确认」只要求检查现有状态。把两者判为等价，判为失败。\n"
+      }
+    ],
+    "expected_issues": [
+      {
+        "category": "modality-weakening",
+        "rule": "CTC-S003",
+        "severity": "ERROR",
+        "locus": "候选改写中的「确认」"
+      }
+    ],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-S-004",
+    "model": "gpt",
+    "task": "review",
+    "mode": "review",
+    "source": "原文：确保数据已成功备份，并且所有从节点都已正确同步主节点的数据。\n候选改写：确认数据备份完成，且所有从节点已与主节点数据同步。\n",
+    "output": "规则：CTC-S003  \n严重级别：ERROR  \n位置：「确认数据备份完成，且所有从节点已与主节点数据同步。」  \n问题：原文的「确保」被替换为「确认」，义务被降级为核验。  \n风险：数据备份或从节点同步未完成时，操作者可能仅作确认而不采取补救措施。  \n建议修改：确保数据已成功备份，并且所有从节点都已正确同步主节点的数据。",
+    "invariants": [
+      {
+        "kind": "modality",
+        "detail": "正确审阅必须指出：「确保」要求操作员使备份和同步状态成立，必要时还要采取补救；「确认」只要求检查现有状态。把两者判为等价，判为失败。\n"
+      }
+    ],
+    "expected_issues": [
+      {
+        "category": "modality-weakening",
+        "rule": "CTC-S003",
+        "severity": "ERROR",
+        "locus": "候选改写中的「确认」"
+      }
+    ],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-S-005",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "过去 24 小时的日志显示，超时可能与连接池耗尽有关。目前只确认两者同时出现，根因尚未确定。\n",
+    "output": "过去 24 小时的日志显示，超时可能与连接池耗尽有关。目前只确认两者同时出现，根因尚未确定。",
+    "invariants": [
+      {
+        "kind": "fact",
+        "detail": "源文把连接池耗尽标为可能相关的候选解释，并明确说明根因尚未确定；输出若把它写成已确认根因，判为失败。\n"
+      },
+      {
+        "kind": "causality",
+        "detail": "源文只确认超时与连接池耗尽同时出现，不确认因果关系；输出若使用「导致」「引起」等确定因果表述，判为失败。\n"
+      },
+      {
+        "kind": "scope",
+        "detail": "源文没有提供频率结论；输出若新增「通常」「最常见」等频率限定，判为失败。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "证据窗口是过去 24 小时；输出若改变或删除该时间范围，判为失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-S-005",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "过去 24 小时的日志显示，超时可能与连接池耗尽有关。目前只确认两者同时出现，根因尚未确定。\n",
+    "output": "过去 24 小时的日志显示，超时可能与连接池耗尽有关。目前只确认两者同时出现，根因尚未确定。",
+    "invariants": [
+      {
+        "kind": "fact",
+        "detail": "源文把连接池耗尽标为可能相关的候选解释，并明确说明根因尚未确定；输出若把它写成已确认根因，判为失败。\n"
+      },
+      {
+        "kind": "causality",
+        "detail": "源文只确认超时与连接池耗尽同时出现，不确认因果关系；输出若使用「导致」「引起」等确定因果表述，判为失败。\n"
+      },
+      {
+        "kind": "scope",
+        "detail": "源文没有提供频率结论；输出若新增「通常」「最常见」等频率限定，判为失败。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "证据窗口是过去 24 小时；输出若改变或删除该时间范围，判为失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-S-006",
+    "model": "gemini",
+    "task": "translate",
+    "mode": "strict",
+    "source": "The elevated timeout rate may be associated with DNS cache expiry. Packet captures remain incomplete, so the root cause is still unconfirmed.\n",
+    "output": "超时率升高可能与 DNS 缓存过期有关。抓包数据仍不完整，因此根本原因仍未确认。",
+    "invariants": [
+      {
+        "kind": "fact",
+        "detail": "“may be associated with”只能译为可能相关，不能译为已确认的关联或根因。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "输出必须保留抓包数据不完整以及根因仍未确认这两项认识限制；删除任一项，判为失败。\n"
+      },
+      {
+        "kind": "causality",
+        "detail": "源文没有断言 DNS 缓存过期导致超时率升高；中文输出若建立确定因果关系，判为失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-S-006",
+    "model": "gpt",
+    "task": "translate",
+    "mode": "strict",
+    "source": "The elevated timeout rate may be associated with DNS cache expiry. Packet captures remain incomplete, so the root cause is still unconfirmed.\n",
+    "output": "超时率升高可能与 DNS 缓存过期有关。数据包捕获仍不完整，因此根本原因仍未确认。",
+    "invariants": [
+      {
+        "kind": "fact",
+        "detail": "“may be associated with”只能译为可能相关，不能译为已确认的关联或根因。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "输出必须保留抓包数据不完整以及根因仍未确认这两项认识限制；删除任一项，判为失败。\n"
+      },
+      {
+        "kind": "causality",
+        "detail": "源文没有断言 DNS 缓存过期导致超时率升高；中文输出若建立确定因果关系，判为失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-S-007",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "客户端参数：\n- 单次请求超时为 250 ms。\n- 首次失败后等待 2 s；最多重试 3 次。\n- 总等待时间不得超过 10 s。\n",
+    "output": "客户端参数：\n- 单次请求超时为 250 ms。\n- 首次失败后等待 2 s；最多重试 3 次。\n- 总等待时间不得超过 10 s。",
+    "invariants": [
+      {
+        "kind": "threshold",
+        "detail": "单次请求超时必须保持为 250 ms；输出若改变数值、单位或数量级，判为失败。\n"
+      },
+      {
+        "kind": "threshold",
+        "detail": "首次失败后的等待时间必须保持为 2 s，总等待上限必须保持为 10 s。\n"
+      },
+      {
+        "kind": "threshold",
+        "detail": "「最多重试 3 次」允许初始请求之后再重试至多 3 次；输出若改成「总共发送 3 次请求」，判为失败，因为最大总尝试次数从 4 次变为 3 次。\n"
+      },
+      {
+        "kind": "modality",
+        "detail": "「总等待时间不得超过 10 s」是上限约束；输出若把它写成建议值或固定等待时间，判为失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-S-007",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "客户端参数：\n- 单次请求超时为 250 ms。\n- 首次失败后等待 2 s；最多重试 3 次。\n- 总等待时间不得超过 10 s。\n",
+    "output": "客户端参数：\n- 单次请求超时为 250 ms。\n- 首次失败后等待 2 s；最多重试 3 次。\n- 总等待时间不得超过 10 s。",
+    "invariants": [
+      {
+        "kind": "threshold",
+        "detail": "单次请求超时必须保持为 250 ms；输出若改变数值、单位或数量级，判为失败。\n"
+      },
+      {
+        "kind": "threshold",
+        "detail": "首次失败后的等待时间必须保持为 2 s，总等待上限必须保持为 10 s。\n"
+      },
+      {
+        "kind": "threshold",
+        "detail": "「最多重试 3 次」允许初始请求之后再重试至多 3 次；输出若改成「总共发送 3 次请求」，判为失败，因为最大总尝试次数从 4 次变为 3 次。\n"
+      },
+      {
+        "kind": "modality",
+        "detail": "「总等待时间不得超过 10 s」是上限约束；输出若把它写成建议值或固定等待时间，判为失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-S-008",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "三组观测均显示，启用压缩与 CPU 使用率升高同时出现。现有数据只支持相关性，不能证明压缩导致请求超时。\n",
+    "output": "三组观测均显示，启用压缩与 CPU 使用率升高同时出现。现有数据只支持相关性，不能证明压缩导致请求超时。",
+    "invariants": [
+      {
+        "kind": "causality",
+        "detail": "源文只断言启用压缩与 CPU 使用率升高共现；输出若断言压缩导致 CPU 使用率升高，判为失败。\n"
+      },
+      {
+        "kind": "causality",
+        "detail": "源文明示现有数据不能证明压缩导致请求超时；输出若建立该因果关系，判为失败。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "证据范围是三组观测，且结论限于相关性；输出不得把观测描述成受控因果实验。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-S-008",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "三组观测均显示，启用压缩与 CPU 使用率升高同时出现。现有数据只支持相关性，不能证明压缩导致请求超时。\n",
+    "output": "三组观测均显示，启用压缩与 CPU 使用率升高同时出现。现有数据只支持相关性，不能证明压缩导致请求超时。",
+    "invariants": [
+      {
+        "kind": "causality",
+        "detail": "源文只断言启用压缩与 CPU 使用率升高共现；输出若断言压缩导致 CPU 使用率升高，判为失败。\n"
+      },
+      {
+        "kind": "causality",
+        "detail": "源文明示现有数据不能证明压缩导致请求超时；输出若建立该因果关系，判为失败。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "证据范围是三组观测，且结论限于相关性；输出不得把观测描述成受控因果实验。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-S-009",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "收到 `503` 时，检查上游服务状态和最近一次部署记录。不要自动重启服务；将检查结果附到事件单。\n",
+    "output": "收到 `503` 时，检查上游服务状态和最近一次部署记录。不要自动重启服务；将检查结果附到事件单。",
+    "invariants": [
+      {
+        "kind": "fact",
+        "detail": "源文没有说明任何原因或恢复动作是「通常」「默认」或「最常见」的；输出若新增此类频率或默认值判断，判为失败。\n"
+      },
+      {
+        "kind": "condition",
+        "detail": "源文没有声称某个单一动作足以恢复；输出若新增「只需」并把某项操作写成充分条件，判为失败。\n"
+      },
+      {
+        "kind": "modality",
+        "detail": "源文禁止自动重启服务；输出若建议、允许或要求自动重启，判为失败。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "状态码 `503` 必须逐字符保留，且仍绑定到检查上游状态和部署记录的触发条件。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-S-009",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "收到 `503` 时，检查上游服务状态和最近一次部署记录。不要自动重启服务；将检查结果附到事件单。\n",
+    "output": "收到 `503` 时，检查上游服务状态和最近一次部署记录。不要自动重启服务；将检查结果附到事件单。",
+    "invariants": [
+      {
+        "kind": "fact",
+        "detail": "源文没有说明任何原因或恢复动作是「通常」「默认」或「最常见」的；输出若新增此类频率或默认值判断，判为失败。\n"
+      },
+      {
+        "kind": "condition",
+        "detail": "源文没有声称某个单一动作足以恢复；输出若新增「只需」并把某项操作写成充分条件，判为失败。\n"
+      },
+      {
+        "kind": "modality",
+        "detail": "源文禁止自动重启服务；输出若建议、允许或要求自动重启，判为失败。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "状态码 `503` 必须逐字符保留，且仍绑定到检查上游状态和部署记录的触发条件。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-T-001",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "取消作业接口：调用 `POST /v1/jobs/{job_id}:cancel`。\n\n| 响应 | 客户端行为 |\n| --- | --- |\n| `409` | 读取字段 `retry_after_ms`，并设置 `JOB_CANCEL_RETRY=1`。 |\n",
+    "output": "取消作业接口：调用 `POST /v1/jobs/{job_id}:cancel`。\n\n| 响应 | 客户端行为 |\n| --- | --- |\n| `409` | 读取字段 `retry_after_ms`，并设置 `JOB_CANCEL_RETRY=1`。 |",
+    "invariants": [
+      {
+        "kind": "token",
+        "detail": "API 方法和路径必须保持为 `POST /v1/jobs/{job_id}:cancel`；单复数、路径参数、斜杠和冒号动作语法中的任一字符变化都判为失败。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "状态码必须保持为 `409`，字段名必须保持为 `retry_after_ms`，环境变量赋值必须保持为 `JOB_CANCEL_RETRY=1`。\n"
+      },
+      {
+        "kind": "scope",
+        "detail": "读取字段和设置环境变量两项行为仍必须绑定到 `409` 响应分支。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-T-001",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "取消作业接口：调用 `POST /v1/jobs/{job_id}:cancel`。\n\n| 响应 | 客户端行为 |\n| --- | --- |\n| `409` | 读取字段 `retry_after_ms`，并设置 `JOB_CANCEL_RETRY=1`。 |\n",
+    "output": "取消作业接口：调用 `POST /v1/jobs/{job_id}:cancel`。\n\n| 响应 | 客户端行为 |\n| --- | --- |\n| `409` | 读取字段 `retry_after_ms`，并设置 `JOB_CANCEL_RETRY=1`。 |",
+    "invariants": [
+      {
+        "kind": "token",
+        "detail": "API 方法和路径必须保持为 `POST /v1/jobs/{job_id}:cancel`；单复数、路径参数、斜杠和冒号动作语法中的任一字符变化都判为失败。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "状态码必须保持为 `409`，字段名必须保持为 `retry_after_ms`，环境变量赋值必须保持为 `JOB_CANCEL_RETRY=1`。\n"
+      },
+      {
+        "kind": "scope",
+        "detail": "读取字段和设置环境变量两项行为仍必须绑定到 `409` 响应分支。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-T-002",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "工具 `sync-config` 接受 `--dry-run` 和 `--config=/etc/ctc/agent.yaml`。仅当 `CTC_SYNC_MODE=verify` 时，工具执行验证而不写入；验证失败时返回退出码 `2`。\n",
+    "output": "工具 `sync-config` 接受 `--dry-run` 和 `--config=/etc/ctc/agent.yaml`。仅当 `CTC_SYNC_MODE=verify` 时，工具执行验证而不写入；验证失败时返回退出码 `2`。",
+    "invariants": [
+      {
+        "kind": "token",
+        "detail": "工具名必须保持为 `sync-config`，标志必须保持为 `--dry-run`，带值参数必须保持为 `--config=/etc/ctc/agent.yaml`。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "环境变量赋值必须保持为 `CTC_SYNC_MODE=verify`，包括大小写；验证失败退出码必须保持为 `2`。\n"
+      },
+      {
+        "kind": "condition",
+        "detail": "不写入行为仅在 `CTC_SYNC_MODE=verify` 时成立；输出若把验证模式写成默认行为或无条件行为，判为失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-T-002",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "工具 `sync-config` 接受 `--dry-run` 和 `--config=/etc/ctc/agent.yaml`。仅当 `CTC_SYNC_MODE=verify` 时，工具执行验证而不写入；验证失败时返回退出码 `2`。\n",
+    "output": "工具 `sync-config` 接受 `--dry-run` 和 `--config=/etc/ctc/agent.yaml`。仅当 `CTC_SYNC_MODE=verify` 时，工具执行验证而不写入；验证失败时返回退出码 `2`。",
+    "invariants": [
+      {
+        "kind": "token",
+        "detail": "工具名必须保持为 `sync-config`，标志必须保持为 `--dry-run`，带值参数必须保持为 `--config=/etc/ctc/agent.yaml`。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "环境变量赋值必须保持为 `CTC_SYNC_MODE=verify`，包括大小写；验证失败退出码必须保持为 `2`。\n"
+      },
+      {
+        "kind": "condition",
+        "detail": "不写入行为仅在 `CTC_SYNC_MODE=verify` 时成立；输出若把验证模式写成默认行为或无条件行为，判为失败。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-T-101",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 发布流程\n\n1. 新版本先以灰度发布上线，覆盖 5% 流量。\n2. 金丝雀发布期间每 5 分钟检查一次错误率。\n3. 小流量验证通过后，按 25%、50% 逐步放量。\n4. 全量发布后保留旧版本实例 24 小时，以便回滚。\n",
+    "output": "## 发布流程\n\n1. 新版本先以灰度发布上线，覆盖 5% 流量。\n2. 金丝雀发布期间每 5 分钟检查一次错误率。\n3. 小流量验证通过后，按 25%、50% 逐步放量。\n4. 全量发布后保留旧版本实例 24 小时，以便回滚。\n\n待确认\n- 灰度发布 / 金丝雀发布 / 小流量验证 | 第 1 步「灰度发布」、第 2 步「金丝雀发布」与第 3 步「小流量验证」可能同指 5% 流量阶段，术语未统一 | 统一术语（如统一为「金丝雀发布」或「灰度发布」）或明确各阶段定义\n- 检查一次错误率 | 未给出错误率的合格阈值与异常处理逻辑 | 允许的错误率阈值及超标后的处理动作\n- 小流量验证通过 | 未给出验证通过的具体成功判据与观察时长 | 判定验证通过的指标标准与观察时间\n- 逐步放量 | 25% 与 50% 放量阶段之间未给出观察时长及推进判据 | 各放量阶段的观察时长与推进至下一阶段的判据",
+    "invariants": [
+      {
+        "kind": "terminology",
+        "detail": "第 1、2、3 步中的「灰度发布」「金丝雀发布」「小流量验证」在本文中指同一个发布阶段\n（5% 流量的受控放量）。输出须在全文用同一术语指代该阶段；若输出中仍有两个及以上不同术语\n指代它，判为术语不一致。\n"
+      },
+      {
+        "kind": "terminology",
+        "detail": "第 4 步的「全量发布」指 100% 放量，与上述阶段是不同概念。输出若把它也替换为统一后的\n灰度类术语（例如「灰度发布后保留旧版本实例 24 小时」），判为错误归并（§17.5）。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "放量档位 5%、25%、50%、检查间隔 5 分钟、旧实例保留 24 小时的数值与单位不得增删或改动。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-T-101",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 发布流程\n\n1. 新版本先以灰度发布上线，覆盖 5% 流量。\n2. 金丝雀发布期间每 5 分钟检查一次错误率。\n3. 小流量验证通过后，按 25%、50% 逐步放量。\n4. 全量发布后保留旧版本实例 24 小时，以便回滚。\n",
+    "output": "## 发布流程\n\n1. 新版本先以灰度发布方式上线，覆盖 5% 流量。\n2. 金丝雀发布期间每 5 分钟检查一次错误率。\n3. 小流量验证通过后，按 25%、50% 逐步放量。\n4. 全量发布后保留旧版本实例 24 小时，以便回滚。\n\n待确认\n- 小流量验证通过 | 未给出验证通过的判据 | 允许继续放量的错误率阈值或其他成功判据",
+    "invariants": [
+      {
+        "kind": "terminology",
+        "detail": "第 1、2、3 步中的「灰度发布」「金丝雀发布」「小流量验证」在本文中指同一个发布阶段\n（5% 流量的受控放量）。输出须在全文用同一术语指代该阶段；若输出中仍有两个及以上不同术语\n指代它，判为术语不一致。\n"
+      },
+      {
+        "kind": "terminology",
+        "detail": "第 4 步的「全量发布」指 100% 放量，与上述阶段是不同概念。输出若把它也替换为统一后的\n灰度类术语（例如「灰度发布后保留旧版本实例 24 小时」），判为错误归并（§17.5）。\n"
+      },
+      {
+        "kind": "fact",
+        "detail": "放量档位 5%、25%、50%、检查间隔 5 分钟、旧实例保留 24 小时的数值与单位不得增删或改动。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-T-102",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "standard",
+    "source": "## `confd` 运维须知\n\n- 修改 `upstream` 配置后须重启 `confd`；重启期间约 2 秒不可用。\n- 仅修改日志级别时执行重载（`kill -HUP`），连接不中断。\n- 每晚 02:00 生成一份备份并上传对象存储；集群内的三份副本用于在线容灾，不能替代备份。\n",
+    "output": "## `confd` 运维须知\n\n- 修改 `upstream` 配置后须重启 `confd`；重启期间约 2 秒不可用。\n- 仅修改日志级别时执行重载（`kill -HUP`），连接不中断。\n- 每晚 02:00 生成一份备份并上传对象存储；集群内的三份副本用于在线容灾，不能替代备份。",
+    "invariants": [
+      {
+        "kind": "terminology",
+        "detail": "「重启」与「重载」在本文中是两个不同操作，源文已给出区分依据：重启约 2 秒不可用，\n重载（`kill -HUP`）连接不中断。输出不得把二者统一为其中之一，也不得互换。\n"
+      },
+      {
+        "kind": "terminology",
+        "detail": "「备份」（每晚上传对象存储的离线拷贝）与「副本」（集群内在线容灾的三份数据）是两个不同\n对象，源文第三条明确写出「不能替代备份」。输出不得把「副本」改称「备份」或反之，\n也不得删除「不能替代备份」这一判断。\n"
+      },
+      {
+        "kind": "over-edit",
+        "detail": "三条要点术语已一致且区分正确，不存在需要统一的术语问题。任何以「统一术语」为由的替换\n都判为失败。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`confd`、`upstream`、`kill -HUP`、02:00 须逐字保留，「2 秒」「三份」的数值不变。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-T-102",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "standard",
+    "source": "## `confd` 运维须知\n\n- 修改 `upstream` 配置后须重启 `confd`；重启期间约 2 秒不可用。\n- 仅修改日志级别时执行重载（`kill -HUP`），连接不中断。\n- 每晚 02:00 生成一份备份并上传对象存储；集群内的三份副本用于在线容灾，不能替代备份。\n",
+    "output": "## `confd` 运维须知\n\n- 修改 `upstream` 配置后须重启 `confd`；重启期间约 2 秒不可用。\n- 仅修改日志级别时执行重载（`kill -HUP`），连接不中断。\n- 每晚 02:00 生成一份备份并上传对象存储；集群内的三份副本用于在线容灾，不能替代备份。",
+    "invariants": [
+      {
+        "kind": "terminology",
+        "detail": "「重启」与「重载」在本文中是两个不同操作，源文已给出区分依据：重启约 2 秒不可用，\n重载（`kill -HUP`）连接不中断。输出不得把二者统一为其中之一，也不得互换。\n"
+      },
+      {
+        "kind": "terminology",
+        "detail": "「备份」（每晚上传对象存储的离线拷贝）与「副本」（集群内在线容灾的三份数据）是两个不同\n对象，源文第三条明确写出「不能替代备份」。输出不得把「副本」改称「备份」或反之，\n也不得删除「不能替代备份」这一判断。\n"
+      },
+      {
+        "kind": "over-edit",
+        "detail": "三条要点术语已一致且区分正确，不存在需要统一的术语问题。任何以「统一术语」为由的替换\n都判为失败。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`confd`、`upstream`、`kill -HUP`、02:00 须逐字保留，「2 秒」「三份」的数值不变。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": true,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-T-103",
+    "model": "gemini",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 积压排查\n\n调度器内部维护一个任务队列（内存，容量上限 10000），用于暂存待分发的作业；跨服务通知走消息队列（Kafka topic `job-events`）。\n\n任务队列积压超过 8000 时，先确认消费者线程数是否被调低，再决定是否扩容调度器。\n消息队列积压通常与下游消费者故障有关，处理路径不同。\n",
+    "output": "## 积压排查\n\n- **调度器任务队列**（内存，容量上限 10000，用于暂存待分发的作业）：积压超过 8000 时，先确认消费者线程数是否被调低，再决定是否扩容调度器。\n- **消息队列**（Kafka topic `job-events`，用于跨服务通知）：积压通常与下游消费者故障有关，处理路径不同。",
+    "invariants": [
+      {
+        "kind": "terminology",
+        "detail": "「任务队列」（调度器内存队列，上限 10000）与「消息队列」（Kafka topic `job-events`）\n是两个不同的系统对象。输出中每条判断必须仍绑定源文指定的那个对象：「积压超过 8000 →\n查消费者线程数 / 扩容调度器」只适用于任务队列；「积压与下游消费者故障有关」只适用于\n消息队列。任何一条挂到另一个对象上，判为失败。\n"
+      },
+      {
+        "kind": "reference",
+        "detail": "压缩后不得出现无限定的「队列」：若输出中有「队列积压超过 8000」这类表述，\n值班无法判断该查内存队列还是 Kafka，判为失败。近义词替换同样禁止，\n例如把「任务队列」写成「作业队列」「调度队列」以外的名称，或写成「消息队列」。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`job-events`、10000、8000 须逐字保留。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  },
+  {
+    "case_id": "G-T-103",
+    "model": "gpt",
+    "task": "rewrite",
+    "mode": "strict",
+    "source": "## 积压排查\n\n调度器内部维护一个任务队列（内存，容量上限 10000），用于暂存待分发的作业；跨服务通知走消息队列（Kafka topic `job-events`）。\n\n任务队列积压超过 8000 时，先确认消费者线程数是否被调低，再决定是否扩容调度器。\n消息队列积压通常与下游消费者故障有关，处理路径不同。\n",
+    "output": "## 积压排查\n\n- 任务队列：调度器内部维护的一个内存队列，容量上限 10000，用于暂存待分发的作业。积压超过 8000 时，先确认消费者线程数是否被调低，再决定是否扩容调度器。\n- 消息队列：用于跨服务通知（Kafka topic `job-events`）。积压通常与下游消费者故障有关，处理路径不同。",
+    "invariants": [
+      {
+        "kind": "terminology",
+        "detail": "「任务队列」（调度器内存队列，上限 10000）与「消息队列」（Kafka topic `job-events`）\n是两个不同的系统对象。输出中每条判断必须仍绑定源文指定的那个对象：「积压超过 8000 →\n查消费者线程数 / 扩容调度器」只适用于任务队列；「积压与下游消费者故障有关」只适用于\n消息队列。任何一条挂到另一个对象上，判为失败。\n"
+      },
+      {
+        "kind": "reference",
+        "detail": "压缩后不得出现无限定的「队列」：若输出中有「队列积压超过 8000」这类表述，\n值班无法判断该查内存队列还是 Kafka，判为失败。近义词替换同样禁止，\n例如把「任务队列」写成「作业队列」「调度队列」以外的名称，或写成「消息队列」。\n"
+      },
+      {
+        "kind": "token",
+        "detail": "`job-events`、10000、8000 须逐字保留。\n"
+      }
+    ],
+    "expected_issues": [],
+    "over_edit_trap": false,
+    "deterministic_failures": []
+  }
+]
