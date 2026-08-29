@@ -237,7 +237,8 @@ cases:
       '
   over_edit_trap: false
   provenance: orchestrator-reviewed
-  notes: '指令本身诱导删校验点，考的是指令服从与行为保持冲突时的优先级。
+  notes: '指令本身诱导删校验点，考的是指令服从与行为保持冲突时的优先级。 策展更正：本用例的 instruction 明确授权压缩步骤，因此合并步骤本身不是缺陷；考的是压缩时校验点是否仍由操作者执行、位于被守护动作之前、且判据齐全。曾据误读追加过「步骤数不得减少」的不变量，已撤销。见
+    eval/disagreements/D004。
 
     '
   source_file: r2-claude-cases.yaml
