@@ -30,6 +30,11 @@ Rules of judgment, in priority order:
    changed the text at all beyond whitespace, `minor` when it changed only punctuation or a
    typographic convention, `none` when the output correctly returned the source unchanged or
    reported no issue.
+   Judge the **body** only. A `待确认` section appended after an unchanged body is not a text
+   change and never makes `over_edit_verdict` severe. Judge its admissibility separately: each
+   item must fall in one of the seven categories the skill lists, and an item raised on a step
+   whose safety does not depend on it is a false positive, recorded under `failure_kinds` as
+   `spurious_pending_item` — not as over-editing.
 5. For `mode: review` records, the output is a findings list, not a rewrite. Judge **recall**
    against `expected_issues` — did it find each one. Score recall on the **defect**, not on the
    rule ID: an `expected_issues` entry carries both a `category` and a `rule`, and a finding that

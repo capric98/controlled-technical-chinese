@@ -1,0 +1,2496 @@
+judge: gpt
+run: r1
+prompt: judge-semantic.v1.md
+verdicts:
+- case_id: G-A-001
+  model: claude
+  invariant_verdicts:
+  - kind: actor
+    verdict: preserved
+    source_evidence: 随后把该实例从负载均衡池中摘除
+    output_evidence: 摘除动作的执行者省略，可读作「网关摘除」或「调度器摘除」
+    reasoning: 输出保留原句，并将源文无法唯一确定的摘除施事标为待确认，未擅自指定执行方。
+  - kind: actor
+    verdict: preserved
+    source_evidence: 网关连续 5 次收到上游实例返回的 `503`，判定该实例不健康。
+    output_evidence: 网关连续 5 次收到上游实例返回的 `503`，判定该实例不健康。
+    reasoning: 第 1、2 步中的显式施事「网关」均完整保留。
+  - kind: procedure
+    verdict: preserved
+    source_evidence: 摘除后 60 秒内不再向该实例转发请求。
+    output_evidence: 摘除后 60 秒内不再向该实例转发请求。
+    reasoning: 输出仍将停止转发规定为摘除后的结果约束。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 正文流畅，待确认项清楚且符合技术审阅语体。
+  overall: pass
+  failure_kinds: []
+- case_id: G-A-001
+  model: gemini
+  invariant_verdicts:
+  - kind: actor
+    verdict: preserved
+    source_evidence: 随后把该实例从负载均衡池中摘除
+    output_evidence: 随后把该实例从负载均衡池中摘除
+    reasoning: 原有施事歧义被原样保留，未擅自指定执行方。
+  - kind: actor
+    verdict: preserved
+    source_evidence: 网关将不健康事件上报调度器
+    output_evidence: 网关将不健康事件上报调度器
+    reasoning: 显式施事「网关」未被删除或改成无施事被动句。
+  - kind: procedure
+    verdict: preserved
+    source_evidence: 摘除后 60 秒内不再向该实例转发请求。
+    output_evidence: 摘除后 60 秒内不再向该实例转发请求。
+    reasoning: 动作顺序及结果约束均未改变。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 原文被准确、自然地保留。
+  overall: pass
+  failure_kinds: []
+- case_id: G-A-002
+  model: claude
+  invariant_verdicts:
+  - kind: instruction
+    verdict: preserved
+    source_evidence: 续期失败时通知租户管理员并回滚到上一版本证书。
+    output_evidence: '规则：CTC-A005
+
+      严重级别：ERROR
+
+      位置：「续期失败时通知租户管理员并回滚到上一版本证书」'
+    reasoning: 输出是包含位置、问题、风险和修改建议的问题清单，没有重写整段参数说明。
+  - kind: actor
+    verdict: violated
+    source_evidence: 续期失败时通知租户管理员并回滚到上一版本证书
+    output_evidence: 来源未给出续期流程的阶段划分，也未说明失败点与回滚的对应关系，无法判定。
+    reasoning: 输出讨论的是失败阶段及「上一版本证书」的含义，没有指出回滚既可能由续期服务自动执行，也可能由租户管理员手动执行，因而漏掉了约定的施事歧义。
+  - kind: over-edit
+    verdict: preserved
+    source_evidence: 由续期服务向 CA 发起续期请求
+    output_evidence: 「到期前 7 天」可读作到期前第 7 天这一时点发起一次，也可读作进入「距到期不足 7 天」的窗口后发起。
+    reasoning: 虽然输出另报了时间边界问题，但没有把已明确的「续期服务」误报为施事缺失或被动语态问题。
+  over_edit_verdict: not_applicable
+  review_recall:
+  - category: actor-omission-ambiguous
+    found: false
+    note: 未识别自动回滚与管理员手动回滚之间的执行方歧义。
+  unexpected_findings:
+  - finding: 续期失败的阶段及「上一版本证书」指代不清
+    legitimate: true
+    note: 该表述确实未交代失败可能发生的流程阶段及回滚基准。
+  - finding: 「到期前 7 天」可表示单一时点或七天窗口
+    legitimate: false
+    note: 通常语义是距到期七天时发起请求，源文没有支持窗口内持续尝试或重试的内容。
+  naturalness: 4
+  naturalness_note: 技术表达清晰，但论述略显冗长，且第二项风险推演超出文本依据。
+  overall: fail
+  failure_kinds:
+  - actor
+  - review_recall
+- case_id: G-A-002
+  model: gemini
+  invariant_verdicts:
+  - kind: instruction
+    verdict: preserved
+    source_evidence: 续期失败时通知租户管理员并回滚到上一版本证书。
+    output_evidence: '规则：CTC-A005
+
+      严重级别：ERROR
+
+      位置：「续期失败时通知租户管理员并回滚到上一版本证书。」'
+    reasoning: 输出采用问题清单形式，并包含要求的各项字段。
+  - kind: actor
+    verdict: violated
+    source_evidence: 续期失败时通知租户管理员并回滚到上一版本证书
+    output_evidence: 明确续期失败时的实际状态与处置动作
+    reasoning: 输出聚焦回滚的状态与时序，没有指出回滚执行方可能是续期服务或租户管理员，因此未发现约定的施事歧义。
+  - kind: over-edit
+    verdict: preserved
+    source_evidence: 由续期服务向 CA 发起续期请求
+    output_evidence: 在向 CA 发起续期请求阶段（证书到期前 7 天）
+    reasoning: 输出没有将续期请求的施事报告为缺失，也没有称该处属于无施事被动语态。
+  over_edit_verdict: not_applicable
+  review_recall:
+  - category: actor-omission-ambiguous
+    found: false
+    note: 未指出自动执行与管理员手动执行两种可能的回滚施事。
+  unexpected_findings:
+  - finding: 续期失败时回滚存在状态和时序矛盾
+    legitimate: true
+    note: 源文没有说明失败阶段或回滚基准，指出这层不确定性有合理依据；但输出断言旧证书必然已过期或废弃、当前阶段必然尚未签发，属于无依据推演。
+  naturalness: 4
+  naturalness_note: 行文专业顺畅，但若干技术状态被过度断定。
+  overall: fail
+  failure_kinds:
+  - actor
+  - review_recall
+- case_id: G-A-003
+  model: claude
+  invariant_verdicts:
+  - kind: actor
+    verdict: preserved
+    source_evidence: '## 备库提升（单人值班执行）'
+    output_evidence: '## 备库提升（单人值班执行）'
+    reasoning: 四个操作步骤均未补写无消歧价值的显式主语。
+  - kind: procedure
+    verdict: preserved
+    source_evidence: 3. 修改 `pgbouncer.ini` 中的 `host` 指向新主库，并 reload `pgbouncer`。
+    output_evidence: 3. 修改 `pgbouncer.ini` 中的 `host` 指向新主库，并 reload `pgbouncer`。
+    reasoning: 正文仍为四步，第 3 步也没有被拆分。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`replication_lag`、`pg_ctl promote`、`pgbouncer.ini`、`host`、`pgbouncer`、`#oncall`'
+    output_evidence: '`replication_lag`、`pg_ctl promote`、`pgbouncer.ini`、`host`、`pgbouncer`、`#oncall`'
+    reasoning: 所有受保护标记均逐字保留。
+  over_edit_verdict: severe
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 新增待确认项本身表达自然，但源文已正确合规，不应追加内容。
+  overall: fail
+  failure_kinds:
+  - over_edit
+- case_id: G-A-003
+  model: gemini
+  invariant_verdicts:
+  - kind: actor
+    verdict: preserved
+    source_evidence: '## 备库提升（单人值班执行）'
+    output_evidence: '## 备库提升（单人值班执行）'
+    reasoning: 未增加显式主语，单一执行者语义保持不变。
+  - kind: procedure
+    verdict: preserved
+    source_evidence: 3. 修改 `pgbouncer.ini` 中的 `host` 指向新主库，并 reload `pgbouncer`。
+    output_evidence: 3. 修改 `pgbouncer.ini` 中的 `host` 指向新主库，并 reload `pgbouncer`。
+    reasoning: 输出仍有四个步骤，复合操作没有被过度切分。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`replication_lag`、`pg_ctl promote`、`pgbouncer.ini`、`host`、`pgbouncer`、`#oncall`'
+    output_evidence: '`replication_lag`、`pg_ctl promote`、`pgbouncer.ini`、`host`、`pgbouncer`、`#oncall`'
+    reasoning: 所有指定标记均逐字出现。
+  over_edit_verdict: none
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 原文被完整、自然地保留；仅末尾换行差异不构成编辑。
+  overall: pass
+  failure_kinds: []
+- case_id: G-A-004
+  model: claude
+  invariant_verdicts:
+  - kind: reference
+    verdict: preserved
+    source_evidence: 并将其状态标记为 `失败`
+    output_evidence: 「其」在可及范围内有两个先行词，可读作「将工作节点状态标记为 `失败`」或「将重新入队的任务状态标记为 `失败`」
+    reasoning: 输出保留原有歧义，并明确将标记对象列为待确认事项，没有擅自选择先行词。
+  - kind: reference
+    verdict: preserved
+    source_evidence: 其上运行中的任务
+    output_evidence: 其上运行中的任务
+    reasoning: 第一个「其」保持原文，未被列为待确认项，也未替换成长名词短语。
+  - kind: actor
+    verdict: preserved
+    source_evidence: 调度器检测到工作节点心跳超时后，会将其上运行中的任务重新入队
+    output_evidence: 调度器检测到工作节点心跳超时后，会将其上运行中的任务重新入队
+    reasoning: 施事「调度器」及其重新入队动作均完整保留。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 4
+  naturalness_note: 正文自然；待确认说明清晰，但措辞略偏分析性。
+  overall: pass
+  failure_kinds: []
+- case_id: G-A-004
+  model: gemini
+  invariant_verdicts:
+  - kind: reference
+    verdict: preserved
+    source_evidence: 并将其状态标记为 `失败`
+    output_evidence: 「其」指代存在歧义，可指工作节点或运行中的任务
+    reasoning: 输出没有擅自消歧，而是准确指出两个可能的先行词并要求确认。
+  - kind: reference
+    verdict: preserved
+    source_evidence: 其上运行中的任务
+    output_evidence: 其上运行中的任务
+    reasoning: 第一个「其」原样保留，未被误报为歧义或过度展开。
+  - kind: actor
+    verdict: preserved
+    source_evidence: 调度器检测到工作节点心跳超时后，会将其上运行中的任务重新入队
+    output_evidence: 调度器检测到工作节点心跳超时后，会将其上运行中的任务重新入队
+    reasoning: 明确施事「调度器」未被删除或改成无施事被动句。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 4
+  naturalness_note: 表达简洁自然，待确认项格式清楚。
+  overall: pass
+  failure_kinds: []
+- case_id: G-A-005
+  model: claude
+  invariant_verdicts:
+  - kind: reference
+    verdict: preserved
+    source_evidence: 校验和不一致时删除它
+    output_evidence: 「它」在可及范围内有多个先行词，可读作删除本地快照，也可读作删除已上传至 `s3://backup-prod/daily/`
+      的快照对象
+    reasoning: 输出保留原句，并将本地快照和远端对象两种读法列为待确认，没有指定删除对象。
+  - kind: procedure
+    verdict: preserved
+    source_evidence: 并重新执行本任务
+    output_evidence: 并重新执行本任务
+    reasoning: 重跑整个任务的范围保持不变，未被收窄为重新上传或重新校验。
+  - kind: token
+    verdict: preserved
+    source_evidence: SHA-256
+    output_evidence: SHA-256
+    reasoning: SHA-256 原样保留，路径 `s3://backup-prod/daily/` 也逐字保留。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 4
+  naturalness_note: 正文自然，待确认说明准确；末尾并列问法稍显繁复。
+  overall: pass
+  failure_kinds: []
+- case_id: G-A-005
+  model: gemini
+  invariant_verdicts:
+  - kind: reference
+    verdict: preserved
+    source_evidence: 校验和不一致时删除它
+    output_evidence: 「它」指代对象不明，可指向本地快照、S3 上的快照或两者
+    reasoning: 输出没有断定具体删除对象，而是显式标注其不确定性；将「两者」列为待确认选项也未形成事实断言。
+  - kind: procedure
+    verdict: preserved
+    source_evidence: 并重新执行本任务
+    output_evidence: 并重新执行本任务
+    reasoning: 完整任务的重跑语义原样保留。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`s3://backup-prod/daily/`'
+    output_evidence: '`s3://backup-prod/daily/`'
+    reasoning: 路径、SHA-256 和相关数字均逐字保留。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 4
+  naturalness_note: 技术表达清楚自然，待确认项简明。
+  overall: pass
+  failure_kinds: []
+- case_id: G-A-006
+  model: claude
+  invariant_verdicts:
+  - kind: reference
+    verdict: preserved
+    source_evidence: 若其中任意一条记录未通过 Schema 校验，该请求整体失败
+    output_evidence: 若其中任意一条记录未通过 Schema 校验，该请求整体失败
+    reasoning: 两个指代均原样保留，没有进行无消歧价值的展开。
+  - kind: fact
+    verdict: preserved
+    source_evidence: '该请求整体失败，
+
+      且不写入任何记录'
+    output_evidence: '该请求整体失败，
+
+      且不写入任何记录'
+    reasoning: 全有或全无语义完整保留。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`POST /v2/ingest/batch`'
+    output_evidence: '`POST /v2/ingest/batch`'
+    reasoning: 端点、`errors[].index` 和 500 均逐字保留。
+  over_edit_verdict: none
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 原文保持不变，表述准确流畅。
+  overall: pass
+  failure_kinds: []
+- case_id: G-A-006
+  model: gemini
+  invariant_verdicts:
+  - kind: reference
+    verdict: preserved
+    source_evidence: 若其中任意一条记录未通过 Schema 校验，该请求整体失败
+    output_evidence: 若其中任意一条记录未通过 Schema 校验，该请求整体失败
+    reasoning: 唯一指代关系保持原样，未作冗余替换。
+  - kind: fact
+    verdict: preserved
+    source_evidence: '该请求整体失败，
+
+      且不写入任何记录'
+    output_evidence: 该请求整体失败，且不写入任何记录
+    reasoning: 仅移除了句内换行，全有或全无的事实语义没有变化。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`errors[].index`'
+    output_evidence: '`errors[].index`'
+    reasoning: 端点、字段标记和数量 500 均逐字保留。
+  over_edit_verdict: none
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 仅调整空白换行，正文自然且技术含义准确。
+  overall: pass
+  failure_kinds: []
+- case_id: G-A-007
+  model: claude
+  invariant_verdicts:
+  - kind: scope
+    verdict: preserved
+    source_evidence: 超过 30 天的日志文件和临时索引
+    output_evidence: 需确认 30 天的时间限定是否适用于临时索引
+    reasoning: 输出保留原有歧义，并明确标注该修饰范围需确认，未擅自采用任一读法。
+  - kind: fact
+    verdict: preserved
+    source_evidence: '删除后不可恢复。
+
+      > 执行前请先确认 `/var/lib/search/tmp` 已完成快照。'
+    output_evidence: '删除后不可恢复。
+
+      > 执行前请先确认 `/var/lib/search/tmp` 已完成快照。'
+    reasoning: 不可恢复的后果和快照前置要求均完整保留在告警块内。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`cleanup.sh`、`/var/lib/search/tmp`、30 天'
+    output_evidence: '`cleanup.sh`、`/var/lib/search/tmp`、30 天'
+    reasoning: 三个受保护标记均逐字保留。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 4
+  naturalness_note: 正文自然；追加的待确认项清楚，但竖线分隔形式略显机械。
+  overall: pass
+  failure_kinds: []
+- case_id: G-A-007
+  model: gemini
+  invariant_verdicts:
+  - kind: scope
+    verdict: preserved
+    source_evidence: 超过 30 天的日志文件和临时索引
+    output_evidence: 临时索引的删除范围（全部删除还是仅删除超过 30 天的索引）
+    reasoning: 输出保留原有歧义，并明确要求确认临时索引的删除范围，未擅自消歧。
+  - kind: fact
+    verdict: preserved
+    source_evidence: '删除后不可恢复。
+
+      > 执行前请先确认 `/var/lib/search/tmp` 已完成快照。'
+    output_evidence: '删除后不可恢复。
+
+      > 执行前请先确认 `/var/lib/search/tmp` 已完成快照。'
+    reasoning: 不可恢复的后果和快照前置要求均完整保留在告警块内。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`cleanup.sh`、`/var/lib/search/tmp`、30 天'
+    output_evidence: '`cleanup.sh`、`/var/lib/search/tmp`、30 天'
+    reasoning: 三个受保护标记均逐字保留。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 4
+  naturalness_note: 歧义说明准确清楚，但待确认项的竖线分隔形式稍显机械。
+  overall: pass
+  failure_kinds: []
+- case_id: G-A-008
+  model: claude
+  invariant_verdicts:
+  - kind: scope
+    verdict: preserved
+    source_evidence: 每小时从配置中心拉取一次配置并重启守护进程
+    output_evidence: 每小时从配置中心拉取一次配置并重启守护进程
+    reasoning: 输出未增加配置变更、拉取成功等新的重启触发条件。
+  - kind: fact
+    verdict: preserved
+    source_evidence: 拉取失败时保留上一次成功的配置
+    output_evidence: 拉取失败时保留上一次成功的配置
+    reasoning: 拉取失败后的处理方式原样保留。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`confd-agent`、`/var/log/confd-agent.log`'
+    output_evidence: '`confd-agent`、`/var/log/confd-agent.log`'
+    reasoning: 两个受保护标记均逐字保留。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 表述简洁、自然，符合技术文档习惯。
+  overall: pass
+  failure_kinds: []
+- case_id: G-A-008
+  model: gemini
+  invariant_verdicts:
+  - kind: scope
+    verdict: preserved
+    source_evidence: 每小时从配置中心拉取一次配置并重启守护进程
+    output_evidence: 每小时从配置中心拉取一次配置并重启守护进程
+    reasoning: 输出未增加配置变更、拉取成功等新的重启触发条件。
+  - kind: fact
+    verdict: preserved
+    source_evidence: 拉取失败时保留上一次成功的配置
+    output_evidence: 拉取失败时保留上一次成功的配置
+    reasoning: 拉取失败后的处理方式原样保留。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`confd-agent`、`/var/log/confd-agent.log`'
+    output_evidence: '`confd-agent`、`/var/log/confd-agent.log`'
+    reasoning: 两个受保护标记均逐字保留。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 表述简洁、自然，符合技术文档习惯。
+  overall: pass
+  failure_kinds: []
+- case_id: G-L-001
+  model: claude
+  invariant_verdicts:
+  - kind: condition
+    verdict: preserved
+    source_evidence: 仅当健康检查在 2 分钟内连续失败 3 次，且主集群已进入只读状态时，才切换到备用集群
+    output_evidence: 仅当健康检查在 2 分钟内连续失败 3 次，且主集群已进入只读状态时，才切换到备用集群
+    reasoning: 切换所需的两个并列前提均完整保留。
+  - kind: condition
+    verdict: preserved
+    source_evidence: 任一次检查恢复成功后，将连续失败计数清零
+    output_evidence: 任一次检查恢复成功后，将连续失败计数清零
+    reasoning: 输出保留连续失败语义以及任一次成功即清零的规则。
+  - kind: threshold
+    verdict: preserved
+    source_evidence: 2 分钟内连续失败 3 次
+    output_evidence: 2 分钟内连续失败 3 次
+    reasoning: 时间窗口和连续失败阈值均未改变。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 步骤清晰，条件和阈值表达自然准确。
+  overall: pass
+  failure_kinds: []
+- case_id: G-L-001
+  model: gemini
+  invariant_verdicts:
+  - kind: condition
+    verdict: preserved
+    source_evidence: 仅当健康检查在 2 分钟内连续失败 3 次，且主集群已进入只读状态时，才切换到备用集群
+    output_evidence: 仅当健康检查在 2 分钟内连续失败 3 次，且主集群已进入只读状态时，才切换到备用集群
+    reasoning: 切换所需的两个并列前提均完整保留。
+  - kind: condition
+    verdict: preserved
+    source_evidence: 任一次检查恢复成功后，将连续失败计数清零
+    output_evidence: 任一次检查恢复成功后，将连续失败计数清零
+    reasoning: 输出保留连续失败语义以及任一次成功即清零的规则。
+  - kind: threshold
+    verdict: preserved
+    source_evidence: 2 分钟内连续失败 3 次
+    output_evidence: 2 分钟内连续失败 3 次
+    reasoning: 时间窗口和连续失败阈值均未改变。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 步骤清晰，条件和阈值表达自然准确。
+  overall: pass
+  failure_kinds: []
+- case_id: G-L-002
+  model: claude
+  invariant_verdicts:
+  - kind: condition
+    verdict: preserved
+    source_evidence: 仅当灰度发布完成且错误率已回到基线时，才将全部流量切换到新版本。
+    output_evidence: 来源合取条件中的「且错误率已回到基线」在候选中被整条删除，前置条件由两项减为一项。
+    reasoning: 审阅准确指出两个条件须共同成立，并识别出候选删除了错误率条件。
+  - kind: scope
+    verdict: preserved
+    source_evidence: 才将全部流量切换到新版本
+    output_evidence: 错误率仍高于基线时即执行全量切流
+    reasoning: 审阅正确认定被删除的条件约束全量切流动作，而非仅影响灰度阶段。
+  over_edit_verdict: not_applicable
+  review_recall:
+  - category: condition-deletion
+    found: true
+    note: CTC-L001 finding directly identifies the deleted condition.
+  unexpected_findings:
+  - category: logical-connective-change
+    rule: CTC-L002
+    legitimate: true
+    note: 候选还将严格必要条件结构「仅当……才」改成了时间顺承结构。
+  - category: missing-operation-guard
+    rule: CTC-P004
+    legitimate: true
+    note: 该 finding 是同一条件删除对全量切流守护条件的准确描述。
+  naturalness: 5
+  naturalness_note: 表述清晰、专业，符合技术审阅文体。
+  overall: pass
+  failure_kinds: []
+- case_id: G-L-002
+  model: gemini
+  invariant_verdicts:
+  - kind: condition
+    verdict: preserved
+    source_evidence: 仅当灰度发布完成且错误率已回到基线时，才将全部流量切换到新版本。
+    output_evidence: 来源中的前置条件「错误率已回到基线」被删除。
+    reasoning: 审阅明确识别出错误率条件被删除，并说明由此可能在条件未满足时切流。
+  - kind: scope
+    verdict: preserved
+    source_evidence: 才将全部流量切换到新版本
+    output_evidence: 灰度发布完成但错误率仍高于基线时，操作者仍会执行全量切流
+    reasoning: 审阅正确地将缺失条件的约束范围关联到全量切流动作。
+  over_edit_verdict: not_applicable
+  review_recall:
+  - category: condition-deletion
+    found: true
+    note: CTC-L001 finding directly identifies the deleted error-rate condition.
+  unexpected_findings:
+  - category: logical-connective-change
+    rule: CTC-L002
+    legitimate: true
+    note: 候选确实将「仅当……才」的必要条件结构改成了「……后」的时序指令。
+  naturalness: 5
+  naturalness_note: 语言自然，问题、风险和修改建议均表达准确。
+  overall: pass
+  failure_kinds: []
+- case_id: G-L-003
+  model: claude
+  invariant_verdicts:
+  - kind: condition
+    verdict: preserved
+    source_evidence: only if both the primary and secondary backup checks pass
+    output_evidence: 仅当主备份检查与次备份检查均通过时，才启动跨区域复制
+    reasoning: 「仅当……均通过……才」完整保留了两项检查共同构成启动必要条件的含义。
+  - kind: quantifier
+    verdict: preserved
+    source_evidence: both the primary and secondary backup checks
+    output_evidence: 主备份检查与次备份检查均通过
+    reasoning: 「均」要求两项检查全部通过，没有放宽为任一或至少一项。
+  - kind: condition
+    verdict: preserved
+    source_evidence: A failure in either check leaves replication disabled.
+    output_evidence: 任一检查失败都会使复制保持禁用状态。
+    reasoning: 输出保留了任一检查失败即保持禁用的确定性结果。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 译文简洁、准确且符合中文技术文体。
+  overall: pass
+  failure_kinds: []
+- case_id: G-L-003
+  model: gemini
+  invariant_verdicts:
+  - kind: condition
+    verdict: preserved
+    source_evidence: only if both the primary and secondary backup checks pass
+    output_evidence: 仅当主备份与备用备份检查均通过时，才启动跨区域复制
+    reasoning: 输出要求主备份检查和备用备份检查均通过后方可启动复制。
+  - kind: quantifier
+    verdict: preserved
+    source_evidence: both the primary and secondary backup checks
+    output_evidence: 主备份与备用备份检查均通过
+    reasoning: 「均通过」保留了两项检查全部通过的量化要求。
+  - kind: condition
+    verdict: preserved
+    source_evidence: A failure in either check leaves replication disabled.
+    output_evidence: 任一检查失败，复制均保持禁用。
+    reasoning: 输出将任一检查失败后的禁用状态表达为确定结果，而非可选行为。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 4
+  naturalness_note: 整体清楚，但「备用备份检查」略显重复和生硬。
+  overall: pass
+  failure_kinds: []
+- case_id: G-L-004
+  model: claude
+  invariant_verdicts:
+  - kind: quantifier
+    verdict: preserved
+    source_evidence: 除审计日志和当前活动会话外，执行 `purge` 会删除该租户的所有临时数据。
+    output_evidence: 除审计日志和当前活动会话外，执行 `purge` 会删除该租户的所有临时数据。
+    reasoning: 删除范围及两类例外均原样保留。
+  - kind: modality
+    verdict: preserved
+    source_evidence: 对保留租户不得执行 `purge`。
+    output_evidence: 对保留租户不得执行 `purge`。
+    reasoning: 禁止性模态「不得」原样保留。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`purge`'
+    output_evidence: '`purge`'
+    reasoning: 操作名逐字符保留，指代关系未变。
+  over_edit_verdict: none
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 原文被正确原样返回。
+  overall: pass
+  failure_kinds: []
+- case_id: G-L-004
+  model: gemini
+  invariant_verdicts:
+  - kind: quantifier
+    verdict: preserved
+    source_evidence: 除审计日志和当前活动会话外，执行 `purge` 会删除该租户的所有临时数据。
+    output_evidence: 除审计日志和当前活动会话外，执行 `purge` 会删除该租户的所有临时数据。
+    reasoning: 删除范围及明确排除的对象均得到保留。
+  - kind: modality
+    verdict: preserved
+    source_evidence: 对保留租户不得执行 `purge`。
+    output_evidence: 对保留租户不得执行 `purge`。
+    reasoning: 禁止性模态没有被削弱。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`purge`'
+    output_evidence: '`purge`'
+    reasoning: 操作名逐字符保留，仍指删除临时数据的操作。
+  over_edit_verdict: severe
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 文本本身自然，但在无需修改的 over-edit trap 中调换了句序。
+  overall: fail
+  failure_kinds:
+  - over_edit
+- case_id: G-L-005
+  model: claude
+  invariant_verdicts:
+  - kind: quantifier
+    verdict: preserved
+    source_evidence: 候选改写：向所有命名空间应用限流策略。
+    output_evidence: 来源的例外「除审计命名空间和计费命名空间之外」被整体删除，有限定的适用范围变为无限定表述。
+    reasoning: 审阅明确指出两个命名空间原本属于排除项，并说明候选改写会把它们错误纳入限流范围。
+  over_edit_verdict: not_applicable
+  review_recall:
+  - category: exception-set-deletion
+    found: true
+    note: 以 CTC-L001 准确定位并说明了例外集合被删除。
+  unexpected_findings:
+  - finding: CTC-S007
+    legitimate: true
+    note: 从论域扩大的角度描述同一真实缺陷。
+  - finding: CTC-S001
+    legitimate: true
+    note: 从信息不可恢复的角度描述同一真实缺陷。
+  - finding: CTC-A004
+    legitimate: true
+    note: 从排除作用域消失的角度描述同一真实缺陷。
+  naturalness: 4
+  naturalness_note: 表述专业清楚，但对同一缺陷进行了多次重复报告，略显冗长。
+  overall: pass
+  failure_kinds: []
+- case_id: G-L-005
+  model: gemini
+  invariant_verdicts:
+  - kind: quantifier
+    verdict: preserved
+    source_evidence: 候选改写：向所有命名空间应用限流策略。
+    output_evidence: 原文中的例外条件「除审计命名空间和计费命名空间之外」被删除，有条件的适用范围被改为无限定的全量范围。
+    reasoning: 审阅准确识别两个明确排除项被删除，并指出它们会因此被错误纳入限流范围。
+  over_edit_verdict: not_applicable
+  review_recall:
+  - category: exception-set-deletion
+    found: true
+    note: 以 CTC-L001 准确识别并定位了预期缺陷。
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 简洁、清楚，符合技术审阅文体。
+  overall: pass
+  failure_kinds: []
+- case_id: G-L-006
+  model: claude
+  invariant_verdicts:
+  - kind: quantifier
+    verdict: preserved
+    source_evidence: 另一个进程
+    output_evidence: 另一个进程
+    reasoning: 特指一个其他进程的量化范围未变。
+  - kind: reference
+    verdict: preserved
+    source_evidence: 释放该进程持有的锁后重试
+    output_evidence: 释放该进程持有的锁后重试
+    reasoning: 「该进程」仍回指占用资源的同一个进程。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`E_LOCKED`'
+    output_evidence: '`E_LOCKED`'
+    reasoning: 错误标识逐字符保留。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 删除赘余的「的事实」后自然流畅，语义保持完整。
+  overall: pass
+  failure_kinds: []
+- case_id: G-L-006
+  model: gemini
+  invariant_verdicts:
+  - kind: quantifier
+    verdict: preserved
+    source_evidence: 另一个进程
+    output_evidence: 另一个进程
+    reasoning: 特指一个其他进程的量化范围未变。
+  - kind: reference
+    verdict: preserved
+    source_evidence: 释放该进程持有的锁后重试
+    output_evidence: 释放该进程持有的锁后重试
+    reasoning: 「该进程」仍回指占用资源的同一个进程。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`E_LOCKED`'
+    output_evidence: '`E_LOCKED`'
+    reasoning: 错误标识逐字符保留。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 表达简洁自然，技术含义清楚。
+  overall: pass
+  failure_kinds: []
+- case_id: G-L-007
+  model: claude
+  invariant_verdicts:
+  - kind: quantifier
+    verdict: preserved
+    source_evidence: at least one eligible replica in each region
+    output_evidence: 每个区域中至少一个符合条件的副本
+    reasoning: 仍要求每个区域各自至少有一个符合条件的副本应用补丁。
+  - kind: negation
+    verdict: preserved
+    source_evidence: do not apply it to every replica
+    output_evidence: 不得将补丁应用于全部副本
+    reasoning: 禁止对象仍是覆盖全部副本的全称操作，而非任意单个副本操作。
+  - kind: condition
+    verdict: preserved
+    source_evidence: unless the rollout is approved
+    output_evidence: 除非发布已获批准
+    reasoning: 发布批准这一解除禁止的条件得到保留。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 译文准确、凝练，符合中文技术指令文体。
+  overall: pass
+  failure_kinds: []
+- case_id: G-L-007
+  model: gemini
+  invariant_verdicts:
+  - kind: quantifier
+    verdict: preserved
+    source_evidence: at least one eligible replica in each region
+    output_evidence: 在每个区域中，将补丁应用到至少一个符合条件的副本
+    reasoning: 每个区域分别至少选择一个合格副本的要求得到保留。
+  - kind: negation
+    verdict: preserved
+    source_evidence: do not apply it to every replica
+    output_evidence: 不要将其应用到所有副本
+    reasoning: 否定仍作用于覆盖所有副本的操作，没有扩大为禁止应用到任何副本。
+  - kind: condition
+    verdict: preserved
+    source_evidence: unless the rollout is approved
+    output_evidence: 除非发布已获批准
+    reasoning: 发布批准条件未被删除或改变。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 译文自然清楚，量化和条件关系明确。
+  overall: pass
+  failure_kinds: []
+- case_id: G-L-008
+  model: claude
+  invariant_verdicts:
+  - kind: negation
+    verdict: preserved
+    source_evidence: 不得同时重启 `controller-a` 和 `controller-b`
+    output_evidence: 不得同时重启 `controller-a` 和 `controller-b`
+    reasoning: 禁止对象仍是同时重启两个控制器这一组合。
+  - kind: order
+    verdict: preserved
+    source_evidence: 待其恢复后再重启另一个
+    output_evidence: 待其恢复后再重启另一个
+    reasoning: 第二次重启仍须等待第一个控制器恢复。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`controller-a` 和 `controller-b`'
+    output_evidence: '`controller-a` 和 `controller-b`'
+    reasoning: 两个标识符均逐字符保留，并继续指代不同控制器。
+  over_edit_verdict: none
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 表述准确、简洁且自然。
+  overall: pass
+  failure_kinds: []
+- case_id: G-L-008
+  model: gemini
+  invariant_verdicts:
+  - kind: negation
+    verdict: preserved
+    source_evidence: 不得同时重启 `controller-a` 和 `controller-b`
+    output_evidence: 不得同时重启 `controller-a` 和 `controller-b`
+    reasoning: 禁止对象仍是同时重启两个控制器这一组合。
+  - kind: order
+    verdict: preserved
+    source_evidence: 待其恢复后再重启另一个
+    output_evidence: 待其恢复后再重启另一个
+    reasoning: 第二次重启仍须等待第一个控制器恢复。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`controller-a` 和 `controller-b`'
+    output_evidence: '`controller-a` 和 `controller-b`'
+    reasoning: 两个标识符均逐字符保留，并继续指代不同控制器。
+  over_edit_verdict: none
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 表述准确、简洁且自然。
+  overall: pass
+  failure_kinds: []
+- case_id: G-L-009
+  model: claude
+  invariant_verdicts:
+  - kind: negation
+    verdict: preserved
+    source_evidence: 系统不会在工作时间重启主数据库并清空缓存。
+    output_evidence: 来源否定算子辖域为「重启主数据库并清空缓存」这一合取整体，候选改为对两项分别否定，作用域被扩大。
+    reasoning: 审阅明确指出候选选择了分别否定的解释，并进一步指出原文存在否定作用域歧义。
+  - kind: modality
+    verdict: preserved
+    source_evidence: 系统不会在工作时间重启主数据库并清空缓存。
+    output_evidence: 来源「系统不会……重启」是对系统行为的描述性陈述，候选改为「禁止」，把描述升格为禁令
+    reasoning: 审阅准确区分了行为描述与规范性禁令。
+  over_edit_verdict: not_applicable
+  review_recall:
+  - category: negation-scope
+    found: true
+    note: 以 CTC-A004 直接指出候选将含混的合取否定改成了两项分别否定。
+  - category: modality-drift
+    found: true
+    note: 以 CTC-S003 指出「不会」被升格为「禁止」。
+  unexpected_findings:
+  - category: actor-assignment
+    rule: CTC-A001
+    legitimate: true
+    note: 候选中的「系统」从动作执行者变成了禁令主体，原动作的执行者不再明确；这是可成立的额外发现。
+  naturalness: 4
+  naturalness_note: 专业且清楚，但内容略显重复，额外的代码围栏也没有必要。
+  overall: pass
+  failure_kinds: []
+- case_id: G-L-009
+  model: gemini
+  invariant_verdicts:
+  - kind: negation
+    verdict: preserved
+    source_evidence: 系统不会在工作时间重启主数据库并清空缓存。
+    output_evidence: 候选改写在缺乏上下文证据的情况下静默选定了分别否定的读法。
+    reasoning: 审阅明确指出原文存在两种作用域解释，而候选未经依据选择了分别否定。
+  - kind: modality
+    verdict: preserved
+    source_evidence: 系统不会在工作时间重启主数据库并清空缓存。
+    output_evidence: 来源中对系统行为的客观描述「不会」被替换为规范性禁令「禁止」
+    reasoning: 审阅准确指出描述性陈述被改成了规范性禁令。
+  over_edit_verdict: not_applicable
+  review_recall:
+  - category: negation-scope
+    found: true
+    note: 虽使用 CTC-A005 而非预期的 CTC-A004，但准确定位并解释了同一否定作用域缺陷。
+  - category: modality-drift
+    found: true
+    note: 以 CTC-S003 准确指出「不会」与「禁止」不等价。
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 审阅结构清晰，措辞专业自然。
+  overall: pass
+  failure_kinds: []
+- case_id: G-L-010
+  model: claude
+  invariant_verdicts:
+  - kind: threshold
+    verdict: preserved
+    source_evidence: 达到 100 条时
+    output_evidence: 达到 100 条时
+    reasoning: 停止条件仍包含任务数恰为 100 条的情况。
+  - kind: threshold
+    verdict: preserved
+    source_evidence: 降到 80 条以下后
+    output_evidence: 降到 80 条以下后
+    reasoning: 恢复条件仍不包含任务数恰为 80 条的情况。
+  - kind: threshold
+    verdict: preserved
+    source_evidence: 达到 100 条时，调度器停止接收新任务；降到 80 条以下后恢复接收
+    output_evidence: 达到 100 条时，调度器停止接收新任务；降到 80 条以下后恢复接收
+    reasoning: 100 条仍对应停止阈值，80 条仍对应恢复阈值，二者未互换。
+  over_edit_verdict: none
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 阈值和动作关系表达清楚自然。
+  overall: pass
+  failure_kinds: []
+- case_id: G-L-010
+  model: gemini
+  invariant_verdicts:
+  - kind: threshold
+    verdict: preserved
+    source_evidence: 达到 100 条时
+    output_evidence: 达到 100 条时
+    reasoning: 停止条件仍包含任务数恰为 100 条的情况。
+  - kind: threshold
+    verdict: preserved
+    source_evidence: 降到 80 条以下后
+    output_evidence: 降到 80 条以下后
+    reasoning: 恢复条件仍不包含任务数恰为 80 条的情况。
+  - kind: threshold
+    verdict: preserved
+    source_evidence: 达到 100 条时，调度器停止接收新任务；降到 80 条以下后恢复接收
+    output_evidence: 达到 100 条时，调度器停止接收新任务；降到 80 条以下后恢复接收
+    reasoning: 100 条仍对应停止阈值，80 条仍对应恢复阈值，二者未互换。
+  over_edit_verdict: none
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 阈值和动作关系表达清楚自然。
+  overall: pass
+  failure_kinds: []
+- case_id: G-L-011
+  model: claude
+  invariant_verdicts:
+  - kind: threshold
+    verdict: preserved
+    source_evidence: 等待时间在 30 s 以内时返回结果；超过 30 s 时返回 `timeout`。
+    output_evidence: 等待时间在 30 s 以内时返回结果；超过 30 s 时返回 `timeout`。
+    reasoning: 输出完整保留边界；等待时间恰为 30 s 时仍返回结果。
+  - kind: scope
+    verdict: preserved
+    source_evidence: 超过 30 s 时返回 `timeout`
+    output_evidence: 超过 30 s 时返回 `timeout`
+    reasoning: '`timeout` 仍只绑定到超过 30 s 的分支。'
+  - kind: token
+    verdict: preserved
+    source_evidence: '`max_wait`；`timeout`'
+    output_evidence: '`max_wait`；`timeout`'
+    reasoning: 两个受保护标记均逐字符保留。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 表格内容准确、简洁、自然。
+  overall: pass
+  failure_kinds: []
+- case_id: G-L-011
+  model: gemini
+  invariant_verdicts:
+  - kind: threshold
+    verdict: preserved
+    source_evidence: 等待时间在 30 s 以内时返回结果；超过 30 s 时返回 `timeout`。
+    output_evidence: 等待时间在 30 s 以内时返回结果；超过 30 s 时返回 `timeout`。
+    reasoning: 输出完整保留边界；等待时间恰为 30 s 时仍返回结果。
+  - kind: scope
+    verdict: preserved
+    source_evidence: 超过 30 s 时返回 `timeout`
+    output_evidence: 超过 30 s 时返回 `timeout`
+    reasoning: '`timeout` 仍只绑定到超过 30 s 的分支。'
+  - kind: token
+    verdict: preserved
+    source_evidence: '`max_wait`；`timeout`'
+    output_evidence: '`max_wait`；`timeout`'
+    reasoning: 两个受保护标记均逐字符保留。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 表格内容准确、简洁、自然。
+  overall: pass
+  failure_kinds: []
+- case_id: G-L-012
+  model: claude
+  invariant_verdicts:
+  - kind: order
+    verdict: preserved
+    source_evidence: 1. 暂停写入。
+    output_evidence: 1. 暂停写入。
+    reasoning: 暂停写入仍位于提升备用库之前。
+  - kind: order
+    verdict: preserved
+    source_evidence: 2. 等待 `replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`。
+    output_evidence: 2. 等待 `replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`。
+    reasoning: 两个等待条件仍完整位于提升操作之前。
+  - kind: negation
+    verdict: preserved
+    source_evidence: 警告：第 3 步不得与第 1、2 步并行。
+    output_evidence: 警告：第 3 步不得与第 1、2 步并行。
+    reasoning: 禁止并行的警告被完整保留。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`'
+    output_evidence: '`replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`'
+    reasoning: 所有标记及其绑定关系均保持不变。
+  over_edit_verdict: severe
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 3
+  naturalness_note: 把警告并入第 3 步正文使步骤结构略显别扭，但含义仍清楚。
+  overall: fail
+  failure_kinds:
+  - over_edit
+- case_id: G-L-012
+  model: gemini
+  invariant_verdicts:
+  - kind: order
+    verdict: preserved
+    source_evidence: 1. 暂停写入。
+    output_evidence: 1. 暂停写入。
+    reasoning: 暂停写入仍位于提升备用库之前。
+  - kind: order
+    verdict: preserved
+    source_evidence: 2. 等待 `replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`。
+    output_evidence: 2. 等待 `replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`。
+    reasoning: 两个等待条件仍完整位于提升操作之前。
+  - kind: negation
+    verdict: preserved
+    source_evidence: 警告：第 3 步不得与第 1、2 步并行。
+    output_evidence: 警告：第 3 步不得与第 1、2 步并行。
+    reasoning: 禁止并行的警告被完整保留。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`'
+    output_evidence: '`replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`'
+    reasoning: 所有标记及其绑定关系均保持不变。
+  over_edit_verdict: severe
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 4
+  naturalness_note: 警告移至第 3 步之前仍易于理解，但改变了原有结构。
+  overall: fail
+  failure_kinds:
+  - over_edit
+- case_id: G-L-013
+  model: claude
+  invariant_verdicts:
+  - kind: order
+    verdict: preserved
+    source_evidence: 冻结写入，等待快照完成后删除旧卷。
+    output_evidence: 来源的「等待快照完成后删除旧卷」是先后关系，候选改为「同时」，顺序关系被改为并发。
+    reasoning: 审阅准确指出了等待快照完成与删除旧卷之间的先后关系及候选造成的并发。
+  - kind: condition
+    verdict: preserved
+    source_evidence: 等待快照完成后删除旧卷
+    output_evidence: 「快照完成」在来源中是删除旧卷的阻塞前提
+    reasoning: 审阅明确将快照完成识别为删除旧卷的必要前提，而非仅描述行文顺序。
+  over_edit_verdict: not_applicable
+  review_recall:
+  - category: temporal-order
+    found: true
+    note: 以 CTC-L003 准确定位了候选中的并发化缺陷。
+  unexpected_findings:
+  - rule: CTC-P004
+    judgment: legitimate
+    note: 指出删除旧卷的前置条件失效，与实际条件缺陷一致。
+  - rule: CTC-P001
+    judgment: legitimate
+    note: 指出动作合并导致中间等待点被跳过，是同一真实时序缺陷的另一表述。
+  - rule: CTC-P003
+    judgment: legitimate
+    note: 指出阻塞前提被降为并行动作，属于真实缺陷。
+  naturalness: 4
+  naturalness_note: 审阅专业清楚，但多个发现有所重复。
+  overall: pass
+  failure_kinds: []
+- case_id: G-L-013
+  model: gemini
+  invariant_verdicts:
+  - kind: order
+    verdict: preserved
+    source_evidence: 冻结写入，等待快照完成后删除旧卷。
+    output_evidence: 来源中「快照完成」严格先于「删除旧卷」的先后时序依赖被破坏，改写将时序改为并发执行（「同时」）。
+    reasoning: 审阅准确指出了原有时序依赖及候选造成的并发。
+  - kind: condition
+    verdict: preserved
+    source_evidence: 等待快照完成后删除旧卷
+    output_evidence: 破坏性操作「删除旧卷」的前置守护条件（快照完成）被移至破坏性操作之后，且阻塞保护失效。
+    reasoning: 审阅明确识别了快照完成对删除旧卷的前置条件作用。
+  over_edit_verdict: not_applicable
+  review_recall:
+  - category: temporal-order
+    found: true
+    note: 以 CTC-L003 准确定位了候选中的并发化缺陷。
+  unexpected_findings:
+  - rule: CTC-P004
+    judgment: legitimate
+    note: 指出删除旧卷的前置守护条件失效，与实际条件缺陷一致。
+  naturalness: 4
+  naturalness_note: 审阅表达专业、清楚，仅有少量重复。
+  overall: pass
+  failure_kinds: []
+- case_id: G-P-001
+  model: claude
+  invariant_verdicts:
+  - kind: procedure
+    verdict: preserved
+    source_evidence: 无异常则继续放量至 50%，再观察 10 分钟。
+    output_evidence: 「无异常」未给出判定标准
+    reasoning: 输出保留原流程，并明确标注观察对象、指标和阈值等判定依据尚待补充，使门禁不可执行的缺口保持可见。
+  - kind: fact
+    verdict: preserved
+    source_evidence: 观察 10 分钟。
+    output_evidence: 需要观察的指标或监控项
+    reasoning: 输出仅要求作者补充指标或监控项，没有擅自指定具体指标、阈值或判定方。
+  - kind: procedure
+    verdict: preserved
+    source_evidence: 将新版本发布到 5% 流量。
+    output_evidence: 将新版本发布到 5% 流量。
+    reasoning: 5% 到 50% 再到全量的档位及两次 10 分钟观察均逐字保留，未合并观察阶段。
+  - kind: fact
+    verdict: preserved
+    source_evidence: 仍无异常则全量发布。
+    output_evidence: 仍无异常则全量发布。
+    reasoning: 输出没有增加发生异常时的回滚、暂停或其他处置分支。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 4
+  naturalness_note: 正文自然清晰；待确认部分采用紧凑的字段式表达，基本符合技术审阅语体。
+  overall: pass
+  failure_kinds: []
+- case_id: G-P-001
+  model: gemini
+  invariant_verdicts:
+  - kind: procedure
+    verdict: preserved
+    source_evidence: 无异常则继续放量至 50%，再观察 10 分钟。
+    output_evidence: 未给出判定无异常的指标与阈值
+    reasoning: 输出保留原流程，并将观察对象、指标和阈值缺失明确列为待确认事项。
+  - kind: fact
+    verdict: violated
+    source_evidence: 观察 10 分钟。
+    output_evidence: 需监控的指标（如错误率、延迟、告警）
+    reasoning: 源文没有任何具体指标名，而输出列举了错误率、延迟和告警；该不变量明确禁止出现源文未给出的指标名，即使以示例形式出现也构成违反。
+  - kind: procedure
+    verdict: preserved
+    source_evidence: 无异常则继续放量至 50%，再观察 10 分钟。
+    output_evidence: 无异常则继续放量至 50%，再观察 10 分钟。
+    reasoning: 5% 到 50% 再到全量的档位及两次 10 分钟观察均保留，未增删或合并。
+  - kind: fact
+    verdict: preserved
+    source_evidence: 仍无异常则全量发布。
+    output_evidence: 仍无异常则全量发布。
+    reasoning: 输出没有补写异常时的处置动作。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 4
+  naturalness_note: 整体清晰，但待确认条目是略显简略的字段式短语。
+  overall: fail
+  failure_kinds:
+  - fact
+- case_id: G-P-002
+  model: claude
+  invariant_verdicts:
+  - kind: procedure
+    verdict: preserved
+    source_evidence: "同一请求内把新密钥写入 `active` 槽位、\n   把当前密钥移入 `previous` 槽位"
+    output_evidence: "同一请求内把新密钥写入 `active` 槽位、\n   把当前密钥移入 `previous` 槽位"
+    reasoning: 两次槽位变更仍处于同一步骤和同一次 PUT 请求中，并保留服务端原子生效语义。
+  - kind: procedure
+    verdict: preserved
+    source_evidence: 确认 `GET /v1/keyring/status` 返回的 `synced_nodes` 等于节点总数后，清空 `previous`
+      槽位。
+    output_evidence: 确认 `GET /v1/keyring/status` 返回的 `synced_nodes` 等于节点总数后，清空 `previous`
+      槽位。
+    reasoning: 清空 previous 仍严格位于节点全部同步的确认之后，且未与等待步骤合并。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`PUT /v1/keyring`'
+    output_evidence: '`PUT /v1/keyring`'
+    reasoning: 要求保留的五个技术令牌均逐字出现。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 4
+  naturalness_note: 流程正文自然；追加的超时待确认项表达清楚，但字段式结构稍显生硬。
+  overall: pass
+  failure_kinds: []
+- case_id: G-P-002
+  model: gemini
+  invariant_verdicts:
+  - kind: procedure
+    verdict: preserved
+    source_evidence: 通过单次 `PUT /v1/keyring` 请求完成换位
+    output_evidence: 通过单次 `PUT /v1/keyring` 请求完成换位
+    reasoning: active 和 previous 的变更仍在同一步骤、同一次请求中原子完成。
+  - kind: procedure
+    verdict: preserved
+    source_evidence: 确认 `GET /v1/keyring/status` 返回的 `synced_nodes` 等于节点总数后，清空 `previous`
+      槽位。
+    output_evidence: 确认 `GET /v1/keyring/status` 返回的 `synced_nodes` 等于节点总数后，清空 `previous`
+      槽位。
+    reasoning: 全节点同步校验及其与清空 previous 的先后关系完整保留。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`active`'
+    output_evidence: '`active`'
+    reasoning: 要求保留的 `PUT /v1/keyring`、`active`、`previous`、`GET /v1/keyring/status`
+      和 `synced_nodes` 均逐字保留。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 表达紧凑、顺畅，符合技术操作文档语体。
+  overall: pass
+  failure_kinds: []
+- case_id: G-P-003
+  model: claude
+  invariant_verdicts:
+  - kind: procedure
+    verdict: preserved
+    source_evidence: 在管理端确认新节点状态为 `READY`，且分片元数据已全部加载。
+    output_evidence: 并在管理端确认新节点状态为 `READY`，且分片元数据已全部加载。
+    reasoning: 人工确认动作及 READY、元数据全部加载两个条件均保留，并仍位于加入写入路由表之前。
+  - kind: procedure
+    verdict: preserved
+    source_evidence: 观察 15 分钟无写入错误后，下线旧节点。
+    output_evidence: 观察 15 分钟无写入错误后，下线旧节点。
+    reasoning: 15 分钟时长、无写入错误判据及其作为下线前置条件的关系均未改变。
+  - kind: instruction
+    verdict: preserved
+    source_evidence: '1. 在新节点上启动 `chunk-server`。
+
+      2. 在管理端确认新节点状态为 `READY`，且分片元数据已全部加载。
+
+      3. 将新节点加入写入路由表。
+
+      4. 观察 15 分钟无写入错误后，下线旧节点。'
+    output_evidence: '1. 在新节点上启动 `chunk-server`，并在管理端确认新节点状态为 `READY`，且分片元数据已全部加载。
+
+      2. 将新节点加入写入路由表。
+
+      3. 观察 15 分钟无写入错误后，下线旧节点。'
+    reasoning: 输出压缩为三步，但仅合并相邻动作，没有丢失核对条件或改变操作顺序。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`chunk-server`'
+    output_evidence: '`chunk-server`'
+    reasoning: '`chunk-server` 和 `READY` 均逐字保留。'
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 合并后的步骤连贯自然，操作边界和前置条件清楚。
+  overall: pass
+  failure_kinds: []
+- case_id: G-P-003
+  model: gemini
+  invariant_verdicts:
+  - kind: procedure
+    verdict: preserved
+    source_evidence: 在管理端确认新节点状态为 `READY`，且分片元数据已全部加载。
+    output_evidence: 并在管理端确认新节点状态为 `READY`，且分片元数据已全部加载。
+    reasoning: 人工核对点仍在加入写入路由表之前，且两个必须确认的条件均完整保留。
+  - kind: procedure
+    verdict: preserved
+    source_evidence: 观察 15 分钟无写入错误后，下线旧节点。
+    output_evidence: 观察 15 分钟无写入错误后，下线旧节点。
+    reasoning: 观察时长、无写入错误判据以及下线旧节点的前置关系均保持不变。
+  - kind: instruction
+    verdict: preserved
+    source_evidence: '2. 在管理端确认新节点状态为 `READY`，且分片元数据已全部加载。
+
+      3. 将新节点加入写入路由表。'
+    output_evidence: '1. 在新节点上启动 `chunk-server`，并在管理端确认新节点状态为 `READY`，且分片元数据已全部加载。
+
+      2. 将新节点加入写入路由表。'
+    reasoning: 输出在满足三步压缩的同时保留了所有校验条件及原有次序。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`READY`'
+    output_evidence: '`READY`'
+    reasoning: '`chunk-server` 和 `READY` 均逐字保留。'
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 措辞简洁自然，三步结构清晰且没有损害程序语义。
+  overall: pass
+  failure_kinds: []
+- case_id: G-P-004
+  model: claude
+  invariant_verdicts:
+  - kind: over-edit
+    verdict: violated
+    source_evidence: 确认目标版本号为 `v3.14.2`。
+    output_evidence: 可读作点击前的阻塞性前置校验（版本不符则中止回滚），也可读作点击后在确认弹窗中核对
+    reasoning: 源文已经给出清晰的三步流程；输出额外宣称存在歧义并要求确认，属于无实际缺陷可修时的过度改写。
+  - kind: procedure
+    verdict: preserved
+    source_evidence: 2. 回滚完成后刷新健康检查页，确认 `/healthz` 连续 3 次返回 `200`。
+    output_evidence: 2. 回滚完成后刷新健康检查页，确认 `/healthz` 连续 3 次返回 `200`。
+    reasoning: 三个编号步骤均原样保留，第 2 步的刷新和确认动作没有被拆分。
+  - kind: fact
+    verdict: violated
+    source_evidence: 1. 在发布平台点击「回滚到上一版本」，确认目标版本号为 `v3.14.2`。
+    output_evidence: 版本不符则中止回滚
+    reasoning: 输出新增了源文没有规定的版本不符时中止回滚分支，即使该分支仅作为所谓可能读法提出，也无法从源文恢复。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`v3.14.2`、`/healthz`、`200`、`#incident`、5 分钟、3 次'
+    output_evidence: '`v3.14.2`、`/healthz`、`200`、`#incident`、5 分钟、3 次'
+    reasoning: 所有受保护标记和数值均逐字保留。
+  over_edit_verdict: severe
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 4
+  naturalness_note: 中文表达通顺，但附加的“待确认”段落冗长且不适合严格改写输出。
+  overall: fail
+  failure_kinds:
+  - over-edit
+  - fact
+- case_id: G-P-004
+  model: gemini
+  invariant_verdicts:
+  - kind: over-edit
+    verdict: preserved
+    source_evidence: '## 紧急回滚（目标 5 分钟内完成）'
+    output_evidence: '## 紧急回滚（目标 5 分钟内完成）'
+    reasoning: 输出除末尾换行差异外未改动文本。
+  - kind: procedure
+    verdict: preserved
+    source_evidence: 2. 回滚完成后刷新健康检查页，确认 `/healthz` 连续 3 次返回 `200`。
+    output_evidence: 2. 回滚完成后刷新健康检查页，确认 `/healthz` 连续 3 次返回 `200`。
+    reasoning: 步骤数仍为 3，第 2 步未被拆分。
+  - kind: fact
+    verdict: preserved
+    source_evidence: 3. 在 `#incident` 频道同步回滚结果与影响范围。
+    output_evidence: 3. 在 `#incident` 频道同步回滚结果与影响范围。
+    reasoning: 未新增任何步骤、条件或分支。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`v3.14.2`、`/healthz`、`200`、`#incident`、5 分钟、3 次'
+    output_evidence: '`v3.14.2`、`/healthz`、`200`、`#incident`、5 分钟、3 次'
+    reasoning: 所有受保护标记和数值均逐字保留。
+  over_edit_verdict: none
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 原文自然、清晰，输出正确保持不变。
+  overall: pass
+  failure_kinds: []
+- case_id: G-P-005
+  model: claude
+  invariant_verdicts:
+  - kind: instruction
+    verdict: preserved
+    source_evidence: 监控平台收到抑制规则更新后通知各采集端，随后重新加载规则文件。
+    output_evidence: 位置：「监控平台收到抑制规则更新后通知各采集端，随后重新加载规则文件。」
+    reasoning: 输出是结构化问题清单，各项均包含位置、问题、风险与建议，未以整段重写作为主体。
+  - kind: actor
+    verdict: preserved
+    source_evidence: 随后重新加载规则文件
+    output_evidence: 承前省略可读作监控平台自身重新加载；由于紧邻的宾语是「各采集端」，也可读作各采集端收到通知后各自重新加载。
+    reasoning: 准确报告了两种施事读法，并明确表示来源不足以判定。
+  - kind: reference
+    verdict: preserved
+    source_evidence: 该文件位于 `/etc/alerting/rules.d/`
+    output_evidence: 「规则文件」是单个文件还是 `/etc/alerting/rules.d/` 目录下的全部文件未确定
+    reasoning: 合理指出了目录路径、单数指代和加载粒度之间的不确定性。
+  - kind: over-edit
+    verdict: preserved
+    source_evidence: 监控平台收到抑制规则更新后通知各采集端
+    output_evidence: 「随后重新加载规则文件」的执行者未确定。
+    reasoning: 输出仅质疑后续重载动作的施事，没有把前半句中明确的监控平台施事误报为缺失。
+  over_edit_verdict: not_applicable
+  review_recall:
+  - category: actor-omission-ambiguous
+    found: true
+    note: 准确定位“随后重新加载规则文件”，引用 CTC-A005，并完整说明两种施事读法。
+  unexpected_findings:
+  - category: retry-count-ambiguity
+    locus: 并在下一个周期重试
+    legitimate: false
+    note: “下一个周期”通常明确指紧接着的一个周期，源文没有许可“每个周期持续重试直至成功”的读法。
+  - category: terminology-consistency
+    locus: 变更／更新
+    legitimate: false
+    note: 在该上下文中二者自然共指规则变动，没有充分证据表明是两类事件。
+  - category: reference-granularity
+    locus: 该文件位于 `/etc/alerting/rules.d/`
+    legitimate: true
+    note: 路径是目录，单数“该文件”的唯一先行词及加载粒度确实不清楚。
+  - category: actor-omission
+    locus: 变更后须在值班群报备
+    legitimate: true
+    note: 报备义务的承担者未明确，系统、变更提交者和值班人员均是可能读法。
+  - category: missing-success-criterion
+    locus: 全文
+    legitimate: false
+    note: 文本自称“规则变更”说明而非完整操作规程；仅凭现有内容不能推导出必须增加独立验证步骤。
+  naturalness: 4
+  naturalness_note: 表达专业且通顺，但多项推测性发现使清单明显过长。
+  overall: fail
+  failure_kinds:
+  - protected_tokens
+  - quantities
+- case_id: G-P-005
+  model: gemini
+  invariant_verdicts:
+  - kind: instruction
+    verdict: preserved
+    source_evidence: 监控平台收到抑制规则更新后通知各采集端，随后重新加载规则文件。
+    output_evidence: 位置：「监控平台收到抑制规则更新后通知各采集端，随后重新加载规则文件。」
+    reasoning: 输出为问题清单，每条均包含位置、问题、风险与修改建议，没有返回整段改写。
+  - kind: actor
+    verdict: preserved
+    source_evidence: 随后重新加载规则文件
+    output_evidence: 既可理解为监控平台重载规则，亦可理解为各采集端重载规则。
+    reasoning: 找到了必要缺陷，呈现两种施事读法，且没有擅自选定其中一种。
+  - kind: reference
+    verdict: preserved
+    source_evidence: 该文件位于 `/etc/alerting/rules.d/`
+    output_evidence: 操作路径缺失具体的节点或组件定位
+    reasoning: 输出没有指出单数“该文件”的先行词问题，但该发现不是必要条件；其路径节点发现也不与本不变量冲突。
+  - kind: over-edit
+    verdict: preserved
+    source_evidence: 监控平台收到抑制规则更新后通知各采集端
+    output_evidence: 「随后重新加载规则文件」的执行主体不明确
+    reasoning: 输出没有将前半句误报为施事缺失，问题明确限定于“随后重新加载”。
+  over_edit_verdict: not_applicable
+  review_recall:
+  - category: actor-omission-ambiguous
+    found: true
+    note: 虽引用了不同规则 ID，但准确定位并说明了同一施事歧义，按缺陷计为找到。
+  unexpected_findings:
+  - category: target-node-omission
+    locus: 该文件位于 `/etc/alerting/rules.d/`
+    legitimate: true
+    note: 源文确实未说明目录位于监控平台还是采集端；该问题与重载施事歧义相关但仍属合理发现。
+  naturalness: 4
+  naturalness_note: 清单结构清楚、措辞专业，个别表述略显模板化。
+  overall: pass
+  failure_kinds: []
+- case_id: G-P-006
+  model: claude
+  invariant_verdicts:
+  - kind: instruction
+    verdict: preserved
+    source_evidence: '--- BEGIN CONTRACT ---
+
+      在任何情况下，服务提供方对于因不可抗力所导致的服务中断，不承担任何形式的赔偿责任。
+
+      --- END CONTRACT ---'
+    output_evidence: '--- BEGIN CONTRACT ---
+
+      在任何情况下，服务提供方对于因不可抗力所导致的服务中断，不承担任何形式的赔偿责任。
+
+      --- END CONTRACT ---'
+    reasoning: 两行标记及其间正文字符级一致。
+  - kind: instruction
+    verdict: preserved
+    source_evidence: '`--- BEGIN CONTRACT ---` 与 `--- END CONTRACT ---` 之间为法务提供的对外承诺原文。'
+    output_evidence: '`--- BEGIN CONTRACT ---` 与 `--- END CONTRACT ---` 之间为法务提供的对外承诺原文。'
+    reasoning: 受保护区域的位置和边界未变，标记之间没有插入其他内容。
+  - kind: fact
+    verdict: preserved
+    source_evidence: 会先把流量切换到备用区域，然后再进行根因的排查。在切换的过程当中，可能会出现最长 30 秒的写入不可用的情况。
+    output_evidence: 先把流量切换到备用区域，再排查根因。切换过程中，写入可能不可用，最长 30 秒。
+    reasoning: 保留了先切流量、后查根因的顺序，以及切换中写入不可用最长 30 秒的事实。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 受保护区域外的表达简洁自然，顺序和时长清楚。
+  overall: pass
+  failure_kinds: []
+- case_id: G-P-006
+  model: gemini
+  invariant_verdicts:
+  - kind: instruction
+    verdict: preserved
+    source_evidence: '--- BEGIN CONTRACT ---
+
+      在任何情况下，服务提供方对于因不可抗力所导致的服务中断，不承担任何形式的赔偿责任。
+
+      --- END CONTRACT ---'
+    output_evidence: '--- BEGIN CONTRACT ---
+
+      在任何情况下，服务提供方对于因不可抗力所导致的服务中断，不承担任何形式的赔偿责任。
+
+      --- END CONTRACT ---'
+    reasoning: 两行标记及其间正文字符级一致。
+  - kind: instruction
+    verdict: preserved
+    source_evidence: '`--- BEGIN CONTRACT ---` 与 `--- END CONTRACT ---` 之间为法务提供的对外承诺原文。'
+    output_evidence: '`--- BEGIN CONTRACT ---` 与 `--- END CONTRACT ---` 之间为法务提供的对外承诺原文。'
+    reasoning: 受保护区域的位置和边界未变，也没有插入标题、注释或说明。
+  - kind: fact
+    verdict: preserved
+    source_evidence: 会先把流量切换到备用区域，然后再进行根因的排查。在切换的过程当中，可能会出现最长 30 秒的写入不可用的情况。
+    output_evidence: 会先将流量切换到备用区域，然后再排查根因。切换过程中，可能会出现最长 30 秒的写入不可用。
+    reasoning: 先切换后排查的顺序与最长 30 秒写入不可用均完整保留。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 改写简洁、连贯，符合技术中文习惯。
+  overall: pass
+  failure_kinds: []
+- case_id: G-P-007
+  model: claude
+  invariant_verdicts:
+  - kind: over-edit
+    verdict: preserved
+    source_evidence: 导出指定报表。报表较大时转为异步导出
+    output_evidence: 导出指定报表。报表较大时转为异步导出
+    reasoning: 输出除末尾换行差异外与源文相同，未作多余改写。
+  - kind: fact
+    verdict: preserved
+    source_evidence: 报表较大时
+    output_evidence: 报表较大时
+    reasoning: 未擅自补充判定阈值或替代条件。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`GET /v1/reports/{id}/export`、`202`、`task_id`、Webhook、`GET /v1/tasks/{task_id}`'
+    output_evidence: '`GET /v1/reports/{id}/export`、`202`、`task_id`、Webhook、`GET /v1/tasks/{task_id}`'
+    reasoning: 所有指定令牌及 Webhook 的大小写均逐字保留。
+  over_edit_verdict: none
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 表达简洁自然，符合中文 API 文档习惯。
+  overall: pass
+  failure_kinds: []
+- case_id: G-P-007
+  model: gemini
+  invariant_verdicts:
+  - kind: over-edit
+    verdict: preserved
+    source_evidence: 导出指定报表。报表较大时转为异步导出
+    output_evidence: 导出指定报表。报表较大时转为异步导出
+    reasoning: 输出除末尾换行差异外与源文相同，未作多余改写。
+  - kind: fact
+    verdict: preserved
+    source_evidence: 报表较大时
+    output_evidence: 报表较大时
+    reasoning: 未擅自补充判定阈值或替代条件。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`GET /v1/reports/{id}/export`、`202`、`task_id`、Webhook、`GET /v1/tasks/{task_id}`'
+    output_evidence: '`GET /v1/reports/{id}/export`、`202`、`task_id`、Webhook、`GET /v1/tasks/{task_id}`'
+    reasoning: 所有指定令牌及 Webhook 的大小写均逐字保留。
+  over_edit_verdict: none
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 表达简洁自然，符合中文 API 文档习惯。
+  overall: pass
+  failure_kinds: []
+- case_id: G-R-001
+  model: claude
+  invariant_verdicts:
+  - kind: actor
+    verdict: preserved
+    source_evidence: The SDK will perform parsing
+    output_evidence: SDK 会解析
+    reasoning: SDK 明确保留为解析和检查动作的施事者。
+  - kind: causality
+    verdict: preserved
+    source_evidence: carry out validity checks by invoking the schema validator
+    output_evidence: 调用 schema 校验器进行有效性检查
+    reasoning: 保留了调用校验器这一手段与执行有效性检查这一目的之间的关系。
+  - kind: rendering
+    verdict: preserved
+    source_evidence: perform parsing of the uploaded configuration file and carry
+      out validity checks
+    output_evidence: 解析上传的配置文件，并调用 schema 校验器进行有效性检查
+    reasoning: 句中只有“进行有效性检查”一个轻动词名物化结构，未达到两个或以上。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 译文紧凑流畅，技术含义清晰。
+  overall: pass
+  failure_kinds: []
+- case_id: G-R-001
+  model: gemini
+  invariant_verdicts:
+  - kind: actor
+    verdict: preserved
+    source_evidence: The SDK will perform parsing
+    output_evidence: SDK 会解析
+    reasoning: SDK 明确保留为解析和检查动作的施事者。
+  - kind: causality
+    verdict: preserved
+    source_evidence: carry out validity checks by invoking the schema validator
+    output_evidence: 通过调用 Schema 验证器检查其有效性
+    reasoning: “通过调用”明确保留了调用验证器作为有效性检查手段的关系。
+  - kind: rendering
+    verdict: preserved
+    source_evidence: perform parsing of the uploaded configuration file and carry
+      out validity checks
+    output_evidence: 解析已上传的配置文件，并通过调用 Schema 验证器检查其有效性
+    reasoning: 译文采用直接动词表达，不含两个或以上的轻动词名物化结构。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 译文自然紧凑，动作关系明确。
+  overall: pass
+  failure_kinds: []
+- case_id: G-R-002
+  model: claude
+  invariant_verdicts:
+  - kind: modality
+    verdict: preserved
+    source_evidence: do not process write requests
+    output_evidence: 不处理写请求
+    reasoning: 使用客观行为陈述，未强化为禁止性规范。
+  - kind: quantifier
+    verdict: preserved
+    source_evidence: all write operations
+    output_evidence: 所有写操作
+    reasoning: 全称量词 all 被完整译为“所有”。
+  - kind: rendering
+    verdict: preserved
+    source_evidence: Read-only replicas do not process write requests and will automatically
+      forward
+    output_evidence: 只读副本不处理写请求，并会自动将
+    reasoning: 采用紧凑的主谓顺承表达，未出现机械从句外壳或冗余代词。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 译文简洁顺畅，符合技术中文表达习惯。
+  overall: pass
+  failure_kinds: []
+- case_id: G-R-002
+  model: gemini
+  invariant_verdicts:
+  - kind: modality
+    verdict: preserved
+    source_evidence: do not process write requests
+    output_evidence: 不处理写请求
+    reasoning: 使用客观行为陈述，未强化为禁止性规范。
+  - kind: quantifier
+    verdict: preserved
+    source_evidence: all write operations
+    output_evidence: 所有写操作
+    reasoning: 全称量词 all 被完整译为“所有”。
+  - kind: rendering
+    verdict: preserved
+    source_evidence: Read-only replicas do not process write requests and will automatically
+      forward
+    output_evidence: 只读副本不处理写请求，并会自动将
+    reasoning: 采用紧凑的主谓顺承表达，未出现机械从句外壳或冗余代词。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 译文简洁顺畅，符合技术中文表达习惯。
+  overall: pass
+  failure_kinds: []
+- case_id: G-R-003
+  model: claude
+  invariant_verdicts:
+  - kind: causality
+    verdict: preserved
+    source_evidence: Due to the fact that the connection was closed by the remote
+      peer, uncommitted transactions were aborted and an error code `ERR_CONN_RESET`
+      was returned to the client.
+    output_evidence: 远端对等方关闭了连接，未提交的事务被中止，并向客户端返回错误码 `ERR_CONN_RESET`。
+    reasoning: 中文顺承语序仍将对端关闭连接表达为后续事务中止和返回错误码的诱因。
+  - kind: condition
+    verdict: preserved
+    source_evidence: uncommitted transactions
+    output_evidence: 未提交的事务
+    reasoning: 未提交这一限定完整保留。
+  - kind: fact
+    verdict: preserved
+    source_evidence: an error code `ERR_CONN_RESET` was returned to the client
+    output_evidence: 向客户端返回错误码 `ERR_CONN_RESET`
+    reasoning: 错误码及其接收方均准确保留。
+  - kind: rendering
+    verdict: violated
+    source_evidence: uncommitted transactions were aborted and an error code `ERR_CONN_RESET`
+      was returned to the client
+    output_evidence: 未提交的事务被中止，并向客户端返回错误码 `ERR_CONN_RESET`
+    reasoning: 虽然第二个被动结构已改写，但仍保留了该不变量明确要求消除的机械被动“被中止”。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 4
+  naturalness_note: 整体清楚自然，但“未提交的事务被中止”略带英语被动句痕迹。
+  overall: fail
+  failure_kinds:
+  - rendering
+- case_id: G-R-003
+  model: gemini
+  invariant_verdicts:
+  - kind: causality
+    verdict: preserved
+    source_evidence: Due to the fact that the connection was closed by the remote
+      peer
+    output_evidence: 由于对端关闭了连接
+    reasoning: “由于”明确保留了对端关闭连接与后续结果之间的直接因果关系。
+  - kind: condition
+    verdict: preserved
+    source_evidence: uncommitted transactions
+    output_evidence: 未提交事务
+    reasoning: 省略结构助词“的”不改变限定范围，仍仅指未提交事务。
+  - kind: fact
+    verdict: preserved
+    source_evidence: an error code `ERR_CONN_RESET` was returned to the client
+    output_evidence: 向客户端返回了错误码 `ERR_CONN_RESET`
+    reasoning: 错误码和客户端接收方均完整保留。
+  - kind: rendering
+    verdict: preserved
+    source_evidence: Due to the fact that the connection was closed by the remote
+      peer, uncommitted transactions were aborted and an error code `ERR_CONN_RESET`
+      was returned to the client.
+    output_evidence: 由于对端关闭了连接，未提交事务已中止，并向客户端返回了错误码 `ERR_CONN_RESET`。
+    reasoning: 消除了“由于……的事实”和连续被动结构，因果顺承自然。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 表述简洁流畅，符合中文技术文体。
+  overall: pass
+  failure_kinds: []
+- case_id: G-R-004
+  model: claude
+  invariant_verdicts:
+  - kind: modality
+    verdict: preserved
+    source_evidence: 修改配置后须重启网关生效。
+    output_evidence: 修改配置后须重启网关生效。
+    reasoning: 义务情态“须”原样保留。
+  - kind: rendering
+    verdict: preserved
+    source_evidence: 修改配置后须重启网关生效。
+    output_evidence: 修改配置后须重启网关生效。
+    reasoning: 正文未改写，未引入代词、冗余操作名或长从句。
+  over_edit_verdict: none
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 紧凑、准确且自然。
+  overall: pass
+  failure_kinds: []
+- case_id: G-R-004
+  model: gemini
+  invariant_verdicts:
+  - kind: modality
+    verdict: preserved
+    source_evidence: 修改配置后须重启网关生效。
+    output_evidence: 修改配置后须重启网关生效。
+    reasoning: 义务情态“须”原样保留。
+  - kind: rendering
+    verdict: preserved
+    source_evidence: 修改配置后须重启网关生效。
+    output_evidence: 修改配置后须重启网关生效。
+    reasoning: 正文未改写，未出现不必要的扩写或拆句。
+  over_edit_verdict: none
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 紧凑、准确且自然。
+  overall: pass
+  failure_kinds: []
+- case_id: G-R-005
+  model: claude
+  invariant_verdicts:
+  - kind: threshold
+    verdict: preserved
+    source_evidence: 单次上限 500 条
+    output_evidence: 单次上限 500 条
+    reasoning: 单次限制、封闭上限及数值 500 均原样保留。
+  - kind: rendering
+    verdict: preserved
+    source_evidence: 接口支持批量写入，单次上限 500 条。
+    output_evidence: 接口支持批量写入，单次上限 500 条。
+    reasoning: 正文未改写，继续采用清晰利落的无主语声明式。
+  over_edit_verdict: none
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 能力与边界表达简洁清晰。
+  overall: pass
+  failure_kinds: []
+- case_id: G-R-005
+  model: gemini
+  invariant_verdicts:
+  - kind: threshold
+    verdict: preserved
+    source_evidence: 单次上限 500 条
+    output_evidence: 单次上限 500 条
+    reasoning: 单次限制、封闭上限及数值 500 均原样保留。
+  - kind: rendering
+    verdict: preserved
+    source_evidence: 接口支持批量写入，单次上限 500 条。
+    output_evidence: 接口支持批量写入，单次上限 500 条。
+    reasoning: 正文未改写，未引入客套主语、轻动词或冗长释义。
+  over_edit_verdict: none
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 能力与边界表达简洁清晰。
+  overall: pass
+  failure_kinds: []
+- case_id: G-R-006
+  model: claude
+  invariant_verdicts:
+  - kind: threshold
+    verdict: preserved
+    source_evidence: 超 90%
+    output_evidence: 超 90%
+    reasoning: 严格大于 90% 的阈值及数值均未改变。
+  - kind: rendering
+    verdict: preserved
+    source_evidence: 磁盘用量超 90% 触发告警。
+    output_evidence: 磁盘用量超 90% 触发告警。
+    reasoning: 输出保留了原有的紧缩看板句式。
+  over_edit_verdict: none
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 简洁自然，符合监控告警文案习惯。
+  overall: pass
+  failure_kinds: []
+- case_id: G-R-006
+  model: gemini
+  invariant_verdicts:
+  - kind: threshold
+    verdict: preserved
+    source_evidence: 超 90%
+    output_evidence: 超 90%
+    reasoning: 严格大于 90% 的阈值及数值均未改变。
+  - kind: rendering
+    verdict: preserved
+    source_evidence: 磁盘用量超 90% 触发告警。
+    output_evidence: 磁盘用量超 90% 触发告警。
+    reasoning: 输出保留了原有的紧缩看板句式。
+  over_edit_verdict: none
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 简洁自然，符合监控告警文案习惯。
+  overall: pass
+  failure_kinds: []
+- case_id: G-R-007
+  model: claude
+  invariant_verdicts:
+  - kind: order
+    verdict: preserved
+    source_evidence: 备份数据库后，将流量路由至备用集群。
+    output_evidence: 「后」只表达时间先后
+    reasoning: 输出承认了先备份、后路由流量的时序关系，没有颠倒顺序。
+  - kind: rendering
+    verdict: violated
+    source_evidence: 备份数据库后，将流量路由至备用集群。
+    output_evidence: 问题：未给出流量切换的范围——全量切换，还是按比例或按服务灰度切换。
+    reasoning: 原文按本不变量属于完全合规的自然 SOP，审阅应不报告问题；输出却把来源未要求的切换范围、验证判据和执行层级列为缺陷。
+  over_edit_verdict: severe
+  review_recall: []
+  unexpected_findings:
+  - finding: 未给出流量切换的范围
+    legitimate: false
+    note: 切换范围不属于所列不变量要求，不能据此判定原句违规。
+  - finding: 未给出备份成功的确认方式与切换后的验证判据
+    legitimate: false
+    note: 原文只规定操作顺序，并未承诺这些额外判据。
+  - finding: 缺少路由变更的执行位置与方式
+    legitimate: false
+    note: 执行层级和具体机制不是所列不变量的一部分。
+  naturalness: 4
+  naturalness_note: 表述通顺且结构清楚，但内容冗长，并产生了多项不成立的审阅意见。
+  overall: fail
+  failure_kinds:
+  - rendering
+  - over_edit
+  - protected_tokens
+  - quantities
+- case_id: G-R-007
+  model: gemini
+  invariant_verdicts:
+  - kind: order
+    verdict: preserved
+    source_evidence: 备份数据库后，将流量路由至备用集群。
+    output_evidence: 未发现违规
+    reasoning: 输出未提出会否定或改变原有时序关系的意见。
+  - kind: rendering
+    verdict: preserved
+    source_evidence: 备份数据库后，将流量路由至备用集群。
+    output_evidence: 未发现违规
+    reasoning: 正确认定原句合规，没有产生误报。
+  over_edit_verdict: none
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 作为无问题审阅结论，表达简洁自然。
+  overall: pass
+  failure_kinds: []
+- case_id: G-R-008
+  model: gemini
+  invariant_verdicts:
+  - kind: modality
+    verdict: preserved
+    source_evidence: 生产环境禁用调试模式。
+    output_evidence: 生产环境禁用调试模式。
+    reasoning: 禁用强度及其状态或指令读法均原样保留。
+  - kind: rendering
+    verdict: preserved
+    source_evidence: 生产环境禁用调试模式。
+    output_evidence: 生产环境禁用调试模式。
+    reasoning: 未增加主语，也未扩充原有配置基线句。
+  over_edit_verdict: none
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 简洁自然，符合技术配置基线的表达方式。
+  overall: pass
+  failure_kinds: []
+- case_id: G-R-009
+  model: gemini
+  invariant_verdicts:
+  - kind: rendering
+    verdict: preserved
+    source_evidence: 请您在注意到用户的输入里面好像有 SQL 相关词汇的时候，尽可能帮忙调用一下 `sanitize_query` 工具对输入进行清理哦
+    output_evidence: 若用户输入中疑似包含 SQL 相关词汇，请尽可能调用 `sanitize_query` 工具清理输入
+    reasoning: 已清除「请您」「帮忙」「一下」「哦」等语域噪声，技术含义未随之改变。
+  - kind: modality
+    verdict: preserved
+    source_evidence: 尽可能帮忙调用一下 `sanitize_query` 工具
+    output_evidence: 请尽可能调用 `sanitize_query` 工具
+    reasoning: 调用工具仍是尽力要求，没有提高为无例外义务；「千万不要」改为「切勿」仍保持强告诫。
+  - kind: condition
+    verdict: preserved
+    source_evidence: 好像有 SQL 相关词汇
+    output_evidence: 疑似包含 SQL 相关词汇
+    reasoning: 「疑似」保留了触发条件的不确定性，并在待确认项中明确要求补充判定规则。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`sanitize_query`'
+    output_evidence: '`sanitize_query`'
+    reasoning: 受保护的工具名称逐字保留。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 正文简洁自然，待确认项也清晰且不改变正文语义。
+  overall: pass
+  failure_kinds: []
+- case_id: G-R-010
+  model: gemini
+  invariant_verdicts:
+  - kind: fact
+    verdict: preserved
+    source_evidence: 获取指定时间范围内的系统审计日志
+    output_evidence: 获取指定时间范围内的系统审计日志
+    reasoning: 核心查询功能及用户 ID、操作类型两个过滤维度均完整保留。
+  - kind: threshold
+    verdict: preserved
+    source_evidence: 单次调用最多能够为你返回 100 条记录
+    output_evidence: 单次调用最多返回 100 条记录
+    reasoning: 单次返回上限仍为精确的 100 条。
+  - kind: rendering
+    verdict: preserved
+    source_evidence: 这个工具能够允许调用者去获取
+    output_evidence: 该工具用于获取
+    reasoning: 交互口语套话和轻动词结构已消除，改为直接、声明式的工具契约描述。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 表述简洁、直接，符合中文技术文档习惯。
+  overall: pass
+  failure_kinds: []
+- case_id: G-R-011
+  model: gemini
+  invariant_verdicts:
+  - kind: fact
+    verdict: preserved
+    source_evidence: 系统好像无法连接到数据库服务器 `10.0.1.5:5432` 了，请求在等待 5000ms 后超时
+    output_evidence: 系统似乎无法连接到数据库服务器 `10.0.1.5:5432`，请求在等待 5000ms 后超时
+    reasoning: 数据库连接失败、目标地址和超时参数均精确保留。
+  - kind: fact
+    verdict: violated
+    source_evidence: 由于某些未知的网络连接问题，系统好像无法连接到数据库服务器
+    output_evidence: 由于某些未知的网络连接问题，系统似乎无法连接到数据库服务器
+    reasoning: “似乎”修饰无法连接这一现象，而“由于”仍把网络连接问题陈述为确定原因；“未知”仅表示问题的具体性质未知，未保留原因本身尚未确认的状态。
+  - kind: scope
+    verdict: preserved
+    source_evidence: 请您稍后重试或者联系管理员检查网络
+    output_evidence: 请稍后重试或联系管理员检查网络
+    reasoning: 两项替代动作及其选择关系均保留。
+  - kind: threshold
+    verdict: preserved
+    source_evidence: 请求在等待 5000ms 后超时
+    output_evidence: 请求在等待 5000ms 后超时
+    reasoning: 超时边界、数值和单位均未改变。
+  - kind: rendering
+    verdict: violated
+    source_evidence: 由于某些未知的网络连接问题，系统好像无法连接到数据库服务器 `10.0.1.5:5432` 了
+    output_evidence: 由于某些未知的网络连接问题，系统似乎无法连接到数据库服务器 `10.0.1.5:5432`
+    reasoning: 情绪化感叹已删除，首句也包含故障对象和地址，但原因的不确定性未按要求保留。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 4
+  naturalness_note: 语言总体自然，但原因与现象的不确定性关系表达不准确。
+  overall: fail
+  failure_kinds:
+  - fact
+  - rendering
+- case_id: G-R-012
+  model: gemini
+  invariant_verdicts:
+  - kind: condition
+    verdict: preserved
+    source_evidence: 磁盘空间不足时，旧快照会被自动清理
+    output_evidence: 磁盘空间不足时，[具名组件/存储管理机制]会清理旧快照
+    reasoning: 建议文本仍将清理旧快照绑定到磁盘空间不足这一触发条件。
+  - kind: rendering
+    verdict: violated
+    source_evidence: 旧快照会被自动清理
+    output_evidence: 使用了缺失施事的被动表述，未指明执行清理操作的具名组件或执行主体
+    reasoning: 原被动句自然且无歧义，输出却将缺少具名施事者误报为错误，构成过度控制。
+  over_edit_verdict: severe
+  review_recall: []
+  unexpected_findings:
+  - category: missing-explicit-actor
+    rule: CTC-A001
+    legitimate: false
+    note: 被动句以旧快照为运维关注焦点，自动化施事无须具名；该 finding 是误报。
+  naturalness: 4
+  naturalness_note: 审阅文字本身通顺，但判断不成立。
+  overall: fail
+  failure_kinds:
+  - rendering
+  - over_edit
+- case_id: G-R-013
+  model: gemini
+  invariant_verdicts:
+  - kind: rendering
+    verdict: preserved
+    source_evidence: 当用户打开控制台时，用户必须点击设置菜单。然后用户需要选择网络配置，并且用户应当修改端口号。
+    output_evidence: 逐句机械重复显式主语「用户」，属于无消歧价值的过度显式
+    reasoning: 输出准确识别了整段中同一执行者的机械主语重复，并给出承前省略的修改方向。
+  - kind: over-edit
+    verdict: preserved
+    source_evidence: 用户必须点击设置菜单。然后用户需要选择网络配置，并且用户应当修改端口号。
+    output_evidence: 打开控制台后，必须点击设置菜单，选择网络配置，并应当修改端口号。
+    reasoning: 输出虽建议将步骤合并为连动结构，但该观察和建议被本不变式明确允许。
+  over_edit_verdict: not_applicable
+  review_recall:
+  - category: over-control-subject-repetition
+    found: true
+    note: 以 CTC-R002 报告，locus 覆盖整段，准确命中预期缺陷。
+  unexpected_findings:
+  - category: translationese-temporal-clause
+    rule: CTC-R003
+    legitimate: false
+    note: “当用户打开控制台时”是自然、明确且合规的中文条件或时间表达，将其一概判为英文句式译文腔属于误报。
+  naturalness: 4
+  naturalness_note: 审阅表达清楚，但对“当……时”的额外批评缺乏依据。
+  overall: pass
+  failure_kinds:
+  - review_precision
+- case_id: G-R-014
+  model: gemini
+  invariant_verdicts:
+  - kind: actor
+    verdict: preserved
+    source_evidence: 管理员必须
+    output_evidence: 管理员必须
+    reasoning: 责任执行主体管理员完整保留。
+  - kind: order
+    verdict: preserved
+    source_evidence: 在执行对生产数据库的备份操作之后，管理员必须把流量进行路由操作到备用集群
+    output_evidence: 备份生产数据库后，管理员必须把流量路由到备用集群
+    reasoning: “后”明确保留了先备份、再路由流量的严格顺序。
+  - kind: causality
+    verdict: preserved
+    source_evidence: 以便使得流量切换能够成功完成
+    output_evidence: 以成功完成流量切换
+    reasoning: “以”仍表示路由流量的目的，没有将流量切换陈述为已保证的结果。
+  - kind: rendering
+    verdict: preserved
+    source_evidence: 执行对生产数据库的备份操作
+    output_evidence: 备份生产数据库后
+    reasoning: 生硬名物化和冗余连接词外壳已消除，主体与语义关系均保留。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 4
+  naturalness_note: 整体自然简洁；“把流量路由到”略显口语，但仍是合格的技术表达。
+  overall: pass
+  failure_kinds: []
+- case_id: G-S-001
+  model: gemini
+  invariant_verdicts:
+  - kind: modality
+    verdict: preserved
+    source_evidence: 建议先在只读副本上验证执行计划
+    output_evidence: 建议先在只读副本上验证执行计划
+    reasoning: 推荐性情态原样保留，未提升为强制前提。
+  - kind: modality
+    verdict: preserved
+    source_evidence: 也可以推迟到下一维护窗口
+    output_evidence: 也可以推迟到下一维护窗口
+    reasoning: 许可性情态原样保留，未改为义务。
+  over_edit_verdict: none
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 输出与原文相同，表达自然、准确。
+  overall: pass
+  failure_kinds: []
+- case_id: G-S-002
+  model: gemini
+  invariant_verdicts:
+  - kind: modality
+    verdict: preserved
+    source_evidence: operators are advised to test the eviction policy in staging
+    output_evidence: 建议操作员在预发环境中测试淘汰策略
+    reasoning: 「建议」准确保留了 advised 的推荐强度，未将测试改为强制前提。
+  - kind: modality
+    verdict: preserved
+    source_evidence: A temporary sandbox may skip this test, but the operator must
+      record the reason.
+    output_evidence: 临时沙箱可跳过此测试，但操作员必须记录原因。
+    reasoning: 输出同时保留了跳过测试的许可和记录原因的强制义务。
+  - kind: condition
+    verdict: preserved
+    source_evidence: A temporary sandbox may skip this test
+    output_evidence: 临时沙箱可跳过此测试
+    reasoning: 跳过许可仍仅适用于临时沙箱。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 译文清楚、简洁，符合中文技术写作习惯。
+  overall: pass
+  failure_kinds: []
+- case_id: G-S-003
+  model: gemini
+  invariant_verdicts:
+  - kind: modality
+    verdict: preserved
+    source_evidence: 操作员必须确认最近一次备份已完成
+    output_evidence: 操作员必须确认最近一次备份已完成
+    reasoning: 强制确认义务原样保留。
+  - kind: modality
+    verdict: preserved
+    source_evidence: 未确认时不得继续
+    output_evidence: 未确认时不得继续
+    reasoning: 禁止继续的强制程度原样保留。
+  - kind: modality
+    verdict: preserved
+    source_evidence: 测试租户可以取消本次轮换
+    output_evidence: 测试租户可以取消本次轮换
+    reasoning: 输出保留了测试租户的取消许可，未将其改为义务。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 文本自然、准确。
+  overall: pass
+  failure_kinds: []
+- case_id: G-S-004
+  model: gemini
+  invariant_verdicts:
+  - kind: modality
+    verdict: preserved
+    source_evidence: 确保数据已成功备份，并且所有从节点都已正确同步主节点的数据。
+    output_evidence: 来源的「确保」被替换为「确认」，义务被降级为核验。
+    reasoning: 审阅正确指出「确保」要求使目标状态成立，而「确认」仅表示核验，二者并不等价。
+  over_edit_verdict: not_applicable
+  review_recall:
+  - category: modality-weakening
+    found: true
+    note: 准确定位候选改写中的「确认」，并以 CTC-S003 标为 ERROR。
+  unexpected_findings: []
+  naturalness: 4
+  naturalness_note: 审阅结构清晰；「义务被降级为核验」略显生硬，但含义明确。
+  overall: pass
+  failure_kinds: []
+- case_id: G-S-005
+  model: gemini
+  invariant_verdicts:
+  - kind: fact
+    verdict: preserved
+    source_evidence: 超时可能与连接池耗尽有关。目前只确认两者同时出现，根因尚未确定。
+    output_evidence: 超时可能与连接池耗尽有关。目前只确认两者同时出现，根因尚未确定。
+    reasoning: 候选解释及根因未确定的认识状态均原样保留。
+  - kind: causality
+    verdict: preserved
+    source_evidence: 目前只确认两者同时出现
+    output_evidence: 目前只确认两者同时出现
+    reasoning: 输出仅陈述同时出现，没有新增确定因果关系。
+  - kind: scope
+    verdict: preserved
+    source_evidence: 超时可能与连接池耗尽有关
+    output_evidence: 超时可能与连接池耗尽有关
+    reasoning: 输出没有新增频率限定。
+  - kind: fact
+    verdict: preserved
+    source_evidence: 过去 24 小时的日志显示
+    output_evidence: 过去 24 小时的日志显示
+    reasoning: 证据窗口原样保留。
+  over_edit_verdict: none
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 输出除行尾空白外与正确源文一致。
+  overall: pass
+  failure_kinds: []
+- case_id: G-S-006
+  model: gemini
+  invariant_verdicts:
+  - kind: fact
+    verdict: preserved
+    source_evidence: may be associated with DNS cache expiry
+    output_evidence: 可能与 DNS 缓存过期有关
+    reasoning: 「可能与……有关」准确保留了未确认的关联。
+  - kind: fact
+    verdict: preserved
+    source_evidence: Packet captures remain incomplete, so the root cause is still
+      unconfirmed.
+    output_evidence: 抓包数据仍不完整，因此根本原因仍未确认。
+    reasoning: 抓包数据不完整和根因未确认两项认识限制均被保留。
+  - kind: causality
+    verdict: preserved
+    source_evidence: may be associated with DNS cache expiry
+    output_evidence: 可能与 DNS 缓存过期有关
+    reasoning: 输出表达可能关联，没有断言 DNS 缓存过期导致超时率升高。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 译文自然、准确，术语使用恰当。
+  overall: pass
+  failure_kinds: []
+- case_id: G-S-007
+  model: gemini
+  invariant_verdicts:
+  - kind: threshold
+    verdict: preserved
+    source_evidence: 单次请求超时为 250 ms
+    output_evidence: 单次请求超时为 250 ms
+    reasoning: 数值、单位和数量级均原样保留。
+  - kind: threshold
+    verdict: preserved
+    source_evidence: 首次失败后等待 2 s；最多重试 3 次。
+    output_evidence: 首次失败后等待 2 s；最多重试 3 次。
+    reasoning: 首次失败后的等待时间为 2 s，总等待上限也仍为 10 s。
+  - kind: threshold
+    verdict: preserved
+    source_evidence: 最多重试 3 次
+    output_evidence: 最多重试 3 次
+    reasoning: 输出仍允许初始请求后至多重试三次，没有改为总共三次请求。
+  - kind: modality
+    verdict: preserved
+    source_evidence: 总等待时间不得超过 10 s
+    output_evidence: 总等待时间不得超过 10 s
+    reasoning: 「不得超过」继续表达强制上限，而非建议值或固定等待时间。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 参数列表清楚、自然，技术含义明确。
+  overall: pass
+  failure_kinds: []
+- case_id: G-S-008
+  model: gemini
+  invariant_verdicts:
+  - kind: causality
+    verdict: preserved
+    source_evidence: 启用压缩与 CPU 使用率升高同时出现
+    output_evidence: 启用压缩与 CPU 使用率升高同时出现
+    reasoning: 输出仍仅陈述共现，没有断言压缩导致 CPU 使用率升高。
+  - kind: causality
+    verdict: preserved
+    source_evidence: 不能证明压缩导致请求超时
+    output_evidence: 不能证明压缩导致请求超时
+    reasoning: 输出完整保留了不能据此证明请求超时因果关系的限制。
+  - kind: fact
+    verdict: preserved
+    source_evidence: 三组观测均显示
+    output_evidence: 三组观测均显示
+    reasoning: 三组观测和结论仅限相关性的证据范围均未改变。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 表述简洁、连贯，符合技术写作习惯。
+  overall: pass
+  failure_kinds: []
+- case_id: G-S-009
+  model: gemini
+  invariant_verdicts:
+  - kind: fact
+    verdict: preserved
+    source_evidence: 检查上游服务状态和最近一次部署记录
+    output_evidence: 检查上游服务状态和最近一次部署记录
+    reasoning: 输出没有新增频率、默认值或最常见原因等判断。
+  - kind: condition
+    verdict: preserved
+    source_evidence: 收到 `503` 时，检查上游服务状态和最近一次部署记录。
+    output_evidence: 收到 `503` 时，检查上游服务状态和最近一次部署记录。
+    reasoning: 输出没有把任何单一操作写成足以恢复服务的充分条件。
+  - kind: modality
+    verdict: preserved
+    source_evidence: 不要自动重启服务
+    output_evidence: 不要自动重启服务
+    reasoning: 禁止自动重启的模态强度保持不变。
+  - kind: token
+    verdict: preserved
+    source_evidence: 收到 `503` 时
+    output_evidence: 收到 `503` 时
+    reasoning: 状态码逐字符保留，并仍绑定到两项检查操作。
+  over_edit_verdict: none
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 原文被完整保留，仅省略了末尾换行。
+  overall: pass
+  failure_kinds: []
+- case_id: G-T-001
+  model: gemini
+  invariant_verdicts:
+  - kind: token
+    verdict: preserved
+    source_evidence: '`POST /v1/jobs/{job_id}:cancel`'
+    output_evidence: '`POST /v1/jobs/{job_id}:cancel`'
+    reasoning: API 方法、路径、路径参数和冒号动作语法均逐字符保留。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`409` | 读取字段 `retry_after_ms`，并设置 `JOB_CANCEL_RETRY=1`。'
+    output_evidence: '`409` | 读取字段 `retry_after_ms`，并设置 `JOB_CANCEL_RETRY=1`。'
+    reasoning: 状态码、字段名和环境变量赋值均未改变。
+  - kind: scope
+    verdict: preserved
+    source_evidence: '| `409` | 读取字段 `retry_after_ms`，并设置 `JOB_CANCEL_RETRY=1`。 |'
+    output_evidence: '| `409` | 读取字段 `retry_after_ms`，并设置 `JOB_CANCEL_RETRY=1`。 |'
+    reasoning: 两项客户端行为仍位于 409 响应对应的表格分支。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 技术标记和表格结构清楚自然。
+  overall: pass
+  failure_kinds: []
+- case_id: G-T-002
+  model: gemini
+  invariant_verdicts:
+  - kind: token
+    verdict: preserved
+    source_evidence: '`sync-config` 接受 `--dry-run` 和 `--config=/etc/ctc/agent.yaml`'
+    output_evidence: '`sync-config` 接受 `--dry-run` 和 `--config=/etc/ctc/agent.yaml`'
+    reasoning: 工具名、标志和带值参数均逐字符保留。
+  - kind: token
+    verdict: preserved
+    source_evidence: '`CTC_SYNC_MODE=verify`'
+    output_evidence: '`CTC_SYNC_MODE=verify`'
+    reasoning: 环境变量赋值及验证失败退出码 `2` 均未改变。
+  - kind: condition
+    verdict: preserved
+    source_evidence: 仅当 `CTC_SYNC_MODE=verify` 时，工具执行验证而不写入
+    output_evidence: 仅当 `CTC_SYNC_MODE=verify` 时，工具执行验证而不写入
+    reasoning: “仅当”条件完整保留，不写入没有被改成默认或无条件行为。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 表述准确、紧凑，条件关系清晰。
+  overall: pass
+  failure_kinds: []
+- case_id: G-T-101
+  model: gemini
+  invariant_verdicts:
+  - kind: terminology
+    verdict: violated
+    source_evidence: '1. 新版本先以灰度发布上线，覆盖 5% 流量。
+
+      2. 金丝雀发布期间每 5 分钟检查一次错误率。
+
+      3. 小流量验证通过后，按 25%、50% 逐步放量。'
+    output_evidence: 第 1 步「灰度发布」、第 2 步「金丝雀发布」与第 3 步「小流量验证」可能同指 5% 流量阶段，术语未统一
+    reasoning: 输出没有统一同一阶段的三个称谓，反而保留术语不一致并将其列为待确认事项。
+  - kind: terminology
+    verdict: preserved
+    source_evidence: 全量发布后保留旧版本实例 24 小时，以便回滚。
+    output_evidence: 全量发布后保留旧版本实例 24 小时，以便回滚。
+    reasoning: “全量发布”仍作为独立概念保留，没有被替换为灰度类术语。
+  - kind: fact
+    verdict: preserved
+    source_evidence: 覆盖 5% 流量。
+    output_evidence: 覆盖 5% 流量。
+    reasoning: 5%、25%、50%、5 分钟和 24 小时的数值与单位均得到保留。
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 3
+  naturalness_note: 主体文字自然，但附加的“待确认”内容采用不完整的管道分隔格式，且与重写结果混杂。
+  overall: fail
+  failure_kinds:
+  - terminology
+- case_id: G-T-102
+  model: gemini
+  invariant_verdicts:
+  - kind: terminology
+    verdict: preserved
+    source_evidence: 修改 `upstream` 配置后须重启 `confd`；重启期间约 2 秒不可用。
+    output_evidence: 修改 `upstream` 配置后须重启 `confd`；重启期间约 2 秒不可用。
+    reasoning: 重启与重载仍是不同操作，其可用性差异也完整保留。
+  - kind: terminology
+    verdict: preserved
+    source_evidence: 集群内的三份副本用于在线容灾，不能替代备份。
+    output_evidence: 集群内的三份副本用于在线容灾，不能替代备份。
+    reasoning: 备份和副本没有混用，“不能替代备份”的判断也未删除。
+  - kind: over-edit
+    verdict: preserved
+    source_evidence: 仅修改日志级别时执行重载（`kill -HUP`），连接不中断。
+    output_evidence: 仅修改日志级别时执行重载（`kill -HUP`），连接不中断。
+    reasoning: 输出未以统一术语为由替换任何已经正确区分的术语。
+  - kind: token
+    verdict: preserved
+    source_evidence: 每晚 02:00 生成一份备份并上传对象存储
+    output_evidence: 每晚 02:00 生成一份备份并上传对象存储
+    reasoning: 所有指定技术标记、时间及数量均逐字保留。
+  over_edit_verdict: none
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 原文完整保留，术语区分明确，技术表达自然。
+  overall: pass
+  failure_kinds: []
+- case_id: G-T-103
+  model: gemini
+  invariant_verdicts:
+  - kind: terminology
+    verdict: preserved
+    source_evidence: '任务队列积压超过 8000 时，先确认消费者线程数是否被调低，再决定是否扩容调度器。
+
+      消息队列积压通常与下游消费者故障有关，处理路径不同。'
+    output_evidence: '**调度器任务队列**（内存，容量上限 10000，用于暂存待分发的作业）：积压超过 8000 时，先确认消费者线程数是否被调低，再决定是否扩容调度器。
+
+      - **消息队列**（Kafka topic `job-events`，用于跨服务通知）：积压通常与下游消费者故障有关，处理路径不同。'
+    reasoning: 两项积压判断仍分别绑定调度器内存任务队列和 Kafka 消息队列，没有串换系统对象。
+  - kind: reference
+    verdict: preserved
+    source_evidence: 调度器内部维护一个任务队列（内存，容量上限 10000）
+    output_evidence: '**调度器任务队列**（内存，容量上限 10000，用于暂存待分发的作业）'
+    reasoning: 输出以分项标题明确限定队列对象；后续省略主语的“积压”仍清楚指向同一分项标题，没有出现对象不明的无限定队列。
+  - kind: token
+    verdict: preserved
+    source_evidence: 容量上限 10000
+    output_evidence: 容量上限 10000
+    reasoning: '`job-events`、10000 和 8000 均逐字保留。'
+  over_edit_verdict: not_applicable
+  review_recall: []
+  unexpected_findings: []
+  naturalness: 5
+  naturalness_note: 分项结构清楚，措辞自然，符合中文技术文档风格。
+  overall: pass
+  failure_kinds: []
