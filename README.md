@@ -116,10 +116,17 @@ mode this project exists to prevent.
 
 ## Status
 
-The rule set, the gold corpus, and the evaluation harness are in place, and `SKILL.md` passes the
-format and packaging gates cleanly. Two gates are still open and are recorded rather than papered
-over: the gold corpus is `orchestrator-reviewed` and cross-audited by a second model but **not yet
-human-reviewed**, and the cross-model evaluation and self-hosting passes are the current work.
+`SKILL.md` passes the format, semantic, ambiguity, naturalness, and self-hosting gates. Across 147
+outputs from three models there were no deterministic failures, semantic pass rates were 80–88%,
+and a mutation corpus of 45 single-defect mutants was detected 45/45. Full assessment in
+[`eval/reports/release-gates.md`](./eval/reports/release-gates.md).
+
+It is **not** a validated release. The gold corpus is agent-reviewed and cross-audited between two
+models but **not human-reviewed**, and every other gate is measured against that corpus — so a gate
+measured against unreviewed expectations reports the expectations, not the artifact. That is the
+blocking item. Three narrower gaps are recorded alongside it: GPT's outputs went unjudged for want
+of a fourth model, one model's sweep covered 35 of 56 cases, and the reverse-decoding pass was
+Claude reading Claude-rendered prose.
 
 Contributor guidance is in [`AGENTS.md`](./AGENTS.md). New hard rules must clear the admission gate
 in [`docs/decisions/000-design.md`](./docs/decisions/000-design.md) §20: a concrete failing input, a
