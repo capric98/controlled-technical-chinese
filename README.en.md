@@ -56,7 +56,7 @@ that would resolve them. Choosing for the author manufactures a fact.
 
 ## Using it
 
-Copy `SKILL.md` into your agent's skills directory, or package it for installation:
+The repository directory matches the frontmatter `name` in `SKILL.md`, so the repository root is itself a valid skill directory. Place the complete `controlled-technical-chinese/` directory in your agent's skills location, or generate an installable directory containing only the runtime artifact with:
 
 ```bash
 bash tools/package.sh      # writes dist/controlled-technical-chinese/ and validates it

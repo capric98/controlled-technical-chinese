@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 # Package the runtime artifact for installation and validate it.
 #
-# The Agent Skills specification requires the skill's directory name to match the
-# skill's `name`. This repository is a development repository named ctc-skill, so
-# the installable layout is produced here rather than imposed on the repo root.
-# The released artifact is still exactly the root SKILL.md, byte for byte.
+# The repository directory and the skill's `name` match. This script still
+# produces an isolated installable layout whose runtime artifact is exactly the
+# root SKILL.md, byte for byte.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

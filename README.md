@@ -43,7 +43,7 @@ CTC 遵循单一的优先级顺序，低层不得覆盖高层：
 
 ## 使用方法
 
-将 `SKILL.md` 复制到你的 agent skills 目录中，或者将其打包以供安装：
+本仓库目录名与 `SKILL.md` frontmatter 中的 `name` 一致，因此仓库根目录本身就是有效的技能目录。可以将整个 `controlled-technical-chinese/` 目录放入 agent skills 位置，或者运行以下命令生成仅包含运行时产物的安装目录：
 
 ```bash
 bash tools/package.sh      # writes dist/controlled-technical-chinese/ and validates it
