@@ -92,8 +92,18 @@ def protected_tokens(text: str) -> Counter:
     return tokens
 
 
+RULE_ID = re.compile(r"CTC-[SAPTLR]\d{3}")
+LIST_MARKER = re.compile(r"^\s{0,3}\d+[.、)]\s", re.M)
+
+
 def quantities(text: str) -> Counter:
-    """(value, unit) pairs. Surface form is preserved by policy: no unit conversion."""
+    """(value, unit) pairs. Surface form is preserved by policy: no unit conversion.
+
+    Rule IDs and Markdown list markers are stripped first. Without that, `CTC-L001`
+    contributes a quantity `001` and a renumbered procedure looks like numeric drift —
+    both fired on every review-mode output in the first sweep.
+    """
+    text = LIST_MARKER.sub(" ", RULE_ID.sub(" ", text))
     out: Counter = Counter()
     for value, unit in NUMBER.findall(text):
         out[(value.rstrip("0").rstrip(".") if "." in value else value, unit or "")] += 1
@@ -160,18 +170,38 @@ def diff_counter(a: Counter, b: Counter) -> str:
 def deterministic_checks(source: str, output: str, case: dict | None = None) -> CheckResult:
     res = CheckResult()
     case = case or {}
+    review = case.get("mode") == "review"
 
     allowed = set(case.get("authorized_token_changes", []) or [])
 
     st, ot = protected_tokens(source), protected_tokens(output)
     st = Counter({k: v for k, v in st.items() if k[1] not in allowed})
     ot = Counter({k: v for k, v in ot.items() if k[1] not in allowed})
-    res.checks.append(Check(
-        "protected_tokens", "ERROR", st == ot, diff_counter(st, ot)))
-
     sq, oq = quantities(source), quantities(output)
-    res.checks.append(Check(
-        "quantities", "ERROR", sq == oq, diff_counter(sq, oq)))
+
+    if review:
+        # A review output is a findings list, not the document. Comparing its token
+        # or quantity inventory against the source is meaningless: it quotes some
+        # loci and omits everything it had no finding about. Only check that it did
+        # not invent a protected token that appears nowhere in the source.
+        invented = {k for k in ot if k[0] != "code_block" and k not in st and k[1] not in source}
+        res.checks.append(Check(
+            "review_no_invented_tokens", "WARNING", not invented,
+            f"tokens absent from source: {sorted(k[1] for k in invented)}" if invented else ""))
+    else:
+        # Losing a protected token or a quantity is a defect. Repeating one is not:
+        # repeating a modifier across both conjuncts is the correct repair for an
+        # attachment ambiguity, and it raises the count of a quantity already present.
+        res.checks.append(Check(
+            "protected_tokens_lost", "ERROR", not (st - ot), diff_counter(st, ot & st)))
+        res.checks.append(Check(
+            "protected_tokens_added", "WARNING", not (set(ot) - set(st)),
+            diff_counter(Counter({k: v for k, v in st.items() if k in ot}), ot)))
+        res.checks.append(Check(
+            "quantities_lost", "ERROR", not (set(sq) - set(oq)), diff_counter(sq, oq & sq)))
+        res.checks.append(Check(
+            "quantities_added", "WARNING", not (set(oq) - set(sq)),
+            diff_counter(Counter({k: v for k, v in sq.items() if k in oq}), oq)))
 
     sc, oc = comparators(source), comparators(output)
     res.checks.append(Check(
@@ -182,11 +212,12 @@ def deterministic_checks(source: str, output: str, case: dict | None = None) -> 
         "modality_profile", "WARNING", sm == om, diff_counter(sm, om)))
 
     # explicitly listed required tokens, when a case pins them
-    required = case.get("protected_tokens") or []
-    missing = [t for t in required if t not in output]
-    res.checks.append(Check(
-        "case_protected_tokens", "ERROR", not missing,
-        f"missing from output: {missing}" if missing else ""))
+    if not review:
+        required = case.get("protected_tokens") or []
+        missing = [t for t in required if t.strip("`") not in output]
+        res.checks.append(Check(
+            "case_protected_tokens", "ERROR", not missing,
+            f"missing from output: {missing}" if missing else ""))
 
     return res
 
@@ -310,6 +341,23 @@ def cmd_run(args) -> int:
     return 0
 
 
+def cmd_recheck(args) -> int:
+    """Re-run deterministic checks over saved outputs. No model calls."""
+    run_dir = REPORTS / "raw" / args.run_id
+    cases = {c["id"]: c for c in load_cases()}
+    changed = 0
+    for path in sorted(run_dir.glob("*.json")):
+        rec = json.loads(path.read_text(encoding="utf-8"))
+        case = cases.get(rec["case_id"], {})
+        before = rec["deterministic"]["passed"]
+        res = deterministic_checks(rec["source"], rec["output"], case)
+        rec["deterministic"] = res.as_dict()
+        path.write_text(json.dumps(rec, ensure_ascii=False, indent=2), encoding="utf-8")
+        changed += before != res.as_dict()["passed"]
+    print(f"rechecked {args.run_id}: {changed} verdict(s) changed")
+    return 0
+
+
 def cmd_bundle(args) -> int:
     run_dir = REPORTS / "raw" / args.run_id
     cases = {c["id"]: c for c in load_cases()}
@@ -420,6 +468,10 @@ def main() -> int:
     r.add_argument("--case-id", action="append")
     r.add_argument("--force", action="store_true")
     r.set_defaults(fn=cmd_run)
+
+    rc = sub.add_parser("recheck", help="re-run deterministic checks over saved outputs")
+    rc.add_argument("--run-id", default="latest")
+    rc.set_defaults(fn=cmd_recheck)
 
     b = sub.add_parser("bundle", help="package a run for independent semantic judging")
     b.add_argument("--run-id", default="latest")

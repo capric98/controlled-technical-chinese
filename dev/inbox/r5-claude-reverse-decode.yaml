@@ -1,0 +1,1208 @@
+# Semantic reverse-decoding of SKILL.md (controlled-technical-chinese).
+# Reconstructed from SKILL.md ALONE. No spec/, docs/decisions/, eval/, dev/, AGENTS.md or
+# CLAUDE.md was read, opened, grepped or listed at any point in this session.
+# Everything below is what an independent reader recovers from the rendered text, not what
+# the author may have meant.
+
+rules:
+  - id: CTC-S001
+    level: MUST
+    level_confidence: medium
+    scope: [rewrite, translate, review]
+    modes: [strict, standard, review]
+    trigger: |-
+      Any rewrite, compression, merge or translation of text that carries concrete assertions.
+      Triggered by the act of editing, not by a defect in the source: if you touch the text at
+      all, S001 is live.
+    required_behavior: |-
+      Every independent assertion in the source (object, property, behaviour, number, condition,
+      result, failure branch) must be RECOVERABLE from the output. Recoverable, not verbatim —
+      paraphrase is allowed, loss is not. Only two things may be dropped: repeated expressions of
+      the same assertion, and purely decorative material. If the caller imposed a length cap,
+      conditions / exceptions / thresholds / warnings / failure branches are deleted LAST, and the
+      fact of deletion is stated in the 待确认 section.
+    prohibited_behavior: |-
+      Dropping a limiting clause as redundancy; summarising a set of assertions into one; silently
+      shortening under a length cap.
+    exceptions: |-
+      Duplicate expressions of one assertion and pure modifiers may be deleted. Under a caller
+      length cap, deletion of the protected categories is permitted as a last resort, with
+      disclosure.
+    invariant: The multiset of independent assertions.
+    detection: semantic
+    unclear:
+      - |-
+        The extent of 「纯修饰成分」. §8.11 forbids deleting soft hedges (可能/通常/预计) because they
+        carry modal content; those are grammatically modifiers. The boundary between a deletable
+        modifier and a modality-bearing hedge is never drawn.
+      - |-
+        「可还原」 by whom, and with what effort? Recoverable by a domain expert reading closely, or
+        recoverable by a mechanical assertion-by-assertion diff? These give different pass rates.
+    two_readings: |-
+      Reading A (escape clause is real): a caller-supplied length cap authorises deleting
+      conditions and exceptions once nothing else remains, provided the deletion is disclosed in
+      待确认. Under this reading S001 is a 必须 with a caller-triggered override, and the model
+      will eventually cut an exception rather than exceed the cap.
+      Reading B (escape clause is unreachable): CTC-L001 is 必须 and says exceptions must be
+      preserved, §2 says 「更短的句子若丢掉一个条件或例外，就不是改进」, and §3 says the caller's
+      authorisation 「不改变任何语义不变量的验证方式」. Under this reading the model must instead
+      refuse to meet the cap and report the conflict. The two readings produce opposite outputs on
+      exactly the case (a hard length cap on a runbook) where the difference is most dangerous.
+      The text does not say which wins.
+
+  - id: CTC-S002
+    level: MUST
+    level_confidence: high
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: |-
+      Every proposition present in the output. This is an output-side rule with no source-side
+      trigger: it fires on what you wrote, not on what you read.
+    required_behavior: |-
+      Each proposition in the output must be traceable to a specific place in the source or in the
+      caller-supplied context. Missing information is raised in 待确认 instead of being filled in.
+    prohibited_behavior: |-
+      Adding frequency claims (「最常见的原因是」「通常」); inventing default values or timeouts;
+      inventing failure causes; adding warnings or disclaimers the source does not have.
+    exceptions: |-
+      §9 (translation) allows adding elements the target language obligatorily requires (classifiers,
+      connectives, topic markers) provided no new proposition results. CTC-P002 and CTC-P005 allow
+      writing out material that IS determinable from source or context.
+    invariant: Provenance — the source-to-output proposition map is total in the output direction.
+    detection: semantic
+    unclear:
+      - |-
+        Whether the model's own general/world knowledge counts as 「调用上下文」. If a runbook says
+        「重启网关」 and the model knows a health check normally follows, S002 forbids adding it —
+        but the text never says the model's knowledge is excluded, it only enumerates 「来源或调用
+        上下文」.
+      - |-
+        For 新写 (author) tasks there is by definition no 来源. S002 then reduces to 「everything must
+        come from caller materials」, which makes authoring impossible from a thin brief. The text
+        never addresses this.
+    two_readings: |-
+      Reading A (narrow): 调用上下文 = the literal material the caller pasted. Anything the model
+      knows but the caller did not supply is 无据新增 and is an ERROR. Authoring is then almost
+      purely a re-arrangement of caller material.
+      Reading B (wide): 调用上下文 includes the surrounding conversation, the system prompt, and
+      any project convention visible to the model, so domain-standard facts can be written in.
+      Under B the model will add health checks, default timeouts and 「通常」 statements it believes
+      to be true; under A each of those is an ERROR. The prohibition list leans towards A but the
+      defining phrase 「调用上下文」 is never bounded.
+
+  - id: CTC-S003
+    level: MUST
+    level_confidence: high
+    scope: [rewrite, translate, review]
+    modes: [strict, standard, review]
+    trigger: |-
+      The source contains modality, obligation, request, permission, prohibition, recommendation,
+      or a description of system behaviour.
+    required_behavior: |-
+      The triple (epistemic strength, deontic strength, speech-act type) is preserved at every
+      site. Same-strength lexical substitution is allowed (不得 <-> 禁止).
+    prohibited_behavior: |-
+      确保->确认, 请->须, 不会->禁止, 建议->必须, 可能->会, 必须->应. Both strengthening and
+      weakening are violations, and so is changing the speech act (a description becoming a norm,
+      a request becoming an obligation).
+    exceptions: |-
+      §3 allows the caller to explicitly authorise 「调整规范强度」. That authorisation is itself the
+      attribution R001 requires.
+    invariant: (epistemic strength, deontic strength, speech-act type), site by site.
+    detection: semantic
+    unclear:
+      - |-
+        No strength ladder for Chinese modals is given anywhere. 必须/须/应当/应/宜/建议/可以/可能/会
+        are used throughout the document but never ordered. Six violating pairs are listed by
+        example and one allowed pair (不得/禁止) — everything else must be guessed.
+      - |-
+        Whether a source 「应」 is an obligation or a recommendation. §3 says 「strict 不把「应」提升为
+        「必须」」 but that sentence is about the SKILL's own rule levels, not about 应 appearing in a
+        user document; a reader can easily take it as governing both.
+    two_readings: |-
+      Reading A: 「同强度换词」 covers any pair a competent reader would call equally strong, so
+      须->必须, 应当->应, 不可->不得 are all free substitutions and the rule only polices the six
+      enumerated crossings.
+      Reading B: absent a published ladder, no two distinct modals are demonstrably 同强度 except
+      the one pair the document names, so every other modal substitution is a 必须-level ERROR.
+      These give opposite verdicts on the single most common edit in Chinese technical rewriting.
+
+  - id: CTC-S004
+    level: MUST
+    level_confidence: medium
+    scope: [rewrite, translate, review]
+    modes: [strict, standard, review]
+    trigger: |-
+      The source contains a number, unit, range, precision, date, duration, count, ratio or status
+      code.
+    required_behavior: |-
+      The (value, unit) multiset and the precision are preserved. §5 adds that the SURFACE FORM is
+      preserved: digits, units, symbols, percentages, interval endpoints and comparison operators
+      appear as the source wrote them.
+    prohibited_behavior: |-
+      Rounding to approximations; unit conversion (60000 ms -> 60 s); turning an enumerable count
+      into 「若干」; collapsing two values into a range; altering status codes; changing the numeral
+      system (3 <-> 三); converting between ratios and percentages.
+    exceptions: |-
+      Conversion is allowed only when all three hold: the caller explicitly authorised it, the
+      conversion is exact, and the value is not inside a protected token. Halfwidth-ing fullwidth
+      digits outside protected tokens counts as typography and is allowed (R006).
+    invariant: (value, unit) multiset, precision, and surface form.
+    detection: mixed
+    unclear:
+      - |-
+        Whether 「精度」 means significant figures, decimal places, or the literal digit string. The
+        surface-form clause in §5 implies the literal string, the table says 精度, and the two come
+        apart for 「1.50」 vs 「1.5」.
+      - |-
+        Whether an ordinal or a numeric section reference (「见 3.2 节」) is a 数值 under S004 or a
+        protected token under S005 (it contains a dot).
+    two_readings: |-
+      Reading A: S004 is absolute and the §5 authorisation clause is an exception to the SURFACE
+      rule only, not to the invariant — conversion remains an ERROR even when authorised, because
+      §3 says authorisation 「不改变任何语义不变量的验证方式」 and (value, unit) is listed in §4 as a
+      semantic invariant.
+      Reading B: §5 plainly says 「只有在调用方明确授权、换算精确、且该值不在受保护标记内时，才可以换算」,
+      so an authorised exact conversion is compliant. Under A the model refuses an explicitly
+      authorised conversion; under B it performs it. §3 and §5 point in opposite directions and
+      nothing adjudicates.
+
+  - id: CTC-S005
+    level: MUST
+    level_confidence: medium
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: |-
+      The text contains code, commands, paths, identifiers, field names, API names, URLs, status
+      codes, placeholders, regexes, config keys or error codes. §5 makes the default protection set
+      broader: inline code and fenced blocks (including the language tag), command lines and
+      arguments, URLs, file and API paths, environment variables, status codes, version numbers,
+      placeholders, and any identifier containing _ , - , . or an internal capital.
+    required_behavior: |-
+      Protected tokens are preserved character for character, including case and separators. Fenced
+      block interiors are untouched as a whole and language tags are kept. The protected-token
+      MULTISET of the output equals that of the source (inventory equality). Chinese prose outside
+      code blocks is rewritten normally.
+    prohibited_behavior: |-
+      Translating identifiers; changing case or separators; converting halfwidth punctuation inside
+      a token to fullwidth; replacing a command with a description; substituting or completing a
+      placeholder; normalising a URL. Also prohibited in the other direction: freezing ordinary
+      Chinese noun phrases, UI strings, section headings or un-marked product names as protected.
+    exceptions: |-
+      The caller may add strings to the protected set, or explicitly release one token and then
+      change it. Source spelling errors are left as-is and raised in 待确认.
+    invariant: |-
+      Protected-token inventory (multiset equality). BINDING is explicitly NOT covered here —
+      「发送 A 给 B」 and 「发送 B 给 A」 have identical inventories and opposite meanings; binding is
+      the semantic layer's job (S001/A001/A003).
+    detection: deterministic
+    unclear:
+      - |-
+        Whether the §5 default set is a definition of 「受保护标记」 or a heuristic. It is stated as
+        「默认受保护」 which implies rebuttable, but no rebuttal procedure other than caller release
+        is given.
+      - |-
+        Where the spelling-error report goes: §5 says 待确认, but §3 closes 待确认 to four categories,
+        none of which is a spelling error (see contradictions).
+    two_readings: |-
+      Reading A (form-based): the identifier test is mechanical — any token containing _ , - , . or
+      an internal capital is protected. Then Node-RED, PostgreSQL, GitLab, Kubernetes v1.29 and
+      「参见 3.2 节」 are all frozen.
+      Reading B (kind-based): §5's own exclusion list says 「未加代码标记的产品名」 is NOT protected, so
+      product names are editable (and translatable) regardless of their punctuation, and only tokens
+      that denote machine-consumed strings are frozen.
+      Every product name with a hyphen or an internal capital falls in the gap. A is over-freezing
+      (blocked legitimate rewriting, the error §5 warns about); B is under-freezing (identifier
+      corruption, the other error §5 warns about). The document names both failure directions and
+      then leaves the case that produces them unresolved.
+
+  - id: CTC-S006
+    level: MUST
+    level_confidence: high
+    scope: [rewrite, translate, review]
+    modes: [strict, standard, review]
+    trigger: |-
+      The source states a relation between two events, states or metrics.
+    required_behavior: |-
+      The triple (cause, effect, strength) is preserved, where strength is drawn from the closed
+      four-value set {同现, 可能导致, 导致, 唯一原因}.
+    prohibited_behavior: |-
+      Promoting co-occurrence to causation; 可能导致 -> 导致; 一种原因 -> 根本原因; joining two merely
+      sequential sentences with 「因此」; and equally, demoting causation to mere sequence.
+    exceptions: none stated
+    invariant: (cause, effect, strength in a 4-valued lattice).
+    detection: semantic
+    unclear:
+      - |-
+        No mapping from Chinese connectives to the four strength values is given. 由于, 因为, 引起,
+        造成, 触发, 会导致, 往往导致 must each be assigned a level by guesswork.
+      - |-
+        Whether 同现 is really a causal strength or the absence of one; if the source asserts no
+        relation at all, S006's trigger (「陈述两个事件…之间的关系」) may not fire, leaving 「adding a
+        causal link where none was asserted」 to S002 instead.
+    two_readings: |-
+      Reading A (four bins): the model classifies every relation into one of the four values and
+      preserves the bin; within a bin, connective choice is free, so 「因为」 -> 「由于」 -> 「…导致」 are
+      interchangeable.
+      Reading B (surface preservation): because no mapping to the bins is published, the safe
+      reading is that the causal connective itself must be preserved. Under A the model freely
+      re-words causal links; under B any re-wording risks an ERROR. The difference is large for
+      translation, where the source connective has no Chinese counterpart at all.
+
+  - id: CTC-S007
+    level: MUST
+    level_confidence: high
+    scope: [rewrite, translate, review]
+    modes: [strict, standard, review]
+    trigger: |-
+      The source contains a quantifier (所有、每个、部分、某些、任一、另一个、仅、只有) or an
+      applicability restriction on the objects a statement covers.
+    required_behavior: |-
+      (quantifier type, domain of discourse) is preserved. A restricted scope stays restricted.
+    prohibited_behavior: |-
+      部分 -> 全部; a specific 「另一个 X」 -> an open-set 「其他 X」; 每次 -> 首次; writing a qualified
+      applicability statement without its qualification.
+    exceptions: none stated
+    invariant: (quantifier type, domain).
+    detection: semantic
+    unclear:
+      - |-
+        Whether the domain 「论域」 is the set named in the sentence or the set the document as a
+        whole is about. 「重启实例」 inside a section titled 「只读副本」 has a domain fixed by the
+        heading; R005/§5 say headings govern their subtree, but S007 does not reference that.
+    two_readings: |-
+      Reading A (lexical trigger): S007 fires only when the source contains an explicit quantifier
+      word. A bare noun phrase ('重启实例') carries no quantifier, so rendering it as '重启所有实例'
+      does not trigger S007 (it would have to be caught by S002 instead, at a different site and
+      with a different remedy).
+      Reading B (semantic trigger): every noun phrase has a quantificational reading, so making an
+      implicit bare plural explicit as 全部 is itself a change of quantifier type and an ERROR.
+      Chinese bare nouns are number- and quantifier-neutral, so this is the single most frequent
+      decision in E->C technical translation, and the rule's trigger clause ('来源含量化词') decides
+      it one way while the invariant table's wording ('(量化类型, 论域) 不变') decides it the other.
+
+  - id: CTC-A001
+    level: MUST
+    level_confidence: high
+    scope: [rewrite, translate, review]
+    modes: [strict, standard, review]
+    trigger: |-
+      Two distinct triggers are bundled in one rule. (a) The source names an executor, including the
+      agent of a passive clause -> that executor must remain locatable in the output. (b) The output
+      would name an executor the source did not -> only permitted under a narrow condition.
+    required_behavior: |-
+      Named executors survive rewriting and are not replaced by generic labels. An executor may be
+      ADDED only when multiple candidate executors exist AND the competing readings change who acts,
+      and the added executor must be determinable from source or context.
+    prohibited_behavior: |-
+      Replacing a named component with a vague label (「存储管理机制」 -> 「系统」/「自动」); adding a
+      responsible party to an objective constraint (§8.9); adding subjects for explicitness alone.
+    exceptions: |-
+      Explicitly: the rule does NOT require an overt subject in every sentence. Passive voice is not
+      restricted (§8.3) — only agent deletion is.
+    invariant: The set of named agents, and their locatability.
+    detection: semantic
+    unclear:
+      - |-
+        「仍可定位」 does not require the same surface form. Whether 「存储管理组件」 for 「存储管理机制」
+        counts as still locatable, or as a T002 concept merge, is not stated.
+      - |-
+        The level of the ADD half of the rule. A001 is 必须, so an unnecessary added executor is
+        formally an ERROR — but the same edit is also the paradigm case of CTC-R002 (应/WARNING).
+    two_readings: |-
+      Reading A: the whole rule including 「只有在…才补出执行者」 carries 必须 force, so gratuitously
+      naming an executor is an ERROR.
+      Reading B: A001 is a preservation rule; the add-restriction is a note, and gratuitous executors
+      are governed by R002 at WARNING. §10 requires each finding to carry exactly one rule ID, so a
+      reviewer must pick, and the severity of the most common over-explicitness failure flips
+      depending on the pick.
+
+  - id: CTC-A002
+    level: MUST
+    level_confidence: high
+    scope: [rewrite, translate, review]
+    modes: [strict, standard, review]
+    trigger: |-
+      A referring expression in the OUTPUT (它、其、该、这、上述、前者、后者) has two or more possible
+      antecedents within its accessibility domain.
+    required_behavior: |-
+      Replace the pronoun with a nominal or reorder the clause so exactly one antecedent remains.
+      Where the antecedent is already unique, leave the pronoun alone.
+    prohibited_behavior: |-
+      Expanding every 其 into a noun for the sake of explicitness (see also §8.10, which says a
+      well-behaved pronoun is MORE readable and less error-prone than triple repetition of a long
+      name).
+    exceptions: none stated
+    invariant: Exactly one antecedent per referring expression.
+    detection: semantic
+    unclear:
+      - |-
+        「可及范围」 is never defined. Same clause, same sentence, same paragraph, same list item, same
+        section and same document all give different answers, and the rule is a 必须.
+      - |-
+        The rule polices the OUTPUT, so a source pronoun with two antecedents is only a violation if
+        it survives into the output — but leaving it is exactly what A005 requires when the referent
+        cannot be determined from evidence. The interaction is not addressed.
+    two_readings: |-
+      Reading A (local domain): accessibility = the current sentence plus the immediately preceding
+      one. Most pronouns pass, and the rule fires rarely.
+      Reading B (document domain): accessibility = everything a reader can still hold in mind, i.e.
+      the section. In a runbook where 「服务」「网关」「实例」 all appear in one procedure, virtually every
+      「其」 has two candidate antecedents and the rule mandates wholesale nominalisation — producing
+      exactly the repetitive prose §8.10 and R002 forbid. The document supplies no way to choose.
+
+  - id: CTC-A003
+    level: SHOULD
+    level_confidence: low
+    scope: [rewrite, translate, review]
+    modes: [strict, standard, review]
+    trigger: |-
+      A modifier can attach either to the first conjunct only or to the whole coordination, AND the
+      two attachments pick out different operational objects.
+    required_behavior: |-
+      Remove the attachment ambiguity by repeating the head noun, splitting the coordination, or
+      splitting the clause. The chosen reading must be evidenced; with no evidence, hand off to
+      CTC-A005 and report instead.
+    prohibited_behavior: |-
+      Choosing an attachment without evidence; firing on ordinary stacked Chinese modifiers merely
+      because they are long or nested.
+    exceptions: |-
+      Normal multi-layer Chinese attributive stacking does not trigger the rule on length or nesting
+      alone. Attachment ambiguity that does not change the operational object does not trigger it
+      either.
+    invariant: The set of constituents a modifier scopes over.
+    detection: semantic
+    unclear:
+      - |-
+        The rule's own level. §7 says 应 (=WARNING); §4 lists 修饰结合域 as a 语义不变量 whose violation
+        is a 语义失败, and §4 declares itself the highest priority section.
+      - |-
+        Whether A003 also covers the case where the model INTRODUCES an attachment ambiguity that the
+        source did not have (e.g. by merging two clauses). The trigger is written source-side.
+    two_readings: |-
+      Reading A: A003 is a WARNING-level style-ish preference; failing to disambiguate an evidenced
+      attachment is a soft finding a human may waive.
+      Reading B: via §4, modifier attachment is a hard semantic invariant and the same failure is an
+      ERROR. Because the difference decides whether a release gate blocks, this is not academic.
+      A third asymmetry follows from the rule's own structure: with evidence, failing to disambiguate
+      is WARNING (A003); without evidence, silently choosing is ERROR (A005). The better-informed
+      case is punished less.
+
+  - id: CTC-A004
+    level: MUST
+    level_confidence: high
+    scope: [rewrite, translate, review]
+    modes: [strict, standard, review]
+    trigger: |-
+      A negative or prohibitive element (不、未、不会、不得、禁止、无需) is followed by a coordination,
+      a condition, or a range restriction.
+    required_behavior: |-
+      Negation scope is preserved exactly. Distributed negation stays distributed:
+      「禁止 A，也禁止 B」 may not become 「禁止同时 A 和 B」, and the reverse is equally forbidden.
+    prohibited_behavior: |-
+      Collapsing two separate prohibitions into a joint one (which silently licenses each act alone);
+      splitting a joint prohibition into two separate ones (which forbids more than the source did).
+    exceptions: none stated
+    invariant: The constituent set governed by the negation operator.
+    detection: semantic
+    unclear:
+      - |-
+        Whether 无需 (absence of requirement) is treated with the same rigour as 禁止. It is in the
+        trigger list but every example is about prohibition, and the operational consequence of
+        mis-scoping 无需 is the opposite kind of error.
+    two_readings: |-
+      Reading A: A004 governs only cases where the source's scope is DETERMINATE and the output
+      changes it. If the source is itself scope-ambiguous, A005 applies and the sentence is preserved
+      and reported.
+      Reading B: A004's phrasing 「分别否定保持分别否定」 sets up a default — coordination under negation
+      is read distributively — so the model resolves an ambiguous source to the distributive reading
+      and preserves that, without reporting anything. Under A the runbook gets a 待确认 entry; under B
+      it gets a confident sentence. The document never says whether a distributive default exists.
+
+  - id: CTC-A005
+    level: MUST
+    level_confidence: medium
+    scope: [rewrite, translate, review]
+    modes: [strict, standard, review]
+    trigger: |-
+      Either (a) two or more readings exist that lead to different behaviour and neither source nor
+      context settles the author's intent, or (b) a parameter, threshold, recipient or acceptance
+      criterion needed for execution is simply absent.
+    required_behavior: |-
+      Preserve the original wording untouched, and emit a 待确认 line giving position, the competing
+      readings or the missing item, and the information needed to decide. In review mode this becomes
+      a finding.
+    prohibited_behavior: |-
+      Silently picking a reading; using fluent rewriting to hide the ambiguity; inventing the missing
+      parameter/threshold/recipient/criterion; emitting several complete alternative versions;
+      combining disambiguation with a verb substitution at the same site so the two edits cannot be
+      audited separately.
+    exceptions: |-
+      Not a real ambiguity when one reading corresponds to no executable operation in the domain, or
+      when the parameter is uniquely fixed at runtime by an external source (「按 Retry-After 指定的
+      秒数等待」). Merely constructible alternative parses must NOT be reported (§8.13).
+    invariant: |-
+      Ambiguity conservation — an unresolved ambiguity is still visible in the output AND is reported.
+    detection: semantic
+    unclear:
+      - |-
+        The evidence bar for 「上下文能确定读法」. §6 says disambiguation is mandatory when context
+        determines the reading, but gives no test for determination beyond 「有来源或上下文证据」.
+      - |-
+        Whether a 待确认 entry is required in addition to leaving the text alone in strict mode when
+        the ambiguity is judged low-impact. The 「不算真歧义」 filter removes the report; it does not
+        say whether it also removes the obligation to preserve.
+    two_readings: |-
+      Reading A: A005 is 必须, so §7/§10's mapping makes every genuine ambiguity finding an ERROR.
+      Reading B: §6 step 3 explicitly grades A005 findings — ERROR when the readings imply different
+      operations, WARNING otherwise — which is a DOWNGRADE of a 必须 rule that §10 says does not
+      exist. Reading B also implies a live category of reportable ambiguity whose readings do NOT
+      change operations, which §6's own 「不算真歧义」 paragraph and §8.13 say must not be reported at
+      all. One of the two branches is dead text and the reader cannot tell which.
+
+  - id: CTC-P001
+    level: MUST
+    level_confidence: high
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: |-
+      You split, merge, number or reorder steps. Note: the trigger is your own restructuring act, not
+      a property of the source.
+    required_behavior: |-
+      One step corresponds to one verifiable operational goal. Execution order, atomicity constraints
+      (same maintenance window / transaction / session) and rollback points match the source, and an
+      atomicity constraint must sit explicitly on the group of actions it constrains.
+    prohibited_behavior: |-
+      Mechanical 「one verb per line」 splitting (see also §8.2 and §8.4).
+    exceptions: none stated
+    invariant: (order dependency, atomicity grouping, rollback points).
+    detection: semantic
+    unclear:
+      - |-
+        Nothing in the rule set licenses splitting or merging steps in the first place. P001 governs
+        HOW you split but never says WHEN you may, and R001 says untriggered text is returned as-is.
+        The trigger is therefore self-referential.
+      - |-
+        「原子性约束必须显式落在…那一组动作上」 may require ADDING an explicit marker the source left
+        implicit, which S002 forbids and §5 explicitly forbids for structural conditions
+        (「不得把结构条件静默复制进每个子步骤」).
+    two_readings: |-
+      Reading A (conditional): P001 constrains restructuring you were already licensed to do. A source
+      step bundling three goals is left alone, because no rule triggered.
+      Reading B (mandatory): 「一个步骤对应一个可验证的操作目标」 is a requirement on the OUTPUT, so a
+      multi-goal source step must be split. Reading B turns P001 into a broad restructuring mandate
+      that collides head-on with R001 and §8.2; reading A makes the rule's headline clause inert.
+
+  - id: CTC-P002
+    level: SHOULD
+    level_confidence: high
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: |-
+      The target text is executable steps AND some step is missing its action, its object, or its
+      location.
+    required_behavior: |-
+      Write out the parts that ARE determinable from source or context. Where they are not
+      determinable, report via CTC-A005.
+    prohibited_behavior: |-
+      Compressing into placeholders such as 「相关配置」「对应服务」「按需处理」; deleting the node,
+      environment or namespace where the operation happens; re-describing a command in prose when the
+      command already expresses the action and object.
+    exceptions: |-
+      A complete command needs no natural-language gloss.
+    invariant: Executability — the (action, object, location) triple is complete where determinable.
+    detection: semantic
+    unclear:
+      - |-
+        Who judges 「目标文本是可执行步骤」. Imperative prose in a README may or may not qualify, and
+        the mode selection (standard for READMEs) does not settle it because P002 applies in both
+        modes at its recorded level.
+    two_readings: |-
+      Reading A: P002 licenses filling in a missing object whenever the fill is determinable, even
+      when nobody would misread the step. This is the plain reading of 「可确定的部分应写出」.
+      Reading B: §2's layer-2-vs-layer-4 tie-break says 「显式化只有在消除了一处真实的分歧读法时才压过
+      自然度；不消除任何分歧读法的显式化是 CTC-R002 违规」. If only one service exists, naming it removes
+      no divergent reading, so the very edit P002 requires is an R002 violation. A model following
+      P002 and a model following §2 produce different text on the same input, and both can cite a
+      rule ID.
+
+  - id: CTC-P003
+    level: SHOULD
+    level_confidence: low
+    scope: [rewrite, translate, review]
+    modes: [strict, standard, review]
+    trigger: |-
+      The source gives a success criterion, a wait condition, or a verification method.
+    required_behavior: |-
+      The criterion stays bound to the step it verifies and retains its blocking character:
+      「直到…为止再继续」 must still be a precondition of continuing.
+    prohibited_behavior: |-
+      Moving it into a note, footnote or the end of the document; converting an imperative
+      verification action into a description of system behaviour; inventing acceptance criteria.
+    exceptions: none stated
+    invariant: (step, criterion, blocking?).
+    detection: semantic
+    unclear:
+      - |-
+        §3 lists 「来源从未给出的成功判据（CTC-P003）」 as one of the four things that may enter 待确认,
+        but P003's own text is triggered only when the source DOES give a criterion and never
+        creates a duty to report a missing one. The 待确认 category has no generating rule.
+      - |-
+        Its level. §7 says 应; §4 lists 判据绑定 as a semantic invariant whose violation is a
+        semantic failure.
+    two_readings: |-
+      Reading A: P003 is purely conservative — preserve criteria that exist, say nothing about the
+      ones that do not. Under this reading a runbook with no acceptance criteria passes silently.
+      Reading B: via §3, P003 also obliges the model to detect and report the ABSENCE of a success
+      criterion for every step. Reading B makes almost every real runbook produce 待确认 entries;
+      reading A makes the §3 category unreachable. This is the difference between a quiet tool and a
+      noisy one, and the document supports both.
+
+  - id: CTC-P004
+    level: MUST
+    level_confidence: high
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: |-
+      A step contains a destructive, irreversible or externally-state-changing operation (删除、DROP、
+      覆盖、重启、扩缩容、发布、回滚、密钥轮换、清空缓存) AND the source supplies a precondition,
+      premise or warning for it.
+    required_behavior: |-
+      The guard must appear BEFORE the guarded action — either in the earlier part of the same
+      sentence, or in the immediately preceding sentence.
+    prohibited_behavior: |-
+      Inventing a guard when the source gives none.
+    exceptions: |-
+      No guard in the source -> no guard in the output. The rule does not create guards.
+    invariant: Guard-before-action ordering.
+    detection: mixed
+    unclear:
+      - |-
+        Whether the operation list is closed or illustrative. It is written as a bare parenthetical
+        with no 等. TRUNCATE, DNS cutover, token revocation, index rebuild, quota change and
+        certificate replacement are all absent.
+      - |-
+        Whether an adjacent warning BLOCK (a Markdown callout, a table cell, a bolded 「注意」 line)
+        satisfies 「紧邻的上一句」.
+    two_readings: |-
+      Reading A (strict adjacency): a warning three sentences earlier, or in a preceding callout,
+      violates P004 and must be MOVED next to the action. That move is a structural edit which R005
+      and §5 (「条件留在原位，结构保持不变」) forbid.
+      Reading B (loose): 「同句前段，或紧邻的上一句」 describes the target state for guards you are
+      already relocating, and a guard that is merely earlier and prominent is compliant. Under A the
+      model restructures documents aggressively around every destructive verb; under B it almost
+      never moves anything.
+
+  - id: CTC-P005
+    level: SHOULD
+    level_confidence: high
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: |-
+      The target text is an agent instruction, a system prompt, or a tool/function description.
+    required_behavior: |-
+      State when the thing should be used and its known applicability boundaries. When authoring,
+      take these from caller materials. When rewriting, capabilities, parameter limits and usage
+      restrictions the source does not give must NOT be added; raise them in 待确认 instead.
+    prohibited_behavior: |-
+      Passing off a contentless formula such as 「用于处理相关请求」 as a tool description; inventing
+      capabilities or limits during a rewrite.
+    exceptions: none stated
+    invariant: Tool descriptions carry a usable trigger condition.
+    detection: semantic
+    unclear:
+      - |-
+        「已知的适用边界」 — known to whom? If it means known to the model, P005 requires exactly the
+        addition S002 forbids; if it means present in the caller material, the word 已知 is
+        redundant.
+      - |-
+        Whether SKILL.md itself, being an agent instruction, is subject to P005 (see
+        self_demonstration).
+    two_readings: |-
+      Reading A: for a rewrite, P005 is purely a reporting rule — you never add a trigger condition,
+      you only flag its absence.
+      Reading B: 「应写明使用时机」 is a requirement on the output regardless of task, so a tool
+      description lacking a trigger condition must be given one from context. The two produce a
+      reported gap versus a written sentence for the single most common tool-description defect.
+
+  - id: CTC-T001
+    level: SHOULD
+    level_confidence: low
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: |-
+      One concept appears under two or more labels within the current 工作单位.
+    required_behavior: |-
+      Unify to one term, choosing by a fixed order: caller-supplied glossary > the clearest and most
+      frequent form in the source > the first-occurring form in the source.
+    prohibited_behavior: |-
+      Introducing a term or translation that appears in neither source nor context; replacing an
+      already-consistent source term with the model's preferred wording.
+    exceptions: |-
+      A first-occurrence bilingual gloss (「熔断（circuit breaking）」) is a definition, not an
+      inconsistency. §7's closing note limits the unit to text visible in this invocation plus the
+      caller's glossary, and forbids unification whenever co-reference is not established.
+    invariant: concept -> term is a function (one concept, one term).
+    detection: semantic
+    unclear:
+      - |-
+        「工作单位」 is glossed only once, as 「本次调用可见的文本，加上调用方提供的术语表」. In a multi-turn
+        session or a multi-file task, whether that means the document under edit or the whole visible
+        context is undetermined.
+      - |-
+        The second selection criterion is a conjunction — 「最明确且出现最多」 — with no tie-break when
+        the clearest form is rare and the frequent form is vague.
+      - |-
+        Its level. §7 says 应; §4 lists 概念与术语 (CTC-T001 / T002) as a semantic invariant.
+    two_readings: |-
+      Reading A (narrow unit): only the text being edited counts, so terms in an earlier turn or a
+      sibling document impose nothing, and unification is local.
+      Reading B (wide unit): everything visible counts, including prior turns and the caller's other
+      documents — which changes both what counts as an inconsistency and which form wins the
+      selection order. Under B, the wording of SKILL.md itself is arguably part of the visible text.
+
+  - id: CTC-T002
+    level: MUST
+    level_confidence: high
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: |-
+      You are about to merge two terms, or replace an existing term with a near-synonym.
+    required_behavior: |-
+      Confirm first that the two genuinely co-refer in this document's domain. Where co-reference is
+      not established, report the difference and do not merge.
+    prohibited_behavior: |-
+      Merging 认证/授权, 参数/属性/字段, 缓存/缓冲, 重启/重载, 告警/错误, 限流/熔断, 副本/备份,
+      幂等/去重; covering a sub-distinction with a superordinate term.
+    exceptions: none stated
+    invariant: term -> concept is injective (no term covers two concepts).
+    detection: semantic
+    unclear:
+      - |-
+        What counts as 「确认」. §7's note says the skill carries no product glossary and therefore
+        cannot know whether two labels co-refer in a system it cannot see, which makes the
+        confirmation condition almost never satisfiable.
+      - |-
+        Where 「报告差异」 goes in strict/standard mode. It is not one of §3's four 待确认 categories.
+    two_readings: |-
+      Reading A: T002 is a gate on T001 — since confirmation is rarely possible, terminology
+      unification effectively never happens, and T001 degenerates into a reporting rule.
+      Reading B: 「本文档领域内确实同指」 can be established from the document itself (both labels used
+      for the same object in the same procedure), so unification proceeds routinely. The two produce
+      very different outputs on the most common real defect in Chinese technical docs.
+
+  - id: CTC-L001
+    level: MUST
+    level_confidence: medium
+    scope: [rewrite, translate, review]
+    modes: [strict, standard, review]
+    trigger: |-
+      The source contains a condition, premise, exception, applicability restriction or warning.
+    required_behavior: |-
+      These elements survive and continue to restrict the SAME target. A conditional statement stays
+      conditional. Surface form may change freely (若…则 / …时 / 前提是).
+    prohibited_behavior: |-
+      Deleting an exception (「只读副本除外」); turning 「在 X 情况下」 into an unqualified statement;
+      relocating an exception to where it no longer modifies the target sentence.
+    exceptions: |-
+      Surface reformulation is explicitly allowed.
+    invariant: For each assertion, its (condition, exception) set.
+    detection: semantic
+    unclear:
+      - |-
+        Whether a condition may be converted into a temporal frame. §12's own 情态强化 example turns
+        「如果你想在生产环境中部署该服务」 into 「在生产环境部署该服务前」, which changes a conditional into
+        a presupposed temporal frame. L001 says form may vary; L002 says 让步不得变条件; nothing says
+        条件 may or may not become 时序.
+      - |-
+        Its interaction with S001's length-cap clause, which contemplates deleting exceptions.
+    two_readings: |-
+      Reading A: 「表述形式可变」 covers conditional-to-temporal recasting, since the operational
+      upshot is the same for a reader who is in fact deploying.
+      Reading B: a conditional is a truth-conditional structure, so 若 -> 前 removes a condition and
+      is a 必须-level violation; the document's own worked example would then be wrong. The document
+      supplies the example but not the principle that licenses it.
+
+  - id: CTC-L002
+    level: MUST
+    level_confidence: high
+    scope: [rewrite, translate, review]
+    modes: [strict, standard, review]
+    trigger: |-
+      The source contains a logical connective (且、或、若…则、仅当…才、只有…才、除非…否则、即使…也).
+    required_behavior: |-
+      Conjunction stays conjunction, sufficient stays sufficient, necessary stays necessary, concessive
+      stays concessive, grouping is preserved. Synonymous connective substitution is allowed as long as
+      direction is unchanged.
+    prohibited_behavior: |-
+      Conjunction -> disjunction; sufficient -> necessary; concession -> condition; re-bracketing.
+    exceptions: |-
+      Synonym substitution that preserves direction.
+    invariant: The logical form — connective type, implication direction, grouping.
+    detection: semantic
+    unclear:
+      - |-
+        Whether the rule applies to IMPLICIT logic. Chinese frequently expresses conjunction and
+        condition by juxtaposition with no connective at all; the trigger is written as 「来源含逻辑
+        连接成分」.
+    two_readings: |-
+      Reading A (lexical): only explicitly connected clauses are protected, so supplying a connective
+      for juxtaposed clauses (a normal step in E->C translation, and something §9 explicitly permits
+      as 「目标语言必需的显性成分」) is outside L002 and judged only by S002.
+      Reading B (semantic): the logical form is protected however it is expressed, so choosing a
+      connective for juxtaposed clauses is a logic decision that must be evidenced or reported. §9's
+      translation clause pushes towards A while §4's 「逻辑式」 invariant pushes towards B.
+
+  - id: CTC-L003
+    level: MUST
+    level_confidence: high
+    scope: [rewrite, translate, review]
+    modes: [strict, standard, review]
+    trigger: |-
+      The source states precedence, concurrency or during-relations between actions, events or states.
+    required_behavior: |-
+      Those relations are preserved: sequence does not become simultaneity, 「完成之后」 does not become
+      「期间」. If the only marker expressing the order is removed, the order must still be recoverable
+      from the text.
+    prohibited_behavior: |-
+      Parallelising dependent steps; converting after-relations into during-relations.
+    exceptions: |-
+      Statement order need not follow temporal order.
+    invariant: The relation set (before, simultaneous, during).
+    detection: semantic
+    unclear:
+      - |-
+        「仍能从文本恢复」 — recoverable by a reader using domain knowledge, or recoverable from the
+        text alone? The two give different verdicts on deleting 首先/然后 in a procedure whose order
+        is only obvious to an expert.
+      - |-
+        How this squares with P001: if statement order may differ from temporal order, then reordering
+        numbered steps is permissible under L003 and impermissible under P001 (「执行顺序…必须与来源
+        一致」).
+    two_readings: |-
+      Reading A: 「陈述顺序可以与时间顺序不同」 licenses reordering prose sentences (and, on its face,
+      numbered steps) as long as the temporal markers still encode the order.
+      Reading B: it is only an observation about the source, not a licence for the output, and P001
+      forbids reordering steps at all. Applied to a numbered runbook these give directly opposed
+      permissions.
+
+  - id: CTC-L004
+    level: MUST
+    level_confidence: high
+    scope: [rewrite, translate, review]
+    modes: [strict, standard, review]
+    trigger: |-
+      The source contains a comparison or boundary expression (达到、超过、不少于、至少、最多、不超过、
+      以上、以下、以内、之前、之后).
+    required_behavior: |-
+      Comparison direction and boundary inclusivity are preserved. Three anchors are given:
+      「达到 N」 includes N, 「超过 N」 excludes N, 「N 以内」 includes N. Synonymous operator substitution
+      is allowed.
+    prohibited_behavior: |-
+      Flipping inclusivity (达到 -> 超过), reversing direction.
+    exceptions: |-
+      Where the source's own boundary expression is ambiguous AND the boundary value changes behaviour,
+      hand off to CTC-A005 (report, do not resolve).
+    invariant: (comparison direction, boundary inclusivity).
+    detection: mixed
+    unclear:
+      - |-
+        Inclusivity is stated for 达到 / 超过 / 以内 only. 以上、以下、之前、之后、至少、最多、不少于、
+        不超过 appear in the trigger list with no inclusivity given, and 以上/以下 are precisely the
+        forms Chinese readers dispute.
+    two_readings: |-
+      Reading A: 以上/以下 are inclusive by GB convention, so 「N 以上」 -> 「不少于 N」 is a permitted
+      synonymous substitution.
+      Reading B: because the document declines to state their inclusivity while stating it for three
+      neighbours, 以上/以下 fall under the final clause — the source expression is itself ambiguous —
+      and any operator substitution is forbidden; the site must be reported via A005 instead. One
+      reading rewrites the threshold, the other files a ticket about it.
+
+  - id: CTC-R001
+    level: MUST
+    level_confidence: high
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: |-
+      Any rewriting or translation task, and emphatically the case where the source is already
+      correct, clear and compliant. It is a meta-rule: §7 says it governs how all six families are
+      applied.
+    required_behavior: |-
+      Every single change must be attributable to one specific rule ID; text that triggered no rule is
+      returned verbatim. Returning the source unchanged is a valid and often correct output (§8).
+    prohibited_behavior: |-
+      Equivalent substitutions justified by 「更清楚」「更专业」; rewriting to demonstrate effort;
+      bundling several unrelated changes at one site so they cannot be audited separately.
+    exceptions: none stated
+    invariant: Change minimality and per-change attributability.
+    detection: semantic
+    unclear:
+      - |-
+        Whether attribution must be EMITTED. §3's output contract for strict/standard says
+        「只返回改写后的中文正文…无前言，不解释改动」, so the attribution never reaches the reader and
+        R001 cannot be checked from the artifact — only by re-deriving each diff hunk and asking
+        whether some rule could have licensed it.
+      - |-
+        Whether one change may cite several IDs. R001 says 「一条具体规则 ID」 (one), §10 says a site
+        triggering several rules is reported as several findings.
+    two_readings: |-
+      Reading A (internal): attributability is a discipline the model applies while working; the output
+      is bare text and the requirement is unauditable in strict/standard mode.
+      Reading B (external): 「必须能归因」 implies an audit trail must exist, which the output contract
+      then forbids emitting. Under A, R001 is the most important rule in the document and also the
+      only one with no observable consequence; under B the document contradicts its own output
+      contract. Either way the strongest rule is the weakest enforced.
+
+  - id: CTC-R002
+    level: SHOULD
+    level_confidence: high
+    scope: [rewrite, translate, author]
+    modes: [strict, standard, review]
+    trigger: |-
+      The OUTPUT contains sentence-by-sentence subject repetition, mechanically split short sentences,
+      or added qualifiers that remove no ambiguity.
+    required_behavior: |-
+      Delete them. Every supplied subject, repeated head noun and split clause should correspond to an
+      identifiable ambiguity risk.
+    prohibited_behavior: |-
+      Treating strict mode as a mandate for more explicitness. §3 and R002 both say strict raises
+      ambiguity SENSITIVITY, not the amount of explicitation.
+    exceptions: |-
+      Repeating the subject has disambiguating value when multiple executors alternate.
+    invariant: Explicitness is proportional to ambiguity risk.
+    detection: semantic
+    unclear:
+      - |-
+        Whether the rule polices only what the MODEL added, or also verbosity already present in the
+        source. The trigger says 「输出中出现」, and the output contains the source.
+    two_readings: |-
+      Reading A (guard): R002 is an anti-over-editing guard on the model's own additions. A verbose
+      source is not defective — nothing triggered — so R001 returns it verbatim.
+      Reading B (mandate): R002 is triggered by the output, and the output inherits the source's
+      repeated subjects, so a verbose human-written document triggers R002 and must be de-verbosed.
+      §8.1's worked example points at B (it takes a verbose SOURCE and says it 「应写成」 a topic-chain
+      version); §12's 过度编辑 example and R001's whole framing point at A.
+      This is the single largest behavioural fork in the document: it decides whether the skill is a
+      minimal-diff auditor or a whole-document restyler, and every downstream expectation about diff
+      size depends on it.
+
+  - id: CTC-R003
+    level: SHOULD
+    level_confidence: high
+    scope: [rewrite, translate, author]
+    modes: [strict, standard, review]
+    trigger: |-
+      The text contains unnecessary passives, nominalisation padding (进行／作出／予以 + verb),
+      overlong 「的」 chains, residual English clause order (「由于…的事实」), or literally-translated
+      connectives.
+    required_behavior: |-
+      Replace with ordinary Chinese technical usage, with semantics完全 unchanged.
+    prohibited_behavior: |-
+      Blanket passive avoidance. Passive is natural when the patient is the focus, when the agent is
+      unknown, or when the agent is already given in the same clause.
+    exceptions: |-
+      The rule is explicitly always subordinate to the S family.
+    invariant: Idiomatic register, subject to full semantic preservation.
+    detection: semantic
+    unclear:
+      - |-
+        Same source-versus-own-output question as R002, and here the trigger is unambiguously written
+        source-side (「文本含…时」).
+      - |-
+        The rule states its priority only against the S family. Its relation to R001 — whether a
+        translationese source counts as 「未触发任何规则的文本」 — is not stated.
+    two_readings: |-
+      Reading A: R003 licenses rewriting any Chinese technical text that shows translationese, which is
+      most machine-translated and much human-written material. R001 is then satisfied because R003 IS
+      a rule ID, and the promise 「未触发规则的文本原样返回」 becomes nearly vacuous for prose.
+      Reading B: R003, sitting at layer 4 of the ladder and below everything else, only fires where the
+      translationese also impedes layer-2 clarity, so a slightly stiff but clear paragraph is left
+      alone. The document gives no threshold, and the two readings differ by roughly the entire diff.
+
+  - id: CTC-R004
+    level: SHOULD
+    level_confidence: medium
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: |-
+      A normative instruction (agent instruction, SOP, policy, gate condition) whose decision condition
+      is carried by a criterion-free word: 尽量、尽可能、最好、适当、必要时、合理.
+    required_behavior: |-
+      When authoring, supply an observable trigger condition (threshold, state or event). When
+      rewriting, do NOT invent a criterion the source lacks — raise it in 待确认.
+    prohibited_behavior: |-
+      Replacing a vague normative condition with a concrete threshold during a rewrite; flagging
+      ordinary adverbs that qualify observed facts.
+    exceptions: |-
+      Ordinary Chinese adverbs describing observations rather than obligations
+      (「该接口通常在 100 ms 内返回」) are out of scope.
+    invariant: Normative conditions are decidable from observables.
+    detection: mixed
+    unclear:
+      - |-
+        Whether the six-word list is closed. 及时、尽快、酌情、视情况、充分、必要的 are not listed and
+        behave identically.
+      - |-
+        Its level. §7 says 应; §6's closing paragraph says modal vagueness 「必须报告其可能的两种以上
+        强度并给出建议，然后停手」.
+      - |-
+        §6 requires 给出建议, but §3's 待确认 line format has exactly three fields
+        (位置 | 问题 | 需要的信息) and no slot for a recommendation.
+    two_readings: |-
+      Reading A: R004 is a WARNING-level lint on a closed six-word list; other vague words pass.
+      Reading B: via §6, criterion-free normative conditions are handled by the ambiguity machinery at
+      必须 force and the word list is illustrative, so 「尽快完成」 in a runbook is an ERROR-grade report.
+      A yields a quiet checker; B yields one that flags most human-written SOPs.
+
+  - id: CTC-R005
+    level: SHOULD
+    level_confidence: low
+    scope: [rewrite, translate, review]
+    modes: [strict, standard, review]
+    trigger: |-
+      The source contains Markdown structure.
+    required_behavior: |-
+      Preserve the granularity of heading levels, list item counts, table rows and columns, fenced
+      blocks and their language tags, links and block quotes.
+    prohibited_behavior: |-
+      Flattening a table into sentences; turning a code block into a paragraph; dropping a language
+      tag; converting numbered steps into prose.
+    exceptions: |-
+      「调用方明确要求改变格式时按要求执行」.
+    invariant: |-
+      Per §7, structural granularity. Per §4 and §5, something materially different: the SCOPE that
+      headings, parent list items, table cells and callouts establish over their subtree
+      (「仅用于测试环境」 must keep governing everything under it).
+    detection: deterministic
+    unclear:
+      - |-
+        Which of the two characterisations is the rule. §4 names the invariant 结构作用域 (scope
+        governance, a truth-conditional property, listed as a semantic invariant) while §7 names the
+        rule 结构保持 (formatting granularity, a 应-level preference).
+      - |-
+        Whether §3's output contract clause 「保留来源的 Markdown 结构、列表粒度、代码围栏与行内代码」
+        is R005 restated (in which case R005 is unconditional, not 应, and has no caller exception) or
+        a separate obligation.
+    two_readings: |-
+      Reading A (formatting rule, 应/WARNING/waivable): flattening a table is a style-level finding a
+      caller can waive by asking for a different format.
+      Reading B (scope rule, semantic invariant/ERROR/not waivable): flattening a table that carries
+      an environment restriction lets 「清空缓存」 escape into production — §4's own stated consequence
+      — and is a semantic failure that no format request can authorise.
+      The same edit is a waivable WARNING under A and an unwaivable ERROR under B, and the document
+      asserts both.
+
+  - id: CTC-R006
+    level: MAY
+    level_confidence: high
+    scope: [rewrite, translate, author]
+    modes: [strict, standard, review]
+    trigger: |-
+      The source is INCONSISTENT in punctuation width, CJK/Latin spacing, quote style or number
+      format.
+    required_behavior: |-
+      None. It is a permission: you MAY unify, without touching protected tokens, towards the
+      consistent style the source or project already uses — never towards the model's own preference.
+    prohibited_behavior: |-
+      Reporting typography as ERROR (§10 repeats this: 「不得…把体例偏好判为 ERROR」). §2 adds that a
+      style or regional preference must not be promoted into a semantic rule to win an argument.
+    exceptions: none stated
+    invariant: Typography is subordinate to everything and never semantic.
+    detection: deterministic
+    unclear:
+      - |-
+        Whether a source that is CONSISTENTLY non-standard (e.g. never spaces CJK against Latin)
+        triggers R006. The literal trigger is inconsistency, so it does not — yet §2's layer 5 speaks
+        of 「项目体例」 as a target, implying an external standard can be imposed.
+      - |-
+        §10 caps STYLE observations at three only in the 「未发现违规」 case; when other findings exist,
+        no cap is stated.
+    two_readings: |-
+      Reading A (trigger-bound): R006 fires only on internal inconsistency; a uniformly unspaced
+      document is returned untouched.
+      Reading B (project-style): the caller's or project's convention is the target, so a uniformly
+      non-conforming document is normalised throughout. Under B a single R006 permission produces a
+      diff on nearly every line of the document — from a rule graded STYLE.
+
+cross_cutting:
+  priority_ladder: |-
+    Five layers, highest first: (1) truth and semantic invariants; (2) operational clarity;
+    (3) terminological consistency; (4) natural technical Chinese; (5) project style and typography.
+    A lower layer may never override a higher one. Layer 2 additionally may not be bought with new
+    facts, executors, parameters or criteria — when clarity would require an addition, layer 1 wins
+    and the gap goes to 待确认.
+
+    Three operational tests are given: a more natural sentence that changes truth conditions is not
+    an improvement; a more explicit sentence that manufactures a requirement is not an improvement;
+    a shorter sentence that loses a condition or exception is not an improvement.
+
+    Stated tie-breaks:
+      - same layer, equivalent candidates -> keep the source's existing form (CTC-R001);
+      - layer 2 vs layer 4 -> explicitation beats naturalness ONLY if it removes a real divergent
+        reading; explicitation that removes none is an R002 violation;
+      - layer 1 unreachable -> do not rewrite that site at all; report it in 待确认. Silence about an
+        ambiguity is the lesser failure; deciding for the author is not;
+      - the ladder authorises nothing. It resolves conflicts BETWEEN rules; it never licenses an edit.
+        Every edit still needs a rule ID, and 「这样更自然」 is not one;
+      - no promotion: a style or regional preference may not be re-labelled as a semantic rule; it is
+        reported as STYLE or not at all.
+
+    What the ladder does NOT provide, and this is the load-bearing gap: no rule is assigned to a
+    layer. Only CTC-R003 states its own position (「本规则永远低于 S 族」). So the definition of 应 in
+    §7 — 「可被更高优先级…推翻」 — cannot be applied, because you cannot determine whether the rule you
+    are weighing sits above or below the one you are weighing it against. Only two of the twenty-odd
+    pairwise conflicts a real document produces (same-layer, and 2-vs-4) have a published answer.
+
+  mode_semantics: |-
+    The document's claim: modes change the AMBIGUITY THRESHOLD, not rule levels; strict does not
+    promote 应 to 必须; the S, L and T families are threshold-independent and apply in full under
+    standard as well.
+
+    strict — applies to agent instructions and system prompts, tool/function descriptions, SOPs,
+    runbooks, change procedures, ops- and security-sensitive operations, troubleshooting steps,
+    alerts and error messages. All rules in force. Lowest threshold: if ANY reasonable operator
+    reading would lead to a different action, treat it as a divergent reading. Conditions, premises,
+    exceptions, guards and success criteria may not be deleted for brevity. And a severity clause
+    that sits awkwardly with the claim above: 應-level rules in the A and P families are handled as
+    ERROR when the omission would change operator behaviour — described as raising the trigger
+    threshold rather than the rule level. Strict explicitly does NOT mean maximum verbosity: no
+    invented executors/parameters/thresholds/criteria/failure causes, no non-disambiguating subject
+    repetition, no one-clause-per-line splitting, no promoting descriptions into norms or requests
+    into obligations, no invented warnings.
+
+    standard — applies to API docs, README-style docs, developer guides, FAQs, release notes,
+    expository technical prose. S/L/T apply unchanged; A/P apply at their recorded levels with a
+    HIGHER threshold: a reading counts as divergent only if an ordinary technical reader would
+    actually disagree, not merely because a second parse is constructible. Idiomatic compression,
+    clause merging and topic chains are permitted. Still forbidden: deleting conditions, exceptions,
+    thresholds, defaults or protected tokens in the name of brevity; generalising an example or a
+    concrete value into a summary claim; treating compression as licence to re-decide meaning.
+
+    review — applies to auditing existing Chinese technical text, checking another model's rewrite,
+    pre-release gating, and reviewing this skill's own text. Report only, never rewrite. Every finding
+    cites one rule ID and quotes the audited text verbatim. Threshold is inherited from the audited
+    document's TYPE (agent instructions and runbooks use strict's threshold, expository docs use
+    standard's). Untriggered text produces no finding.
+
+    Mode selection: decide task, mode and caller-given context before starting. If the mode is not
+    given, infer it from §3's applicability lists, and when the document type straddles categories,
+    take the stricter one.
+
+    Undetermined: (a) the R family is not mentioned in standard's behaviour clause at all — S/L/T and
+    A/P are enumerated, R is not, so whether R001–R006 apply under standard is unstated; (b) strict's
+    「按 ERROR 处理」 has no output channel, since strict returns bare prose and ERROR is a review-mode
+    severity — either it silently means 「treat as blocking, i.e. do not compress」, or it means such
+    sites must surface somewhere the output contract does not provide for; (c) review is selected by
+    TASK while strict/standard are selected by DOCUMENT TYPE, so §1's 「文档类型跨界时取更严的一档」
+    procedure does not range over review; (d) 新写 (author) is a declared task in §1 but appears in
+    only two rules (P005, R004), so the applicable rule set for authoring is essentially undefined.
+
+  ambiguity_policy: |-
+    Where context DOES determine the reading, disambiguation is mandatory, and the chosen reading must
+    rest on evidence from the source or the caller's context.
+
+    Where context does not determine it: (1) leave the wording untouched; (2) emit a 待确认 line giving
+    position, the two-or-more readings or the missing item, and the information needed to decide;
+    (3) in review mode emit a finding — ERROR when the readings imply different operations, WARNING
+    otherwise.
+
+    Hard prohibitions: silently choosing a reading; hiding ambiguity behind fluent prose; supplying a
+    missing parameter, threshold, recipient or criterion so the text merely looks executable; emitting
+    multiple complete alternative versions; combining disambiguation with a key-verb substitution at
+    one site so the two edits cannot be audited separately.
+
+    Not real ambiguity: a reading that corresponds to no executable operation in the domain; a
+    parameter uniquely fixed at runtime by an external source (「按 Retry-After 指定的秒数等待」).
+    Reporting a merely constructible second parse is itself an error (false-positive flooding).
+
+    Modal vagueness routes here too: where a normative instruction's obligation rests on a
+    criterion-free word (R004's list), report the two-or-more possible strengths, give a
+    recommendation, and stop. Replacing it with a concrete strength or threshold is an unauthorised
+    normative decision on the author's behalf.
+
+    Unresolved: the instruction to 「给出建议」 has nowhere to go under the three-field 待确认 format;
+    the WARNING branch of the review grading contradicts §10's 「没有降级」 and appears to describe a
+    case (readings that do not change operations) which §6 and §8.13 elsewhere say must not be
+    reported at all.
+
+  quantity_policy: |-
+    Numbers keep their SURFACE FORM: value, unit, symbol, percentage, interval endpoints and
+    comparison operator exactly as the source wrote them. No unit conversion, no rounding, no numeral
+    system change (3 <-> 三), no ratio/percentage conversion, no collapsing two values into a range,
+    no 「若干」 for an enumerable count, no altered status codes. Precision is preserved.
+
+    The stated rationale is operational, not arithmetic: technical values get pasted into config
+    fields whose unit is fixed by the field name, and documents usually do not say which values those
+    are — so a conversion that is lossless in arithmetic is lossy in operation.
+
+    Three exceptions: (a) conversion is permitted only when the caller explicitly authorises it AND
+    the conversion is exact AND the value is not inside a protected token; (b) halfwidth-ing fullwidth
+    digits outside protected tokens is typography and is permitted; (c) translation may add
+    classifiers required by the target language, provided no new proposition results — which sits
+    against §8.8's prohibition on supplying elided classifiers.
+
+    Boundary semantics are given for three forms only (达到 includes, 超过 excludes, 以内 includes);
+    以上/以下/之前/之后/至少/最多/不少于/不超过 are listed as triggers with no inclusivity stated.
+
+  protected_token_policy: |-
+    Default-protected, character for character: inline code and fenced blocks including the language
+    tag, command lines and arguments, URLs, file and API paths, environment variables, status codes,
+    version numbers, placeholders ({project_id}, <region>), and identifiers containing _ , - , . or an
+    internal capital. Rules S005 adds field names, API names, regexes, config keys and error codes.
+
+    Forbidden: translating identifiers, changing case or separators, fullwidth-ing halfwidth
+    punctuation inside a token, replacing a command with a description, substituting or completing a
+    placeholder, normalising a URL. Source typos in these tokens are preserved and raised.
+
+    Explicitly NOT protected: ordinary Chinese noun phrases, UI strings, section headings, product
+    names not marked as code. The document names both failure directions — freezing ordinary text
+    blocks legitimate rewriting; treating an identifier as an ordinary word causes irreversible damage
+    — and asks that both be avoided.
+
+    Protection covers INVENTORY, not BINDING: the multiset of tokens must match, and semantic layers
+    are responsible for who does what to whom (「发送 A 给 B」 vs 「发送 B 给 A」 have equal inventories).
+
+    Caller controls: may add strings to the protected set; may explicitly release one token and then
+    edit it. Without release, no edit.
+
+    Unresolved: a product name containing a hyphen or an internal capital satisfies the identifier
+    test and the not-protected test simultaneously.
+
+  output_contract: |-
+    strict and standard — return the rewritten Chinese body only. Preserve the source's Markdown
+    structure, list granularity, fenced blocks and inline code. No preamble, no explanation of edits.
+    Consequence: the per-change rule-ID attribution R001 demands is never emitted.
+
+    review — return the finding list only, never the whole text. Each finding has six fields
+    (规则 / 严重级别 / 位置 / 问题 / 风险 / 建议修改); 位置 quotes the audited text verbatim; 建议修改 is
+    a fragment-level proposal, not an applied edit. Findings are sorted by severity, then by document
+    position. A site triggering several rules yields several findings, never a merged one. When
+    nothing is found, return 「未发现违规」 plus at most three STYLE observations — no findings is a
+    valid result.
+
+    待确认 — appended to the body only when unresolved items exist, one line each, formatted
+    「位置 | 问题 | 需要的信息」. §3 declares the admissible categories to be exactly four: evidence-poor
+    ambiguity (A005), a success criterion the source never gave (P003), a missing trigger condition in
+    a tool description (P005), and a criterion-free normative condition (R004). It is explicitly not a
+    place for style preferences, and it is absent when there is nothing pending.
+
+    That closed list is contradicted at least four times elsewhere (see contradictions), and the
+    three-field line format has no slot for the 建议 that §6 requires for modal vagueness.
+
+  severity_mapping: |-
+    必须 -> ERROR (violation is a semantic error); 应 -> WARNING (a default requirement, defeasible by
+    a higher priority layer or an explicit boundary); 可以 -> STYLE (permission). §7 states the
+    correspondence is one-to-one.
+
+    ERROR — semantic damage, unsafe ambiguity, protected-token mutation, or a violated hard invariant.
+    WARNING — possible ambiguity or rule risk requiring human judgement.
+    STYLE — naturalness or consistency issues that do not affect meaning.
+
+    Exactly one escalation is permitted: a 应-level violation may be reported as ERROR if that
+    finding's 風險 field names the specific different action the operator would take as a result. No
+    other escalation, and no de-escalation at all. Typography must never be reported as ERROR.
+
+    Three things break this cleanly: §3's strict clause escalates A/P 應-level rules on a differently
+    worded condition and a narrower family scope; §6 grades A005 (a 必须 rule) findings down to
+    WARNING; and §4 declares four rules that §7 grades 應 (A003, P003, T001, R005) to be semantic
+    invariants whose violation is a 语义失败.
