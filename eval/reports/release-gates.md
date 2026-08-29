@@ -10,6 +10,7 @@ Assessed against `000-design.md` §30. Date: 2026-08-29.
 | Ambiguity | **pass** | high-severity actor, reference, scope and procedure cases covered; the over-control traps that guard against unnecessary explicitness pass in both models after the fixes |
 | Naturalness | **pass** | mean 4.66/5 across 91 judged outputs; no systematic translationese or pseudo-legal style reported |
 | Self-hosting | **pass** | review-mode self-review returned 9 findings; 8 fixed, 1 rejected with reason; re-run clean |
+| Mutation detection | **partial** | 45/45 detected across 11 classes, one reviewer only; two classes have n=1 |
 | Cross-model | **partial** | 3 models ran the corpus; GPT's 56 outputs are unjudged because GPT was the only judge available |
 | Trusted core is human-reviewed | **open** | the 56 gold cases are `orchestrator-reviewed` and cross-audited by a second model, not human-reviewed |
 
@@ -46,9 +47,10 @@ known to be fine.
 **Reverse-decoding was Claude reading Claude-rendered prose.** A reader with different priors will
 find a different set of forks. The next pass should use a non-Claude decoder.
 
-**Mutation detection has not been run.** `eval/mutations/generated.yaml` holds 37 single-defect
-mutants across 11 classes and the per-class detection rates that `000-design.md` §16 asks for have
-not been measured.
+**Mutation detection has been run for one reviewer only.** 45 mutants over 11 classes, 45/45
+detected by Gemini with both the right rule and the right locus (`eval/reports/mut1-summary.md`).
+That measures Gemini running CTC, not CTC; the corpus exists to compare reviewers and only one has
+been run. Two classes have a single mutant each.
 
 ## Recommendation
 

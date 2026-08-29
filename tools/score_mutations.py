@@ -39,7 +39,8 @@ COVERING_RULES: dict[str, set[str]] = {
     "modality_strengthen":  {"CTC-S003"},
     "modality_weaken":      {"CTC-S003"},
     "certainty_inflate":    {"CTC-S003", "CTC-S006", "CTC-S002"},
-    "condition_broaden":    {"CTC-L001", "CTC-L002", "CTC-S007"},
+    # a 連續 N 次 gate is expressed as a count, so quantity preservation covers it too
+    "condition_broaden":    {"CTC-L001", "CTC-L002", "CTC-S007", "CTC-S004"},
     "threshold_flip":       {"CTC-L004", "CTC-S004"},
     "quantity_drift":       {"CTC-S004", "CTC-L004"},
     "token_mutate":         {"CTC-S005"},
@@ -74,7 +75,12 @@ def scored(case: dict, output: str) -> tuple[bool, bool]:
 
     spans = changed_spans(case["clean_source"], case["mutant"])
     locus = (case.get("expected_issues") or [{}])[0].get("locus", "")
-    needles = [s for s in spans + [locus] if s]
+    # a swap rearranges whole lines, and difflib reports the rearranged fragments
+    # rather than the lines a review would quote; add the differing lines themselves
+    clean_lines = set(case["clean_source"].splitlines())
+    moved = [l.strip() for l in case["mutant"].splitlines()
+             if l.strip() and l not in clean_lines]
+    needles = [s for s in spans + moved + [locus] if s]
     # a quoted 位置 usually carries the surrounding clause, so substring containment
     # in either direction counts
     locus_hit = any(n in output for n in needles if len(n) >= 2)
