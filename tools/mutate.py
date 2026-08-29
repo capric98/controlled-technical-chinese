@@ -57,8 +57,8 @@ LEXICAL_OPERATORS: list[tuple[str, str, str, str]] = [
     ("modality_weaken", r"必须", "建议", "必须（义务）被弱化为建议（推荐）"),
     ("modality_weaken", r"不得", "应尽量避免", "不得（禁止）被弱化为defeasible的规避建议"),
     ("modality_weaken", r"禁止", "不建议", "禁止被弱化为不建议"),
-    ("certainty_inflate", r"可能会", "会", "可能性被改写为确定性"),
-    ("certainty_inflate", r"可能(?!会)", "会", "可能性被改写为确定性"),
+    ("certainty_inflate", r"(?<!尽)可能会", "会", "可能性被改写为确定性"),
+    ("certainty_inflate", r"(?<!尽)可能(?!会)", "会", "可能性被改写为确定性"),
     ("certainty_inflate", r"预计", "将", "预测被改写为确定的未来事实"),
     ("certainty_inflate", r"疑似", "确认为", "推测被改写为已确认结论"),
     # 仅当 X 时，才 Y  ->  当 X 时，Y ; dropping 才 too, otherwise the gate survives
@@ -75,9 +75,11 @@ LEXICAL_OPERATORS: list[tuple[str, str, str, str]] = [
     ("negation_scope", r"不得同时", "均不得", "组合级禁止被改为对每一项的全面禁止"),
     ("causal_inject", r"(?<=[^。；\n])。(?=[^\n]{4,})", "，因此", "并列或时序关系被改写为因果关系"),
     ("causal_inject", r"与([^，。]{2,12})相关", r"由\1导致", "相关性被升级为确定因果"),
+    # anchored at ^, so this fires on any text; mutate() restricts it to short
+    # single-sentence sources, where a leading 通常 is a plausible model edit
     ("unsourced_qualifier", r"^", "通常", "新增了源文没有的频率判断"),
-    ("unsourced_qualifier", r"检查", "只需检查", "新增了源文没有的充分性判断"),
-    ("order_swap", r"^([^，。]{4,30})后，([^，。]{4,40})", r"\2后，\1", "两个动作的必要先后顺序被反转"),
+    ("unsourced_qualifier", r"(?<=[。；\n])(检查|执行|重启|运行)", r"只需\1",
+     "新增了源文没有的充分性判断"),
     ("term_substitute", r"撤销", "删除", "撤销与删除是不同的领域概念，被错误归一"),
     ("term_substitute", r"副本", "备份", "副本与备份是不同的领域概念，被错误归一"),
     ("term_substitute", r"重载", "重启", "重载与重启是不同的操作，被错误归一"),
@@ -145,9 +147,39 @@ def actor_mutations(text: str, actors: list[str]) -> list[Mutation]:
     return out
 
 
+def order_mutations(text: str) -> list[Mutation]:
+    """Swap two adjacent numbered steps.
+
+    A free-form clause swap on Chinese prose reliably produces ungrammatical text,
+    which tests nothing. Renumbering a procedure is both grammatical by construction
+    and a failure real models actually commit.
+    """
+    steps = re.findall(r"^(\d+)\.\s*(.+)$", text, re.M)
+    if len(steps) < 2:
+        return []
+    lines = text.split("\n")
+    idx = [i for i, l in enumerate(lines) if re.match(r"^\d+\.\s", l)]
+    if len(idx) < 2:
+        return []
+    a, b = idx[-2], idx[-1]
+    na = re.match(r"^(\d+)\.\s*(.*)$", lines[a])
+    nb = re.match(r"^(\d+)\.\s*(.*)$", lines[b])
+    if not (na and nb):
+        return []
+    lines[a] = f"{na.group(1)}. {nb.group(2)}"
+    lines[b] = f"{nb.group(1)}. {na.group(2)}"
+    return [Mutation(
+        "order_swap", "\n".join(lines), f"步骤 {na.group(1)} 与 {nb.group(1)}",
+        f"步骤 {na.group(1)} 与 {nb.group(1)} 的执行顺序被互换，越过了必要的前置条件")]
+
+
 def mutate(text: str, actors: list[str] | None = None, limit: int = 6) -> list[Mutation]:
     found: list[Mutation] = []
+    multi_line = "\n" in text.strip()
     for cls, pattern, repl, expected in LEXICAL_OPERATORS:
+        if pattern == r"^" and (multi_line or len(text) > 60 or "：" in text[:8]):
+            # a leading label (「警告：」「错误 X：」) cannot take a frequency adverb in front
+            continue
         res = _sub_first(text, pattern, repl)
         if res is None:
             continue
@@ -155,6 +187,7 @@ def mutate(text: str, actors: list[str] | None = None, limit: int = 6) -> list[M
         if mutated.strip() == text.strip():
             continue
         found.append(Mutation(cls, mutated, locus, expected))
+    found += order_mutations(text)
     found += quantity_mutations(text)
     found += token_mutations(text)
     found += actor_mutations(text, actors or [])
@@ -170,19 +203,28 @@ def mutate(text: str, actors: list[str] | None = None, limit: int = 6) -> list[M
     return balanced[:limit]
 
 
-def cases_from_gold(gold_dir: Path) -> list[dict]:
+def cases_from_gold(gold_dir: Path, per_class_cap: int = 6) -> list[dict]:
+    """Cap each class so the corpus is balanced. An operator that matches every
+    text would otherwise dominate and the per-class detection rate — the whole
+    point of the corpus — would be measured on one class with a long tail."""
     out: list[dict] = []
+    counts: dict[str, int] = {}
     seq = 0
     for path in sorted(gold_dir.glob("*.yaml")):
         doc = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         for case in doc.get("cases", []):
-            if case.get("over_edit_trap"):
-                continue  # a trap's source is clean by design; mutating it inverts its purpose
+            if case.get("mode") == "review":
+                # a review case's source is an 原文/候选改写 pair that already carries a
+                # planted defect; injecting a second one makes the expectation ambiguous
+                continue
             source = (case.get("source") or "").strip()
             if not source:
                 continue
             actors = [i.get("actor") for i in case.get("invariants", []) if i.get("actor")]
             for m in mutate(source, actors):
+                if counts.get(m.cls, 0) >= per_class_cap:
+                    continue
+                counts[m.cls] = counts.get(m.cls, 0) + 1
                 seq += 1
                 out.append({
                     "id": f"M-{seq:03d}",
@@ -199,6 +241,7 @@ def cases_from_gold(gold_dir: Path) -> list[dict]:
                         "locus": m.locus,
                         "problem": m.expected,
                     }],
+                    "clean_source_is_compliant": bool(case.get("over_edit_trap")),
                     "provenance": "generated-mutation",
                 })
     return out
@@ -209,6 +252,7 @@ def main() -> int:
     ap.add_argument("--from", dest="src", default=str(ROOT / "eval" / "gold"))
     ap.add_argument("--out", default=str(ROOT / "eval" / "mutations" / "generated.yaml"))
     ap.add_argument("--text", help="mutate one string and print the result")
+    ap.add_argument("--cap", type=int, default=6, help="max mutants per class")
     args = ap.parse_args()
 
     if args.text:
@@ -216,7 +260,7 @@ def main() -> int:
             print(f"[{m.cls}] {m.locus!r}\n  {m.text}\n  expect: {m.expected}\n")
         return 0
 
-    cases = cases_from_gold(Path(args.src))
+    cases = cases_from_gold(Path(args.src), args.cap)
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     Path(args.out).write_text(
         yaml.dump({"cases": cases}, allow_unicode=True, sort_keys=False, width=100),

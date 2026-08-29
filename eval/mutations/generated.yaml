@@ -1,0 +1,678 @@
+cases:
+- id: M-001
+  mutation_class: condition_broaden
+  derived_from: G-L-001
+  task: review
+  mode: review
+  clean_source: '故障切换步骤：
+
+    1. 记录本次健康检查结果。
+
+    2. 仅当健康检查在 2 分钟内连续失败 3 次，且主集群已进入只读状态时，才切换到备用集群。
+
+    3. 任一次检查恢复成功后，将连续失败计数清零。'
+  source: '故障切换步骤：
+
+    1. 记录本次健康检查结果。
+
+    2. 当健康检查在 2 分钟内连续失败 3 次，且主集群已进入只读状态时，才切换到备用集群。
+
+    3. 任一次检查恢复成功后，将连续失败计数清零。'
+  locus: 仅当
+  expected_issues:
+  - category: condition_broaden
+    severity: ERROR
+    locus: 仅当
+    problem: 必要条件（仅当）被放宽为一般条件
+  clean_source_is_compliant: false
+  provenance: generated-mutation
+- id: M-002
+  mutation_class: order_swap
+  derived_from: G-L-001
+  task: review
+  mode: review
+  clean_source: '故障切换步骤：
+
+    1. 记录本次健康检查结果。
+
+    2. 仅当健康检查在 2 分钟内连续失败 3 次，且主集群已进入只读状态时，才切换到备用集群。
+
+    3. 任一次检查恢复成功后，将连续失败计数清零。'
+  source: '故障切换步骤：
+
+    1. 记录本次健康检查结果。
+
+    2. 任一次检查恢复成功后，将连续失败计数清零。
+
+    3. 仅当健康检查在 2 分钟内连续失败 3 次，且主集群已进入只读状态时，才切换到备用集群。'
+  locus: 步骤 2 与 3
+  expected_issues:
+  - category: order_swap
+    severity: ERROR
+    locus: 步骤 2 与 3
+    problem: 步骤 2 与 3 的执行顺序被互换，越过了必要的前置条件
+  clean_source_is_compliant: false
+  provenance: generated-mutation
+- id: M-003
+  mutation_class: quantity_drift
+  derived_from: G-L-001
+  task: review
+  mode: review
+  clean_source: '故障切换步骤：
+
+    1. 记录本次健康检查结果。
+
+    2. 仅当健康检查在 2 分钟内连续失败 3 次，且主集群已进入只读状态时，才切换到备用集群。
+
+    3. 任一次检查恢复成功后，将连续失败计数清零。'
+  source: '故障切换步骤：
+
+    1. 记录本次健康检查结果。
+
+    2. 仅当健康检查在 4 分钟内连续失败 3 次，且主集群已进入只读状态时，才切换到备用集群。
+
+    3. 任一次检查恢复成功后，将连续失败计数清零。'
+  locus: 2 分钟
+  expected_issues:
+  - category: quantity_drift
+    severity: ERROR
+    locus: 2 分钟
+    problem: 数值由 2 改为 4，阈值/次数被改变
+  clean_source_is_compliant: false
+  provenance: generated-mutation
+- id: M-004
+  mutation_class: modality_weaken
+  derived_from: G-L-004
+  task: review
+  mode: review
+  clean_source: 警告：除审计日志和当前活动会话外，执行 `purge` 会删除该租户的所有临时数据。对保留租户不得执行 `purge`。
+  source: 警告：除审计日志和当前活动会话外，执行 `purge` 会删除该租户的所有临时数据。对保留租户应尽量避免执行 `purge`。
+  locus: 不得
+  expected_issues:
+  - category: modality_weaken
+    severity: ERROR
+    locus: 不得
+    problem: 不得（禁止）被弱化为defeasible的规避建议
+  clean_source_is_compliant: true
+  provenance: generated-mutation
+- id: M-005
+  mutation_class: condition_broaden
+  derived_from: G-L-004
+  task: review
+  mode: review
+  clean_source: 警告：除审计日志和当前活动会话外，执行 `purge` 会删除该租户的所有临时数据。对保留租户不得执行 `purge`。
+  source: 警告：执行 `purge` 会删除该租户的所有临时数据。对保留租户不得执行 `purge`。
+  locus: 除审计日志和当前活动会话外，
+  expected_issues:
+  - category: condition_broaden
+    severity: ERROR
+    locus: 除审计日志和当前活动会话外，
+    problem: 例外集合被删除，义务范围被扩大
+  clean_source_is_compliant: true
+  provenance: generated-mutation
+- id: M-006
+  mutation_class: unsourced_qualifier
+  derived_from: G-L-006
+  task: review
+  mode: review
+  clean_source: 错误 `E_LOCKED`：由于该资源正在被另一个进程占用的事实，当前请求已被拒绝。释放该进程持有的锁后重试。
+  source: 通常错误 `E_LOCKED`：由于该资源正在被另一个进程占用的事实，当前请求已被拒绝。释放该进程持有的锁后重试。
+  locus: ''
+  expected_issues:
+  - category: unsourced_qualifier
+    severity: ERROR
+    locus: ''
+    problem: 新增了源文没有的频率判断
+  clean_source_is_compliant: false
+  provenance: generated-mutation
+- id: M-007
+  mutation_class: token_mutate
+  derived_from: G-L-006
+  task: review
+  mode: review
+  clean_source: 错误 `E_LOCKED`：由于该资源正在被另一个进程占用的事实，当前请求已被拒绝。释放该进程持有的锁后重试。
+  source: 错误 `ELocked`：由于该资源正在被另一个进程占用的事实，当前请求已被拒绝。释放该进程持有的锁后重试。
+  locus: E_LOCKED
+  expected_issues:
+  - category: token_mutate
+    severity: ERROR
+    locus: E_LOCKED
+    problem: 受保护标记 `E_LOCKED` 被改写为 `ELocked`，不再对应真实接口
+  clean_source_is_compliant: false
+  provenance: generated-mutation
+- id: M-008
+  mutation_class: modality_strengthen
+  derived_from: G-L-008
+  task: review
+  mode: review
+  clean_source: 不得同时重启 `controller-a` 和 `controller-b`；可以先重启其中一个，待其恢复后再重启另一个。
+  source: 不得同时重启 `controller-a` 和 `controller-b`；必须先重启其中一个，待其恢复后再重启另一个。
+  locus: 可以
+  expected_issues:
+  - category: modality_strengthen
+    severity: ERROR
+    locus: 可以
+    problem: 可以（许可）被强化为必须（义务）
+  clean_source_is_compliant: true
+  provenance: generated-mutation
+- id: M-009
+  mutation_class: modality_weaken
+  derived_from: G-L-008
+  task: review
+  mode: review
+  clean_source: 不得同时重启 `controller-a` 和 `controller-b`；可以先重启其中一个，待其恢复后再重启另一个。
+  source: 应尽量避免同时重启 `controller-a` 和 `controller-b`；可以先重启其中一个，待其恢复后再重启另一个。
+  locus: 不得
+  expected_issues:
+  - category: modality_weaken
+    severity: ERROR
+    locus: 不得
+    problem: 不得（禁止）被弱化为defeasible的规避建议
+  clean_source_is_compliant: true
+  provenance: generated-mutation
+- id: M-010
+  mutation_class: negation_scope
+  derived_from: G-L-008
+  task: review
+  mode: review
+  clean_source: 不得同时重启 `controller-a` 和 `controller-b`；可以先重启其中一个，待其恢复后再重启另一个。
+  source: 均不得重启 `controller-a` 和 `controller-b`；可以先重启其中一个，待其恢复后再重启另一个。
+  locus: 不得同时
+  expected_issues:
+  - category: negation_scope
+    severity: ERROR
+    locus: 不得同时
+    problem: 组合级禁止被改为对每一项的全面禁止
+  clean_source_is_compliant: true
+  provenance: generated-mutation
+- id: M-011
+  mutation_class: threshold_flip
+  derived_from: G-L-010
+  task: review
+  mode: review
+  clean_source: 当待处理任务数达到 100 条时，调度器停止接收新任务；降到 80 条以下后恢复接收。
+  source: 当待处理任务数超过 100 条时，调度器停止接收新任务；降到 80 条以下后恢复接收。
+  locus: 达到
+  expected_issues:
+  - category: threshold_flip
+    severity: ERROR
+    locus: 达到
+    problem: 闭区间边界被改为开区间，等于阈值时的行为改变
+  clean_source_is_compliant: true
+  provenance: generated-mutation
+- id: M-012
+  mutation_class: unsourced_qualifier
+  derived_from: G-L-010
+  task: review
+  mode: review
+  clean_source: 当待处理任务数达到 100 条时，调度器停止接收新任务；降到 80 条以下后恢复接收。
+  source: 通常当待处理任务数达到 100 条时，调度器停止接收新任务；降到 80 条以下后恢复接收。
+  locus: ''
+  expected_issues:
+  - category: unsourced_qualifier
+    severity: ERROR
+    locus: ''
+    problem: 新增了源文没有的频率判断
+  clean_source_is_compliant: true
+  provenance: generated-mutation
+- id: M-013
+  mutation_class: quantity_drift
+  derived_from: G-L-010
+  task: review
+  mode: review
+  clean_source: 当待处理任务数达到 100 条时，调度器停止接收新任务；降到 80 条以下后恢复接收。
+  source: 当待处理任务数达到 1000 条时，调度器停止接收新任务；降到 80 条以下后恢复接收。
+  locus: 100 条
+  expected_issues:
+  - category: quantity_drift
+    severity: ERROR
+    locus: 100 条
+    problem: 数值由 100 改为 1000，阈值/次数被改变
+  clean_source_is_compliant: true
+  provenance: generated-mutation
+- id: M-014
+  mutation_class: quantity_drift
+  derived_from: G-L-011
+  task: review
+  mode: review
+  clean_source: '| 参数 | 行为 |
+
+    | --- | --- |
+
+    | `max_wait` | 等待时间在 30 s 以内时返回结果；超过 30 s 时返回 `timeout`。 |'
+  source: '| 参数 | 行为 |
+
+    | --- | --- |
+
+    | `max_wait` | 等待时间在 32 s 以内时返回结果；超过 30 s 时返回 `timeout`。 |'
+  locus: 30 s
+  expected_issues:
+  - category: quantity_drift
+    severity: ERROR
+    locus: 30 s
+    problem: 数值由 30 改为 32，阈值/次数被改变
+  clean_source_is_compliant: false
+  provenance: generated-mutation
+- id: M-015
+  mutation_class: token_mutate
+  derived_from: G-L-011
+  task: review
+  mode: review
+  clean_source: '| 参数 | 行为 |
+
+    | --- | --- |
+
+    | `max_wait` | 等待时间在 30 s 以内时返回结果；超过 30 s 时返回 `timeout`。 |'
+  source: '| 参数 | 行为 |
+
+    | --- | --- |
+
+    | `maxWait` | 等待时间在 30 s 以内时返回结果；超过 30 s 时返回 `timeout`。 |'
+  locus: max_wait
+  expected_issues:
+  - category: token_mutate
+    severity: ERROR
+    locus: max_wait
+    problem: 受保护标记 `max_wait` 被改写为 `maxWait`，不再对应真实接口
+  clean_source_is_compliant: false
+  provenance: generated-mutation
+- id: M-016
+  mutation_class: modality_weaken
+  derived_from: G-L-012
+  task: review
+  mode: review
+  clean_source: '故障切换步骤：
+
+    1. 暂停写入。
+
+    2. 等待 `replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`。
+
+    3. 将备用库提升为主库。
+
+
+    警告：第 3 步不得与第 1、2 步并行。'
+  source: '故障切换步骤：
+
+    1. 暂停写入。
+
+    2. 等待 `replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`。
+
+    3. 将备用库提升为主库。
+
+
+    警告：第 3 步应尽量避免与第 1、2 步并行。'
+  locus: 不得
+  expected_issues:
+  - category: modality_weaken
+    severity: ERROR
+    locus: 不得
+    problem: 不得（禁止）被弱化为defeasible的规避建议
+  clean_source_is_compliant: true
+  provenance: generated-mutation
+- id: M-017
+  mutation_class: order_swap
+  derived_from: G-L-012
+  task: review
+  mode: review
+  clean_source: '故障切换步骤：
+
+    1. 暂停写入。
+
+    2. 等待 `replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`。
+
+    3. 将备用库提升为主库。
+
+
+    警告：第 3 步不得与第 1、2 步并行。'
+  source: '故障切换步骤：
+
+    1. 暂停写入。
+
+    2. 将备用库提升为主库。
+
+    3. 等待 `replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`。
+
+
+    警告：第 3 步不得与第 1、2 步并行。'
+  locus: 步骤 2 与 3
+  expected_issues:
+  - category: order_swap
+    severity: ERROR
+    locus: 步骤 2 与 3
+    problem: 步骤 2 与 3 的执行顺序被互换，越过了必要的前置条件
+  clean_source_is_compliant: true
+  provenance: generated-mutation
+- id: M-018
+  mutation_class: token_mutate
+  derived_from: G-L-012
+  task: review
+  mode: review
+  clean_source: '故障切换步骤：
+
+    1. 暂停写入。
+
+    2. 等待 `replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`。
+
+    3. 将备用库提升为主库。
+
+
+    警告：第 3 步不得与第 1、2 步并行。'
+  source: '故障切换步骤：
+
+    1. 暂停写入。
+
+    2. 等待 `replicaLagMs` 降为 `0`，并确认快照状态为 `COMPLETED`。
+
+    3. 将备用库提升为主库。
+
+
+    警告：第 3 步不得与第 1、2 步并行。'
+  locus: replica_lag_ms
+  expected_issues:
+  - category: token_mutate
+    severity: ERROR
+    locus: replica_lag_ms
+    problem: 受保护标记 `replica_lag_ms` 被改写为 `replicaLagMs`，不再对应真实接口
+  clean_source_is_compliant: true
+  provenance: generated-mutation
+- id: M-019
+  mutation_class: token_mutate
+  derived_from: G-R-003
+  task: review
+  mode: review
+  clean_source: Due to the fact that the connection was closed by the remote peer, uncommitted transactions
+    were aborted and an error code `ERR_CONN_RESET` was returned to the client.
+  source: Due to the fact that the connection was closed by the remote peer, uncommitted transactions
+    were aborted and an error code `ERRConnReset` was returned to the client.
+  locus: ERR_CONN_RESET
+  expected_issues:
+  - category: token_mutate
+    severity: ERROR
+    locus: ERR_CONN_RESET
+    problem: 受保护标记 `ERR_CONN_RESET` 被改写为 `ERRConnReset`，不再对应真实接口
+  clean_source_is_compliant: false
+  provenance: generated-mutation
+- id: M-020
+  mutation_class: unsourced_qualifier
+  derived_from: G-R-004
+  task: review
+  mode: review
+  clean_source: 修改配置后须重启网关生效。
+  source: 通常修改配置后须重启网关生效。
+  locus: ''
+  expected_issues:
+  - category: unsourced_qualifier
+    severity: ERROR
+    locus: ''
+    problem: 新增了源文没有的频率判断
+  clean_source_is_compliant: true
+  provenance: generated-mutation
+- id: M-021
+  mutation_class: unsourced_qualifier
+  derived_from: G-R-005
+  task: review
+  mode: review
+  clean_source: 接口支持批量写入，单次上限 500 条。
+  source: 通常接口支持批量写入，单次上限 500 条。
+  locus: ''
+  expected_issues:
+  - category: unsourced_qualifier
+    severity: ERROR
+    locus: ''
+    problem: 新增了源文没有的频率判断
+  clean_source_is_compliant: true
+  provenance: generated-mutation
+- id: M-022
+  mutation_class: quantity_drift
+  derived_from: G-R-005
+  task: review
+  mode: review
+  clean_source: 接口支持批量写入，单次上限 500 条。
+  source: 接口支持批量写入，单次上限 5000 条。
+  locus: 500 条
+  expected_issues:
+  - category: quantity_drift
+    severity: ERROR
+    locus: 500 条
+    problem: 数值由 500 改为 5000，阈值/次数被改变
+  clean_source_is_compliant: true
+  provenance: generated-mutation
+- id: M-023
+  mutation_class: unsourced_qualifier
+  derived_from: G-R-006
+  task: review
+  mode: review
+  clean_source: 磁盘用量超 90% 触发告警。
+  source: 通常磁盘用量超 90% 触发告警。
+  locus: ''
+  expected_issues:
+  - category: unsourced_qualifier
+    severity: ERROR
+    locus: ''
+    problem: 新增了源文没有的频率判断
+  clean_source_is_compliant: true
+  provenance: generated-mutation
+- id: M-024
+  mutation_class: quantity_drift
+  derived_from: G-R-006
+  task: review
+  mode: review
+  clean_source: 磁盘用量超 90% 触发告警。
+  source: 磁盘用量超 92% 触发告警。
+  locus: 90%
+  expected_issues:
+  - category: quantity_drift
+    severity: ERROR
+    locus: 90%
+    problem: 数值由 90 改为 92，阈值/次数被改变
+  clean_source_is_compliant: true
+  provenance: generated-mutation
+- id: M-025
+  mutation_class: unsourced_qualifier
+  derived_from: G-R-008
+  task: review
+  mode: review
+  clean_source: 生产环境禁用调试模式。
+  source: 通常生产环境禁用调试模式。
+  locus: ''
+  expected_issues:
+  - category: unsourced_qualifier
+    severity: ERROR
+    locus: ''
+    problem: 新增了源文没有的频率判断
+  clean_source_is_compliant: true
+  provenance: generated-mutation
+- id: M-026
+  mutation_class: token_mutate
+  derived_from: G-R-009
+  task: review
+  mode: review
+  clean_source: 请您在注意到用户的输入里面好像有 SQL 相关词汇的时候，尽可能帮忙调用一下 `sanitize_query` 工具对输入进行清理哦，千万不要直接拿去拼接字符串。
+  source: 请您在注意到用户的输入里面好像有 SQL 相关词汇的时候，尽可能帮忙调用一下 `sanitizeQuery` 工具对输入进行清理哦，千万不要直接拿去拼接字符串。
+  locus: sanitize_query
+  expected_issues:
+  - category: token_mutate
+    severity: ERROR
+    locus: sanitize_query
+    problem: 受保护标记 `sanitize_query` 被改写为 `sanitizeQuery`，不再对应真实接口
+  clean_source_is_compliant: false
+  provenance: generated-mutation
+- id: M-027
+  mutation_class: modality_strengthen
+  derived_from: G-R-010
+  task: review
+  mode: review
+  clean_source: 这个工具能够允许调用者去获取指定时间范围内的系统审计日志，你可以用它来根据用户 ID 和操作类型进行日志筛选，单次调用最多能够为你返回 100 条记录。
+  source: 这个工具能够允许调用者去获取指定时间范围内的系统审计日志，你必须用它来根据用户 ID 和操作类型进行日志筛选，单次调用最多能够为你返回 100 条记录。
+  locus: 可以
+  expected_issues:
+  - category: modality_strengthen
+    severity: ERROR
+    locus: 可以
+    problem: 可以（许可）被强化为必须（义务）
+  clean_source_is_compliant: false
+  provenance: generated-mutation
+- id: M-028
+  mutation_class: quantity_drift
+  derived_from: G-R-010
+  task: review
+  mode: review
+  clean_source: 这个工具能够允许调用者去获取指定时间范围内的系统审计日志，你可以用它来根据用户 ID 和操作类型进行日志筛选，单次调用最多能够为你返回 100 条记录。
+  source: 这个工具能够允许调用者去获取指定时间范围内的系统审计日志，你可以用它来根据用户 ID 和操作类型进行日志筛选，单次调用最多能够为你返回 1000 条记录。
+  locus: 100 条
+  expected_issues:
+  - category: quantity_drift
+    severity: ERROR
+    locus: 100 条
+    problem: 数值由 100 改为 1000，阈值/次数被改变
+  clean_source_is_compliant: false
+  provenance: generated-mutation
+- id: M-029
+  mutation_class: modality_weaken
+  derived_from: G-R-014
+  task: review
+  mode: review
+  clean_source: 在执行对生产数据库的备份操作之后，管理员必须把流量进行路由操作到备用集群，以便使得流量切换能够成功完成。
+  source: 在执行对生产数据库的备份操作之后，管理员建议把流量进行路由操作到备用集群，以便使得流量切换能够成功完成。
+  locus: 必须
+  expected_issues:
+  - category: modality_weaken
+    severity: ERROR
+    locus: 必须
+    problem: 必须（义务）被弱化为建议（推荐）
+  clean_source_is_compliant: false
+  provenance: generated-mutation
+- id: M-030
+  mutation_class: modality_strengthen
+  derived_from: G-S-001
+  task: review
+  mode: review
+  clean_source: 在低流量窗口执行索引重建可以降低对在线请求的影响，因此建议先在只读副本上验证执行计划。若延迟预算紧张，也可以推迟到下一维护窗口。
+  source: 在低流量窗口执行索引重建可以降低对在线请求的影响，因此必须先在只读副本上验证执行计划。若延迟预算紧张，也可以推迟到下一维护窗口。
+  locus: 建议
+  expected_issues:
+  - category: modality_strengthen
+    severity: ERROR
+    locus: 建议
+    problem: 建议（推荐）被强化为必须（义务）
+  clean_source_is_compliant: true
+  provenance: generated-mutation
+- id: M-031
+  mutation_class: term_substitute
+  derived_from: G-S-001
+  task: review
+  mode: review
+  clean_source: 在低流量窗口执行索引重建可以降低对在线请求的影响，因此建议先在只读副本上验证执行计划。若延迟预算紧张，也可以推迟到下一维护窗口。
+  source: 在低流量窗口执行索引重建可以降低对在线请求的影响，因此建议先在只读备份上验证执行计划。若延迟预算紧张，也可以推迟到下一维护窗口。
+  locus: 副本
+  expected_issues:
+  - category: term_substitute
+    severity: ERROR
+    locus: 副本
+    problem: 副本与备份是不同的领域概念，被错误归一
+  clean_source_is_compliant: true
+  provenance: generated-mutation
+- id: M-032
+  mutation_class: modality_strengthen
+  derived_from: G-S-003
+  task: review
+  mode: review
+  clean_source: 轮换主密钥前，操作员必须确认最近一次备份已完成。未确认时不得继续；测试租户可以取消本次轮换。
+  source: 轮换主密钥前，操作员必须确认最近一次备份已完成。未确认时不得继续；测试租户必须取消本次轮换。
+  locus: 可以
+  expected_issues:
+  - category: modality_strengthen
+    severity: ERROR
+    locus: 可以
+    problem: 可以（许可）被强化为必须（义务）
+  clean_source_is_compliant: false
+  provenance: generated-mutation
+- id: M-033
+  mutation_class: modality_weaken
+  derived_from: G-S-003
+  task: review
+  mode: review
+  clean_source: 轮换主密钥前，操作员必须确认最近一次备份已完成。未确认时不得继续；测试租户可以取消本次轮换。
+  source: 轮换主密钥前，操作员建议确认最近一次备份已完成。未确认时不得继续；测试租户可以取消本次轮换。
+  locus: 必须
+  expected_issues:
+  - category: modality_weaken
+    severity: ERROR
+    locus: 必须
+    problem: 必须（义务）被弱化为建议（推荐）
+  clean_source_is_compliant: false
+  provenance: generated-mutation
+- id: M-034
+  mutation_class: certainty_inflate
+  derived_from: G-S-005
+  task: review
+  mode: review
+  clean_source: 过去 24 小时的日志显示，超时可能与连接池耗尽有关。目前只确认两者同时出现，根因尚未确定。
+  source: 过去 24 小时的日志显示，超时会与连接池耗尽有关。目前只确认两者同时出现，根因尚未确定。
+  locus: 可能
+  expected_issues:
+  - category: certainty_inflate
+    severity: ERROR
+    locus: 可能
+    problem: 可能性被改写为确定性
+  clean_source_is_compliant: true
+  provenance: generated-mutation
+- id: M-035
+  mutation_class: modality_weaken
+  derived_from: G-S-007
+  task: review
+  mode: review
+  clean_source: '客户端参数：
+
+    - 单次请求超时为 250 ms。
+
+    - 首次失败后等待 2 s；最多重试 3 次。
+
+    - 总等待时间不得超过 10 s。'
+  source: '客户端参数：
+
+    - 单次请求超时为 250 ms。
+
+    - 首次失败后等待 2 s；最多重试 3 次。
+
+    - 总等待时间应尽量避免超过 10 s。'
+  locus: 不得
+  expected_issues:
+  - category: modality_weaken
+    severity: ERROR
+    locus: 不得
+    problem: 不得（禁止）被弱化为defeasible的规避建议
+  clean_source_is_compliant: false
+  provenance: generated-mutation
+- id: M-036
+  mutation_class: token_mutate
+  derived_from: G-S-009
+  task: review
+  mode: review
+  clean_source: 收到 `503` 时，检查上游服务状态和最近一次部署记录。不要自动重启服务；将检查结果附到事件单。
+  source: 收到 `512` 时，检查上游服务状态和最近一次部署记录。不要自动重启服务；将检查结果附到事件单。
+  locus: '503'
+  expected_issues:
+  - category: token_mutate
+    severity: ERROR
+    locus: '503'
+    problem: 状态码 `503` 被改为 `512`，分支条件改变
+  clean_source_is_compliant: true
+  provenance: generated-mutation
+- id: M-037
+  mutation_class: condition_broaden
+  derived_from: G-T-002
+  task: review
+  mode: review
+  clean_source: 工具 `sync-config` 接受 `--dry-run` 和 `--config=/etc/ctc/agent.yaml`。仅当 `CTC_SYNC_MODE=verify`
+    时，工具执行验证而不写入；验证失败时返回退出码 `2`。
+  source: 工具 `sync-config` 接受 `--dry-run` 和 `--config=/etc/ctc/agent.yaml`。当 `CTC_SYNC_MODE=verify` 时，工具执行验证而不写入；验证失败时返回退出码
+    `2`。
+  locus: 仅当
+  expected_issues:
+  - category: condition_broaden
+    severity: ERROR
+    locus: 仅当
+    problem: 必要条件（仅当）被放宽为一般条件
+  clean_source_is_compliant: false
+  provenance: generated-mutation

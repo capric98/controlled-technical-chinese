@@ -574,3 +574,181 @@ rules:
       risk: "选定一种读法等于替作者做出未经授权的技术决定，且改写后的文本不再显示曾经存在过歧义，后续审查者失去了发现它的机会。"
       not_covered_by: "S002 禁止新增命题，但不规定遇到歧义时应当做什么；没有本规则，S002 的合规做法可以是「什么都不改也不说」，歧义随之被静默带入下游。A001-A004 单独作用时都会推动模型去消歧，需要一条明确的兜底规则来约束它们。"
       distinguishing_criterion: "对来源可枚举出多于一种导致不同行为的读法，而输出只呈现一种且「待确认」中无对应条目，即失败。"
+
+  # ------------------------------------------------- P: procedures and action structure
+
+  - id: CTC-P001
+    family: P
+    concept: step-decomposition-safety
+    level: MUST
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: "改写涉及步骤的拆分、合并、编号或重排；或来源用一句话描述了包含多个操作的过程。"
+    requirement: "一个步骤对应一个可验证的操作目标。拆分或合并之后，执行顺序、原子性约束（必须在同一维护窗口、同一事务、同一会话内完成）与可回滚点必须与来源一致；原子性约束必须显式落在它所约束的那一组动作上。"
+    prohibition: "把带原子性约束的一组动作拆成互不引用的独立步骤；把有依赖关系的步骤合并成一句从而抹掉顺序；把约束保留下来却挂到错误的步骤上；按「一句一动词」机械拆分。"
+    exceptions: "本规则不采用「一句一动词」（000-design.md §7.3）。多个动作构成同一操作目标时保持在同一步骤内。调用方明确要求逐条编号时，仍须保留原子性约束。"
+    invariant: "step-graph — (步骤集合, 顺序依赖, 原子性分组, 回滚点) 与来源一致。"
+    detection: semantic
+    examples:
+      positive:
+        source_zh: "在同一维护窗口内停止写入并创建快照，然后卸载数据卷。"
+        good_zh: |-
+          1. 停止写入，并在同一维护窗口内创建快照。
+          2. 卸载数据卷。
+      negative:
+        source_zh: "在同一维护窗口内停止写入并创建快照，然后卸载数据卷。"
+        bad_zh: |-
+          1. 停止写入。
+          2. 创建快照。
+          3. 在同一维护窗口内卸载数据卷。
+        why_bad: "约束文字被保留，却绑定到了错误的步骤：需要落在同一窗口内的是「停止写入」与「创建快照」这一对操作。逐条比对断言看不出任何丢失，执行结果却是一个在写入恢复之后创建的、不一致的快照——而该快照正是回滚依据。"
+      boundary:
+        source_zh: "执行 `make build` 并运行 `make test`。"
+        output_zh: |-
+          1. 执行 `make build`。
+          2. 运行 `make test`。
+        why_not_triggered: "两个命令之间只有先后关系，没有原子性约束，拆分不改变执行语义，也没有引入新的失败模式。"
+    justification: "步骤边界本身携带操作语义；改写模型把编号视为排版，因而会自由地拆合。"
+    gate_evidence:
+      failing_input: "在同一维护窗口内停止写入并创建快照，然后卸载数据卷。"
+      observed_bad_output: "1. 停止写入。 2. 创建快照。 3. 在同一维护窗口内卸载数据卷。"
+      risk: "得到一个不一致的快照，且这一点只有在真正需要回滚时才会暴露。"
+      not_covered_by: "S001 不触发：所有断言（含约束短语）都在输出中。L003 覆盖动作之间的先后关系，不覆盖「哪些动作必须落在同一时间窗口内」这一分组关系；先后关系在坏输出中恰好是正确的。"
+      distinguishing_criterion: "抽取两侧的 (步骤, 顺序依赖, 原子性分组)；分组归属不同即失败。"
+
+  - id: CTC-P002
+    family: P
+    concept: step-operability
+    level: SHOULD
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: "目标文本是可执行步骤（runbook、SOP、agent 指令、工具使用说明），而某一步骤缺少执行所必需的成分：动作、动作对象、或对象所在位置。"
+    requirement: "步骤应当可直接执行：动作、对象与位置在来源或上下文中可确定时应写出。无法确定时按 A005 在「待确认」中提出，不得猜测。"
+    prohibition: "把已给出的操作对象压缩为「相关配置」「对应服务」「必要的调整」；把具体命令替换为「按需处理」；删除操作发生的位置（节点、环境、命名空间）。"
+    exceptions: "命令行或代码块已完整表达动作与对象时，不再补写自然语言描述，否则触发 R002。说明性文档中对机制的概述不属于步骤，不触发本规则。"
+    invariant: "step-executability — 步骤的 (动作, 对象, 位置) 三元组在来源中可确定的部分，在输出中仍然可确定。"
+    detection: semantic
+    examples:
+      positive:
+        source_zh: "在网关节点上确认 `gateway.yaml` 的 `upstream` 配置无误，然后重启。"
+        good_zh: "在网关节点上确认 `gateway.yaml` 中的 `upstream` 配置无误，然后重启网关进程。"
+      negative:
+        source_zh: "在网关节点上确认 `gateway.yaml` 的 `upstream` 配置无误，然后重启网关进程。"
+        bad_zh: "确认配置无误后重启。"
+        why_bad: "操作位置、配置文件、字段与重启对象全部被压缩掉。步骤不可执行；在同时运行多个组件的节点上，「重启」还可能被理解为重启节点本身。"
+      boundary:
+        source_zh: "执行 `systemctl restart api-gateway`。"
+        output_zh: "执行 `systemctl restart api-gateway`。"
+        why_not_triggered: "命令本身已完整给出动作与对象。补写「由值班工程师在网关节点上执行该命令以重启网关服务」只增加冗余，不提高可执行性。"
+    justification: "过度压缩会把一个可执行步骤变成一句提示，而它在文档里看起来仍然像一个步骤。"
+    gate_evidence:
+      failing_input: "在网关节点上确认 `gateway.yaml` 的 `upstream` 配置无误，然后重启网关进程。"
+      observed_bad_output: "确认配置无误后重启。"
+      risk: "执行者要么停下来提问（流程延迟），要么按自己的理解重启错误的对象。"
+      not_covered_by: "S001 是通用的断言保留规则，但它不区分「说明性文本」与「必须可执行的步骤」；本规则给出的是可执行性判据，也是 A001／A005 补出成分时的适用边界。"
+      why_defeasible: "可执行性的门槛随读者与文档类型变化：面向开发者的 README 与面向值班的 runbook 要求不同。定为 MUST 会迫使说明性文本补出无关的操作细节。strict 模式下按 MUST 执行。"
+      distinguishing_criterion: "对每个步骤询问：不查阅其他材料能否执行？来源可确定而输出不可确定，即为 WARNING。"
+
+  - id: CTC-P003
+    family: P
+    concept: verification-binding
+    level: SHOULD
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: "来源给出了某个步骤的成功判据、等待条件或验证方式。"
+    requirement: "成功判据应与它所验证的步骤保持绑定，并保持其阻塞性质：「直到…为止再继续」必须仍然是继续的前提。来源未给出判据时不得虚构，可在「待确认」中提出缺失。"
+    prohibition: "把阻塞条件移到附注、脚注或文末；把「确认 X 后再继续」改写为「随后可继续」；把祈使的验证动作改写为对系统行为的描述；为步骤补写来源没有的验收标准。"
+    exceptions: "判据的呈现位置可以变化（正文、表格、检查清单），只要仍绑定同一步骤且保持阻塞性质。"
+    invariant: "verification-binding — (步骤, 判据, 是否阻塞) 三元组不变。"
+    detection: semantic
+    examples:
+      positive:
+        source_zh: "重启网关，直到 `/healthz` 返回 200 为止再继续下一步。"
+        good_zh: |-
+          1. 重启网关。
+          2. 确认 `/healthz` 返回 200 后，再继续下一步。
+      negative:
+        source_zh: "重启网关，直到 `/healthz` 返回 200 为止再继续下一步。"
+        bad_zh: |-
+          1. 重启网关。
+          2. 继续执行后续步骤。
+
+          附注：`/healthz` 正常时返回 200。
+        why_bad: "阻塞条件被降级为附注，并从祈使变成描述。操作员会在网关尚未就绪时继续，后续步骤作用于一个半启动的实例，产生的错误又会被误判为新故障。"
+      boundary:
+        source_zh: "运行 `terraform plan` 并检查输出。"
+        output_zh: "运行 `terraform plan` 并检查输出。"
+        why_not_triggered: "来源没有给出可判定的成功判据。补写「确认变更数量为 0」等于虚构验收标准（S002）；缺失本身可在「待确认」中提出。"
+    justification: "把校验挪成附注读起来更整洁，但它同时把一个前置条件变成了可选的参考信息。"
+    gate_evidence:
+      failing_input: "重启网关，直到 `/healthz` 返回 200 为止再继续下一步。"
+      observed_bad_output: "1. 重启网关。 2. 继续执行后续步骤。 附注：`/healthz` 正常时返回 200。"
+      risk: "后续步骤在服务未就绪时执行；在滚动发布类流程中这会把一次可控重启变成一次故障。"
+      not_covered_by: "S001 不触发：判据的文字仍在文档中。S003 覆盖情态强度，但此处的降级发生在结构位置上，句子内部的情态词甚至可以完全不变。"
+      why_defeasible: "文档体例差异很大，判据可以合法地出现在检查清单或表格中；只要仍绑定同一步骤且保持阻塞性质就不算违规，因此需要判断而非硬性位置要求。"
+      distinguishing_criterion: "对每条判据追问：它绑定哪个步骤？它仍是继续的前提吗？绑定丢失或阻塞性质降级，即为 WARNING（strict 下按 ERROR 处理）。"
+
+  - id: CTC-P004
+    family: P
+    concept: guard-precedes-irreversible-action
+    level: MUST
+    scope: [rewrite, translate, review, author]
+    modes: [strict, standard, review]
+    trigger: "某步骤包含破坏性、不可逆或改变外部状态的操作（删除、DROP、覆盖、重启、扩缩容、发布、回滚、密钥轮换、清空缓存），且来源给出了它的前置条件、前提或告警。"
+    requirement: "前置条件与告警必须出现在被守护的动作之前——同一句的前段，或紧邻的上一句。"
+    prohibition: "把前置条件或告警置于命令之后；移到章节末尾、附注或折叠块中；把它降级为不显眼的补充说明。"
+    exceptions: "动作可逆、且条件只作用于结果处理而非执行前提时不触发。来源没有给出条件时不得虚构条件或告警（S002）。"
+    invariant: "guard-order — 对每个不可逆动作，其守护条件在文本顺序上位于该动作之前。"
+    detection: mixed
+    detection_note: "确定性层可定位破坏性动作的关键词与代码块，并检查其前置条件短语的字符位置是否更早，作为 WARNING；动作是否不可逆、条件是否为守护条件由语义层判定。"
+    examples:
+      positive:
+        source_zh: "执行 `DROP TABLE staging_events;`。执行前必须确认已完成备份。"
+        good_zh: "确认备份已完成后，执行 `DROP TABLE staging_events;`。"
+      negative:
+        source_zh: "执行 `DROP TABLE staging_events;`。执行前必须确认已完成备份。"
+        bad_zh: "执行 `DROP TABLE staging_events;`；该操作要求已完成备份。"
+        why_bad: "前置条件出现在不可逆命令之后。运维逐条阅读并执行时，读到条件时表已经被删除；备份是否存在此刻已无法补救。"
+      boundary:
+        source_zh: "执行 `SELECT count(*) FROM events;`；若结果为 0，检查采集任务是否在运行。"
+        output_zh: "执行 `SELECT count(*) FROM events;`；若结果为 0，检查采集任务是否在运行。"
+        why_not_triggered: "查询可逆，且条件作用于结果处理而不是执行前提，前置反而会打乱阅读顺序。"
+    justification: "运行手册是被边读边执行的；条件的文本位置在这里是语义的一部分，而不是排版。"
+    gate_evidence:
+      failing_input: "执行 `DROP TABLE staging_events;`。执行前必须确认已完成备份。"
+      observed_bad_output: "执行 `DROP TABLE staging_events;`；该操作要求已完成备份。"
+      risk: "不可逆操作在前置条件未满足时被执行，且损失无法回滚。"
+      not_covered_by: "S001 与 L001 都只要求条件存在于输出中，对它出现在哪里不置一词；两条规则在这个坏输出上都判通过。风险完全来自位置。"
+      distinguishing_criterion: "定位每个不可逆动作及其守护条件的字符位置；条件位置晚于动作即 ERROR。"
+
+  - id: CTC-P005
+    family: P
+    concept: instruction-trigger-explicitness
+    level: SHOULD
+    scope: [author, rewrite, review]
+    modes: [strict, review]
+    trigger: "目标文本是 agent 指令、系统提示，或工具／函数描述。"
+    requirement: "应写明使用时机（触发条件）与已知的适用边界（何时不适用）。author 模式下这些内容取自调用方素材；rewrite 模式下来源未给出时不得补写，在「待确认」中提出。"
+    prohibition: "在改写模式下补出来源没有的能力、参数上限或使用限制；用「用于处理相关请求」这类不含触发条件的描述充当工具描述。"
+    exceptions: "触发条件已由工具名与参数唯一确定时不再重复说明；边界未知且素材未提供时留空并报告，不得推测。"
+    invariant: "no-invented-capability — 描述中声明的能力集合包含于素材给出的能力集合。"
+    detection: semantic
+    examples:
+      positive:
+        source_zh: "工具：`get_order_status`。描述：查询订单。（调用方素材：按 `order_id` 返回单个订单的当前状态；不支持批量与历史快照。）"
+        good_zh: "工具：`get_order_status`。按 `order_id` 查询单个订单的当前状态。不用于批量导出，也不返回历史快照。"
+      negative:
+        source_zh: "工具：`get_order_status`。描述：查询订单。"
+        bad_zh: "工具：`get_order_status`。查询订单，支持按时间范围批量查询，单次最多返回 100 条。"
+        why_bad: "改写模式下补出了来源没有的能力与上限。agent 会据此调用不存在的功能；失败之后也无法从描述判断是描述写错了还是实现有缺陷。"
+      boundary:
+        source_zh: "工具：`cancel_job`。取消指定的任务。任务已完成时调用会返回 `409`。"
+        output_zh: "工具：`cancel_job`。取消指定的任务。任务已完成时调用会返回 `409`。"
+        why_not_triggered: "触发条件与边界都已给出；追加「当用户希望取消任务时使用本工具」是纯冗余（R002）。"
+    justification: "agent 指令与工具描述是本技能的首要使用场景之一（000-design.md §1），其失败方式与散文不同：描述不全导致选错工具，描述过全导致调用不存在的能力。"
+    gate_evidence:
+      failing_input: "工具：`get_order_status`。描述：查询订单。"
+      observed_bad_output: "查询订单，支持按时间范围批量查询，单次最多返回 100 条。"
+      risk: "工具选择与调用参数被一段虚构的能力说明驱动；错误在运行时才暴露，且指向错误的排查方向。"
+      not_covered_by: "S002 覆盖了坏输出这一半（虚构能力），但不覆盖另一半：缺少触发条件的描述本身就是一种失败，而 S002 恰恰禁止用补写来修复它。本规则把两半连起来：缺失就报告，不填空。"
+      why_defeasible: "能否写出触发条件完全取决于素材是否包含它。定为 MUST 会与 S002 直接冲突，逼出虚构。"
