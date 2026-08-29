@@ -69,6 +69,12 @@ the judge, three are model limitations.
 over-editing, which counted an appended `待确认` section as a text change. `G-A-003` failed on this
 before the rule defect above was even reached.
 
+**Misdiagnosis — withdrawn.** `G-P-003` was initially read as a third rule defect, on the grounds
+that all three models merged a verification step. They were following the case's own `instruction`,
+which authorises compression to at most three steps, and the case prefers intact checks over step
+count. The constraint added on that reading was withdrawn and `CTC-P003` re-scoped around what the
+case actually tests. See `eval/disagreements/D004`.
+
 **Model limitations — recorded, no rule change.**
 
 3. `G-R-012`: Gemini reported a natural agentless passive as a `CTC-A001` missing-actor `ERROR`.
@@ -83,8 +89,14 @@ before the rule defect above was even reached.
 ## Conclusion
 
 The skill holds the deterministic invariants completely and the semantic invariants at 80–88%. The
-failures cluster where the design said they would — restraint, not preservation. Two of them were
-the rules' fault and are fixed; the rest are the frontier.
+failures cluster where the design said they would — restraint, not preservation. Two were the
+rules' fault and are fixed, one was a defect in the judge, one was a misdiagnosis by the reviewer,
+and the rest are the frontier.
+
+Post-fix regression on the affected cases: `G-L-012` and `G-R-012` now pass in both models —
+the warning block stays where it is and the agentless passive is no longer reported as a missing
+actor. `G-A-003` no longer produces pending-item noise. `G-P-003` compresses as instructed while
+keeping the checkpoint operator-executed and complete.
 
 The run's own instrument was wrong on first use and had to be repaired before its numbers meant
 anything. That is worth carrying forward: an evaluation harness is an artifact under test too.
