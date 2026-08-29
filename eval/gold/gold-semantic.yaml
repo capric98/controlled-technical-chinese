@@ -131,6 +131,7 @@ cases:
       '
   expected_issues:
   - category: modality-weakening
+    rule: CTC-S003
     severity: ERROR
     locus: 候选改写中的「确认」
   over_edit_trap: false

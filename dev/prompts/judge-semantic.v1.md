@@ -31,7 +31,10 @@ Rules of judgment, in priority order:
    typographic convention, `none` when the output correctly returned the source unchanged or
    reported no issue.
 5. For `mode: review` records, the output is a findings list, not a rewrite. Judge **recall**
-   against `expected_issues` — did it find each one — and judge **precision** separately: findings
+   against `expected_issues` — did it find each one. Score recall on the **defect**, not on the
+   rule ID: an `expected_issues` entry carries both a `category` and a `rule`, and a finding that
+   locates the same defect under a different but defensible rule ID counts as found. Citing no rule
+   at all does not — and judge **precision** separately: findings
    not in `expected_issues` are only false positives if the flagged text is in fact unambiguous
    and compliant. A correct extra finding is not an error. Rewriting the whole input in review
    mode is itself a failure (`instruction_following`).

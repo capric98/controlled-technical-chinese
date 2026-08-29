@@ -81,6 +81,7 @@ cases:
       '
   expected_issues:
   - category: condition-deletion
+    rule: CTC-L001
     severity: ERROR
     locus: 候选改写删除了「错误率已回到基线」
   over_edit_trap: false
@@ -187,6 +188,7 @@ cases:
       '
   expected_issues:
   - category: exception-set-deletion
+    rule: CTC-L001
     severity: ERROR
     locus: 候选改写中的「所有命名空间」
   over_edit_trap: false
@@ -339,9 +341,11 @@ cases:
       '
   expected_issues:
   - category: negation-scope
+    rule: CTC-A004
     severity: ERROR
     locus: 候选改写中的「禁止重启主数据库，亦禁止清空缓存」
   - category: modality-drift
+    rule: CTC-S003
     severity: ERROR
     locus: 原文「不会」与候选「禁止」
   over_edit_trap: false
@@ -527,6 +531,7 @@ cases:
       '
   expected_issues:
   - category: temporal-order
+    rule: CTC-L003
     severity: ERROR
     locus: 候选改写中的「删除旧卷，同时等待快照完成」
   over_edit_trap: false

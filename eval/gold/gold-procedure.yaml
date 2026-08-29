@@ -373,6 +373,7 @@ cases:
   authorized_token_changes: []
   expected_issues:
   - category: actor-omission-ambiguous
+    rule: CTC-A005
     severity: ERROR
     locus: 随后重新加载规则文件
   invalid_transformations:

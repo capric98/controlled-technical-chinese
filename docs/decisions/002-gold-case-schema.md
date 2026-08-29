@@ -61,9 +61,14 @@ A `violated` entry must reference a kind the same case declares in its own `inva
 audit of the first corpus found four cases citing kinds their own case never declared, which
 makes the entry unfalsifiable.
 
-`expected_issues` entries use `rule:` once rule IDs are frozen and `category:` before then. The
-first corpus was authored before the rule set existed, so it uses `category:` throughout; binding
-those to rule IDs is a separate reviewed pass.
+`expected_issues` entries carry both `category:` (the defect) and `rule:` (the frozen rule ID).
+The first corpus was authored before the rule set existed and used `category:` alone; the IDs were
+bound in a later reviewed pass.
+
+**Recall is scored on the category, not the rule ID.** A review that locates the same defect and
+cites a different but defensible rule counts as having found it. Requiring an exact ID match would
+fail correct reviews over a classification choice — several defects legitimately sit under two
+rules, and 「施事不可确定」 is both an actor problem and an unresolvable ambiguity.
 
 ### What the candidate model actually sees
 

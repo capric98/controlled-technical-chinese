@@ -116,6 +116,7 @@ cases:
   authorized_token_changes: []
   expected_issues:
   - category: actor-omission-ambiguous
+    rule: CTC-A005
     severity: ERROR
     locus: 通知租户管理员并回滚到上一版本证书
   invalid_transformations:

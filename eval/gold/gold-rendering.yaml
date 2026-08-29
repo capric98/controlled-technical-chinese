@@ -473,6 +473,7 @@ cases:
     reason: 漏报：未能识别机械套用英文主谓完整性造成的显式主语「用户」机械重复。
   expected_issues:
   - category: over-control-subject-repetition
+    rule: CTC-R002
     severity: WARNING
     locus: 当用户打开控制台时，用户必须点击设置菜单。然后用户需要选择网络配置，并且用户应当修改端口号。
   over_edit_trap: false
