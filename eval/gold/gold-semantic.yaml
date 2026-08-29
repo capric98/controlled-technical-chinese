@@ -211,6 +211,15 @@ cases:
     reason: '候选译文把可能关联改成确定因果关系，并反转了根因的确认状态。
 
       '
+  - output: '超时率升高由 DNS 缓存过期导致。抓包数据尚不完整，具体根因待确认。
+
+      '
+    violated:
+    - causality
+    - fact
+    reason: '候选译文保留了「根因待确认」的表象，却已经把 may be associated with 升级为确定因果；这是更贴近真实模型的失败形态：认识状态未被删除，但因果强度已被改变。
+
+      '
   over_edit_trap: false
   provenance: orchestrator-reviewed
   source_file: r2-gpt-cases.yaml
@@ -350,6 +359,15 @@ cases:
     - condition
     - modality
     reason: '候选输出注入了无来源的频率、充分性和常见性判断，并把明确禁止的操作改成恢复建议。
+
+      '
+  - output: '收到 `503` 时，通常只需检查上游服务状态和最近一次部署记录；不要自动重启服务，并将检查结果附到事件单。
+
+      '
+    violated:
+    - fact
+    - condition
+    reason: '候选输出保留了禁止自动重启的约束，因此看起来忠实，但注入了源文没有的频率判断「通常」和充分性判断「只需」，把两项检查写成了充分条件。
 
       '
   over_edit_trap: true

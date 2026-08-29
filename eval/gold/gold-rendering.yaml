@@ -21,14 +21,13 @@ cases:
 
       '
   - kind: rendering
-    detail: '必须消除「进行解析」「来进行有效性检查」等轻动词名物化套话，使用自然的动词谓语（如「解析...并调用...校验/检查」）；若机械直译为「对...进行解析」「进行...检查」，判为翻译腔失败。
+    detail: '判据是轻动词名物化的堆叠，不是单个搭配的出现。「进行解析」「进行有效性检查」等搭配单独出现时属于正常的技术中文，不判为失败。判定方法：对输出的每个句子，数其中轻动词名物化结构的个数（计入「进行
+      X」「来进行 Y」「对……执行……操作」「实施……」等形式）；任何一个句子中出现两个或两个以上，即判为翻译腔失败。
 
       '
   protected_tokens:
   - SDK
-  - schema validator
-  authorized_token_changes:
-  - schema 校验器
+  authorized_token_changes: []
   invalid_transformations:
   - output: SDK 将对上传的配置文件进行解析，并通过调用 schema 校验器来进行有效性检查。
     violated:
@@ -41,7 +40,10 @@ cases:
     reason: 丢失了施事者 SDK 以及手段组件 schema validator。
   over_edit_trap: false
   provenance: orchestrator-reviewed
-  notes: 测试英文技术文档中 perform/carry out + noun 结构向自然中文动词的转换。
+  notes: '测试英文技术文档中 perform/carry out + noun 结构向自然中文动词的转换。 策展修正：schema validator 是需要翻译的普通名词，不是受保护标记；受保护标记只保留
+    SDK。
+
+    '
   source_file: r2-gemini-cases.yaml
 - id: G-R-002
   category: translationese-clunky-connectors
@@ -261,7 +263,7 @@ cases:
   instruction: null
   invariants:
   - kind: modality
-    detail: '「禁用」表达绝对禁止模态，不得弱化为「不建议开启」或「尽量避免」。
+    detail: '「禁用」表示该模式在生产环境中不启用。输出不得把它弱化为「建议关闭」「尽量避免开启」等可选表述。本用例不要求判定「禁用」是状态描述还是祈使指令，输出保留任一读法都可以，但不得改变强度。
 
       '
   - kind: rendering
@@ -292,35 +294,45 @@ cases:
     '
   instruction: null
   invariants:
-  - kind: condition
-    detail: '触发条件必须去模糊化，明确表达为「若用户输入包含 SQL 关键字/词汇」，消除「好像有」等不确定推测。
+  - kind: rendering
+    detail: '对话客套与语气词（「请您」「帮忙」「一下」「哦」）属于语域噪声，输出应予清除。残留一两个语气词属于轻微问题，不单独判为失败；但「请您……」这类客套句式整体未清除，判为失败。清除语域噪声时若语义随之改变，按下面三条判。
 
       '
   - kind: modality
-    detail: '必须将客套与弱建议（「尽可能帮忙调用一下」）强化为 Agent 的强制执行义务（「必须先调用」「须调用」），并将口语告诫（「千万不要」）明确为严格禁止模态（「禁止」「严禁」）。
+    detail: '源文用「尽可能」表达尽力而非义务，用「千万不要」表达强告诫。输出不得把「尽可能」改写为「必须」「须」「一律」等义务表述。这不是因为强制调用是错的，而是因为提高义务等级是作者的决定，不是改写的授权范围。输出若提高了调用义务的等级，判为失败。
 
       '
-  - kind: rendering
-    detail: '必须彻底消除对话客套语气词（「请您」「帮忙」「哦」）与商用客服口吻，改写为确定、封闭、高依从性的 Agent 系统指令。
+  - kind: condition
+    detail: '源文的触发条件「好像有 SQL 相关词汇」本身带有不确定性。输出若把它改写为「输入包含 SQL 关键字」这类确定的可判定条件，而没有任何标注说明这是补充的判定标准，判为静默消歧失败。若输出保留不确定表述，或保留并附「待确认」说明，均判为通过。
+
+      '
+  - kind: token
+    detail: '`sanitize_query` 须逐字保留。
 
       '
   protected_tokens:
   - '`sanitize_query`'
   authorized_token_changes: []
   invalid_transformations:
-  - output: 若用户输入包含 SQL 词汇，建议尽可能调用 `sanitize_query` 进行清理，请尽量避免直接拼接字符串。
+  - output: 若用户输入包含 SQL 关键字，必须先调用 `sanitize_query` 过滤；禁止直接拼接字符串。
     violated:
     - modality
+    - condition
+    reason: 语域清理是对的，但同时把「尽可能」升为「必须」、把「千万不要」升为「禁止」，并把不确定的触发条件固定为确定判据。三处都超出了改写授权。
+  - output: 请您在发现用户输入疑似包含 SQL 词汇时，尽可能先调用 `sanitize_query` 工具清理，不要直接拼接字符串。
+    violated:
     - rendering
-    reason: 保留了模糊概率词「尽可能」与弱建议情态「建议」「尽量避免」，导致 Agent 执行确定性不足。
+    reason: 情态与条件都正确保留，但「请您」等客套语气未清除，语域噪声仍在。
   - output: 用户输入含 SQL 时必须调用 `sanitize_query`。
     violated:
-    - scope
-    - fact
-    reason: 丢失了「禁止直接拼接字符串」这一明确的禁止约束分支。
+    - modality
+    - condition
+    - rendering
+    reason: 在提高义务等级和固定触发条件之外，还删除了「不要直接拼接字符串」这条独立约束。
   over_edit_trap: false
   provenance: orchestrator-reviewed
-  notes: 语域适配：将充满客套与模糊语的提示词改写为严格确定性的 Agent 行为准则。
+  notes: 本用例检验一个真实冲突：agent 指令的语域要求确定性，而决策 003 政策 5 禁止改写抬高目标文档的情态等级。正确行为是清理语域、保留情态、把弱情态作为可报告的问题交回作者，而不是自行「修好」。见
+    eval/disagreements/D003。
   source_file: r2-gemini-cases.yaml
 - id: G-R-010
   category: register-tool-description
@@ -373,8 +385,20 @@ cases:
     detail: '故障核心事实「数据库连接超时」以及上下文参数目标地址 `10.0.1.5:5432` 与超时时间 5000ms 必须精确保留。
 
       '
+  - kind: fact
+    detail: '源文把原因表述为「某些未知的网络连接问题」，是未确认的推测。输出可以删除口语化的「好像」，但必须以「可能」「疑似」或等价方式保留原因未确认这一状态。输出若把网络问题写成已确认原因，判为失败。
+
+      '
+  - kind: scope
+    detail: '源文给出两条替代动作：稍后重试，或联系管理员检查网络。二者是选择关系。输出若改成必须同时执行，或删除其中一条，判为失败。
+
+      '
+  - kind: threshold
+    detail: '超时点是等待 5000ms 后超时。输出若改成「超过 5000ms」「约 5 秒」或其他改变边界或单位的表述，判为失败。
+
+      '
   - kind: rendering
-    detail: '必须消除情绪化拟人感叹词「糟糕！」与推测性模糊语「好像」，在第一视距直接呈现故障对象与原因，附带明确排查动作（检查网络连通性及重试）。
+    detail: '「好像」等口语化推测词可以删除，但原因的不确定性须按本用例的 fact 不变式保留。输出首句须包含故障对象（数据库连接）与目标地址 `10.0.1.5:5432`。情绪化感叹词「糟糕！」应删除。
 
       '
   protected_tokens:
@@ -419,7 +443,7 @@ cases:
     - rendering
     reason: 误报：机械套用英文禁用被动语态规则，对合规的受事焦点句产生误判。
   expected_issues: []
-  over_edit_trap: false
+  over_edit_trap: true
   provenance: orchestrator-reviewed
   notes: 受控语言约束误用与误报控制：验证审阅器不会机械禁用自然的汉语被动句。
   source_file: r2-gemini-cases.yaml
@@ -433,7 +457,11 @@ cases:
   instruction: null
   invariants:
   - kind: rendering
-    detail: '源文机械重复显式主语「用户」，并强行将同一操作流切碎为孤立短句。审阅模式下必须指出「显式主语机械重复 / 流程过度割裂」的问题，并建议使用自然的话题链与连动结构合并指令；若未报告主语重复或割裂问题，判为审阅漏报失败。
+    detail: '源文在三个分句中机械重复显式主语「用户」四次，指向同一个执行者，没有任何消歧收益。审阅模式下唯一必报的问题是这一处显式主语机械重复，locus 为整段；可建议改用话题链承前省略。若未报告主语重复，判为审阅漏报失败。
+
+      '
+  - kind: over-edit
+    detail: '「流程过度割裂」是可选观察，不是必报项：两句承载三步操作并不必然构成过度割裂，分句还可以分别承载「必须」「需要」「应当」三种不同的情态强度。审阅若额外报告句式割裂并建议以连动结构合并，不计为误报；不报告该项也不判为失败。
 
       '
   protected_tokens: []
@@ -442,7 +470,7 @@ cases:
   - output: 未发现任何问题。
     violated:
     - rendering
-    reason: 漏报：未能识别机械套用英文主谓完整性造成的严重主语堆叠与句式割裂缺陷。
+    reason: 漏报：未能识别机械套用英文主谓完整性造成的显式主语「用户」机械重复。
   expected_issues:
   - category: over-control-subject-repetition
     severity: WARNING
@@ -466,6 +494,10 @@ cases:
       '
   - kind: order
     detail: '必须保留「先备份生产数据库，后路由流量至备用集群」的严格时序关系。
+
+      '
+  - kind: causality
+    detail: '源文说明路由流量的目的是完成流量切换。输出须保留这一目的关系，且不得把目的改写为已保证的结果（如「路由后流量切换即告完成」）。
 
       '
   - kind: rendering

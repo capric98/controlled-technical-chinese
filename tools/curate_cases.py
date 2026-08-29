@@ -91,6 +91,8 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--in", dest="inputs", nargs="+", required=True)
     ap.add_argument("--check", action="store_true", help="report only, write nothing")
+    ap.add_argument("--force", action="store_true",
+                    help="overwrite an existing gold file, DISCARDING post-curation edits")
     args = ap.parse_args()
 
     by_family, notes = curate([Path(p) for p in args.inputs])

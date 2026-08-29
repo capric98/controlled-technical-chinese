@@ -131,10 +131,16 @@ def check_rule_ids(body: str) -> None:
         warn("rule ids: spec/rule-ids.txt does not exist; ID stability is unenforced")
 
 
+CITED = re.compile(r"[「『][^」』]{0,12}[」』]")
+
+
 def check_normative_vocabulary(body: str) -> None:
-    for term in VAGUE_NORMATIVE:
-        for i, line in enumerate(body.split("\n"), 1):
-            if term in line:
+    for i, line in enumerate(body.split("\n"), 1):
+        # a term inside 「」 is being named as something to detect, not used as an
+        # instruction — CTC-R004 has to quote the very words it tells the model to flag
+        used = CITED.sub(" ", line)
+        for term in VAGUE_NORMATIVE:
+            if term in used:
                 warn(f"normative vocabulary: line {i} uses ambiguous {term!r} — define the trigger or remove")
     for term in NORMATIVE_DRIFT:
         n = body.count(term)
