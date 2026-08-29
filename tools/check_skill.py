@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Deterministic project checks for SKILL.md.
 
-Covers the checks that `npx skills-ref validate .` does not: rule-ID stability,
+Covers the checks that `pnpm dlx skills-ref validate .` does not: rule-ID stability,
 development-path leakage, normative-vocabulary discipline, and the line budget.
 Dependency-free on purpose — the frontmatter CTC ships is flat scalars only.
 

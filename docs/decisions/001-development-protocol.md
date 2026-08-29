@@ -80,7 +80,7 @@ Cross-exposure is permitted only after step 3 has been recorded.
 
 ### Format gate
 
-`npx skills-ref validate .` is available and is the format gate. `tools/` additionally carries the
+`pnpm dlx skills-ref validate .` is available and is the format gate. `tools/` additionally carries the
 project-specific deterministic checks that `skills-ref` does not cover (rule-ID stability,
 protected-token comparison, line budget).
 

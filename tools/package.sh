@@ -17,4 +17,4 @@ cp "$ROOT/SKILL.md" "$DIST/SKILL.md"
 
 echo "packaged $NAME -> dist/$NAME/SKILL.md"
 python3 "$ROOT/tools/check_skill.py" "$DIST/SKILL.md"
-npx --yes skills-ref validate "$DIST"
+pnpm dlx skills-ref validate "$DIST"
