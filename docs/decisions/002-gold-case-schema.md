@@ -29,8 +29,8 @@ cases:
       当队列长度达到 100 时拒绝新任务。
     instruction:                # optional; omit to use the task default
     invariants:                 # what must survive; each is judgeable on its own
-      - kind: threshold         # fact | modality | condition | quantifier | negation |
-        detail: |               # scope | causality | order | reference | actor |
+      - kind: threshold         # see the approved kind vocabulary below
+        detail: |
           「达到 100」包含 100 本身，不得改写为「超过 100」。
     protected_tokens: []        # strings that must appear unchanged in the output
     authorized_token_changes: []   # tokens the task explicitly permits changing
@@ -43,9 +43,34 @@ cases:
         severity: ERROR
         locus: 达到 100
     over_edit_trap: false       # true when the source is already compliant
-    provenance: human-reviewed  # human-reviewed | derived-from-<record> | model-proposed-unreviewed
+    provenance: human-reviewed  # human-reviewed | derived-from-<record> |
+                                # orchestrator-reviewed | model-proposed-unreviewed |
+                                # generated-mutation
     notes:
 ```
+
+### Approved `kind` vocabulary
+
+```text
+fact  modality  condition  quantifier  negation  scope  causality  order
+reference  actor  threshold  token  procedure  terminology  instruction
+rendering  over-edit
+```
+
+A `violated` entry must reference a kind the same case declares in its own `invariants`. An
+audit of the first corpus found four cases citing kinds their own case never declared, which
+makes the entry unfalsifiable.
+
+`expected_issues` entries use `rule:` once rule IDs are frozen and `category:` before then. The
+first corpus was authored before the rule set existed, so it uses `category:` throughout; binding
+those to rule IDs is a separate reviewed pass.
+
+### What the candidate model actually sees
+
+Only `source` and `instruction` reach the candidate. `invariants`, `invalid_transformations`,
+`expected_issues`, `notes`, and `protected_tokens` are grading material and are never included in
+the prompt `tools/ctc_eval.py` builds. This matters because case authors write `notes` that state
+the expected restraint outright; that is harmless as grading material and would be fatal as input.
 
 `valid_transformations` is deliberately **not** part of the pass condition. Listing one acceptable
 output invites a later agent to score by string similarity, which would contradict `000-design.md`
@@ -67,8 +92,12 @@ asserting "meaning unchanged" about its own output was wrong six times in one pa
 
 ### Provenance and the no-silent-edit rule
 
-`provenance: model-proposed-unreviewed` cases may be run and reported but may not gate a release.
-Promotion to `human-reviewed` is a separate, recorded act.
+`provenance: model-proposed-unreviewed` and `generated-mutation` cases may be run and reported but
+may not gate a release. `orchestrator-reviewed` means an agent checked the case against accepted
+semantics and against an independent audit by a second model; it is stronger than
+model-proposed and weaker than `human-reviewed`. Promotion to `human-reviewed` is a separate,
+recorded act, and the gold core is not human-reviewed until a person performs it — that gap is a
+known outstanding release gate, not an oversight.
 
 When a candidate `SKILL.md` fails a case, the permitted responses are: fix the skill, or open a
 decision record arguing the case is wrong. Editing `invariants`, `invalid_transformations`, or

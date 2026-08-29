@@ -157,7 +157,7 @@ cases:
     detail: '源文没有提供频率结论；输出若新增「通常」「最常见」等频率限定，判为失败。
 
       '
-  - kind: quantity
+  - kind: fact
     detail: '证据窗口是过去 24 小时；输出若改变或删除该时间范围，判为失败。
 
       '
@@ -228,15 +228,15 @@ cases:
 
     '
   invariants:
-  - kind: quantity
+  - kind: threshold
     detail: '单次请求超时必须保持为 250 ms；输出若改变数值、单位或数量级，判为失败。
 
       '
-  - kind: quantity
+  - kind: threshold
     detail: '首次失败后的等待时间必须保持为 2 s，总等待上限必须保持为 10 s。
 
       '
-  - kind: quantity
+  - kind: threshold
     detail: '「最多重试 3 次」允许初始请求之后再重试至多 3 次；输出若改成「总共发送 3 次请求」，判为失败，因为最大总尝试次数从 4 次变为 3 次。
 
       '
@@ -257,7 +257,7 @@ cases:
 
       '
     violated:
-    - quantity
+    - threshold
     reason: '单次超时和失败后等待时间的单位被互换，数量级发生变化。
 
       '
@@ -271,7 +271,7 @@ cases:
 
       '
     violated:
-    - quantity
+    - threshold
     reason: '重试上限被改成总请求次数上限，最大允许尝试次数减少一次。
 
       '

@@ -232,7 +232,6 @@ cases:
       '
     violated:
     - terminology
-    - fact
     reason: '重载被并入重启。读者要么预期这次也会有 2 秒中断，要么以为 `kill -HUP` 会重启进程；
 
       两种理解都与实际行为不符。
@@ -243,7 +242,6 @@ cases:
       '
     violated:
     - terminology
-    - fact
     reason: '「副本」被改称「备份」，并删除了「不能替代备份」的结论。在线冗余与离线备份的区别消失后，
 
       有人会据此认为三副本已经等于有备份，从而停掉夜间备份。
@@ -322,7 +320,6 @@ cases:
       '
     violated:
     - terminology
-    - fact
     reason: '阈值与处置动作被挂到了错误的组件上。按此排查会去看 Kafka 消费者，
 
       而真正积压的是调度器内存队列。

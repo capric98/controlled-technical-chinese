@@ -37,9 +37,8 @@ cases:
   - output: 上传的配置文件将被解析并完成校验。
     violated:
     - actor
-    - fact
+    - causality
     reason: 丢失了施事者 SDK 以及手段组件 schema validator。
-  expected_issues: []
   over_edit_trap: false
   provenance: orchestrator-reviewed
   notes: 测试英文技术文档中 perform/carry out + noun 结构向自然中文动词的转换。
@@ -78,7 +77,6 @@ cases:
     - modality
     - quantifier
     reason: 将客观行为描述强化为禁止/义务情态，并丢失了全称量词「所有」。
-  expected_issues: []
   over_edit_trap: false
   provenance: orchestrator-reviewed
   notes: 测试客观系统行为翻译时的情态保真与去翻译腔能力。
@@ -121,9 +119,7 @@ cases:
     violated:
     - condition
     - fact
-    - quantifier
     reason: 丢失了对端关闭诱因、将未提交事务扩大为所有事务，且丢失了受保护错误码及客户端响应。
-  expected_issues: []
   over_edit_trap: false
   provenance: orchestrator-reviewed
   notes: 测试同位语从句与多重被动语态在错误诊断信息中的自然中文转换。
@@ -156,7 +152,6 @@ cases:
     violated:
     - modality
     reason: 将强制义务情态「须」弱化为顺承效果描述「即可」，削弱了运维操作约束力。
-  expected_issues: []
   over_edit_trap: true
   provenance: orchestrator-reviewed
   notes: 防过度编辑陷阱：检验模型是否克制对已经极度凝练的运维 SOP 进行无意义的主谓扩写。
@@ -190,7 +185,6 @@ cases:
     violated:
     - threshold
     reason: 将精确确定的硬上限「上限 500 条」篡改为模糊估值「500 条左右」。
-  expected_issues: []
   over_edit_trap: true
   provenance: orchestrator-reviewed
   notes: 防过度编辑陷阱：API 契约声明已满足最高信息密度，严禁展开为口语化解释。
@@ -224,7 +218,6 @@ cases:
     violated:
     - threshold
     reason: 比较符漂移：将开区间「超」（> 90%）改变为闭区间「达到」（>= 90%）。
-  expected_issues: []
   over_edit_trap: true
   provenance: orchestrator-reviewed
   notes: 防过度编辑陷阱：监控看板紧缩表达无需补齐时间从句外壳。
@@ -280,14 +273,12 @@ cases:
   invalid_transformations:
   - output: 在生产环境中，管理员必须禁止开启调试模式。
     violated:
-    - actor
     - rendering
     reason: 强加主语「管理员」，将全局系统级配置基线窄化为特定角色的行为约束，并造成句式臃肿。
   - output: 生产环境建议关闭调试模式。
     violated:
     - modality
     reason: 模态严重弱化：将绝对禁止「禁用」降级为「建议关闭」。
-  expected_issues: []
   over_edit_trap: true
   provenance: orchestrator-reviewed
   notes: 防过度编辑陷阱：客观系统基线规则无需捏造主体责任人。
@@ -327,7 +318,6 @@ cases:
     - scope
     - fact
     reason: 丢失了「禁止直接拼接字符串」这一明确的禁止约束分支。
-  expected_issues: []
   over_edit_trap: false
   provenance: orchestrator-reviewed
   notes: 语域适配：将充满客套与模糊语的提示词改写为严格确定性的 Agent 行为准则。
@@ -366,7 +356,6 @@ cases:
     violated:
     - threshold
     reason: 丢失了「单次最多返回 100 条」的硬性容量契约边界。
-  expected_issues: []
   over_edit_trap: false
   provenance: orchestrator-reviewed
   notes: 语域适配：消除工具描述中的会话引导套话，保留完整契约参数与边界。
@@ -401,7 +390,6 @@ cases:
     violated:
     - rendering
     reason: 未消除拟人化情绪感叹词「糟糕」，不符合生产环境专业错误日志语域。
-  expected_issues: []
   over_edit_trap: false
   provenance: orchestrator-reviewed
   notes: 语域适配：错误信息去情绪化，第一视距呈现故障对象并保护技术参数。
@@ -495,7 +483,6 @@ cases:
     violated:
     - rendering
     reason: 仍残留「进行路由操作」等名物化轻动词，且连接词仍然臃肿。
-  expected_issues: []
   over_edit_trap: false
   provenance: orchestrator-reviewed
   notes: 受控语言约束误用改写：消除轻动词与虚词冗余，同时严格保护责任施事者。

@@ -129,7 +129,6 @@ cases:
       '
     violated:
     - procedure
-    - fact
     reason: '「一步一动作」的机械拆分把一次原子请求写成了两次写入，制造出源文明确排除的中间状态。
 
       '
@@ -385,7 +384,6 @@ cases:
     violated:
     - instruction
     - actor
-    - fact
     reason: 'review 模式被当成 rewrite；同时把加载方定为采集端、把「下一个周期」定为采集周期，
 
       两处都是源文没有的事实。
@@ -474,7 +472,6 @@ cases:
       '
     violated:
     - instruction
-    - token
     reason: '区域外的改写是合格的，但受保护区域被「顺手改自然」了：「在任何情况下」与「任何形式的」
 
       都是法务措辞，删除后责任范围的表述发生变化。受保护即不可改，与改得好不好无关。

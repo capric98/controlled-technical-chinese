@@ -48,7 +48,6 @@ cases:
       '
     violated:
     - actor
-    - fact
     reason: '源文没有说明摘除由调度器执行。输出把一种读法固定成事实，值班据此排障会去查错组件。
 
       '
@@ -57,7 +56,6 @@ cases:
       '
     violated:
     - actor
-    - fact
     reason: '另一种读法同样是凭空指定。不可解的歧义应当报告，而不是替作者决定（D001 发现 5）。
 
       '
@@ -129,7 +127,6 @@ cases:
     violated:
     - instruction
     - actor
-    - fact
     reason: 'review 模式被当成 rewrite 执行；且「自动回滚」是源文没有的事实，把一种读法写成了规格。
 
       '
@@ -207,7 +204,6 @@ cases:
 
       '
     violated:
-    - over-edit
     - actor
     reason: '唯一施事被重复五次，零消歧收益，切换窗口内的可读性明显下降（§17.6 中「无消歧价值的重复主语」）。
 
@@ -228,7 +224,6 @@ cases:
 
       '
     violated:
-    - over-edit
     - procedure
     reason: '原第 4 步「提升备库」被从命令中剥离成独立步骤，读起来像两个动作；整体切分成 7 步后，
 
@@ -289,7 +284,6 @@ cases:
       '
     violated:
     - reference
-    - fact
     reason: '「其」被固定为节点。若原意是把本次任务执行标记为失败，输出就凭空规定了节点级状态变更，
 
       影响后续是否还向该节点派发任务。
@@ -300,7 +294,6 @@ cases:
       '
     violated:
     - reference
-    - fact
     reason: '「其」被固定为任务。同一句里任务既被重新入队又被标记失败，输出把一种可疑读法确认为规格。
 
       '
@@ -357,7 +350,6 @@ cases:
       '
     violated:
     - reference
-    - fact
     reason: '源文未指明删的是本地快照；输出替作者做了删除对象的选择，且删除是不可逆动作。
 
       '
@@ -367,7 +359,6 @@ cases:
     violated:
     - reference
     - procedure
-    - fact
     reason: '既固定了先行词，又把「重新执行本任务」收窄为「重新上传」，跳过了步骤 1 的快照生成。
 
       '
@@ -427,7 +418,6 @@ cases:
 
       '
     violated:
-    - over-edit
     - reference
     reason: '用重复长名词短语替换本无歧义的代词，段落长度翻倍而信息不变，正是 §17.3 与 §17.6 要罚的写法。
 
