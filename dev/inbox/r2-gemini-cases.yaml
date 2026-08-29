@@ -1,0 +1,422 @@
+cases:
+  - id: G-R-001
+    category: translationese-light-verbs
+    task: translate
+    mode: standard
+    source: |
+      The SDK will perform parsing of the uploaded configuration file and carry out validity checks by invoking the schema validator.
+    instruction:
+    invariants:
+      - kind: actor
+        detail: |
+          施事者「SDK」必须保留为主语或动作发出者，不得省略或漂移为其他组件。
+      - kind: causality
+        detail: |
+          必须保留「通过调用 schema 校验器来执行有效性检查」的手段与目的关系，不得倒置或割裂。
+      - kind: rendering
+        detail: |
+          必须消除「进行解析」「来进行有效性检查」等轻动词名物化套话，使用自然的动词谓语（如「解析...并调用...校验/检查」）；若机械直译为「对...进行解析」「进行...检查」，判为翻译腔失败。
+    protected_tokens:
+      - "SDK"
+      - "schema validator"
+    authorized_token_changes:
+      - "schema 校验器"
+    invalid_transformations:
+      - output: "SDK 将对上传的配置文件进行解析，并通过调用 schema 校验器来进行有效性检查。"
+        violated: [rendering]
+        reason: "机械对译 perform parsing 与 carry out checks，产生严重的名物化轻动词翻译腔。"
+      - output: "上传的配置文件将被解析并完成校验。"
+        violated: [actor, fact]
+        reason: "丢失了施事者 SDK 以及手段组件 schema validator。"
+    expected_issues: []
+    over_edit_trap: false
+    provenance: model-proposed-unreviewed
+    notes: "测试英文技术文档中 perform/carry out + noun 结构向自然中文动词的转换。"
+
+  - id: G-R-002
+    category: translationese-clunky-connectors
+    task: translate
+    mode: strict
+    source: |
+      Read-only replicas do not process write requests and will automatically forward all write operations to the primary database.
+    instruction:
+    invariants:
+      - kind: modality
+        detail: |
+          源文「do not process」是系统客观行为描述；输出必须使用客观陈述（如「不处理」），不得强化为面向运维人员的规范禁止（如「禁止处理」「不得处理」）。
+      - kind: quantifier
+        detail: |
+          「all write operations」的全称量词必须完整保留（如「所有写操作」），不得漏译或泛化。
+      - kind: rendering
+        detail: |
+          必须消除「对于只读副本而言」「它们将会」等机械从句外壳与冗余代词，使用自然紧凑的主谓顺承表达；若输出包含「对于...而言，其/它们...」，判为翻译腔失败。
+    protected_tokens: []
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: "对于只读副本而言，它们不处理写请求，并且将会自动地将所有的写操作转发给主数据库。"
+        violated: [rendering]
+        reason: "机械套用「对于...而言」句套与冗余人称代词「它们」，副词「自动地」带生硬虚词。"
+      - output: "只读副本严禁处理写请求，必须将写操作转发至主库。"
+        violated: [modality, quantifier]
+        reason: "将客观行为描述强化为禁止/义务情态，并丢失了全称量词「所有」。"
+    expected_issues: []
+    over_edit_trap: false
+    provenance: model-proposed-unreviewed
+    notes: "测试客观系统行为翻译时的情态保真与去翻译腔能力。"
+
+  - id: G-R-003
+    category: translationese-passive-stacking
+    task: translate
+    mode: strict
+    source: |
+      Due to the fact that the connection was closed by the remote peer, uncommitted transactions were aborted and an error code `ERR_CONN_RESET` was returned to the client.
+    instruction:
+    invariants:
+      - kind: causality
+        detail: |
+          必须完整保留「对端关闭连接」作为事务中止与返回错误码的直接诱因，不得弱化为无因果关系的相关并列。
+      - kind: condition
+        detail: |
+          「uncommitted transactions」限定必须准确保留为「未提交的事务」，不得扩大为「所有事务」或漏掉限定。
+      - kind: fact
+        detail: |
+          受保护错误码 `ERR_CONN_RESET` 与接收方「客户端」必须完整保留。
+      - kind: rendering
+        detail: |
+          必须消除「由于...的事实」「被中止」「一个错误码被返回」等多重机械被动与同位语直译，使用自然中文因果顺承语序；若输出保留「由于...的事实」或连续使用「被...被...」，判为翻译腔失败。
+    protected_tokens:
+      - "`ERR_CONN_RESET`"
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: "由于连接被远端对等节点关闭的事实，未提交的事务被中止，并且一个错误代码 `ERR_CONN_RESET` 被返回给客户端。"
+        violated: [rendering]
+        reason: "直译 due to the fact that，且堆叠三个被动语态「被关闭」「被中止」「被返回」。"
+      - output: "因连接中断，所有事务已回滚。"
+        violated: [condition, fact, quantifier]
+        reason: "丢失了对端关闭诱因、将未提交事务扩大为所有事务，且丢失了受保护错误码及客户端响应。"
+    expected_issues: []
+    over_edit_trap: false
+    provenance: model-proposed-unreviewed
+    notes: "测试同位语从句与多重被动语态在错误诊断信息中的自然中文转换。"
+
+  - id: G-R-004
+    category: over-edit-concise-sop
+    task: rewrite
+    mode: strict
+    source: |
+      修改配置后须重启网关生效。
+    instruction:
+    invariants:
+      - kind: modality
+        detail: |
+          原文「须」表达紧凑义务情态，不得弱化为「建议/可」，亦不得过度扩写为「您必须...以使...生效」。
+      - kind: rendering
+        detail: |
+          原文已经紧凑、准确且无歧义。输出若强加第二人称代词（如「您/用户」）、把「须」替换展开为「必须执行网关重启操作」、补齐长从句外壳（「在...之后」「以使修改后的配置生效」）或拆为多句，判为过度编辑失败。
+    protected_tokens: []
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: "在您修改了配置文件之后，您必须重新启动网关服务，以使修改后的配置生效。"
+        violated: [rendering]
+        reason: "强加第二人称代词、添加功能动词并补全冗余连接词，将原本高效的操作说明膨胀为啰嗦会话。"
+      - output: "修改配置后，重启网关即可生效。"
+        violated: [modality]
+        reason: "将强制义务情态「须」弱化为顺承效果描述「即可」，削弱了运维操作约束力。"
+    expected_issues: []
+    over_edit_trap: true
+    provenance: model-proposed-unreviewed
+    notes: "防过度编辑陷阱：检验模型是否克制对已经极度凝练的运维 SOP 进行无意义的主谓扩写。"
+
+  - id: G-R-005
+    category: over-edit-api-contract
+    task: rewrite
+    mode: standard
+    source: |
+      接口支持批量写入，单次上限 500 条。
+    instruction:
+    invariants:
+      - kind: threshold
+        detail: |
+          「单次上限 500 条」是封闭数值上限，数值 500 与单次限制必须准确保留。
+      - kind: rendering
+        detail: |
+          原文采用无主语声明式，参数能力与边界清晰利落。输出若引入客套主语（如「允许用户/调用方」）、套用轻动词（如「进行批量写入操作」）或将上限扩写为「在单次请求中最多可以写入五百条数据记录」，判为过度编辑失败。
+    protected_tokens:
+      - "500"
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: "该接口允许用户进行批量写入操作，在单次请求中最多可以写入 500 条数据记录。"
+        violated: [rendering]
+        reason: "添加拟人化主语「用户」和轻动词「进行...操作」，稀释了 API 契约的信息密度。"
+      - output: "接口支持批量写入，每次最多 500 条左右。"
+        violated: [threshold]
+        reason: "将精确确定的硬上限「上限 500 条」篡改为模糊估值「500 条左右」。"
+    expected_issues: []
+    over_edit_trap: true
+    provenance: model-proposed-unreviewed
+    notes: "防过度编辑陷阱：API 契约声明已满足最高信息密度，严禁展开为口语化解释。"
+
+  - id: G-R-006
+    category: over-edit-alert-rule
+    task: rewrite
+    mode: strict
+    source: |
+      磁盘用量超 90% 触发告警。
+    instruction:
+    invariants:
+      - kind: threshold
+        detail: |
+          开区间比较「超 90%」与数值 90% 必须严格保持，不得篡改为闭区间「达到 90%」或「高于等于 90%」。
+      - kind: rendering
+        detail: |
+          原文是监控告警看板的标准紧缩句。输出若机械扩充为「当磁盘的使用量超过百分之九十的时候，系统将会触发告警信息」，判为过度编辑失败。
+    protected_tokens:
+      - "90%"
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: "当磁盘的使用量超过 90% 的时候，系统将会触发告警。"
+        violated: [rendering]
+        reason: "套用「当...的时候」模版并添加虚拟施事「系统」，大幅降低监控告警规则的扫读效率。"
+      - output: "磁盘用量达到 90% 触发告警。"
+        violated: [threshold]
+        reason: "比较符漂移：将开区间「超」（> 90%）改变为闭区间「达到」（>= 90%）。"
+    expected_issues: []
+    over_edit_trap: true
+    provenance: model-proposed-unreviewed
+    notes: "防过度编辑陷阱：监控看板紧缩表达无需补齐时间从句外壳。"
+
+  - id: G-R-007
+    category: over-edit-serial-verb-review
+    task: review
+    mode: review
+    source: |
+      备份数据库后，将流量路由至备用集群。
+    instruction:
+    invariants:
+      - kind: order
+        detail: |
+          源文严格规定先「备份数据库」后「路由流量」的时序关系。
+      - kind: rendering
+        detail: |
+          原文「备份数据库后，将流量路由至备用集群。」属于标准自然的中文连动 SOP，承前省略主语且兼类词「备份」「路由」动用准确，完全符合 CTC 规范。审阅模式下正确行为是「不报告任何问题」（输出空列表）；若错误报告「缺少主语」「单句多动词」或「词性不当」，判为误报失败。
+    protected_tokens: []
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: |
+          - category: missing-actor
+            severity: ERROR
+            locus: 备份数据库后
+            problem: 缺少明确的操作执行主体。
+        violated: [rendering]
+        reason: "误报：将自然的无主祈使 SOP 误判为主语缺失。"
+    expected_issues: []
+    over_edit_trap: true
+    provenance: model-proposed-unreviewed
+    notes: "误报控制用例：验证审阅模式不会对合规连动结构和名词活用产生误报。"
+
+  - id: G-R-008
+    category: over-edit-objective-constraint
+    task: rewrite
+    mode: strict
+    source: |
+      生产环境禁用调试模式。
+    instruction:
+    invariants:
+      - kind: modality
+        detail: |
+          「禁用」表达绝对禁止模态，不得弱化为「不建议开启」或「尽量避免」。
+      - kind: rendering
+        detail: |
+          原文属于客观环境配置基线约束。输出若强加主语（如「管理员必须...」「开发人员不得...」）或膨胀为「在生产环境中，系统必须禁止开启调试模式」，判为过度编辑失败。
+    protected_tokens: []
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: "在生产环境中，管理员必须禁止开启调试模式。"
+        violated: [actor, rendering]
+        reason: "强加主语「管理员」，将全局系统级配置基线窄化为特定角色的行为约束，并造成句式臃肿。"
+      - output: "生产环境建议关闭调试模式。"
+        violated: [modality]
+        reason: "模态严重弱化：将绝对禁止「禁用」降级为「建议关闭」。"
+    expected_issues: []
+    over_edit_trap: true
+    provenance: model-proposed-unreviewed
+    notes: "防过度编辑陷阱：客观系统基线规则无需捏造主体责任人。"
+
+  - id: G-R-009
+    category: register-agent-instruction
+    task: rewrite
+    mode: strict
+    source: |
+      请您在注意到用户的输入里面好像有 SQL 相关词汇的时候，尽可能帮忙调用一下 `sanitize_query` 工具对输入进行清理哦，千万不要直接拿去拼接字符串。
+    instruction:
+    invariants:
+      - kind: condition
+        detail: |
+          触发条件必须去模糊化，明确表达为「若用户输入包含 SQL 关键字/词汇」，消除「好像有」等不确定推测。
+      - kind: modality
+        detail: |
+          必须将客套与弱建议（「尽可能帮忙调用一下」）强化为 Agent 的强制执行义务（「必须先调用」「须调用」），并将口语告诫（「千万不要」）明确为严格禁止模态（「禁止」「严禁」）。
+      - kind: rendering
+        detail: |
+          必须彻底消除对话客套语气词（「请您」「帮忙」「哦」）与商用客服口吻，改写为确定、封闭、高依从性的 Agent 系统指令。
+    protected_tokens:
+      - "`sanitize_query`"
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: "若用户输入包含 SQL 词汇，建议尽可能调用 `sanitize_query` 进行清理，请尽量避免直接拼接字符串。"
+        violated: [modality, rendering]
+        reason: "保留了模糊概率词「尽可能」与弱建议情态「建议」「尽量避免」，导致 Agent 执行确定性不足。"
+      - output: "用户输入含 SQL 时必须调用 `sanitize_query`。"
+        violated: [scope, fact]
+        reason: "丢失了「禁止直接拼接字符串」这一明确的禁止约束分支。"
+    expected_issues: []
+    over_edit_trap: false
+    provenance: model-proposed-unreviewed
+    notes: "语域适配：将充满客套与模糊语的提示词改写为严格确定性的 Agent 行为准则。"
+
+  - id: G-R-010
+    category: register-tool-description
+    task: rewrite
+    mode: standard
+    source: |
+      这个工具能够允许调用者去获取指定时间范围内的系统审计日志，你可以用它来根据用户 ID 和操作类型进行日志筛选，单次调用最多能够为你返回 100 条记录。
+    instruction:
+    invariants:
+      - kind: fact
+        detail: |
+          工具核心功能「查询指定时间范围内的系统审计日志」与过滤维度「用户 ID」「操作类型」必须完整保留。
+      - kind: threshold
+        detail: |
+          单次返回上限数值 100 条必须精确保持，不得删除或改为模糊描述。
+      - kind: rendering
+        detail: |
+          必须消除「这个工具能够允许...」「你可以用它来...」「为你返回」等交互口语套话与轻动词「进行日志筛选」，改写为声明式、动宾直接破题的工具契约描述。
+    protected_tokens:
+      - "100"
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: "本工具用于获取系统审计日志，你可以按用户 ID 筛选，最多返回 100 条。"
+        violated: [fact, rendering]
+        reason: "遗漏了「时间范围」与「操作类型」两个关键过滤条件，且仍残留第二人称口吻「你可以」。"
+      - output: "查询指定时间范围内的系统审计日志，支持按用户 ID 和操作类型筛选。"
+        violated: [threshold]
+        reason: "丢失了「单次最多返回 100 条」的硬性容量契约边界。"
+    expected_issues: []
+    over_edit_trap: false
+    provenance: model-proposed-unreviewed
+    notes: "语域适配：消除工具描述中的会话引导套话，保留完整契约参数与边界。"
+
+  - id: G-R-011
+    category: register-error-message
+    task: rewrite
+    mode: strict
+    source: |
+      糟糕！由于某些未知的网络连接问题，系统好像无法连接到数据库服务器 `10.0.1.5:5432` 了，请求在等待 5000ms 后超时，请您稍后重试或者联系管理员检查网络。
+    instruction:
+    invariants:
+      - kind: fact
+        detail: |
+          故障核心事实「数据库连接超时」以及上下文参数目标地址 `10.0.1.5:5432` 与超时时间 5000ms 必须精确保留。
+      - kind: rendering
+        detail: |
+          必须消除情绪化拟人感叹词「糟糕！」与推测性模糊语「好像」，在第一视距直接呈现故障对象与原因，附带明确排查动作（检查网络连通性及重试）。
+    protected_tokens:
+      - "`10.0.1.5:5432`"
+      - "5000ms"
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: "数据库连接超时，请检查网络后重试。"
+        violated: [fact]
+        reason: "删除了至关重要的排障上下文参数 `10.0.1.5:5432` 与 5000ms。"
+      - output: "糟糕，连接数据库 `10.0.1.5:5432` 耗时超过 5000ms 超时，请重试。"
+        violated: [rendering]
+        reason: "未消除拟人化情绪感叹词「糟糕」，不符合生产环境专业错误日志语域。"
+    expected_issues: []
+    over_edit_trap: false
+    provenance: model-proposed-unreviewed
+    notes: "语域适配：错误信息去情绪化，第一视距呈现故障对象并保护技术参数。"
+
+  - id: G-R-012
+    category: over-control-passive-voice-boundary
+    task: review
+    mode: review
+    source: |
+      磁盘空间不足时，旧快照会被自动清理。
+    instruction:
+    invariants:
+      - kind: condition
+        detail: |
+          前提条件「磁盘空间不足时」与动作「自动清理旧快照」的因果触发绑定不变。
+      - kind: rendering
+        detail: |
+          原文受事「旧快照」为系统运维关注焦点，施事为底层自动化机制，使用被动句「会被自动清理」准确自然且无歧义。审阅模式下正确行为是「不报告任何问题」（输出空列表）；若错误报告「禁止使用被动语态」或「缺少明确施事者」，判为过度控制误报失败。
+    protected_tokens: []
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: |
+          - category: forbidden-passive-voice
+            severity: ERROR
+            locus: 会被自动清理
+            problem: 违反了禁用被动语态的规则，必须改为主动语态。
+        violated: [rendering]
+        reason: "误报：机械套用英文禁用被动语态规则，对合规的受事焦点句产生误判。"
+    expected_issues: []
+    over_edit_trap: false
+    provenance: model-proposed-unreviewed
+    notes: "受控语言约束误用与误报控制：验证审阅器不会机械禁用自然的汉语被动句。"
+
+  - id: G-R-013
+    category: over-control-forced-subject-review
+    task: review
+    mode: review
+    source: |
+      当用户打开控制台时，用户必须点击设置菜单。然后用户需要选择网络配置，并且用户应当修改端口号。
+    instruction:
+    invariants:
+      - kind: rendering
+        detail: |
+          源文机械重复显式主语「用户」，并强行将同一操作流切碎为孤立短句。审阅模式下必须指出「显式主语机械重复 / 流程过度割裂」的问题，并建议使用自然的话题链与连动结构合并指令；若未报告主语重复或割裂问题，判为审阅漏报失败。
+    protected_tokens: []
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: "未发现任何问题。"
+        violated: [rendering]
+        reason: "漏报：未能识别机械套用英文主谓完整性造成的严重主语堆叠与句式割裂缺陷。"
+    expected_issues:
+      - category: over-control-subject-repetition
+        severity: WARNING
+        locus: "当用户打开控制台时，用户必须点击设置菜单。然后用户需要选择网络配置，并且用户应当修改端口号。"
+    over_edit_trap: false
+    provenance: model-proposed-unreviewed
+    notes: "受控语言约束误用审阅：检验模型能否识别出受控语言机械套用主谓结构所造成的语言破坏。"
+
+  - id: G-R-014
+    category: over-control-nominalization-rewrite
+    task: rewrite
+    mode: strict
+    source: |
+      在执行对生产数据库的备份操作之后，管理员必须把流量进行路由操作到备用集群，以便使得流量切换能够成功完成。
+    instruction:
+    invariants:
+      - kind: actor
+        detail: |
+          明确的责任执行主体「管理员」必须保留，不得在去冗余过程中丢失责任人。
+      - kind: order
+        detail: |
+          必须保留「先备份生产数据库，后路由流量至备用集群」的严格时序关系。
+      - kind: rendering
+        detail: |
+          必须消除「执行...备份操作」「进行路由操作」等兼类词生硬名物化，以及「以便使得...能够成功完成」等冗余连接词外壳，恢复为自然的动词表达（如「备份生产数据库后，管理员须将流量路由至备用集群，以完成流量切换」）；输出若仍保留「进行路由操作」或删除了责任主体「管理员」，均判为改写失败。
+    protected_tokens: []
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: "备份生产数据库后，将流量路由至备用集群以完成切换。"
+        violated: [actor]
+        reason: "在改写过程中丢失了事故定责与权限审计所需的明确责任执行主体「管理员」。"
+      - output: "在备份生产数据库之后，管理员必须对流量进行路由操作到备用集群。"
+        violated: [rendering]
+        reason: "仍残留「进行路由操作」等名物化轻动词，且连接词仍然臃肿。"
+    expected_issues: []
+    over_edit_trap: false
+    provenance: model-proposed-unreviewed
+    notes: "受控语言约束误用改写：消除轻动词与虚词冗余，同时严格保护责任施事者。"

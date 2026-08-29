@@ -1,0 +1,717 @@
+cases:
+  - id: G-S-001
+    category: modality-strengthening
+    task: rewrite
+    mode: strict
+    source: |
+      在低流量窗口执行索引重建可以降低对在线请求的影响，因此建议先在只读副本上验证执行计划。若延迟预算紧张，也可以推迟到下一维护窗口。
+    instruction: 若文本已经清楚、准确且符合技术中文，请原样返回；不得强化行为要求。
+    invariants:
+      - kind: modality
+        detail: |
+          「建议先在只读副本上验证」是推荐行为，不是索引重建的强制前提；输出若改成「必须验证」「验证后方可执行」或其他强制要求，判为失败。
+      - kind: modality
+        detail: |
+          「也可以推迟」授予推迟操作的许可，不要求操作员必须推迟；输出若把许可改成义务，判为失败。
+    protected_tokens: []
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: |
+          为降低对在线请求的影响，必须先在只读副本上验证执行计划。若延迟预算紧张，必须推迟到下一维护窗口。
+        violated: [modality]
+        reason: |
+          候选输出把推荐和许可分别强化为两项强制义务。
+    over_edit_trap: true
+    provenance: model-proposed-unreviewed
+
+  - id: G-S-002
+    category: modality-strengthening
+    task: translate
+    mode: standard
+    source: |
+      Before enabling the cache, operators are advised to test the eviction policy in staging. A temporary sandbox may skip this test, but the operator must record the reason.
+    instruction: 将文本翻译成中文，并保持建议、许可和义务的强度差异。
+    invariants:
+      - kind: modality
+        detail: |
+          “are advised to test”表示建议，不是强制前提；中文输出若使用「必须」「须」或「只有测试后才能启用」，判为失败。
+      - kind: modality
+        detail: |
+          “may skip”允许临时沙箱跳过测试；“must record”要求记录原因。输出必须同时保留这项许可及其附带的记录义务。
+      - kind: condition
+        detail: |
+          跳过测试的许可仅适用于临时沙箱；输出若允许其他环境跳过测试，判为失败。
+    protected_tokens: []
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: |
+          启用缓存前，操作员必须在预发布环境测试淘汰策略。临时沙箱可以跳过测试，但操作员必须记录原因。
+        violated: [modality]
+        reason: |
+          “are advised to test”被译成「必须测试」，把建议强化为义务。
+    over_edit_trap: false
+    provenance: model-proposed-unreviewed
+
+  - id: G-S-003
+    category: modality-weakening
+    task: rewrite
+    mode: strict
+    source: |
+      轮换主密钥前，操作员必须确认最近一次备份已完成。未确认时不得继续；测试租户可以取消本次轮换。
+    invariants:
+      - kind: modality
+        detail: |
+          轮换主密钥前确认备份完成是强制义务；输出若改成「建议确认」「最好确认」或其他可选行为，判为失败。
+      - kind: modality
+        detail: |
+          「未确认时不得继续」是禁止继续轮换；输出若仅表示不推荐继续，判为失败。
+      - kind: modality
+        detail: |
+          测试租户拥有取消本次轮换的许可，但没有必须取消的义务。
+    protected_tokens: []
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: |
+          轮换主密钥前，建议操作员确认最近一次备份已完成。尚未确认时最好不要继续；测试租户应取消本次轮换。
+        violated: [modality]
+        reason: |
+          候选输出弱化了确认义务和继续操作禁令，同时把取消许可强化为义务。
+    over_edit_trap: false
+    provenance: model-proposed-unreviewed
+
+  - id: G-S-004
+    category: modality-weakening
+    task: review
+    mode: review
+    source: |
+      原文：确保数据已成功备份，并且所有从节点都已正确同步主节点的数据。
+      候选改写：确认数据备份完成，且所有从节点已与主节点数据同步。
+    instruction: 审阅候选改写是否保持原文的行为义务；只输出问题清单。
+    invariants:
+      - kind: modality
+        detail: |
+          正确审阅必须指出：「确保」要求操作员使备份和同步状态成立，必要时还要采取补救；「确认」只要求检查现有状态。把两者判为等价，判为失败。
+    protected_tokens: []
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: |
+          未发现问题。候选改写删除了冗余修饰，行为要求与原文相同。
+        violated: [modality]
+        reason: |
+          审阅遗漏了「确保」到「确认」造成的义务弱化。
+    expected_issues:
+      - category: modality-weakening
+        severity: ERROR
+        locus: 候选改写中的「确认」
+    over_edit_trap: false
+    provenance: model-proposed-unreviewed
+
+  - id: G-S-005
+    category: epistemic-status-collapse
+    task: rewrite
+    mode: strict
+    source: |
+      过去 24 小时的日志显示，超时可能与连接池耗尽有关。目前只确认两者同时出现，根因尚未确定。
+    instruction: 若文本已经清楚、准确且符合技术中文，请原样返回；不得补充根因判断。
+    invariants:
+      - kind: fact
+        detail: |
+          源文把连接池耗尽标为可能相关的候选解释，并明确说明根因尚未确定；输出若把它写成已确认根因，判为失败。
+      - kind: causality
+        detail: |
+          源文只确认超时与连接池耗尽同时出现，不确认因果关系；输出若使用「导致」「引起」等确定因果表述，判为失败。
+      - kind: scope
+        detail: |
+          源文没有提供频率结论；输出若新增「通常」「最常见」等频率限定，判为失败。
+      - kind: quantity
+        detail: |
+          证据窗口是过去 24 小时；输出若改变或删除该时间范围，判为失败。
+    protected_tokens: []
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: |
+          过去 24 小时的日志确认，连接池耗尽通常会导致这些超时，根因已经确定。
+        violated: [fact, causality, scope]
+        reason: |
+          候选输出把可能相关升级为确定因果关系，删除未确认状态，并注入无来源的频率判断。
+    over_edit_trap: true
+    provenance: model-proposed-unreviewed
+
+  - id: G-S-006
+    category: epistemic-status-collapse
+    task: translate
+    mode: strict
+    source: |
+      The elevated timeout rate may be associated with DNS cache expiry. Packet captures remain incomplete, so the root cause is still unconfirmed.
+    instruction: 将文本翻译成中文，并保持可能性、证据限制和未确认状态。
+    invariants:
+      - kind: fact
+        detail: |
+          “may be associated with”只能译为可能相关，不能译为已确认的关联或根因。
+      - kind: fact
+        detail: |
+          输出必须保留抓包数据不完整以及根因仍未确认这两项认识限制；删除任一项，判为失败。
+      - kind: causality
+        detail: |
+          源文没有断言 DNS 缓存过期导致超时率升高；中文输出若建立确定因果关系，判为失败。
+    protected_tokens: []
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: |
+          超时率升高是由 DNS 缓存过期导致的。虽然抓包数据不完整，但根因已经明确。
+        violated: [fact, causality]
+        reason: |
+          候选译文把可能关联改成确定因果关系，并反转了根因的确认状态。
+    over_edit_trap: false
+    provenance: model-proposed-unreviewed
+
+  - id: G-S-007
+    category: quantity-drift
+    task: rewrite
+    mode: strict
+    source: |
+      客户端参数：
+      - 单次请求超时为 250 ms。
+      - 首次失败后等待 2 s；最多重试 3 次。
+      - 总等待时间不得超过 10 s。
+    invariants:
+      - kind: quantity
+        detail: |
+          单次请求超时必须保持为 250 ms；输出若改变数值、单位或数量级，判为失败。
+      - kind: quantity
+        detail: |
+          首次失败后的等待时间必须保持为 2 s，总等待上限必须保持为 10 s。
+      - kind: quantity
+        detail: |
+          「最多重试 3 次」允许初始请求之后再重试至多 3 次；输出若改成「总共发送 3 次请求」，判为失败，因为最大总尝试次数从 4 次变为 3 次。
+      - kind: modality
+        detail: |
+          「总等待时间不得超过 10 s」是上限约束；输出若把它写成建议值或固定等待时间，判为失败。
+    protected_tokens: []
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: |
+          客户端参数：
+          - 单次请求超时为 250 s。
+          - 首次失败后等待 2 ms；最多重试 3 次。
+          - 总等待时间不得超过 10 s。
+        violated: [quantity]
+        reason: |
+          单次超时和失败后等待时间的单位被互换，数量级发生变化。
+      - output: |
+          客户端参数：
+          - 单次请求超时为 250 ms。
+          - 首次失败后等待 2 s；最多发送 3 次请求。
+          - 总等待时间不得超过 10 s。
+        violated: [quantity]
+        reason: |
+          重试上限被改成总请求次数上限，最大允许尝试次数减少一次。
+    over_edit_trap: false
+    provenance: model-proposed-unreviewed
+
+  - id: G-S-008
+    category: correlation-upgraded-to-causation
+    task: rewrite
+    mode: strict
+    source: |
+      三组观测均显示，启用压缩与 CPU 使用率升高同时出现。现有数据只支持相关性，不能证明压缩导致请求超时。
+    invariants:
+      - kind: causality
+        detail: |
+          源文只断言启用压缩与 CPU 使用率升高共现；输出若断言压缩导致 CPU 使用率升高，判为失败。
+      - kind: causality
+        detail: |
+          源文明示现有数据不能证明压缩导致请求超时；输出若建立该因果关系，判为失败。
+      - kind: fact
+        detail: |
+          证据范围是三组观测，且结论限于相关性；输出不得把观测描述成受控因果实验。
+    protected_tokens: []
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: |
+          三组观测证明，启用压缩会提高 CPU 使用率并导致请求超时。
+        violated: [causality, fact]
+        reason: |
+          候选输出把共现升级为两项确定因果结论，并夸大了观测证据的能力。
+    over_edit_trap: false
+    provenance: model-proposed-unreviewed
+
+  - id: G-S-009
+    category: unsourced-qualifier-injection
+    task: rewrite
+    mode: strict
+    source: |
+      收到 `503` 时，检查上游服务状态和最近一次部署记录。不要自动重启服务；将检查结果附到事件单。
+    instruction: 若文本已经清楚、准确且符合技术中文，请原样返回；不得补充恢复经验或默认行为。
+    invariants:
+      - kind: fact
+        detail: |
+          源文没有说明任何原因或恢复动作是「通常」「默认」或「最常见」的；输出若新增此类频率或默认值判断，判为失败。
+      - kind: condition
+        detail: |
+          源文没有声称某个单一动作足以恢复；输出若新增「只需」并把某项操作写成充分条件，判为失败。
+      - kind: modality
+        detail: |
+          源文禁止自动重启服务；输出若建议、允许或要求自动重启，判为失败。
+      - kind: token
+        detail: |
+          状态码 `503` 必须逐字符保留，且仍绑定到检查上游状态和部署记录的触发条件。
+    protected_tokens: ['503']
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: |
+          收到 `503` 时，通常只需自动重启上游服务；这是最常见的恢复方式。
+        violated: [fact, condition, modality]
+        reason: |
+          候选输出注入了无来源的频率、充分性和常见性判断，并把明确禁止的操作改成恢复建议。
+    over_edit_trap: true
+    provenance: model-proposed-unreviewed
+
+  - id: G-L-001
+    category: condition-deletion
+    task: rewrite
+    mode: strict
+    source: |
+      故障切换步骤：
+      1. 记录本次健康检查结果。
+      2. 仅当健康检查在 2 分钟内连续失败 3 次，且主集群已进入只读状态时，才切换到备用集群。
+      3. 任一次检查恢复成功后，将连续失败计数清零。
+    invariants:
+      - kind: condition
+        detail: |
+          切换必须同时满足两个前提：健康检查在 2 分钟内连续失败 3 次，以及主集群已经进入只读状态。输出删除任一前提，判为失败。
+      - kind: condition
+        detail: |
+          「连续失败」不等于在时间窗口内累计失败；任一次成功都会按第 3 步清零计数。
+      - kind: quantity
+        detail: |
+          时间窗口必须保持为 2 分钟，连续失败阈值必须保持为 3 次。
+    protected_tokens: []
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: |
+          故障切换步骤：
+          1. 记录健康检查结果。
+          2. 健康检查在 2 分钟内失败 3 次后，切换到备用集群。
+          3. 检查恢复成功后，将失败计数清零。
+        violated: [condition]
+        reason: |
+          候选输出删除了「连续」要求和主集群只读前提，允许在更多状态下切换。
+    over_edit_trap: false
+    provenance: model-proposed-unreviewed
+
+  - id: G-L-002
+    category: condition-deletion
+    task: review
+    mode: review
+    source: |
+      原文：仅当灰度发布完成且错误率已回到基线时，才将全部流量切换到新版本。
+      候选改写：灰度发布完成后，将全部流量切换到新版本。
+    instruction: 审阅候选改写是否保留原文的全部切流条件；只输出问题清单。
+    invariants:
+      - kind: condition
+        detail: |
+          正确审阅必须指出：原文要求灰度发布完成和错误率回到基线两个条件同时成立；候选仅保留灰度发布完成，删除了错误率条件。
+      - kind: scope
+        detail: |
+          被两个条件共同约束的动作是将全部流量切换到新版本；审阅若把被删除条件误判为仅影响灰度阶段，判为失败。
+    protected_tokens: []
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: |
+          未发现问题。候选改写保留了灰度完成后切换流量的主要流程。
+        violated: [condition, scope]
+        reason: |
+          审阅遗漏了错误率回到基线这一必要切流条件。
+    expected_issues:
+      - category: condition-deletion
+        severity: ERROR
+        locus: 候选改写删除了「错误率已回到基线」
+    over_edit_trap: false
+    provenance: model-proposed-unreviewed
+
+  - id: G-L-003
+    category: condition-broadening
+    task: translate
+    mode: strict
+    source: |
+      Start cross-region replication only if both the primary and secondary backup checks pass. A failure in either check leaves replication disabled.
+    instruction: 将文本翻译成中文，并保持门控条件及其合取关系。
+    invariants:
+      - kind: condition
+        detail: |
+          启动跨区域复制的必要条件是主备份检查和辅助备份检查都通过；中文输出若允许只通过其中一项就启动，判为失败。
+      - kind: quantifier
+        detail: |
+          “both”作用于两项检查并要求二者全部通过；不得译成「任一」「至少一项」。
+      - kind: condition
+        detail: |
+          任一检查失败时都必须保持复制禁用；输出若把失败后的禁用写成可选行为，判为失败。
+    protected_tokens: []
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: |
+          主备份检查或辅助备份检查任一通过后，即可启动跨区域复制；只有两项都失败时才保持禁用。
+        violated: [condition, quantifier]
+        reason: |
+          候选译文把两项检查均通过的合取门槛放宽为任一检查通过。
+    over_edit_trap: false
+    provenance: model-proposed-unreviewed
+
+  - id: G-L-004
+    category: exception-deletion
+    task: rewrite
+    mode: strict
+    source: |
+      警告：除审计日志和当前活动会话外，执行 `purge` 会删除该租户的所有临时数据。对保留租户不得执行 `purge`。
+    instruction: 若警告已经清楚、准确且可执行，请原样返回；不得扩大删除范围。
+    invariants:
+      - kind: quantifier
+        detail: |
+          删除范围是该租户的所有临时数据，但审计日志和当前活动会话明确排除在外；输出若声称这两类对象也会被删除，判为失败。
+      - kind: modality
+        detail: |
+          对保留租户执行 `purge` 是被禁止的，不是建议避免。
+      - kind: token
+        detail: |
+          操作名 `purge` 必须逐字符保留，且仍指代删除临时数据的操作。
+    protected_tokens: ['purge']
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: |
+          警告：执行 `purge` 会删除该租户的所有临时数据。对保留租户不得执行 `purge`。
+        violated: [quantifier]
+        reason: |
+          候选输出删除了审计日志和当前活动会话这两个排除项，扩大了删除集合。
+    over_edit_trap: true
+    provenance: model-proposed-unreviewed
+
+  - id: G-L-005
+    category: exception-deletion
+    task: review
+    mode: review
+    source: |
+      原文：向除审计命名空间和计费命名空间之外的所有命名空间应用限流策略。
+      候选改写：向所有命名空间应用限流策略。
+    instruction: 审阅候选改写是否保持原文的适用对象集合；只输出问题清单。
+    invariants:
+      - kind: quantifier
+        detail: |
+          正确审阅必须指出：审计命名空间和计费命名空间是明确排除项，候选输出把它们纳入限流范围。
+    protected_tokens: []
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: |
+          未发现问题。「所有命名空间」是对原文范围的简洁概括。
+        violated: [quantifier]
+        reason: |
+          审阅把删除两个排除项的范围扩大误判为无损概括。
+    expected_issues:
+      - category: exception-set-deletion
+        severity: ERROR
+        locus: 候选改写中的「所有命名空间」
+    over_edit_trap: false
+    provenance: model-proposed-unreviewed
+
+  - id: G-L-006
+    category: quantifier-scope-drift
+    task: rewrite
+    mode: standard
+    source: |
+      错误 `E_LOCKED`：由于该资源正在被另一个进程占用的事实，当前请求已被拒绝。释放该进程持有的锁后重试。
+    invariants:
+      - kind: quantifier
+        detail: |
+          「另一个进程」指一个特定的其他进程；输出若改成可指多个或任意进程的「其他进程」，判为失败。
+      - kind: reference
+        detail: |
+          后句「该进程」必须继续指向占用资源的同一个进程；输出不得把解锁动作扩展到其他进程。
+      - kind: token
+        detail: |
+          错误标识 `E_LOCKED` 必须逐字符保留。
+    protected_tokens: ['E_LOCKED']
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: |
+          错误 `E_LOCKED`：因该资源正被其他进程占用，当前请求已被拒绝。释放其他进程持有的锁后重试。
+        violated: [quantifier, reference]
+        reason: |
+          候选输出把一个特定占用进程泛化为数量和身份均不确定的进程集合。
+    over_edit_trap: false
+    provenance: model-proposed-unreviewed
+
+  - id: G-L-007
+    category: quantifier-scope-drift
+    task: translate
+    mode: strict
+    source: |
+      Apply the patch to at least one eligible replica in each region; do not apply it to every replica unless the rollout is approved.
+    instruction: 将文本翻译成中文，并保持量词的对象域、作用域和批准条件。
+    invariants:
+      - kind: quantifier
+        detail: |
+          “at least one eligible replica in each region”要求每个区域各有至少一个符合条件的副本应用补丁；只在至少一个区域选择副本不满足要求。
+      - kind: negation
+        detail: |
+          未获批准时禁止的是「给每个副本都应用补丁」这一全称操作，不是禁止给任何单个副本应用补丁。
+      - kind: condition
+        detail: |
+          获得发布批准后，给每个副本应用补丁才不再受第二项禁止约束；输出不得删除该批准条件。
+    protected_tokens: []
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: |
+          在至少一个区域中，给一个符合条件的副本应用补丁；除非发布获得批准，否则不得给任何副本应用补丁。
+        violated: [quantifier, negation]
+        reason: |
+          候选译文把「每个区域至少一个」缩成「至少一个区域一个」，并把禁止全量应用扩大为禁止任何应用。
+    over_edit_trap: false
+    provenance: model-proposed-unreviewed
+
+  - id: G-L-008
+    category: negation-scope
+    task: rewrite
+    mode: strict
+    source: |
+      不得同时重启 `controller-a` 和 `controller-b`；可以先重启其中一个，待其恢复后再重启另一个。
+    instruction: 若警告已经清楚、准确且可执行，请原样返回；不得扩大禁止范围。
+    invariants:
+      - kind: negation
+        detail: |
+          禁止对象是同时重启两个控制器这一组合；分别重启任一控制器并未被禁止。输出若分别禁止重启两个控制器，判为失败。
+      - kind: order
+        detail: |
+          顺序重启时，第二个控制器必须等待第一个恢复后才能重启；输出若允许并行或删除等待点，判为失败。
+      - kind: token
+        detail: |
+          `controller-a` 和 `controller-b` 必须逐字符保留并继续指代两个不同控制器。
+    protected_tokens: ['controller-a', 'controller-b']
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: |
+          不得重启 `controller-a`，也不得重启 `controller-b`。
+        violated: [negation, order]
+        reason: |
+          候选输出把组合级禁止拆成两个独立禁止，并删除了允许顺序重启的路径。
+    over_edit_trap: true
+    provenance: model-proposed-unreviewed
+
+  - id: G-L-009
+    category: negation-scope
+    task: review
+    mode: review
+    source: |
+      原文：系统不会在工作时间重启主数据库并清空缓存。
+      候选改写：工作时间内，系统禁止重启主数据库，亦禁止清空缓存。
+    instruction: 审阅候选改写是否保持否定作用域和陈述类型；只输出问题清单。
+    invariants:
+      - kind: negation
+        detail: |
+          正确审阅必须指出：候选输出选择了分别否定重启和清空缓存的解释；原文中的「不会 A 并 B」并未明确给出这一作用域。
+      - kind: modality
+        detail: |
+          正确审阅必须指出：原文描述系统不会发生某行为，候选却改成规范性禁止。行为描述和禁令不等价。
+    protected_tokens: []
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: |
+          未发现问题。候选改写消除了歧义，并完整保留了原文语义。
+        violated: [negation, modality]
+        reason: |
+          审阅没有识别候选对否定作用域的擅自选择，也没有识别行为描述到禁令的模态变化。
+    expected_issues:
+      - category: negation-scope
+        severity: ERROR
+        locus: 候选改写中的「禁止重启主数据库，亦禁止清空缓存」
+      - category: modality-drift
+        severity: ERROR
+        locus: 原文「不会」与候选「禁止」
+    over_edit_trap: false
+    provenance: model-proposed-unreviewed
+
+  - id: G-L-010
+    category: threshold-boundary
+    task: rewrite
+    mode: strict
+    source: |
+      当待处理任务数达到 100 条时，调度器停止接收新任务；降到 80 条以下后恢复接收。
+    instruction: 若规则已经清楚、准确且可执行，请原样返回；不得归一化比较词。
+    invariants:
+      - kind: threshold
+        detail: |
+          「达到 100 条」包含任务数恰为 100 的情况；输出若改成「超过 100 条」，判为失败。
+      - kind: threshold
+        detail: |
+          「80 条以下」不包含恰为 80 的情况；输出若改成「不超过 80 条」或「80 条以内」，判为失败。
+      - kind: quantity
+        detail: |
+          停止阈值必须保持为 100 条，恢复阈值必须保持为 80 条，且两者不得互换。
+    protected_tokens: []
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: |
+          当待处理任务数超过 100 条时，调度器停止接收新任务；降到不超过 80 条后恢复接收。
+        violated: [threshold]
+        reason: |
+          候选输出把停止边界从包含 100 改为排除 100，并把恢复边界从排除 80 改为包含 80。
+    over_edit_trap: true
+    provenance: model-proposed-unreviewed
+
+  - id: G-L-011
+    category: threshold-boundary
+    task: rewrite
+    mode: strict
+    source: |
+      | 参数 | 行为 |
+      | --- | --- |
+      | `max_wait` | 等待时间在 30 s 以内时返回结果；超过 30 s 时返回 `timeout`。 |
+    invariants:
+      - kind: threshold
+        detail: |
+          等待时间恰为 30 s 时属于「30 s 以内」，必须返回结果；输出若让 30 s 返回 `timeout`，判为失败。
+      - kind: scope
+        detail: |
+          `timeout` 只绑定到等待时间超过 30 s 的分支；不得绑定到达到或等于 30 s 的分支。
+      - kind: token
+        detail: |
+          参数名 `max_wait` 和返回值 `timeout` 必须逐字符保留。
+    protected_tokens: ['max_wait', 'timeout']
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: |
+          | 参数 | 行为 |
+          | --- | --- |
+          | `max_wait` | 等待时间小于 30 s 时返回结果；达到 30 s 时返回 `timeout`。 |
+        violated: [threshold, scope]
+        reason: |
+          候选输出把恰为 30 s 的行为从返回结果改成返回超时。
+    over_edit_trap: false
+    provenance: model-proposed-unreviewed
+
+  - id: G-L-012
+    category: temporal-order
+    task: rewrite
+    mode: strict
+    source: |
+      故障切换步骤：
+      1. 暂停写入。
+      2. 等待 `replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`。
+      3. 将备用库提升为主库。
+
+      警告：第 3 步不得与第 1、2 步并行。
+    instruction: 若步骤已经清楚、准确且可执行，请原样返回；不得合并或并行化步骤。
+    invariants:
+      - kind: order
+        detail: |
+          提升备用库前必须先暂停写入；输出若在暂停写入之前或同时提升备用库，判为失败。
+      - kind: order
+        detail: |
+          提升备用库必须等待复制延迟降为 `0` 且快照状态成为 `COMPLETED`；未满足任一等待条件就提升，判为失败。
+      - kind: negation
+        detail: |
+          警告明确禁止第 3 步与前两步并行；输出若把三项操作写成并行任务，判为失败。
+      - kind: token
+        detail: |
+          `replica_lag_ms`、`0` 和 `COMPLETED` 必须逐字符保留，且仍分别绑定到复制延迟和值、快照状态和值。
+    protected_tokens: ['replica_lag_ms', '0', 'COMPLETED']
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: |
+          并行执行以下操作：暂停写入；等待 `replica_lag_ms` 降为 `0` 并确认快照状态为 `COMPLETED`；将备用库提升为主库。
+        violated: [order, negation]
+        reason: |
+          候选输出把提升主库与两个必要前置步骤并行化，删除了等待边。
+    over_edit_trap: true
+    provenance: model-proposed-unreviewed
+
+  - id: G-L-013
+    category: temporal-order
+    task: review
+    mode: review
+    source: |
+      原文：冻结写入，等待快照完成后删除旧卷。
+      候选改写：冻结写入并删除旧卷，同时等待快照完成。
+    instruction: 审阅候选改写是否保持操作顺序和等待点；只输出问题清单。
+    invariants:
+      - kind: order
+        detail: |
+          正确审阅必须指出：原文要求先冻结写入，再等待快照完成，最后删除旧卷；候选允许删除旧卷与等待快照并行。
+      - kind: condition
+        detail: |
+          快照完成是删除旧卷的必要前提；审阅若只把差异描述成行文顺序变化，判为失败。
+    protected_tokens: []
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: |
+          未发现问题。候选改写合并了步骤，但仍包含冻结写入、等待快照和删除旧卷三个动作。
+        violated: [order, condition]
+        reason: |
+          审阅只核对动作是否出现，没有识别删除操作越过等待点。
+    expected_issues:
+      - category: temporal-order
+        severity: ERROR
+        locus: 候选改写中的「删除旧卷，同时等待快照完成」
+    over_edit_trap: false
+    provenance: model-proposed-unreviewed
+
+  - id: G-T-001
+    category: protected-token-mutation
+    task: rewrite
+    mode: strict
+    source: |
+      取消作业接口：调用 `POST /v1/jobs/{job_id}:cancel`。
+
+      | 响应 | 客户端行为 |
+      | --- | --- |
+      | `409` | 读取字段 `retry_after_ms`，并设置 `JOB_CANCEL_RETRY=1`。 |
+    invariants:
+      - kind: token
+        detail: |
+          API 方法和路径必须保持为 `POST /v1/jobs/{job_id}:cancel`；单复数、路径参数、斜杠和冒号动作语法中的任一字符变化都判为失败。
+      - kind: token
+        detail: |
+          状态码必须保持为 `409`，字段名必须保持为 `retry_after_ms`，环境变量赋值必须保持为 `JOB_CANCEL_RETRY=1`。
+      - kind: scope
+        detail: |
+          读取字段和设置环境变量两项行为仍必须绑定到 `409` 响应分支。
+    protected_tokens: ['POST /v1/jobs/{job_id}:cancel', '409', 'retry_after_ms', 'JOB_CANCEL_RETRY=1']
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: |
+          取消作业接口：调用 `POST /v1/job/{jobId}/cancel`。
+
+          | 响应 | 客户端行为 |
+          | --- | --- |
+          | `400` | 读取字段 `retryAfterMs`，并设置 `JOB_CANCEL_RETRY=true`。 |
+        violated: [token]
+        reason: |
+          API 路径、路径参数、动作语法、状态码、字段名和环境变量值均被静默改写。
+    over_edit_trap: false
+    provenance: model-proposed-unreviewed
+
+  - id: G-T-002
+    category: protected-token-mutation
+    task: rewrite
+    mode: strict
+    source: |
+      工具 `sync-config` 接受 `--dry-run` 和 `--config=/etc/ctc/agent.yaml`。仅当 `CTC_SYNC_MODE=verify` 时，工具执行验证而不写入；验证失败时返回退出码 `2`。
+    invariants:
+      - kind: token
+        detail: |
+          工具名必须保持为 `sync-config`，标志必须保持为 `--dry-run`，带值参数必须保持为 `--config=/etc/ctc/agent.yaml`。
+      - kind: token
+        detail: |
+          环境变量赋值必须保持为 `CTC_SYNC_MODE=verify`，包括大小写；验证失败退出码必须保持为 `2`。
+      - kind: condition
+        detail: |
+          不写入行为仅在 `CTC_SYNC_MODE=verify` 时成立；输出若把验证模式写成默认行为或无条件行为，判为失败。
+    protected_tokens: ['sync-config', '--dry-run', '--config=/etc/ctc/agent.yaml', 'CTC_SYNC_MODE=verify', '2']
+    authorized_token_changes: []
+    invalid_transformations:
+      - output: |
+          工具 `sync_config` 接受 `--dryrun` 和 `--config=/etc/ctc/agent.yml`。当 `CTC_SYNC_MODE=VERIFY` 时，工具默认只执行验证；验证失败时返回退出码 `0`。
+        violated: [token, condition]
+        reason: |
+          工具名、标志、配置路径、环境变量值和退出码均被修改，并且新增了无来源的默认行为。
+    over_edit_trap: false
+    provenance: model-proposed-unreviewed
