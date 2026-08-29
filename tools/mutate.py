@@ -65,7 +65,10 @@ LEXICAL_OPERATORS: list[tuple[str, str, str, str]] = [
     ("condition_broaden", r"仅当([^，。]{1,40})时，([^。]{0,12}?)才", r"当\1时，\2",
      "必要条件（仅当…才）被放宽为一般条件"),
     ("condition_broaden", r"仅当", "当", "必要条件（仅当）被放宽为一般条件"),
-    ("condition_broaden", r"连续(失败)?\s*\d+\s*次", "失败", "连续 N 次的门控被放宽为单次触发"),
+    ("condition_broaden", r"连续失败\s*\d+\s*次", "失败", "连续失败 N 次的门控被放宽为单次失败即触发"),
+    # deleting the counter outright, rather than substituting a word, is the only
+    # variant that stays grammatical when 连续 N 次 modifies a following verb
+    ("condition_broaden", r"连续\s*\d+\s*次\s*", "", "连续 N 次的门控被删除，单次即触发"),
     ("condition_broaden", r"除[^，。；]{1,12}外[，、]?", "", "例外集合被删除，义务范围被扩大"),
     ("threshold_flip", r"达到", "超过", "闭区间边界被改为开区间，等于阈值时的行为改变"),
     ("threshold_flip", r"不低于", "高于", "包含端点的下界被改为不含端点"),
@@ -177,7 +180,8 @@ def mutate(text: str, actors: list[str] | None = None, limit: int = 6) -> list[M
     found: list[Mutation] = []
     multi_line = "\n" in text.strip()
     for cls, pattern, repl, expected in LEXICAL_OPERATORS:
-        if pattern == r"^" and (multi_line or len(text) > 60 or "：" in text[:8]):
+        leading_label = re.match(r"^[^，。\n]{0,20}：", text) is not None
+        if pattern == r"^" and (multi_line or len(text) > 60 or leading_label):
             # a leading label (「警告：」「错误 X：」) cannot take a frequency adverb in front
             continue
         res = _sub_first(text, pattern, repl)
@@ -232,8 +236,14 @@ def cases_from_gold(gold_dir: Path, per_class_cap: int = 6) -> list[dict]:
                     "derived_from": case["id"],
                     "task": "review",
                     "mode": "review",
+                    "instruction": ("下面给出原文与候选改写。审阅候选改写是否忠实于原文；"
+                                    "只输出问题清单，不要整体重写。"),
                     "clean_source": source,
-                    "source": m.text,
+                    # The review sees the pair, not the mutant alone. Drift from an
+                    # unseen original is undetectable by construction: 「2 分钟」→「4 分钟」
+                    # reads as a perfectly ordinary threshold with no source to compare to.
+                    "source": f"原文：\n{source}\n\n候选改写：\n{m.text}",
+                    "mutant": m.text,
                     "locus": m.locus,
                     "expected_issues": [{
                         "category": m.cls,

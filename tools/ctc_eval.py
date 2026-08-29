@@ -280,9 +280,9 @@ def build_prompt(case: dict) -> str:
 
 # ---------------------------------------------------------------- cases
 
-def load_cases(case_ids: list[str] | None = None) -> list[dict]:
+def load_cases(case_ids: list[str] | None = None, cases_dir: Path | None = None) -> list[dict]:
     cases: list[dict] = []
-    for path in sorted(GOLD.glob("*.yaml")):
+    for path in sorted((cases_dir or GOLD).glob("*.yaml")):
         doc = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         for c in doc.get("cases", []):
             c["_file"] = path.name
@@ -309,7 +309,7 @@ def cmd_run(args) -> int:
     if not SKILL.exists():
         print("SKILL.md does not exist yet", file=sys.stderr)
         return 1
-    cases = load_cases(args.case_id)
+    cases = load_cases(args.case_id, Path(args.cases_dir) if args.cases_dir else None)
     if not cases:
         print("no cases matched", file=sys.stderr)
         return 1
@@ -467,6 +467,7 @@ def main() -> int:
     r.add_argument("--run-id", default="latest")
     r.add_argument("--case-id", action="append")
     r.add_argument("--force", action="store_true")
+    r.add_argument("--cases-dir", help="load cases from here instead of eval/gold")
     r.set_defaults(fn=cmd_run)
 
     rc = sub.add_parser("recheck", help="re-run deterministic checks over saved outputs")
