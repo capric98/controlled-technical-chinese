@@ -7,7 +7,7 @@
 meta:
   version: v0
   author_role: specification-compiler
-  status: draft-independent-first-pass
+  status: aligned-with-accepted-decisions-through-005
   date: 2026-08-28
   produced_as: independent-first-pass
   inputs_read:
@@ -19,6 +19,31 @@ meta:
   not_read_on_purpose:
     - dev/inbox/*        # parallel independent passes; independence before discussion
                          # (000-design.md §12, 001-development-protocol.md independence protocol)
+  revisions:
+    - date: 2026-09-25
+      purpose: >-
+        Align the canonical semantics with the decisions accepted after this draft (004, 005, D004)
+        and with the current SKILL.md. IDs, levels and family assignments are unchanged.
+      applied:
+        - "004 §1 + 005 C1, C4: 「待确认」 is a closed list of seven categories; optional fourth column 建议 (005 gap 3); R001 attribution is internal discipline in rewrite modes"
+        - "004 §2 + 005 C7: modes change only the ambiguity threshold; severities exist only in review; 'SHOULD enforced as MUST/ERROR' removed from modes[strict], A003, P002, P003 and open_issues 2/6"
+        - "004 §2, §6: review threshold follows document type; the single demonstrated escalation"
+        - "004 §3 + 005 C1: T001 scope and reporting route"
+        - "004 §8 + D003 + 003 §5: R004 vocabulary adds 尽可能/最好; report the candidate strengths and suggest, then stop"
+        - "005 C4: S001 length-cap escape deleted"
+        - "005 C5: level-2-vs-level-4 tie-break; R002 carve-out for P002"
+        - "005 C6: S005 ordered protection test; product names in prose"
+        - "005 C8 + 003 §4: structural condition scope moved into L001 at MUST; R005 keeps format and granularity"
+        - "005 structural gap 1: ladder_layers block"
+        - "005 structural gap 2: R002/R003 describe defects, not rewrite licences"
+        - "005 self-demonstration: A001 positive example no longer swaps 销毁→清理 (T002)"
+        - "D004 (commit 7cbdf21): P003 re-scoped for caller-authorised merges; authorized_merge example added"
+      not_applied_no_decision_record:   # SKILL.md changed here in commit a0678b6 without a decision record; the spec is left as-is
+        - "P003: SKILL.md limits the missing-criterion 「待确认」 item to destructive or irreversible steps whose success gates what follows (regression: eval/gold/gold-ambiguity.yaml); spec P003 still allows reporting any missing criterion"
+        - "P004: SKILL.md exempts standalone warning blocks — they govern the whole procedure wherever they sit and moving them is an R005 violation (regression: eval/gold/gold-logic.yaml); spec P004 has no such exemption"
+        - "「待确认」 category 1 vs 5: SKILL.md routes all missing information to category 5 whichever rule found it; spec A005's trigger still overlaps category 5"
+        - "R004 at ladder layer 2: taken from SKILL.md §2, absent from 005's mapping; included in ladder_layers pending a decision"
+        - "Several examples.positive entries (S001, S002, S003, S005, S006, S007, T002, L001) edit an already-compliant source with no rule trigger — the pattern 005 repaired in SKILL.md's worked examples. Only A001 is fixed here because 005 names its defect; the rest need a decision on what a positive example must demonstrate"
   rule_count: 29
   family_counts: {S: 7, A: 5, P: 5, T: 2, L: 4, R: 6}
   level_counts: {MUST: 19, SHOULD: 9, MAY: 1}
@@ -32,7 +57,8 @@ meta:
   conventions:
     pending_block: >-
       「待确认」is the single channel through which a rewrite reports what it refused to decide.
-      Rules A005 / P003 / P005 / R004 depend on it existing; see modes[].output_contract.
+      Seven rules route into it — A005, P003, P005, R004, S002, S005, S001 (length cap) — and the
+      list is closed (004 §1; 005 C1, C4); see modes[].output_contract.
     severity_mapping: MUST -> ERROR, SHOULD -> WARNING, MAY -> STYLE (000-design.md §28)
     detection_note: >-
       Per 002-gold-case-schema.md, `deterministic` is reserved for properties decidable by string
@@ -44,7 +70,7 @@ families:
   A: ambiguity and reference — actor, reference expression, modifier/negation/coordination scope
   P: procedures and action structure — steps, operability, verification, guarded actions
   T: terminology — consistency of the concept-to-term mapping in both directions
-  L: logic, conditions, temporal order
+  L: logic, conditions, temporal order, and the scope of conditions carried by document structure (005 C8)
   R: rendering and controlled style — minimal intervention, naturalness, structure, typography
 
 priority_ladder:
@@ -97,8 +123,10 @@ priority_tie_breaks:
         source. Minimal intervention (R001) is the tie-break, not the model's preference.
     - level_2_versus_level_4: >-
         An explicitness gain at level 2 outranks a naturalness loss at level 4 only when it removes
-        a demonstrated divergent reading. Explicitness that removes no divergent reading is an
-        R002 violation, not a level-2 win.
+        an indeterminacy. Two kinds count: a divergent reading, and operational indeterminacy —
+        which action, which object, which node. Writing out an action, object or location that the
+        source or context determines removes the second kind; that is P002 and is licensed.
+        Explicitness that removes neither kind is an R002 violation, not a level-2 win (005 C5).
     - level_1_unreachable: >-
         If level 2 cannot be reached without violating level 1, do not rewrite that span: leave it
         and report it. Silence about an ambiguity is a lesser failure than deciding it (D001 §5).
@@ -108,6 +136,18 @@ priority_tie_breaks:
     - level_confusion: >-
         A house-style or locale preference may not be promoted into a semantic rule to win an
         argument (000-design.md §7.5). Report it as STYLE or not at all.
+
+ladder_layers:
+  # 005 structural gap 1: without a layer per rule, 000-design.md §26's definition of SHOULD —
+  # "may be overridden by a higher priority" — cannot be executed. Mirrors SKILL.md §2.
+  by_family: {S: 1, L: 1, A: 2, P: 2, T: 3}
+  by_rule:
+    CTC-R001: cross-cutting   # governs how every layer is applied; no layer of its own
+    CTC-R002: 4
+    CTC-R003: 4
+    CTC-R004: 2               # not in 005's list; placed by SKILL.md §2 (commit a0678b6) — see meta.revisions
+    CTC-R005: 4
+    CTC-R006: 5
 
 modes:
   - id: strict
@@ -120,24 +160,32 @@ modes:
       - warnings, alerts and error messages
     behavior: >-
       All rules apply. The ambiguity threshold is at its lowest: a reading counts as divergent if
-      any plausible operator reading would lead to a different action, even a careful one. SHOULD
-      rules in families A and P are enforced as if MUST whenever the omission would change what
-      an operator does; this changes the trigger threshold, not the rule level recorded here.
-      Conditions, prerequisites, exceptions, guards and success criteria are never dropped for
-      brevity. Strict is not maximal verbosity (000-design.md §6.1).
+      it is executable in the document's context and leads to a different action. Lowering the
+      threshold makes more sites count as ambiguous and so triggers more A- and P-family rules;
+      what changes is the trigger surface, not the level recorded here (004 §2). Severities exist
+      only in review mode — a rewrite has no findings to grade — and the only permitted escalation
+      is the one stated under modes[review] (005 C7, 004 §6). Conditions, prerequisites,
+      exceptions, guards and success criteria are never dropped for brevity. Strict is not maximal
+      verbosity (000-design.md §6.1).
     must_not: >-
       Must not invent an actor, parameter, threshold, criterion or failure cause in order to look
       explicit; must not repeat a subject that disambiguates nothing; must not split clauses into
       one-line fragments; must not raise descriptive text to normative text or a request to an
       obligation; must not add defensive warnings absent from the source.
     output_contract: >-
-      Return the rewritten Chinese text only, preserving the source's Markdown structure, list
-      granularity, code fences and inline code. No preamble, no explanation of the changes. If and
-      only if unresolved items exist, append one final section headed 「待确认」 containing at most
-      one line per item, each as: 位置 | 问题 | 需要的信息. Items are limited to ambiguities that
-      could not be resolved from evidence (A005), success criteria the source never stated (P003),
-      trigger conditions missing from a tool description (P005), and undefined normative criteria
-      (R004). If there are none, the section is absent.
+      Return the rewritten Chinese text only; Markdown structure, list granularity, code fences and
+      inline code are kept per R005. No preamble, no explanation of the changes. The per-edit rule
+      attribution R001 requires is internal discipline here and is not written into the output
+      (005). If and only if unresolved items exist, append one final section headed 「待确认」
+      containing at most one line per item, each as: 位置 | 问题 | 需要的信息 | 建议（可选）; the
+      fourth column is filled only when a rule requires a suggestion (R004 on modal-strength
+      hedges) and is otherwise omitted. The admissible items form a closed list of seven (004 §1;
+      005 C1, C4): (1) an ambiguity evidence could not resolve (A005); (2) a success criterion the
+      source never stated (P003); (3) a trigger condition missing from a tool description (P005);
+      (4) an undefined normative criterion (R004); (5) information execution needs that neither
+      source nor context supplies (S002); (6) a protected token whose source spelling is suspect
+      (S005); (7) a caller-given length cap that cannot be met without deleting a condition or
+      exception (S001). Nothing else enters. If there are none, the section is absent.
   - id: standard
     use_for:
       - API documentation
@@ -157,8 +205,8 @@ modes:
       of concision; must not generalise an example or a specific value into a summary claim; must
       not treat compression as a licence to re-decide meaning.
     output_contract: >-
-      Same as strict: rewritten text only, source structure preserved, optional trailing 「待确认」
-      section under the same field format.
+      Same as strict: rewritten text only, source structure preserved per R005, optional trailing
+      「待确认」 section under the same four-column format and the same closed list of seven items.
   - id: review
     use_for:
       - auditing existing Chinese technical text
@@ -167,9 +215,14 @@ modes:
       - checking another model's rewrite
     behavior: >-
       Report; do not rewrite. Every finding cites one rule id, and a span of the reviewed text that
-      is quoted verbatim. Severity follows the recorded level: MUST -> ERROR, SHOULD -> WARNING,
-      MAY -> STYLE. Suggested corrections are fragment-level and are proposals, not applied edits.
-      Text that triggers no rule produces no finding; absence of findings is a valid result.
+      is quoted verbatim. The ambiguity threshold follows the reviewed document's type: strict's
+      threshold for agent instructions and runbooks, standard's for explanatory documents (004 §2).
+      Severity follows the recorded level: MUST -> ERROR, SHOULD -> WARNING, MAY -> STYLE. The
+      single permitted escalation: a SHOULD violation may be reported as ERROR only when the
+      finding's 风险 field names the specific different action an operator would take as a result;
+      no other escalation, and no de-escalation (004 §6). Suggested corrections are fragment-level
+      and are proposals, not applied edits. Text that triggers no rule produces no finding; absence
+      of findings is a valid result.
     must_not: >-
       Must not emit a whole-document rewrite; must not report a finding without a rule id; must not
       classify a style preference as ERROR (000-design.md §28); must not manufacture findings to
@@ -193,7 +246,7 @@ rules:
     trigger: "改写、压缩、合并或翻译一段已包含具体断言的技术文本。"
     requirement: "输出必须能还原来源中的每一条独立断言：对象、属性、行为、数值、条件、结果、失败分支。压缩只允许删除同一断言的重复表述与纯修饰成分。"
     prohibition: "删除一条独立断言；把一组并列断言概括为上位表述；把具体值或具体示例替换为「相关配置」「若干」「一些情况下」之类的占位说法；在合并句子时丢弃其中一个谓词。"
-    exceptions: "调用方明确要求摘要或给定长度上限时可以删除断言，但删除顺序必须遵守优先级阶梯：条件、例外、阈值、告警与失败分支最后删除，且删除事实必须在「待确认」中说明。"
+    exceptions: "调用方给定的长度上限不授权删除任何条件、例外、阈值、告警或失败分支；无法在不删除的前提下满足上限时，返回完全合规的最短文本，并在「待确认」（第 7 类）中说明上限未能满足。（005 C4：原「最后删除并说明」的例外与 L001 的 MUST 级冲突，已删除。）"
     invariant: "assertion-set-complete — 来源断言集合包含于输出断言集合。"
     detection: semantic
     detection_note: "确定性层可提供两个信号：输出长度显著下降；来源中出现的数值或标识符未出现在输出中（与 S004/S005 共用检查）。是否构成断言丢失由语义层判定。"
@@ -325,7 +378,7 @@ rules:
     trigger: "文本含有代码、命令、路径、标识符、字段名、API 名、URL、状态码、占位符、正则、配置键、错误码，或行内代码与代码块。"
     requirement: "受保护标记逐字符不变，包括大小写、连字符、下划线、点号与斜杠。行内代码与围栏代码块的内部内容整体不改动，语言标注保留。占位符（`{project_id}`、`<region>`）按原形保留。"
     prohibition: "翻译标识符；改动大小写或分隔符；把标记内的半角符号改为全角；改写代码块内容；把命令替换为对命令的描述；替换或补全占位符；规范化 URL。"
-    exceptions: "调用方显式授权的改动（对应 002 的 `authorized_token_changes`）；代码块之外的自然语言照常改写；来源自身的拼写错误保持原样并在「待确认」中提出。"
+    exceptions: "调用方显式授权的改动（对应 002 的 `authorized_token_changes`）；代码块之外的自然语言照常改写；受保护标记本身的拼写疑似有误时保持原样，按「待确认」第 6 类提出（005 C1）。判定按顺序做（005 C6）：出现在代码标记内，或被用作命令、路径、标识符、字段名或取值的字符串，是受保护标记；在正文中作普通名词使用的产品名与项目名（Node-RED、GitLab、.NET）不是——其拼写、大小写与连字符仍逐字符保留且不得翻译，但可以在句中改变位置。"
     invariant: "protected-token-multiset — 受保护标记多重集在来源与输出之间相等。"
     detection: deterministic
     detection_note: "002 确定性层：受保护标记多重集相等，不等即 ERROR。无需语义判断。"
@@ -430,9 +483,9 @@ rules:
     invariant: "actor-binding — 每个动作的 (施事, 受事) 绑定不变；来源中的具名施事在输出中仍可定位。"
     detection: semantic
     examples:
-      positive:
-        source_zh: "存储管理机制会在磁盘空间不足时把旧快照数据销毁。"
-        good_zh: "磁盘空间不足时，存储管理机制会自动清理旧快照。"
+      positive:   # 005 self-demonstration: the earlier good_zh swapped 销毁→清理 (T002) and added 自动 (S002)
+        source_zh: "磁盘空间不足时，旧快照数据会被存储管理机制销毁。"
+        good_zh: "磁盘空间不足时，存储管理机制会销毁旧快照数据。"
       negative:
         source_zh: "存储管理机制会在磁盘空间不足时把旧快照数据销毁。"
         bad_zh: "磁盘空间不足时，旧快照会被自动清理。"
@@ -511,7 +564,7 @@ rules:
       observed_bad_output: "清理超过 7 天的容器日志与镜像缓存，两者均按 7 天保留。"
       risk: "删除范围被扩大到仍在使用的对象；在清理类脚本文档中这是不可逆操作。"
       not_covered_by: "S007 覆盖量化词本身的强度，不覆盖修饰语与并列项的结合方式。A005 规定无证据时不得择一，但不给出有证据时的修复方式，也不把结合歧义定义为一个需要主动识别的触发条件。"
-      why_defeasible: "结合歧义的判定依赖领域知识：某些结合在专业读者看来只有一种读法。定为 MUST 会让规则在正常多层定语上大量误触发，产生 R002 式的过度显式化。strict 模式下当两种读法改变操作对象时按 MUST 执行。"
+      why_defeasible: "结合歧义的判定依赖领域知识：某些结合在专业读者看来只有一种读法。定为 MUST 会让规则在正常多层定语上大量误触发，产生 R002 式的过度显式化。strict 模式降低的是歧义阈值：更多结合歧义会被判为改变操作对象而触发本规则；级别与严重级不变（004 §2，005 C7）。"
       distinguishing_criterion: "对每个限定成分枚举可能的作用集合；集合数大于 1 且对应不同操作对象，而输出未消歧或消歧无证据，即为 WARNING。"
 
   - id: CTC-A004
@@ -655,7 +708,7 @@ rules:
       observed_bad_output: "确认配置无误后重启。"
       risk: "执行者要么停下来提问（流程延迟），要么按自己的理解重启错误的对象。"
       not_covered_by: "S001 是通用的断言保留规则，但它不区分「说明性文本」与「必须可执行的步骤」；本规则给出的是可执行性判据，也是 A001／A005 补出成分时的适用边界。"
-      why_defeasible: "可执行性的门槛随读者与文档类型变化：面向开发者的 README 与面向值班的 runbook 要求不同。定为 MUST 会迫使说明性文本补出无关的操作细节。strict 模式下按 MUST 执行。"
+      why_defeasible: "可执行性的门槛随读者与文档类型变化：面向开发者的 README 与面向值班的 runbook 要求不同。定为 MUST 会迫使说明性文本补出无关的操作细节。strict 模式只降低歧义阈值，不改变本规则的级别（004 §2）。"
       distinguishing_criterion: "对每个步骤询问：不查阅其他材料能否执行？来源可确定而输出不可确定，即为 WARNING。"
 
   - id: CTC-P003
@@ -665,9 +718,9 @@ rules:
     scope: [rewrite, translate, review, author]
     modes: [strict, standard, review]
     trigger: "来源给出了某个步骤的成功判据、等待条件或验证方式。"
-    requirement: "成功判据应与它所验证的步骤保持绑定，并保持其阻塞性质：「直到…为止再继续」必须仍然是继续的前提。来源未给出判据时不得虚构，可在「待确认」中提出缺失。"
-    prohibition: "把阻塞条件移到附注、脚注或文末；把「确认 X 后再继续」改写为「随后可继续」；把祈使的验证动作改写为对系统行为的描述；为步骤补写来源没有的验收标准。"
-    exceptions: "判据的呈现位置可以变化（正文、表格、检查清单），只要仍绑定同一步骤且保持阻塞性质。"
+    requirement: "成功判据应与它所验证的步骤保持绑定，并保持其阻塞性质：「直到…为止再继续」必须仍然是继续的前提。来源把验证单独列为一个步骤时：未获压缩授权则该步骤保持独立；调用方授权合并步骤时可以并入相邻步骤，但合并后它必须仍是由操作者执行、位于被守护动作之前、且逐项列全原有判据的确认动作（D004）。来源未给出判据时不得虚构，可在「待确认」中提出缺失。"
+    prohibition: "把阻塞条件移到附注、脚注或文末；把「确认 X 后再继续」改写为「随后可继续」；把祈使的验证动作改写为对系统行为的描述；为步骤补写来源没有的验收标准；合并步骤时把校验改写为不需要操作者动作的状态描述（「节点就绪后加入路由表」），或丢掉其中任一判据——两者都是删除校验点（D004）。"
+    exceptions: "判据的呈现位置可以变化（正文、表格、检查清单），只要仍绑定同一步骤且保持阻塞性质。调用方授权压缩或合并步骤属于 R001 意义上的归因；本规则不要求独立的验证步骤在获授权时仍保持独立（D004 撤回了该条款）。"
     invariant: "verification-binding — (步骤, 判据, 是否阻塞) 三元组不变。"
     detection: semantic
     examples:
@@ -688,6 +741,21 @@ rules:
         source_zh: "运行 `terraform plan` 并检查输出。"
         output_zh: "运行 `terraform plan` 并检查输出。"
         why_not_triggered: "来源没有给出可判定的成功判据。补写「确认变更数量为 0」等于虚构验收标准（S002）；缺失本身可在「待确认」中提出。"
+      authorized_merge:   # D004 / G-P-003: a caller's compression instruction versus checkpoint integrity
+        source_zh: |-
+          1. 启动 `chunk-server`。
+          2. 确认状态为 `READY` 且元数据已加载。
+          3. 加入写入路由表。
+        instruction: "合并可合并的步骤，压缩到不超过 2 步。"
+        bad_zh: |-
+          1. 启动 `chunk-server`。
+          2. 节点就绪后加入写入路由表。
+        why_bad: "步骤数达标，但校验被改写成不需要操作者动作的状态描述，且丢了元数据判据。"
+        good_zh: |-
+          1. 启动 `chunk-server`。
+          2. 确认状态为 `READY` 且元数据已加载。
+          3. 加入写入路由表。
+        why_good: "并附「待确认」说明上限未能满足（第 7 类）。步骤数达标而校验丢失，不如超出上限而校验完整。合并为 2 步而仍保留由操作者执行、位于加入路由表之前、且列全两项判据的确认动作，同样合规。"
     justification: "把校验挪成附注读起来更整洁，但它同时把一个前置条件变成了可选的参考信息。"
     gate_evidence:
       failing_input: "重启网关，直到 `/healthz` 返回 200 为止再继续下一步。"
@@ -695,7 +763,7 @@ rules:
       risk: "后续步骤在服务未就绪时执行；在滚动发布类流程中这会把一次可控重启变成一次故障。"
       not_covered_by: "S001 不触发：判据的文字仍在文档中。S003 覆盖情态强度，但此处的降级发生在结构位置上，句子内部的情态词甚至可以完全不变。"
       why_defeasible: "文档体例差异很大，判据可以合法地出现在检查清单或表格中；只要仍绑定同一步骤且保持阻塞性质就不算违规，因此需要判断而非硬性位置要求。"
-      distinguishing_criterion: "对每条判据追问：它绑定哪个步骤？它仍是继续的前提吗？绑定丢失或阻塞性质降级，即为 WARNING（strict 下按 ERROR 处理）。"
+      distinguishing_criterion: "对每条判据追问：它绑定哪个步骤？它仍是继续的前提吗？绑定丢失或阻塞性质降级，即为 WARNING；review 唯一允许的升级见 modes[review]（004 §6）。"
 
   - id: CTC-P004
     family: P
@@ -773,7 +841,7 @@ rules:
     trigger: "同一概念在本次工作单位（被改写的文本，加上调用方给出的上下文）内出现两种以上称呼。"
     requirement: "同一概念应统一为一个术语。选择顺序：调用方提供的术语约定 > 来源中最明确且出现最多的形式 > 来源中首次出现的形式。"
     prohibition: "引入来源与上下文都没有出现过的新术语或新译名；在同一文档内无理由地交替使用中英形式；把来源已经统一的术语替换为模型自己偏好的说法。"
-    exceptions: "首次出现处给出中英对照属于术语定义，不算不一致。引用外部系统或标准的固有名称时保持原名。本技能不附带产品术语表（000-design.md §7.4）：术语只能来自来源文本与调用上下文。"
+    exceptions: "首次出现处给出中英对照属于术语定义，不算不一致。引用外部系统或标准的固有名称时保持原名。本技能不附带产品术语表（000-design.md §7.4）：术语只能来自来源文本与调用上下文。作用域仅限本次调用可见的文本加调用方术语表（004 §3）；只有明确同指时才统一，不明确时不合并，各说法保持原样——改写模式下差异本身不进「待确认」，只有当它妨碍执行时按第 5 类（S002）报告；review 模式下它是一条普通 finding（005 C1）。"
     invariant: "concept-to-term — 概念到术语的映射在工作单位内是函数（一个概念一个术语）。"
     detection: mixed
     detection_note: "当调用方提供了术语约定时，约定内术语可做确定性字符串检查；无约定时，同义变体的识别属于语义层。"
@@ -838,10 +906,10 @@ rules:
     scope: [rewrite, translate, review]
     modes: [strict, standard, review]
     trigger: "来源含有条件、前提、例外、适用限定或告警。"
-    requirement: "条件、前提与例外必须保留，并继续限定同一对象。有条件的陈述必须仍然是有条件的。"
-    prohibition: "删除例外（「只读副本除外」）；把有条件的规则降格为一般规则；把「在 X 情况下」改为无限定表述；把例外挪到一个不再修饰目标句的位置。"
+    requirement: "条件、前提与例外必须保留，并继续限定同一对象。有条件的陈述必须仍然是有条件的。标题或父级列表项建立的条件管辖其子树：拍平结构不得让该条件逃出子树，也不得把它缩小到比原本管辖的更少的步骤；也不得把结构条件静默复制进每个子步骤（003 §4，005 C8）。"
+    prohibition: "删除例外（「只读副本除外」）；把有条件的规则降格为一般规则；把「在 X 情况下」改为无限定表述；把例外挪到一个不再修饰目标句的位置；拍平标题或列表结构，使其建立的条件逃出子树或缩小管辖范围。"
     exceptions: "条件的表述形式可变（若…则／…时／前提是），只要限定对象与逻辑方向不变（L002）。"
-    invariant: "condition-set — 每条断言所附带的 (条件, 例外) 集合不变。"
+    invariant: "condition-set — 每条断言所附带的 (条件, 例外) 集合不变，含由标题或父级列表项建立的条件。"
     detection: semantic
     examples:
       positive:
@@ -855,6 +923,18 @@ rules:
         source_zh: "在启用了 TLS 的集群中，还需要同时更新 CA 包。"
         output_zh: "启用 TLS 的集群还需同时更新 CA 包。"
         why_not_triggered: "条件仍限定同一对象集合，只是语序与助词变化。"
+      structural_scope:   # 003 §4 evidence (GPT F-14); assigned to this rule by 005 C8, formerly listed under R005
+        source_zh: |-
+          ## 仅用于测试环境
+          1. 清空缓存。
+          2. 重置计数器。
+        bad_zh: "清空缓存并重置计数器。"
+        why_bad: "标题建立的条件「仅用于测试环境」管辖两个步骤；拍平成散文后条件消失，清空缓存在生产环境获得了授权。"
+        output_zh: |-
+          ## 仅用于测试环境
+          1. 清空缓存。
+          2. 重置计数器。
+        why_good: "原样返回；条件留在原位，也不复制进每个子步骤。格式与粒度本身由 R005 管，此处的失败是条件保持，按本规则的 MUST 级判定。"
     justification: "例外与前提是句子里最像赘余的成分，因此在以简洁为目标的改写中最先被牺牲。"
     gate_evidence:
       failing_input: "除只读副本外，所有节点都需要重新加载证书。"
@@ -1008,7 +1088,7 @@ rules:
     trigger: "输出中出现逐句重复的主语、被机械拆分的短句，或不消除任何歧义的补充限定。"
     requirement: "显式化必须换来歧义的消除。每一个补出的主语、重复的中心语、拆出的短句，都应对应一处具体的歧义风险。"
     prohibition: "在只有一个执行者的语境中逐句补出主语；把正常复句拆成一行一句；给每个步骤补写「以确保操作正确执行」之类的空补语；对已经唯一确定的对象反复加限定。"
-    exceptions: "多执行者交替出现时重复主语具有消歧价值（A001）。面向 agent 的指令中为使每条可被单独引用而分条编号，不算机械拆句。strict 模式提高的是歧义敏感度，不是显式化的数量要求。"
+    exceptions: "多执行者交替出现时重复主语具有消歧价值（A001）。写出来源或上下文中可确定的动作、对象或位置，消除的是操作未定，属 P002，不在本规则禁止之列（005 C5）。面向 agent 的指令中为使每条可被单独引用而分条编号，不算机械拆句。strict 模式提高的是歧义敏感度，不是显式化的数量要求。本规则描述的是缺陷，不是改写许可：来源已有的缺陷只在本规则触发时修复，取能去除该缺陷的最小改动（R001）；不含该缺陷的文本不授权重写（005 结构性缺口 2）。"
     invariant: "explicitness-justified — 每个显式成分对应一处可指认的歧义风险。"
     detection: semantic
     examples:
@@ -1043,7 +1123,7 @@ rules:
     trigger: "文本含无必要的被动式、名词化赘语（进行／作出／予以 + 动词）、过长的「的」字串、英语从句语序残留（「由于…的事实」「在…的情况下」滥用），或直译的连接词。"
     requirement: "在语义完全不变的前提下，使用中文技术写作的常规表达。"
     prohibition: "为求正式而使用「被…所」；用「进行处理」代替「处理」；保留英语原文的从句语序；把简单谓语改写成「对…进行…操作」。"
-    exceptions: "被动用于突出受事、施事未知、或施事已在同句给出时是自然的技术表述。术语内部的固定搭配不改。本规则永远低于 S 族：任何自然度改进一旦改变不变量即作废（D001）。"
+    exceptions: "被动用于突出受事、施事未知、或施事已在同句给出时是自然的技术表述。术语内部的固定搭配不改。本规则永远低于 S 族：任何自然度改进一旦改变不变量即作废（D001）。本规则描述的是缺陷，不是改写许可：来源已有的译文腔只在本规则触发处修复，取能去除该缺陷的最小改动（R001）；不含该缺陷的文本不授权重写（005 结构性缺口 2）。"
     invariant: "meaning-under-rendering — 渲染改动前后，S、A、P、T、L 各族不变量全部不变。"
     detection: semantic
     examples:
@@ -1072,13 +1152,13 @@ rules:
     level: SHOULD
     scope: [author, rewrite, review]
     modes: [strict, review]
-    trigger: "目标文本是规范性指令（agent 指令、SOP、策略、门禁条件），且其判定条件由「尽量、适当、必要时、一般来说、合理」这类无判据词承担。"
-    requirement: "author 模式下，规范性条件应给出可判定的触发条件：阈值、状态或事件。rewrite 模式下不得补出来源没有的判据，应在「待确认」中提出。规范强度词（必须／应／可以）在同一文档内应保持稳定用法（000-design.md §26）。"
+    trigger: "目标文本是规范性指令（agent 指令、SOP、策略、门禁条件），且其判定条件由「尽量、尽可能、最好、适当、必要时、一般来说、合理」这类无判据词承担，包括承担义务本身的情态模糊词（004 §8）。"
+    requirement: "author 模式下，规范性条件应给出可判定的触发条件：阈值、状态或事件。rewrite 模式下不得补出来源没有的判据，应在「待确认」中提出；无判据词承担义务时，报告其可能的两种以上强度并在第四栏给出建议，然后停手，由作者决定（D003，003 §5，004 §8）。规范强度词（必须／应／可以）在同一文档内应保持稳定用法（000-design.md §26）。"
     prohibition: "在改写中把无判据词替换为具体阈值（那是 S002 违规）；在同一文档内让「应」时而表示义务、时而表示建议；把目标文档中限定观测事实的普通汉语副词当作违规删除。"
     exceptions: "本规则只适用于规范性指令文本。目标文档中对观测事实的限定（「该接口通常在 100 ms 内返回」）不受限制（000-design.md §26 末段）。"
     invariant: "criterion-decidable — 每个规范性条件都对应一个可观测的判定依据，或被显式标记为未定义。"
     detection: mixed
-    detection_note: "确定性层可对无判据词表（尽量、适当、必要时、一般来说、合理、酌情）做字符串检查并给出 WARNING；该词是否承担判定条件、附近是否已定义判据，由语义层判定。"
+    detection_note: "确定性层可对无判据词表（尽量、尽可能、最好、适当、必要时、一般来说、合理、酌情）做字符串检查并给出 WARNING；该词是否承担判定条件、附近是否已定义判据，由语义层判定。"
     examples:
       positive:
         source_zh: "（author 模式；调用方素材：SLO 规定服务异常后 15 分钟内恢复，超时升级至平台组）服务异常时应尽量快速恢复。"
@@ -1108,7 +1188,7 @@ rules:
     trigger: "来源包含 Markdown 结构：标题层级、有序或无序列表、表格、围栏代码块及其语言标注、链接、引用块。"
     requirement: "结构标记及其承载的粒度应保持不变：表格仍是表格，代码块仍是代码块并保留语言标注，列表项数保持一致（P001 允许的合法拆合除外），标题层级不变。"
     prohibition: "把表格展平为句子；把围栏代码块改为行内代码或普通段落；删除语言标注；把编号步骤改写成散文段落；调整标题层级从而改变文档结构。"
-    exceptions: "调用方明确要求改变格式时按要求执行。把顺序敏感的无序列表改为有序列表是允许的，前提是顺序已由来源给出（否则属 S002 新增）。"
+    exceptions: "调用方明确要求改变格式时按要求执行。把顺序敏感的无序列表改为有序列表是允许的，前提是顺序已由来源给出（否则属 S002 新增）。结构所承载的条件作用域（标题或父级列表项的条件管辖其子树）不属于本规则，属 L001 的 MUST 级条件保持，调用方的格式授权不能豁免它；本规则只管格式与粒度（005 C8）。"
     invariant: "structure-counts — (标题层级序列, 列表项数, 代码块数与语言标注, 表格行列数) 不变。"
     detection: mixed
     detection_note: "确定性层可比较结构计数（标题、列表项、代码围栏与语言标注、表格行列）并给出 WARNING；差异是否被任务授权由语义层判定。"
@@ -1215,6 +1295,7 @@ self_check:
       - "输出中每条命题都能指回来源或调用上下文的具体位置（S002）。"
       - "新出现的因果连接词有来源依据（S006）。"
       - "没有新出现的数字、参数、执行者、判据或能力（S002、A005、P003、P005）。"
+      - "长度上限没有成为删除任何条件、例外、阈值、告警或失败分支的理由；无法满足的上限已按第 7 类报告（S001）。"
   - step: "检查改写本身是否制造了新的歧义。"
     checks:
       - "每个指代成分的可及先行词唯一（A002）。"
@@ -1231,10 +1312,13 @@ self_check:
   - step: "按模式的输出契约组装结果。"
     checks:
       - "strict／standard：正文 + 可选「待确认」；无待确认项时不输出该节。"
-      - "「待确认」条目来自 A005、P003、P005、R004，每条给出 位置 | 问题 | 需要的信息。"
+      - "「待确认」条目只来自七类：A005、P003、P005、R004、S002、S005、S001（长度上限），每条给出 位置 | 问题 | 需要的信息 | 建议（可选），第四栏只在 R004 要求给出建议时填写。"
       - "review：只输出 findings，每条含规则 ID、严重级、逐字引用的位置、问题、风险、建议。"
       - "任何模式下都不输出对自身改动的辩解性说明。"
 
+# Every item below was adjudicated in 004-rule-set-adjudications.md (and refined by 005 where
+# noted). The drafting text is kept verbatim as the record of what was open; each item now carries
+# its resolution. Where a recommendation's tentative answer was rejected, the resolution says so.
 open_issues:
   - issue: "000-design.md 定义了 review 模式的输出结构，但没有定义 rewrite／translate 模式的输出格式。A005、P003、P005、R004 都依赖一个「报告而不改写」的通道。"
     options:
@@ -1242,37 +1326,58 @@ open_issues:
       - "正文 + 可选「待确认」小节（本文件采用）。"
       - "由调用方开关决定是否输出「待确认」。"
     recommendation: "采用第二项并设为默认。没有这个通道时，A005 只能在「静默带入歧义」与「虚构以求确定」之间二选一，而 D001 §5 表明模型会选后者。建议在 SKILL.md 中固定该小节的字段格式，并限制条目数量以免它变成免责声明列表。"
+    resolved_by: "004 §1; expanded by 005 C1, C4"
+    resolution: >-
+      Adopted: body plus an optional trailing 「待确认」 section with a fixed line format. The list of admissible items is closed and now has seven categories (see modes[].output_contract).
   - issue: "strict 模式如何加强 A 族与 P 族的 SHOULD 规则，设计文档只说 strict「应当偏好显式」，没有说这是否改变规则级别。"
     options:
       - "级别固定，模式只改变触发阈值（本文件采用）。"
       - "每个模式一张独立的级别表。"
       - "不做任何加强，strict 与 standard 仅在语气上不同。"
     recommendation: "采用第一项。第二项会让实际规则数量接近三倍，且同一条规则在不同模式下拥有不同 ID 语义，破坏 ID 稳定性。需要一并确认的是：strict 下被抬升执行的 SHOULD 违规，在 review 输出中应报 ERROR 还是标注为 WARNING (strict)。本文件暂按前者，即严重级随执行级别一起抬升。"
+    resolved_by: "004 §2; 005 C7"
+    resolution: >-
+      Option one adopted: levels are mode-invariant and modes change only the ambiguity threshold. The recommendation's tentative answer to its own follow-up — severity rising with strict enforcement — is rejected: severities exist only in review mode, a rewrite has no findings to grade, and the only escalation is the demonstrated one in 004 §6. The 'enforced as if MUST' wording formerly in modes[strict] and in the A003 / P002 / P003 notes is withdrawn.
   - issue: "术语一致性的作用域单位。000-design.md §7.4 说「in a document or project」，但改写任务通常只看到文档片段。"
     options:
       - "仅限本次输入文本加调用方提供的上下文（本文件采用）。"
       - "允许模型使用自身的通用术语知识补齐一致性。"
       - "要求调用方显式提供术语约定，否则不执行 T001。"
     recommendation: "采用第一项。第二项等价于附带一份隐式术语表，违反 §7.4；第三项会让 T001 在绝大多数调用中失效。建议在 SKILL.md 中明确说明片段级一致性的局限：跨片段的不一致本技能无法发现，也不应假装发现。"
+    resolved_by: "004 §3; 005 C1"
+    resolution: >-
+      Option one adopted. Variants not clearly co-referential are kept, not merged; in rewrite mode the variance enters 「待确认」 only when it impedes execution (category 5, S002); in review mode it is an ordinary finding.
   - issue: "CTC-L004 的 ID 归属。002-gold-case-schema.md 的示例案例 G-L-003（category: threshold-boundary）引用了 `rule: CTC-L004`，而 000-design.md §7 说 ID 在被决策或评估案例引用后即稳定。"
     options:
       - "按 002 的引用把阈值边界规则定为 CTC-L004（本文件采用），并放弃原先设想的 L004「隐含逻辑关系显式化」。"
       - "视 002 中的片段为示意性，另行编号。"
     recommendation: "采用第一项。分类上也讲得通：边界包含性决定的是条件的边界，属于 L 族而非 S 族；且 002 的确定性层把 comparator drift 与 quantity 分成两项检查，与本文件把 L004 与 S004 分开一致。若合成阶段改变这一编号，需要同步更新 002 的示例。"
+    resolved_by: "004 §4"
+    resolution: >-
+      Option one adopted. CTC-L004 = threshold-boundary preservation, frozen in spec/rule-ids.txt.
   - issue: "000-design.md §7.2 把「隐含逻辑关系」列为候选歧义领域，本文件没有为它设立规则。"
     options:
       - "不设立，等待评估中出现真实失败（本文件采用）。"
       - "设为 SHOULD：当两个小句之间的关系有分歧读法且改变行为时，应显式化。"
       - "并入 A003 的结合歧义。"
     recommendation: "采用第一项。中文技术文本大量使用意合结构，一条要求显式化逻辑关系的规则会在正常并列句上广泛误触发，与 R002 直接冲突；而插入连接词又极易违反 S006。真正危险的子情形（条件读作现象）已被 L001 与 A005 覆盖。若评估中出现该类失败，再按门禁新增。"
+    resolved_by: "004 §5"
+    resolution: >-
+      Option one adopted and recorded as a deliberate rejection with its counterexamples (GPT OR-04, Gemini OC-03), so that the gap is not 'fixed' by a later review pass.
   - issue: "严重级与规则级别是否恒等映射。T001 是 SHOULD，但鉴权文档中的术语混乱可能造成配置错误；A003 在 strict 下按 MUST 执行。"
     options:
       - "恒等映射，strict 抬升时严重级一并抬升（本文件采用）。"
       - "引入按上下文风险调整的严重级。"
     recommendation: "采用第一项。第二项需要一个风险模型，而本项目没有可靠的风险标注来源；用上下文风险调整严重级还会让同一条规则在不同文档中给出不同判决，破坏 review 输出的可比较性。"
+    resolved_by: "004 §6; 005 C7"
+    resolution: >-
+      Identity mapping adopted (MUST→ERROR, SHOULD→WARNING, MAY→STYLE). The clause 'severity rises with strict escalation' is rejected — strict escalates nothing. The single escalation: a SHOULD violation may be reported as ERROR when the finding's 风险 names the specific different action an operator would take; no de-escalation.
   - issue: "CTC-R001（最小可归因改动）被放在 R 族，但它约束的是全部规则族的适用方式，不只是渲染。"
     options:
       - "留在 R 族（本文件采用）。"
       - "提升为一条与优先级阶梯并列的元规则，不进入任何族。"
       - "新设一个族。"
     recommendation: "采用第一项，但在合成时值得重新考虑第二项。留在 R 族的理由是保持 ID 空间简单、且它确实在渲染阶段被违反；反对的理由是它与 A005 一样是「上限型」规则，而 A005 在 A 族里也有同样的错位。若合成阶段引入元规则层，R001 与 A005 应一并迁移。"
+    resolved_by: "004 §7"
+    resolution: >-
+      Option one adopted: CTC-R001 stays in family R. Family letters are stable prefixes, not a taxonomy; SKILL.md states that R001 governs all families.
