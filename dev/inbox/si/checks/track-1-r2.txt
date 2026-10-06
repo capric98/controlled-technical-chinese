@@ -1,0 +1,37 @@
+### compare_skill  base=SKILL.md cand=dev/inbox/si/track-1/r2/SKILL.md prev=dev/inbox/si/track-1/r1/SKILL.md
+=== HARD GATES: PASS ===
+  [ok] rule_level_map
+  [ok] pending_categories
+  [ok] mode_headings
+  [ok] ladder_rows
+  [ok] finding_fields
+  [ok] severities
+  [ok] frontmatter
+  [ok] check_skill
+=== METRICS ===
+  lines              base=372     cand=308     delta=-17.2%
+  bytes              base=42309   cand=36645   delta=-13.4%
+  body_chars         base=16779   cand=14493   delta=-13.6%
+  body_chars_no_ws   base=15221   cand=13261   delta=-12.9%
+  diff_ratio_vs_base=0.2531
+  diff_ratio_vs_prev=0.0569
+  check_skill: 0 error(s), 0 warning(s)
+=== RULE ROW DIFFS (0 changed; top by weight) ===
+=== INVENTORY ===
+  fenced_blocks   base=3    cand=3   
+  numbered_items  base=49   cand=31  
+  bullet_items    base=32   cand=19  
+  table_rows      base=66   cand=65  
+  headings (cand): # 受控技术中文（CTC） | ## 1. 用途与触发 | ## 2. 优先级 | ## 3. 模式 | ### strict | ### standard | ### review | ### 输出契约 | ## 4. 受保护内容 | ## 5. 歧义处理 | ## 6. 控制规则 | ### S — 语义保持 | ### A — 歧义与指代 | ### P — 步骤与可操作性 | ### T — 术语 | ### L — 逻辑、条件与时序 | ### R — 渲染与受控风格 | ## 7. 改写与翻译流程 | ## 8. 审阅流程与输出格式 | ## 9. 返回前核对 | ## 10. 不得做的事 | ## 11. 示例
+  code_spans: {"lost": {"Retry-After": 1}, "gained": {}}
+  cn_numerals: {"lost": {"一个": 12, "一条": 4, "一种": 3, "一项": 1, "三族": 1, "三条": 1, "四类": 1}, "gained": {}}
+### exit=0
+
+### ctc_eval check  source=dev/inbox/si/track-1/r1/SKILL.md output=dev/inbox/si/track-1/r2/SKILL.md (informational)
+ERROR    protected_tokens_lost  — lost ('code_block', '```\n待确认\n- 多次失败 | 「多次」未给出具体次数 | 触发升级的失败次数阈值\n- 升级处理 | 未给出升级的接收方与方式 | 升级对象（值班组／工单系统）\n- 尽快回滚 | 「尽快」承担义务，强度未定 | 作者意图的规范强度 | 可读作「必须立即执行」或「应在窗口内执行」，建议按前者确认\n```')
+WARNING  protected_tokens_added  — added ('code_block', '```\n- 尽快回滚 | 「尽快」承担义务，强度未定 | 作者意图的规范强度 | 可读作「必须立即执行」或「应在窗口内执行」，建议按前者确认\n```'), ('code_block', '```\n待确认\n- 多次失败 | 「多次」未给出具体次数 | 触发升级的失败次数阈值\n- 升级处理 | 未给出升级的接收方与方式 | 升级对象（值班组／工单系统）\n```')
+pass     quantities_lost
+pass     quantities_added
+WARNING  threshold_boundaries  — lost '达到'x1
+WARNING  modality_profile  — lost 'obligation'x3, 'prohibition'x3
+pass     case_protected_tokens

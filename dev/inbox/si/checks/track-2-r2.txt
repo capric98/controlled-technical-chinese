@@ -1,0 +1,40 @@
+### compare_skill  base=SKILL.md cand=dev/inbox/si/track-2/r2/SKILL.md prev=dev/inbox/si/track-2/r1/SKILL.md
+=== HARD GATES: PASS ===
+  [ok] rule_level_map
+  [ok] pending_categories
+  [ok] mode_headings
+  [ok] ladder_rows
+  [ok] finding_fields
+  [ok] severities
+  [ok] frontmatter
+  [ok] check_skill
+=== METRICS ===
+  lines              base=372     cand=246     delta=-33.9%
+  bytes              base=42309   cand=31832   delta=-24.8%
+  body_chars         base=16779   cand=12551   delta=-25.2%
+  body_chars_no_ws   base=15221   cand=11498   delta=-24.5%
+  diff_ratio_vs_base=0.2604
+  diff_ratio_vs_prev=0.1178
+  check_skill: 0 error(s), 0 warning(s)
+=== RULE ROW DIFFS (1 changed; top by weight) ===
+  CTC-P003 ratio=0.020 weight=7
+    BASE: 来源给出成功判据、等待条件或验证方式时，判据应与它所验证的步骤保持绑定，并保持阻塞性质：「直到…为止再继续」必须仍是继续的前提。不得移入附注、脚注或文末，不得把祈使的验证动作改写为对系统行为的描述，不得虚构验收标准。来源把验证单独列为一个步骤时：未获压缩授权则该步骤保持独立；调用方授权合并步骤时可以并入相邻步骤，但合并后它必须仍是**由操作者执行**、位于被守护动作**之前**、且**逐项列全**原有判据的确认动作。把它改写为不需要操作者动作的状态描述（「节点就绪后加入路由表」），或丢掉其中任一判据，都是删除校验点。来源未给出成功判据时：只有当该步是破坏性或不可逆操作、且后续步骤的安全性取决于它是否成功，才按「待确认」第 2 类提出；其余步骤缺少判据不提出，否则每份正常的流程文档都会产生成串的未决项。
+    CAND: 来源给出成功判据、等待条件或验证方式时，判据应与它所验证的步骤保持绑定，并保持阻塞性质：「直到…为止再继续」必须仍是继续的前提。不得移入附注、脚注或文末，不得把祈使的验证动作改写为对系统行为的描述，不得虚构判据。来源把验证单独列为一个步骤时：未获压缩授权则该步骤保持独立；调用方授权合并步骤时可以并入相邻步骤，但合并后它必须仍是**由操作者执行**、位于被守护动作**之前**、且**逐项列全**原有判据的确认动作。把它改写为不需要操作者动作的状态描述（「节点就绪后加入路由表」），或丢掉其中任一判据，都是删除校验点。来源未给出成功判据时：只有当该步是破坏性或不可逆操作、且后续步骤的安全性取决于它是否成功，才按「待确认」第 2 类提出；其余步骤缺少判据不提出，以免正常的流程文档产生成串的未决项。
+=== INVENTORY ===
+  fenced_blocks   base=3    cand=1   
+  numbered_items  base=49   cand=31  
+  bullet_items    base=32   cand=19  
+  table_rows      base=66   cand=44  
+  headings (cand): # 受控技术中文（CTC） | ## 1. 用途与触发 | ## 2. 优先级 | ## 3. 模式 | ### strict | ### standard | ### review | ### 输出契约 | ## 4. 受保护内容 | ## 5. 歧义处理 | ## 6. 控制规则 | ### S 族 — 语义保持 | ### A 族 — 歧义与指代 | ### P 族 — 步骤与可操作性 | ### T 族 — 术语 | ### L 族 — 逻辑、条件与时序 | ### R 族 — 渲染与受控风格 | ## 7. 改写与翻译流程 | ## 8. 审阅流程与输出格式 | ## 9. 不得做的事 | ## 10. 返回前自检 | ## 11. 示例
+  code_spans: {"lost": {"Retry-After": 1, "隔离受感染的主机和网关通信 | 可读作「隔离主机并隔离网关通信」或「切断主机与网关之间的通信」 | 需确认隔离范围": 1}, "gained": {}}
+  cn_numerals: {"lost": {"一个": 11, "一条": 3, "一种": 5, "一项": 1, "三个": 1, "三条": 1}, "gained": {"五族": 1, "四栏": 1}}
+### exit=0
+
+### ctc_eval check  source=dev/inbox/si/track-2/r1/SKILL.md output=dev/inbox/si/track-2/r2/SKILL.md (informational)
+ERROR    protected_tokens_lost  — lost ('code_block', '```\n待确认\n- 多次失败 | 「多次」未给出具体次数 | 触发升级的失败次数阈值\n- 升级处理 | 未给出升级的接收方与方式 | 升级对象（值班组／工单系统）\n- 尽快回滚 | 「尽快」承担义务，强度未定 | 作者意图的道义强度 | 可读作「必须立即执行」或「应在窗口内执行」，建议按前者确认\n```'), ('code_block', '```\n规则：CTC-S003\n严重级别：ERROR\n位置：「确认数据备份完成，且所有从节点已与主节点数据同步。」\n问题：来源的「确保」被替换为「确认」，义务被降级为核验。\n风险：从节点尚未同步时，操作者会直接继续执行后续步骤，跳过补救。\n建议修改：确保数据备份完成，且所有从节点已与主节点数据同步。\n```'), ('code_span', '隔离受感染的主机和网关通信 | 可读作「隔离主机并隔离网关通信」或「切断主机与网关之间的通信」 | 需确认隔离范围')
+WARNING  protected_tokens_added  — added ('code_block', '```\n待确认\n- 多次失败 | 「多次」未给出具体次数 | 触发升级的失败次数阈值\n- 升级处理 | 未给出升级的接收方与方式 | 升级对象（值班组／工单系统）\n- 最好在窗口内回滚 | 「最好」承担义务，可读作「应在窗口内回滚」或「可以在窗口内回滚」 | 作者意图的道义强度 | 建议按前者确认\n```')
+ERROR    quantities_lost  — lost ('60', 's'), ('60000', 'ms')
+pass     quantities_added
+WARNING  threshold_boundaries  — lost '之前'x2, '满'x2, '起'x1, '达到'x1
+WARNING  modality_profile  — lost 'obligation'x7, 'permission'x1, 'prohibition'x11; added 'recommendation'x1
+pass     case_protected_tokens

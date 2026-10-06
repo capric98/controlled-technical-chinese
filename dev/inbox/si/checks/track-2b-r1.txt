@@ -1,0 +1,46 @@
+### compare_skill  base=SKILL.md cand=dev/inbox/si/track-2b/r1/SKILL.md prev=dev/inbox/si/track-2b/r0/SKILL.md
+=== HARD GATES: PASS ===
+  [ok] rule_level_map
+  [ok] pending_categories
+  [ok] mode_headings
+  [ok] ladder_rows
+  [ok] finding_fields
+  [ok] severities
+  [ok] frontmatter
+  [ok] check_skill
+=== METRICS ===
+  lines              base=372     cand=293     delta=-21.2%
+  bytes              base=42309   cand=39028   delta=-7.8%
+  body_chars         base=16779   cand=15472   delta=-7.8%
+  body_chars_no_ws   base=15221   cand=14126   delta=-7.2%
+  diff_ratio_vs_base=0.1270
+  diff_ratio_vs_prev=0.1270
+  check_skill: 0 error(s), 0 warning(s)
+=== RULE ROW DIFFS (3 changed; top by weight) ===
+  CTC-P003 ratio=0.035 weight=13
+    BASE: 来源给出成功判据、等待条件或验证方式时，判据应与它所验证的步骤保持绑定，并保持阻塞性质：「直到…为止再继续」必须仍是继续的前提。不得移入附注、脚注或文末，不得把祈使的验证动作改写为对系统行为的描述，不得虚构验收标准。来源把验证单独列为一个步骤时：未获压缩授权则该步骤保持独立；调用方授权合并步骤时可以并入相邻步骤，但合并后它必须仍是**由操作者执行**、位于被守护动作**之前**、且**逐项列全**原有判据的确认动作。把它改写为不需要操作者动作的状态描述（「节点就绪后加入路由表」），或丢掉其中任一判据，都是删除校验点。来源未给出成功判据时：只有当该步是破坏性或不可逆操作、且后续步骤的安全性取决于它是否成功，才按「待确认」第 2 类提出；其余步骤缺少判据不提出，否则每份正常的流程文档都会产生成串的未决项。
+    CAND: 来源给出成功判据、等待条件或验证方式时，判据应与它所验证的步骤保持绑定，并保持阻塞性质：「直到…为止再继续」必须仍是继续的前提。不得移入附注、脚注或文末，不得把祈使的验证动作改写为对系统行为的描述，不得虚构验收标准。来源把验证单独列为一个步骤时：未获压缩授权则该步骤保持独立；调用方授权合并步骤时可以并入相邻步骤，但合并后它必须仍是**由操作者执行**、位于被守护动作**之前**、且**逐项列全**原有判据的确认动作。把它改写为不需要操作者动作的状态描述（「节点就绪后加入路由表」），或丢掉其中任一判据，都是删除校验点。来源未给出成功判据时：只有当该步是破坏性或不可逆操作、且后续步骤的安全性取决于它是否成功，才按「待确认」第 2 类提出；其余步骤缺少判据不提出——本例外的目的是避免流程文档因每步都无判据而产生成串的未决项。
+  CTC-A001 ratio=0.045 weight=8
+    BASE: 来源指明的执行者（含被动句中的施事）必须在输出中仍可定位；不得把具名组件替换为笼统称呼。只有在存在多个可能执行者且不同读法改变由谁执行时才补出执行者，且补出的执行者必须能从来源或上下文确定。本规则不要求每句都有显性主语。review 模式同理：施事可由上下文唯一推定时不产生 finding，把自然的无施事被动句报为施事缺失是误报。
+    CAND: 来源指明的执行者（含被动句中的施事）必须在输出中仍可定位；不得把具名组件替换为笼统称呼。只有在存在多个可能执行者且不同读法改变由谁执行时才补出执行者，且补出的执行者必须能从来源或上下文确定。本规则不要求每句都有显性主语。review 模式同理：执行者可由上下文唯一推定时不产生 finding，把自然的无执行者被动句报为执行者缺失是误报。
+  CTC-A005 ratio=0.019 weight=2
+    BASE: 存在两种以上导致不同行为的读法而来源与上下文都不足以确定作者意图，或缺少执行所需的参数、阈值、接收方、判据时：保持原表述，并在「待确认」中给出位置、竞争读法或缺失项、判定所需的信息。不得静默择一，不得补出缺失项。
+    CAND: 存在两种以上导致不同行为的读法而来源与上下文都不足以确定作者意图，或缺少执行所需的参数、阈值、接收方、判据时：保持原表述，并在「待确认」中给出位置、分歧读法或缺失项、判定所需的信息。不得静默择一，不得补出缺失项。
+=== INVENTORY ===
+  fenced_blocks   base=3    cand=2   
+  numbered_items  base=49   cand=28  
+  bullet_items    base=32   cand=24  
+  table_rows      base=66   cand=66  
+  headings (cand): # 受控技术中文（CTC） | ## 1. 用途与触发 | ## 2. 优先级 | ## 3. 模式 | ### strict | ### standard | ### review | ### 输出契约 | ## 4. 返回前必须验证的不变量 | ## 5. 受保护内容 | ## 6. 歧义处理 | ## 7. 控制规则 | ### S — 语义保持：真值、情态、数值、标记、因果、量化 | ### A — 歧义与指代：执行者、先行词、结合域、否定域、消歧上限 | ### P — 步骤与可操作性：切分、可执行性、验证、守护、触发条件 | ### T — 术语：概念到术语的双向映射 | ### L — 逻辑、条件与时序 | ### R — 渲染与受控风格：最小改动、显式化上限、自然度、结构 | ## 8. 看似受控、实则有害的做法 | ## 9. 改写与翻译流程 | ## 10. 审阅流程与输出格式 | ## 11. 示例
+  code_spans: {"lost": {"Retry-After": 1}, "gained": {}}
+  cn_numerals: {"lost": {"一个": 6, "一条": 2, "一种": 2, "一项": 2, "三族": 1, "三条": 1}, "gained": {"一类": 1, "三步": 1, "五族": 1}}
+### exit=0
+
+### ctc_eval check  source=dev/inbox/si/track-2b/r0/SKILL.md output=dev/inbox/si/track-2b/r1/SKILL.md (informational)
+ERROR    protected_tokens_lost  — lost ('code_block', '```\n真值与语义不变量\n      ↓\n操作清晰度\n      ↓\n术语一致\n      ↓\n自然的技术中文\n      ↓\n项目体例与排版\n```')
+pass     protected_tokens_added
+ERROR    quantities_lost  — lost ('002', ''), ('12', ''), ('60', 's'), ('60000', 'ms'), ('90', '%')
+pass     quantities_added
+WARNING  threshold_boundaries  — lost '之前'x2, '以上'x1, '超过'x1, '达到'x2; added '之后'x1
+WARNING  modality_profile  — lost 'obligation'x30, 'permission'x2, 'prohibition'x29
+pass     case_protected_tokens

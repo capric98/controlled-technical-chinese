@@ -1,0 +1,388 @@
+reviewer_model: Opus 5.5 (claude-opus-5-5[1m])
+files_read:
+  - dev/inbox/si/judge/adjudication.md
+  - dev/inbox/si/blind/A.md
+  - dev/inbox/si/blind/B.md
+  - SKILL.md
+# spec/rules.v0.yaml 未读：A、B 与基线的 29 条规则行逐字比对后只有 A 的 CTC-P003 两处措辞不同（C14/C134），规则级主张用 SKILL.md 的规则行即可判定。
+
+rulings:
+  # ---------- D-A1：重点复核严重级别 ----------
+  - claim: C1
+    orchestrator_ruling: confirmed (ERROR) · D-A1
+    verdict: agree
+    your_ruling: confirmed
+    your_severity: ERROR
+    reason: "A §5 写「义务的强度由「最好」「尽量」「尽可能」这类无判据词承担时，报告其可能的两种以上强度并在第四栏给出建议……「必要时」「适当」「合理」承担的是判定条件而非强度」，A 的 CTC-R004 行写「判定条件由无判据词承担时——「尽量」「尽可能」「最好」「适当」「必要时」「合理」——」。同一个词被两处归入不同类别，而且行为确实分叉：(1) 改写时，「待确认」行要不要列强度、填第四栏；(2) review 时引 §5 的路径（「按本节处理」→A005，ERROR）还是 R004（应→WARNING）；(3) 新写时，R004 要求给「可观测的触发条件」，而 §5 把这三个词归为承担强度，它们在新写时怎么处理没有着落。这属于预先登记的「两种读法、行为不同」→A005→ERROR，A 自己的 §8 第 1 步也把文内冲突指派给 A005。基线对六个词一视同仁（「由无判据词（见 CTC-R004）承担义务的条件」），没有这个归类冲突；基线在同一位置的冲突是另一种（§6 固定 ERROR 对 R004 的「应」）。因此这个分叉是 A 的拆分新造成的，计入第 2 判据。Fable 按 R004 计 WARNING，针对的是词表缺判据，并没有指向这个归类冲突。"
+  - claim: C108
+    orchestrator_ruling: confirmed (ERROR) · D-A1
+    verdict: agree
+    your_ruling: confirmed
+    your_severity: ERROR
+    reason: "与 C1 是同一缺陷，Fable 描述的问题本身就是「同一组词在两处被归入不同类别，处理方式不同」。最直接描述这个缺陷的是 A005（文内两处对同一情形要求不同行为），不是 R004（无判据词）。按预先登记的规则应计 ERROR，Fable 定的 WARNING 偏低。"
+
+  # ---------- 其余 confirmed ----------
+  - claim: C5
+    orchestrator_ruling: confirmed (WARNING) · D-A4
+    verdict: agree
+    your_ruling: confirmed
+    your_severity: WARNING
+    reason: "A §3「缺失信息的规则 ID 与其所属类别括注的规则一致」。基线只说「缺失信息一律归第 5 类，不论是哪条规则先发现它」，定的是类别，没有定 finding 的规则字段。这是新增的语义归属规则。"
+  - claim: C116
+    orchestrator_ruling: confirmed (WARNING) · D-A4
+    verdict: agree
+    your_ruling: confirmed
+    your_severity: WARNING
+    reason: "同 C5。"
+  - claim: C12
+    orchestrator_ruling: confirmed (WARNING) · D-A2
+    verdict: agree
+    your_ruling: confirmed
+    your_severity: WARNING
+    reason: "基线 §6「由无判据词（见 CTC-R004）承担义务的条件，必须报告其可能的两种以上强度并给出建议」适用于六个词。A 对「必要时」「适当」「合理」改为「只按第 4 类提出」，不再报告强度、给出建议。冻结的 R004 行只要求「在「待确认」中提出」，推不出这种收窄。基线散文的「必须」与 R004 的「应」冲突，按规则行级别计 WARNING。"
+  - claim: C113
+    orchestrator_ruling: confirmed (WARNING) · D-A2
+    verdict: agree
+    your_ruling: confirmed
+    your_severity: WARNING
+    reason: "同 C12。"
+  - claim: C25
+    orchestrator_ruling: confirmed (WARNING) · D-A5
+    verdict: agree
+    your_ruling: confirmed
+    your_severity: WARNING
+    reason: "A §8 第 1 步「被审文本没有独立来源时……以被审文本自身为来源……文内两处陈述对同一情形要求不同行为时，按 CTC-A005 报告」。基线对此没有规定，规则行也推不出，属于新增程序。"
+  - claim: C118
+    orchestrator_ruling: confirmed (WARNING) · D-A5
+    verdict: agree
+    your_ruling: confirmed
+    your_severity: WARNING
+    reason: "同 C25。"
+  - claim: C28
+    orchestrator_ruling: confirmed (WARNING) · D-A6
+    verdict: agree
+    your_ruling: confirmed
+    your_severity: WARNING
+    reason: "基线「未发现问题时返回「未发现违规」，其后最多三条 STYLE 观察」没有说清 STYLE 级 finding 算不算「问题」。A 改为「没有 ERROR 或 WARNING 级 finding 时……最多列三条 STYLE 级 finding」，选定了一种读法。存在四条以上 R006 finding 时，两种读法输出不同。这条是临界情形：Fable（C146）判 style-only 也有道理。但它与 B 的 D-B3 性质相同，两边都判 confirmed 才对称。改判也不影响排序：A 变为 3 条，B 仍是 2 条。"
+  - claim: C86
+    orchestrator_ruling: confirmed (WARNING) · D-B1
+    verdict: agree
+    your_ruling: confirmed
+    your_severity: WARNING
+    reason: "B §1 把「状态提示」列在「§3 中 strict 与 standard 适用范围所列的文档」之外，B §3 strict 只列「告警与错误信息」，所以状态提示的模式无从推定。基线同样如此，属继承。注意 A 也有同一缺陷，见 summary_check。"
+  - claim: C192
+    orchestrator_ruling: confirmed (WARNING) · D-B1
+    verdict: agree
+    your_ruling: confirmed
+    your_severity: WARNING
+    reason: "同 C86。"
+  - claim: C106
+    orchestrator_ruling: confirmed (WARNING) · D-B4
+    verdict: agree
+    your_ruling: confirmed
+    your_severity: WARNING
+    reason: "两种读法对应不同阈值（strict 与 standard），行为不同；继承自基线。"
+  - claim: C216
+    orchestrator_ruling: confirmed (WARNING) · D-B4
+    verdict: agree
+    your_ruling: confirmed
+    your_severity: WARNING
+    reason: "同 C106。"
+  - claim: C90
+    orchestrator_ruling: confirmed (WARNING) · D-B2
+    verdict: agree
+    your_ruling: confirmed
+    your_severity: WARNING
+    reason: "基线 §11 第 10–12 问（R002/R003、「我有没有改动任何规则并未要求改动的地方？有则还原」、输出契约）是返回前的核对步骤。B §9 表只列 S/A/P/T/L，§7 第 7 步只加了逻辑方向、指代与标记，找不到渲染后对 R001/R002/R003 的核对与还原动作。R001 规则本身保持必须级，丢失的是程序步骤，所以计 WARNING 而不是 ERROR。A 的 §7 第 7 步明确保留了这几项核对。"
+  - claim: C196
+    orchestrator_ruling: confirmed (WARNING) · D-B2
+    verdict: agree
+    your_ruling: confirmed
+    your_severity: WARNING
+    reason: "同 C90。输出契约一项在 A、B 中都只靠第 8 步「按输出契约返回（§3）」承接，两边相同；B 独有的差异在 R001/R002/R003 的核对。"
+  - claim: C97
+    orchestrator_ruling: confirmed (WARNING) · D-B3
+    verdict: agree
+    your_ruling: confirmed
+    your_severity: WARNING
+    reason: "B「最多三条 STYLE 观察，每条引用规则 ID」。基线没有说 STYLE 观察算不算 finding，B 选定了一种读法，与 D-A6 对称。"
+  - claim: C213
+    orchestrator_ruling: confirmed (WARNING) · D-B3
+    verdict: agree
+    your_ruling: confirmed
+    your_severity: WARNING
+    reason: "同 C97。"
+  - claim: C107
+    orchestrator_ruling: confirmed (WARNING) · D-A3
+    verdict: agree
+    your_ruling: confirmed
+    your_severity: WARNING
+    reason: "冻结的 R003 行「过长的「的」字串」没有判据。基线与 B 的该行逐字相同，所以是继承缺陷；B 同样有，只是没有评审报出（见 summary_check）。"
+
+  # ---------- rejected ----------
+  - claim: C2
+    orchestrator_ruling: rejected
+    verdict: agree
+    your_ruling: rejected
+    your_severity: null
+    reason: "S001 行（必须、所有模式）规定「每条独立断言……必须在输出中可还原」「长度上限不授权删除任何条件、例外、阈值、告警或失败分支」，已覆盖并集。A 没有新增禁止。"
+  - claim: C4
+    orchestrator_ruling: rejected
+    verdict: agree
+    your_ruling: rejected
+    your_severity: null
+    reason: "基线「缺失信息一律归第 5 类」与第 2–4 类自相矛盾，也与 P003 行「其余步骤缺少判据不提出」矛盾。A 向冻结行收窄，属于消除冲突。"
+  - claim: C91
+    orchestrator_ruling: rejected
+    verdict: agree
+    your_ruling: rejected
+    your_severity: null
+    reason: "同 C4。编排者对同一 B 改动在 C203 判 style-only、在 C91 判 rejected，标签不一致，但两者都不计为丢失，不影响计数。"
+  - claim: C110
+    orchestrator_ruling: rejected
+    verdict: agree
+    your_ruling: rejected
+    your_severity: null
+    reason: "同 C4。"
+  - claim: C7
+    orchestrator_ruling: rejected
+    verdict: agree
+    your_ruling: rejected
+    your_severity: null
+    reason: "review 下，A §8 第 2 步「每条违规确定唯一的规则 ID」加上映射，就能还原「偏离即 finding、按规则级别定级」。改写模式下，基线这句与自身「改写没有可分级的 finding」冲突；A 取「先修复再返回」（§7 第 7 步）。"
+  - claim: C9
+    orchestrator_ruling: rejected
+    verdict: agree
+    your_ruling: rejected
+    your_severity: null
+    reason: "基线 P004 行已写「独立告警块……管辖它所依附的整个流程」，与基线 §5「告警块……管辖其子树（L001）」冲突。A 向冻结的 P004 行统一。"
+  - claim: C112
+    orchestrator_ruling: rejected
+    verdict: agree
+    your_ruling: rejected
+    your_severity: null
+    reason: "同 C9。"
+  - claim: C10
+    orchestrator_ruling: rejected
+    verdict: agree
+    your_ruling: rejected
+    your_severity: null
+    reason: "基线散文「必须消歧」与 A003/P002 的「应」冲突。Fable 提到的「没有规则触发、但上下文可定的歧义」在基线下也受 R001「每一处改动必须能归因到一条具体规则 ID」约束，基线散文与该规则行本身就冲突。A 与冻结行一致。"
+  - claim: C114
+    orchestrator_ruling: rejected
+    verdict: agree
+    your_ruling: rejected
+    your_severity: null
+    reason: "同 C10。"
+  - claim: C92
+    orchestrator_ruling: rejected
+    verdict: agree
+    your_ruling: rejected
+    your_severity: null
+    reason: "同 C10（B 写作「按对应规则消歧，级别以 §6 规则表为准」）。"
+  - claim: C199
+    orchestrator_ruling: rejected
+    verdict: agree
+    your_ruling: rejected
+    your_severity: null
+    reason: "同 C10。"
+  - claim: C11
+    orchestrator_ruling: rejected
+    verdict: agree
+    your_ruling: rejected
+    your_severity: null
+    reason: "证据不足的歧义仍引 A005，仍为 ERROR；只有经 R004 的情态模糊按「应」映射为 WARNING。基线 §6 的固定 ERROR 与 R004 行级别冲突，按规则行级别处理。"
+  - claim: C115
+    orchestrator_ruling: rejected
+    verdict: agree
+    your_ruling: rejected
+    your_severity: null
+    reason: "同 C11。"
+  - claim: C93
+    orchestrator_ruling: rejected
+    verdict: agree
+    your_ruling: rejected
+    your_severity: null
+    reason: "B 仍对全部 R004 词「列出其可能的两种以上强度并给出建议」，级别向 R004 的「应」收敛。新写分支取自 R004 行「新写时给出可观测的触发条件」。没有独立断言丢失。"
+  - claim: C200
+    orchestrator_ruling: rejected
+    verdict: agree
+    your_ruling: rejected
+    your_severity: null
+    reason: "同 C93。"
+  - claim: C23
+    orchestrator_ruling: rejected
+    verdict: agree
+    your_ruling: rejected
+    your_severity: null
+    reason: "扩大后的核对集合是基线 §4 表、§9 第 7 步与 §11 三处的并集，属于合并，不是新增要求。"
+  - claim: C202
+    orchestrator_ruling: rejected
+    verdict: agree
+    your_ruling: rejected
+    your_severity: null
+    reason: "同 C23（B §7 第 7 步）。"
+  - claim: C27
+    orchestrator_ruling: rejected
+    verdict: agree
+    your_ruling: rejected
+    your_severity: null
+    reason: "基线的描述性定义（STYLE = 自然度或一致性问题）与冻结映射冲突：R003、T001 为「应」，映射为 WARNING。A 删除描述，只保留映射，消除了冲突。"
+  - claim: C121
+    orchestrator_ruling: rejected
+    verdict: agree
+    your_ruling: rejected
+    your_severity: null
+    reason: "同 C27。"
+  - claim: C206
+    orchestrator_ruling: rejected
+    verdict: agree
+    your_ruling: rejected
+    your_severity: null
+    reason: "同 C27。B 仍保留「受保护标记突变与不安全的歧义」为 ERROR 描述。"
+  - claim: C87
+    orchestrator_ruling: rejected
+    verdict: agree
+    your_ruling: rejected
+    your_severity: null
+    reason: "被删的 strict 散文逐项仍有同级规则行覆盖：执行者 A001，参数/阈值/判据 S002/A005，失败原因与告警 S002，升格 S003。「不得重复不消歧的主语／拆成一行一句」在基线散文中为「不得」，与冻结的 R002「应」及「模式不改变规则级别」冲突，由 R002 行按「应」承担。"
+  - claim: C194
+    orchestrator_ruling: rejected
+    verdict: agree
+    your_ruling: rejected
+    your_severity: null
+    reason: "成功判据是一条独立断言，受 S001（必须、所有模式）保护；P003 另有「丢掉其中任一判据，都是删除校验点」。B 在 strict 下的禁删强度没有降为「应」。"
+  - claim: C201
+    orchestrator_ruling: rejected
+    verdict: agree
+    your_ruling: rejected
+    your_severity: null
+    reason: "基线 §8 第 1 条「多角色交替执行」与冻结的 A001 行「存在多个可能执行者且不同读法改变由谁执行」条件不同。B 向 A001 行对齐，A 也引用 A001。"
+
+  # ---------- example-correction：重点复核是否被滥用 ----------
+  - claim: C18
+    orchestrator_ruling: example-correction · X-A001
+    verdict: agree
+    your_ruling: example-correction
+    your_severity: null
+    reason: "基线正例「打开控制台后，点击「设置」修改端口。」把来源中唯一具名的执行者「用户」全部删去，违反 A001「来源指明的执行者必须在输出中仍可定位」。A 保留一次「用户」，与该行一致。去掉引号属于附带的措辞差异，不构成行为改变。"
+  - claim: C100
+    orchestrator_ruling: example-correction · X-A001
+    verdict: agree
+    your_ruling: example-correction
+    your_severity: null
+    reason: "同 C18。"
+  - claim: C37
+    orchestrator_ruling: example-correction · X-P003
+    verdict: agree
+    your_ruling: example-correction
+    your_severity: null
+    reason: "指令已授权合并步骤；按 P003 行，存在合规的 2 步合并（由操作者执行、在被守护动作之前、判据列全）。S001 只在「无法在不删除的前提下满足上限」时才允许超限返回。基线正例保留 3 步并报上限未满足，与这两行都矛盾，属真正的示例纠正。A 删去了基线的回退理据句，但回退行为仍由 S001 行承担。"
+  - claim: C103
+    orchestrator_ruling: example-correction · X-P003
+    verdict: agree
+    your_ruling: example-correction
+    your_severity: null
+    reason: "同 C37。B 还把回退作为条件分支保留下来。"
+  - claim: C109
+    orchestrator_ruling: example-correction · X-P003
+    verdict: agree
+    your_ruling: example-correction
+    your_severity: null
+    reason: "同 C37。"
+  - claim: C209
+    orchestrator_ruling: example-correction · X-B (X-P003)
+    verdict: agree
+    your_ruling: example-correction
+    your_severity: null
+    reason: "同 C37。"
+  - claim: C101
+    orchestrator_ruling: example-correction · X-S002
+    verdict: agree
+    your_ruling: example-correction
+    your_severity: null
+    reason: "基线「等待复制延迟归零后执行切换」补出了来源没有的阈值「归零」，并删掉了「检查」这一动作，违反 S002「不得以补写填平」与 A005「不得补出缺失项」。B 与这两行一致。"
+  - claim: C207
+    orchestrator_ruling: example-correction · X-B (X-S002)
+    verdict: agree
+    your_ruling: example-correction
+    your_severity: null
+    reason: "同 C101。"
+  - claim: C102
+    orchestrator_ruling: example-correction · X-R003
+    verdict: agree
+    your_ruling: example-correction
+    your_severity: null
+    reason: "来源「旧快照数据会被存储管理机制销毁」的施事已在同句给出。R003 行「被动用于……施事已在同句给出时是自然的技术表述」，所以不触发。R001 要求「未触发任何规则的文本原样返回」。基线正例改成主动句，与这两行矛盾；B 改为原样返回，是纠正。"
+  - claim: C208
+    orchestrator_ruling: example-correction · X-B (X-R003)
+    verdict: agree
+    your_ruling: example-correction
+    your_severity: null
+    reason: "同 C102。"
+
+style_only_spot_checks:
+  - claim: C13
+    verdict: agree
+    reason: "基线 §4 写明「「级别」栏即该规则的级别」，由此可推出「规则正文中的「必须」「不得」不改变级别栏的级别」。"
+  - claim: C117
+    verdict: agree
+    reason: "同 C13。"
+  - claim: C131
+    verdict: agree
+    reason: "这条最临界。基线「并按「待确认」第 6 类提出」是一项报告要求，A 只保留了第 6 类的准入。不过 A §3「仅当存在未决项时……追加「待确认」小节，每项一行」加上第 6 类的定义，可以还原「疑似拼写错误须列出」；「保持原样」由 S005 的「逐字符不变」保证。不算独立断言丢失。"
+  - claim: C120
+    verdict: agree
+    reason: "替换或补全占位符、用描述替换命令、半角改全角，都会改变标记字符或标记多重集，被 A 的 S005「逐字符不变」与 §4「标记多重集必须相等」（必须级）覆盖。"
+  - claim: C119
+    verdict: agree
+    reason: "「必须保持什么」一栏逐行对应 29 条规则行，「破坏后的后果」是理据，返回前核对由 §7 第 7 步承接。"
+  - claim: C15
+    verdict: agree
+    reason: "R003 行保留被动的边界，A001 行保留「本规则不要求每句都有显性主语」。"
+  - claim: C20
+    verdict: agree
+    reason: "逐项核对：S006「因此」、T002、S004、A002「不得……都展开为名词」、A §5「不得因「理论上可解析出两种读法」而报告」、R001，都在 A 中。"
+  - claim: C122
+    verdict: agree
+    reason: "A §3 示例块仍演示了三栏与四栏的「待确认」行。执行者删除示例在基线中本身与 R003 冲突，删除它不会丢失任何断言。"
+  - claim: C137
+    verdict: agree
+    reason: "与 C18 是同一改动，编排者在这里标 style-only、在 C18 标 example-correction，标签不一致，但都不计为丢失。"
+  - claim: C146
+    verdict: agree
+    reason: "编排者对同一改动在 C28 判 confirmed。取 confirmed 更保守，并与 D-B3 对称，不需要翻转。"
+  - claim: C203
+    verdict: agree
+    reason: "与 C91 同一改动，标签不一致，但结论都不是丢失。"
+  - claim: C88
+    verdict: agree
+    reason: "S001/L001/P003 行覆盖。"
+  - claim: C89
+    verdict: agree
+    reason: "三条取舍判据是第 1 层优先的重述，内容由 S001/S002/S003/L001 覆盖。"
+  - claim: C94
+    verdict: agree
+    reason: "新增的「回滚时限」与 R004「在「待确认」中提出」缺失判据一致。"
+  - claim: C195
+    verdict: agree
+    reason: "同 C87。"
+  - claim: C198
+    verdict: agree
+    reason: "「未触发规则即不改动」由 R001 承担，「不替作者决定」由 A005 与 §2 承担；「输出整篇改写」由输出契约「不返回整篇文本」承担，「体例偏好判为 ERROR」由 §2「只能按 STYLE 报告」与 R006 承担。"
+
+missed_losses: []
+
+summary_check:
+  counts_consistent: yes
+  ranking_consistent: yes
+  notes: >-
+    逐条核对：A 新增的 WARNING 为 D-A2、D-A4、D-A5、D-A6 四条（D-A3 是继承，不计），B 为 D-B2、D-B3 两条（D-B1、D-B4 是继承），第 4 判据 4 比 2 与逐条裁决一致。
+    第 2 判据 A 1、B 0 成立：D-A1 是 A 的拆分新造成的，不是原样继承。
+    第 3 判据：两份候选都没有新增分叉。
+    另有几处评审漏报的继承缺陷，不属于断言丢失，也不改变任何判据：
+    (1) A 同样有「状态提示」不在任何模式适用范围的缺陷（A §1「以及状态提示」，A §3 strict 只列「告警与错误信息」），与 D-B1/D-B4 相同，两位评审对 A 都没有报出；A 的 self-host 与分叉计数应各加一条继承项。
+    (2) B §4「表格单元格与告警块建立的条件……管辖其子树（CTC-L001）」保留了基线与 P004 行「管辖它所依附的整个流程」的冲突，是一个继承的分叉；A 已消除它。
+    (3) 冻结的 R003 行「过长」在 B 中同样存在，与 D-A3 对称。
+    标签不一致的地方：C91 与 C203、C7 与 C119、C18 与 C137 对同一改动给了不同标签，但都不计为丢失，不影响计数。
+overall: "接受临时排序（B 第一）。复核的 51 条裁决全部同意。D-A1 维持 ERROR：A §5 与 A 自己的 R004 行对同一组词给出不同归类，在「待确认」栏位、review 引用的规则与严重级别、新写时的处理三处都导致不同行为，按预先登记的 A005 规则计 ERROR；而且这个分叉由 A 新造成。即使 D-A1 降为 WARNING，B 仍在第 4 判据以 2 比 4 领先，结论不变。没有发现未被覆盖的断言丢失；漏报的几项继承缺陷两边都有，不影响排序。"

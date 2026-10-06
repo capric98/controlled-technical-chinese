@@ -1,0 +1,38 @@
+### compare_skill  base=SKILL.md cand=dev/inbox/si/track-1/r1/SKILL.md prev=dev/inbox/si/track-1/r0/SKILL.md
+=== HARD GATES: PASS ===
+  [ok] rule_level_map
+  [ok] pending_categories
+  [ok] mode_headings
+  [ok] ladder_rows
+  [ok] finding_fields
+  [ok] severities
+  [ok] frontmatter
+  [ok] check_skill
+=== METRICS ===
+  lines              base=372     cand=325     delta=-12.6%
+  bytes              base=42309   cand=37864   delta=-10.5%
+  body_chars         base=16779   cand=15009   delta=-10.5%
+  body_chars_no_ws   base=15221   cand=13693   delta=-10.0%
+  diff_ratio_vs_base=0.2232
+  diff_ratio_vs_prev=0.2232
+  check_skill: 0 error(s), 0 warning(s)
+=== RULE ROW DIFFS (0 changed; top by weight) ===
+=== INVENTORY ===
+  fenced_blocks   base=3    cand=2   
+  numbered_items  base=49   cand=31  
+  bullet_items    base=32   cand=31  
+  table_rows      base=66   cand=66  
+  headings (cand): # 受控技术中文（CTC） | ## 1. 用途与触发 | ## 2. 优先级 | ## 3. 模式 | ### strict | ### standard | ### review | ### 输出契约 | ## 4. 受保护内容 | ## 5. 歧义处理 | ## 6. 控制规则 | ### S — 语义保持 | ### A — 歧义与指代 | ### P — 步骤与可操作性 | ### T — 术语 | ### L — 逻辑、条件与时序 | ### R — 渲染与受控风格 | ## 7. 改写与翻译流程 | ## 8. 审阅流程与输出格式 | ## 9. 返回前核对 | ## 10. 不得做的事 | ## 11. 示例
+  code_spans: {"lost": {"Retry-After": 1}, "gained": {}}
+  cn_numerals: {"lost": {"一个": 10, "一条": 3, "一种": 3, "三条": 1, "四类": 1}, "gained": {"三种": 1}}
+### exit=0
+
+### ctc_eval check  source=dev/inbox/si/track-1/r0/SKILL.md output=dev/inbox/si/track-1/r1/SKILL.md (informational)
+Installed 1 package in 5ms
+ERROR    protected_tokens_lost  — lost ('code_block', '```\n真值与语义不变量\n      ↓\n操作清晰度\n      ↓\n术语一致\n      ↓\n自然的技术中文\n      ↓\n项目体例与排版\n```')
+pass     protected_tokens_added
+ERROR    quantities_lost  — lost ('12', '')
+pass     quantities_added
+WARNING  threshold_boundaries  — lost '之前'x2, '之后'x1, '以上'x1, '满'x1, '起'x1, '达到'x1
+WARNING  modality_profile  — lost 'obligation'x31, 'permission'x1, 'prohibition'x14
+pass     case_protected_tokens

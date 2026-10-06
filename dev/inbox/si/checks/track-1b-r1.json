@@ -1,0 +1,179 @@
+{
+ "gates": {
+  "rule_level_map": {
+   "pass": true,
+   "base_count": 29,
+   "cand_count": 29,
+   "missing": [],
+   "extra": [],
+   "level_changed": {}
+  },
+  "pending_categories": {
+   "pass": true,
+   "base": [
+    "CTC-A005",
+    "CTC-P003",
+    "CTC-P005",
+    "CTC-R004",
+    "CTC-S002",
+    "CTC-S005",
+    "CTC-S001"
+   ],
+   "cand_lists": [
+    [
+     "CTC-A005",
+     "CTC-P003",
+     "CTC-P005",
+     "CTC-R004",
+     "CTC-S002",
+     "CTC-S005",
+     "CTC-S001"
+    ]
+   ]
+  },
+  "mode_headings": {
+   "pass": true,
+   "found": [
+    "review",
+    "standard",
+    "strict"
+   ]
+  },
+  "ladder_rows": {
+   "pass": true,
+   "found": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ]
+  },
+  "finding_fields": {
+   "pass": true,
+   "missing": []
+  },
+  "severities": {
+   "pass": true,
+   "missing": []
+  },
+  "frontmatter": {
+   "pass": true,
+   "name_equal": true,
+   "description_equal": true
+  },
+  "check_skill": {
+   "pass": true,
+   "errors": 0,
+   "warnings": 0,
+   "output": "checking dev/inbox/si/track-1b/r1/SKILL.md\n  info: 333 lines, 38250 bytes\n\n0 error(s), 0 warning(s)"
+  }
+ },
+ "info": {
+  "metrics": {
+   "base": {
+    "lines": 372,
+    "bytes": 42309,
+    "body_chars": 16779,
+    "body_chars_no_ws": 15221
+   },
+   "cand": {
+    "lines": 333,
+    "bytes": 38250,
+    "body_chars": 15154,
+    "body_chars_no_ws": 13807
+   },
+   "delta_pct": {
+    "lines": -10.5,
+    "bytes": -9.6,
+    "body_chars": -9.7,
+    "body_chars_no_ws": -9.3
+   }
+  },
+  "rule_row_diffs": [],
+  "inventory": {
+   "base": {
+    "headings": [
+     "# 受控技术中文（CTC）",
+     "## 1. 用途与触发",
+     "## 2. 优先级",
+     "## 3. 模式",
+     "### strict",
+     "### standard",
+     "### review",
+     "### 输出契约",
+     "## 4. 语义不变量",
+     "## 5. 受保护内容",
+     "## 6. 歧义处理",
+     "## 7. 控制规则",
+     "### S — 语义保持：真值、情态、数值、标记、因果、量化",
+     "### A — 歧义与指代：施事、先行词、结合域、否定域、消歧上限",
+     "### P — 步骤与可操作性：切分、可执行性、验证、守护、触发条件",
+     "### T — 术语：概念到术语的双向映射",
+     "### L — 逻辑、条件与时序",
+     "### R — 渲染与受控风格：最小改动、显式化上限、自然度、结构",
+     "## 8. 不得做的事",
+     "## 9. 改写与翻译流程",
+     "## 10. 审阅流程与输出格式",
+     "## 11. 自检",
+     "## 12. 示例"
+    ],
+    "fenced_blocks": 3,
+    "numbered_items": 49,
+    "bullet_items": 32,
+    "table_rows": 66
+   },
+   "cand": {
+    "headings": [
+     "# 受控技术中文（CTC）",
+     "## 1. 用途与触发",
+     "## 2. 优先级",
+     "## 3. 模式",
+     "### strict",
+     "### standard",
+     "### review",
+     "### 输出契约",
+     "## 4. 返回前核对",
+     "## 5. 受保护内容",
+     "## 6. 歧义处理",
+     "## 7. 控制规则",
+     "### S — 语义保持",
+     "### A — 歧义与指代",
+     "### P — 步骤与可操作性",
+     "### T — 术语",
+     "### L — 逻辑、条件与时序",
+     "### R — 渲染与受控风格",
+     "## 8. 不得做的事",
+     "## 9. 改写与翻译流程",
+     "## 10. 审阅流程与输出格式",
+     "## 11. 示例"
+    ],
+    "fenced_blocks": 2,
+    "numbered_items": 32,
+    "bullet_items": 35,
+    "table_rows": 66
+   },
+   "code_spans": {
+    "lost": {
+     "Retry-After": 1
+    },
+    "gained": {}
+   },
+   "cn_numerals": {
+    "lost": {
+     "一个": 10,
+     "一条": 4,
+     "一种": 3,
+     "三族": 1,
+     "三条": 1
+    },
+    "gained": {
+     "三项": 1
+    }
+   }
+  },
+  "diff_ratio_vs_base": 0.0949,
+  "diff_ratio_vs_prev": 0.0949
+ },
+ "pass": true
+}
