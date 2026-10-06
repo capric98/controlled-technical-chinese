@@ -123,6 +123,11 @@ outputs from three models there were no deterministic failures, semantic pass ra
 and a mutation corpus of 45 single-defect mutants was detected 45/45. Full assessment in
 [`eval/reports/release-gates.md`](./eval/reports/release-gates.md).
 
+These measurements were taken on the 2026-08-29 version. The current `SKILL.md` is the merged
+result of the si1 self-iteration experiment ([decision 006](./docs/decisions/006-si1-merged-iteration.md),
+[report](./eval/reports/si1-summary.md)): 232 lines instead of 372, passing the format and
+deterministic gates and an independent two-model review, but not yet re-run against the gold corpus.
+
 It is **not** a validated release. The gold corpus is agent-reviewed and cross-audited between two
 models but **not human-reviewed**, and every other gate is measured against that corpus — so a gate
 measured against unreviewed expectations reports the expectations, not the artifact. That is the

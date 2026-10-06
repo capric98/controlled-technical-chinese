@@ -1,0 +1,790 @@
+judge_phase: 1
+reviewer_model: Opus 5.5 (claude-opus-5-5)
+files_read:
+  - dev/inbox/si/merge/SKILL.md
+
+# T1 规则级别映射（逐字取自候选 §6 各表「级别」栏）
+rule_levels:
+  CTC-S001: 必须
+  CTC-S002: 必须
+  CTC-S003: 必须
+  CTC-S004: 必须
+  CTC-S005: 必须
+  CTC-S006: 必须
+  CTC-S007: 必须
+  CTC-A001: 必须
+  CTC-A002: 必须
+  CTC-A003: 应
+  CTC-A004: 必须
+  CTC-A005: 必须
+  CTC-P001: 必须
+  CTC-P002: 应
+  CTC-P003: 应
+  CTC-P004: 必须
+  CTC-P005: 应
+  CTC-T001: 应
+  CTC-T002: 必须
+  CTC-L001: 必须
+  CTC-L002: 必须
+  CTC-L003: 必须
+  CTC-L004: 必须
+  CTC-R001: 必须
+  CTC-R002: 应
+  CTC-R003: 应
+  CTC-R004: 应
+  CTC-R005: 应
+  CTC-R006: 可以
+rule_levels_note: 29 条均在表中给出级别，无 missing。计数：必须 19，应 9，可以 1。
+
+# T2 自宿主审阅（review 模式，strict 阈值；按严重级别、再按文档位置排序）
+selfhost_findings:
+  - id: F1
+    rule: CTC-A005
+    severity: ERROR
+    location: "模式未指定时，审阅任务用 review；其余任务按 §3 中 strict 与 standard 的适用范围推定，文档类型跨界时取 strict。"
+    problem: |
+      任务（改写／翻译／审阅／新写）与模式（strict／standard／review）是两个独立的选择，候选只规定了「模式未指定」时如何推定，没有规定调用方显式给出的模式与任务不一致时怎么办，例如「用 strict 审阅这份 SOP」。§3 输出契约按模式定义返回物（strict／standard → 只返回改写后的正文；review → 只返回 finding 列表），而 review 的歧义阈值又按被审文档类型选取，不按调用方指定。
+    risk: |
+      读法 A：模式 = strict，按输出契约返回改写后的正文，审阅请求被执行成改写。读法 B：任务 = 审阅，按 §8 输出 finding，并把 strict 当作歧义阈值（若被审文档属于 standard 范围，又与「阈值按被审文档的类型选取」冲突）。同一请求得到改写稿或 finding 列表两种不同产出。
+    suggestion: |
+      在 §1 补一句：「审阅任务始终按 review 模式输出 finding；调用方为审阅指定 strict 或 standard 时，指定的是歧义阈值，优先于按文档类型选取。改写、翻译、新写任务不使用 review 模式。」
+  - id: F2
+    rule: CTC-A005
+    severity: ERROR
+    location: "歧义阈值按被审文档的类型选取：属于 strict 适用范围的用 strict 的阈值，属于 standard 适用范围的用 standard 的阈值。"
+    problem: |
+      阈值选择有两处未覆盖：(1) §1 把「状态提示」列为覆盖对象（「以及状态提示、技术文本的英译中……」），但它既不在 strict 适用范围（只列「告警与错误信息」），也不在 standard 适用范围，改写时的模式推定与审阅时的阈值都无从选取；(2) 「文档类型跨界时取 strict」只写在 §1「其余任务」的推定规则里，review 行为对跨界文档（例如含 runbook 段落的 README）没有对应规定。
+    risk: |
+      跨界文档可读作整篇用 strict、整篇用 standard，或逐段分别取阈值；状态提示可读作 strict（类比告警与错误信息）或 standard。不同读法下 A、P 两族的触发数量不同，审阅产出的 finding 集合与改写产出的「待确认」都不同。
+    suggestion: |
+      把 strict 适用范围中的「告警与错误信息」改为「告警、错误与状态提示」；把 review 行为改为「……属于 standard 适用范围的用 standard 的阈值；跨界时用 strict 的阈值（与 §1 一致）。」
+  - id: F3
+    rule: CTC-A005
+    severity: ERROR
+    location: "可进入该小节的只有七类，此外一律不得进入："
+    problem: |
+      封闭清单与把内容送进「待确认」的规则不一致。(a) CTC-P005 适用于「agent 指令、系统提示或工具／函数描述」，并要求把来源未给出的「能力、参数上限或使用限制」在「待确认」中提出；第 3 类只写「工具描述缺失的触发条件（CTC-P005）」。(b) CTC-S001 的长度上限情形覆盖「条件、例外、阈值、告警或失败分支」，第 7 类只写「无法在不删除条件或例外的前提下满足」。(c) §2「不牺牲第 1 层就达不到第 2 层时，该处不改写，在「待确认」中报告。」没有对应类别；其典型情形（见 F5：先行词有证据可定，但写出标识符会改变标记库存）既不是证据不足（第 1 类），也不是信息缺失（第 5 类）。第 5 类兜底以「执行所需」为条件，而系统提示缺少使用时机、工具描述缺少参数上限是否「执行所需」，正文没有判据。
+    risk: |
+      系统提示缺少使用时机时，一种读法按 CTC-P005 写入「待确认」，另一种按封闭清单（第 3 类仅限工具描述、第 5 类要求「执行所需」）不写；§2 的不可达情形一种读法报告、一种读法静默。同一输入的「待确认」内容不同。(b) 项因 CTC-S001 自身写明「在「待确认」中说明上限未能满足」，执行上大多能消解，列出供一并修正。
+    suggestion: |
+      第 3 类改为「agent 指令、系统提示或工具描述缺失的触发条件、能力、参数上限或使用限制（CTC-P005）」；第 7 类改为「……无法在不删除条件、例外、阈值、告警或失败分支的前提下满足（CTC-S001）」；§2「第 1 层不可达」一条写明归入哪一类，或删去「在「待确认」中报告」并改为「保持原文」。
+  - id: F4
+    rule: CTC-A005
+    severity: ERROR
+    location: "调用方可以显式授权本来禁止的改动，即调整道义强度（规范强度）、精确的单位换算、解除某个受保护标记的保护、指定改写目标或长度上限"
+    problem: |
+      「指定改写目标」被列为能解锁「本来禁止的改动」的授权，且「授权本身即构成 CTC-R001 所要求的归因」，但正文没有界定改写目标能解锁哪类改动。§1 中「改写目标」指营销、品牌等文本的风格目标，与此处是否同一概念未说明。
+    risk: |
+      调用方给出「改写目标：面向新用户，精简背景说明」时，读法 A：该目标授权为达成目标所需的改写，包括 CTC-R001 本会禁止的等义替换，乃至删减背景断言（第 7 步「调用方已授权的改动不计为不成立」使其通过核对）；读法 B：改写目标只决定规则触发处怎样改，不解锁任何 S、L 族禁止的改动。两种输出可能相差整段内容。
+    suggestion: |
+      删去「指定改写目标」；或改为「指定改写目标（例如目标读者或语体；只授权对未触发规则的文本做等义改写，不授权改变第 1 层的任何不变量）」。
+  - id: F5
+    rule: CTC-A005
+    severity: ERROR
+    location: "保护的是**库存**：标记多重集必须相等。"
+    problem: |
+      「多重集必须相等」冻结了每个受保护标记的出现次数，而其他规则会合法地改变次数：CTC-A002（必须）要求先行词不唯一时「改用名词回指」，先行词是标识符时（如「调用 `get_user` 后调用 `update_user`，若其返回 404 则重试」），名词回指就是多写一次 `update_user`；CTC-P002 要求写出可确定的对象，常常就是命名空间或服务名标记；CTC-R002 合并重复的标识符主语、CTC-T001 把「最大重试次数」统一为 `max_retries`、CTC-S001 删除同一断言的重复表述，都会改变次数。正文没有说明「相等」是「来源中的标记不丢不改」还是「次数严格相等」。
+    risk: |
+      读法 A（次数严格相等）：S 族在第 1 层，压过第 2 层的 CTC-A002／P002，agent 不替换「其」，保留真实的指代歧义；按 §2 本应进「待确认」，但七类中无对应类别（见 F3），结果是静默留下歧义。读法 B（只要求不丢不改）：agent 用标识符替换指代。同一 strict 文本两种输出；review 模式下对同一改写一个判 ERROR、一个不报。
+    suggestion: |
+      改为「保护的是**库存**：来源中的每个受保护标记都必须在输出中逐字符出现，不得删除或改动；规则要求的名词回指、对象补写与术语统一可以增加已有标记的出现次数。」若作者意图是次数严格相等，则在 CTC-A002 中写明先行词为受保护标记时只能调整语序，无法调整时按第 1 类报告。
+  - id: F6
+    rule: CTC-A005
+    severity: ERROR
+    location: "该条件必须出现在被守护动作之前——同句前段，或紧邻的上一句。"
+    problem: |
+      位置要求只给出「同句前段或紧邻的上一句」两种合格位置，没有说明它约束的是改写造成的位移，还是来源本身的排列。来源为「1. 确认已备份。2. 停止服务。3. 执行 DROP TABLE。」时，前置条件在被守护动作之前，但不在紧邻的上一句。
+    risk: |
+      读法 A（约束来源排列）：agent 必须把「确认已备份」重述进第 3 步，或把第 1 步移到第 2 步之后——前者是 §4 所说的重复伪法律文本、不消歧的补充限定（CTC-R002），后者改变来源的步骤顺序（CTC-L003、CTC-P001）。读法 B（只禁止改写把条件挪到动作之后或挪远）：原样返回。审阅时读法 A 会对大量正常 runbook 报 ERROR。
+    suggestion: |
+      改为「……该条件在输出中必须仍位于被守护动作之前，且不得比来源中离该动作更远；来源中条件原本就位于被守护动作之前时保持原位。」
+  - id: F7
+    rule: CTC-A005
+    severity: ERROR
+    location: "没有改动任何规则并未要求改动的地方（CTC-R001）"
+    problem: |
+      第 7 步把 CTC-R001 的判据转述为「规则要求」，而 CTC-R001 本身的判据是「每一处改动必须能归因到一条具体规则 ID」。CTC-R006 是「可以」级许可规则，§4 也写明「受保护标记之外的全角数字半角化属于排版，可以做」：这类改动有规则 ID，但没有规则「要求」它们。
+    risk: |
+      读法 A（按第 7 步字面）：返回前回退全部排版统一与全角数字半角化；读法 B（按 CTC-R001）：保留。同一次改写返回的文本不同；review 模式下对同一改写，一个审阅者按 CTC-R001 报 ERROR，另一个不报。
+    suggestion: |
+      改为「没有改动任何不能归因到具体规则 ID 的地方（CTC-R001）」。
+  - id: F8
+    rule: CTC-T001
+    severity: WARNING
+    location: "第四栏只在规则要求给出建议时填写（§5 的情态模糊），其余情形省略。"
+    problem: |
+      第四栏的触发对象有三种称呼：§3 的「§5 的情态模糊」、§5 的「规范性指令中由无判据词（见 CTC-R004）承担义务的条件」、第 4 类的「无判据的规范条件（CTC-R004）」。按 §5 的定义，它覆盖全部第 4 类条目，每条都要「列出其可能的两种以上强度并给出建议」；但示例第一行「多次失败 | 「多次」未给出具体次数 | 触发升级的失败次数阈值」是规范条件由无判据词「多次」承担的情形，没有第四栏，只有「尽快回滚」一行有。
+    risk: |
+      对「多次失败后升级」「必要时重启」这类条目，一种读法填第四栏并给出建议，另一种读法省略；且「列出其可能的两种以上强度」对阈值类无判据词（多次）无法执行。改写输出的「待确认」格式与内容因此不一致。
+    suggestion: |
+      统一为一个术语并界定范围，例如在 §3 与 §5 都写：「第四栏只在无判据词使义务强度未定时填写（如「尽快」可读作「必须立即」或「应在窗口内」）；无判据词只使阈值或触发条件未定时（如「多次」），不填第四栏。」
+  - id: F9
+    rule: CTC-A003
+    severity: WARNING
+    location: "不得换算单位、四舍五入、改变数制（`3`↔`三`）或在比例与百分比之间转换，只有在调用方明确授权、换算精确、且该值不在受保护标记内时才可以换算（CTC-S004）"
+    problem: |
+      例外「只有在调用方明确授权……时才可以换算」既可以只作用于第一并列项「换算单位」，也可以作用于全部并列项（比例与百分比互换、改变数制都可以称为换算；四舍五入因「换算精确」被排除）。§3「调用方授权」只列「精确的单位换算」，支持前一种结合；「才可以换算」紧跟整个并列结构，支持后一种。
+    risk: |
+      调用方要求「把比例统一写成百分比」或「正文数字用中文数字」时，读法 A 视为清单外改动而拒绝，读法 B 照做。两种输出的数值表面形式不同，而 CTC-S004 是必须级。
+    suggestion: |
+      改为「……只有在调用方明确授权、换算精确、且该值不在受保护标记内时才可以换算单位（CTC-S004）；改变数制与比例和百分比的互换不在授权范围内。」或在 §3 授权清单中补列这两项。
+  - id: F10
+    rule: CTC-T001
+    severity: WARNING
+    location: "未获压缩授权则该步骤保持独立；调用方授权合并步骤时可以并入相邻步骤"
+    problem: |
+      同一条规则用「压缩授权」与「授权合并步骤」两个称呼，§3 授权清单则分列「长度上限」与「CTC-P003 的合并步骤」。调用方只给出步骤数上限（「压缩到不超过 2 步」）而没有说「合并」时，是否构成本条所说的「压缩授权」无从判定；§10 示例的指令同时含「合并可合并的步骤」与「压缩到不超过 2 步」，不能区分两者。
+    risk: |
+      读法 A：步骤数上限即压缩授权，验证步骤并入相邻步骤；读法 B：只有明确的合并授权才能并入，验证步骤保持独立，上限无法满足时按第 7 类报告。两种输出的步骤结构不同。
+    suggestion: |
+      统一为「调用方授权合并步骤」，并写明「只给出长度或步骤数上限不构成合并授权」（或按作者意图写明相反结论）。
+  - id: F11
+    rule: CTC-R004
+    severity: WARNING
+    location: "过长的「的」字串"
+    problem: |
+      CTC-R003 的触发条件之一由无判据词「过长」承担，没有可观测的界限（层数或字数）。CTC-A003 又写明「正常的中文多层定语不因长度或嵌套触发本规则」，读者无法据此推出 CTC-R003 的界限。
+    risk: |
+      改写时，同一个三层「的」字串一种读法改写、一种读法保留；审阅时一个审阅者报 WARNING、另一个不报。改写一侧正是 §9 要防止的过度编辑。
+    suggestion: |
+      给出可观测界限（例如同一定语串中「的」的个数上限，数值由作者确定），或删去该项，把结合歧义交给 CTC-A003 处理。
+selfhost_findings_count:
+  ERROR: 7
+  WARNING: 4
+  STYLE: 0
+  total: 11
+
+# T3 反向解码（仅凭候选重建）
+reverse_decoding:
+  - probe: CTC-S001
+    level: 必须
+    scope: 改写、压缩、合并、翻译任务；review 模式核对改写稿时同样适用
+    trigger: 改写、压缩、合并或翻译含具体断言的文本
+    requires: 来源每条独立断言（对象、属性、行为、数值、条件、结果、失败分支）在输出中可还原；调用方给定的长度上限无法在不删除的前提下满足时，返回完全合规的最短文本，并在「待确认」中说明上限未能满足（第 7 类）
+    prohibits: 删除独立断言；以长度上限为由删除条件、例外、阈值、告警或失败分支；（§3 重申）任何模式下以简洁或长度为名删除前提、守护条件、成功判据、默认值或受保护标记
+    exceptions: 可以删除同一断言的重复表述与纯修饰成分；软限定词（可能、通常、预计）不属于可删的纯修饰成分（§9 第 4 条）
+    invariants: 断言集合
+    fork: no
+    notes: 第 7 类措辞（条件或例外）比本条列举的范围窄，但本条自身写明要报告，执行上可消解（见 F3(b)）。删除含受保护标记的重复表述会改变标记出现次数，与 §4「多重集必须相等」相撞（见 F5）。
+  - probe: CTC-S003
+    level: 必须
+    scope: 全部改写、翻译；review 核对
+    trigger: 来源含情态、义务、请求、许可、禁止、建议或对系统行为的描述
+    requires: (认识强度, 道义强度, 言语行为类型) 逐处不变；翻译时情态词按强度类别对译，不按字面，也不归一到本技能自身的规范词表
+    prohibits: 确保→确认、请→须、不会→禁止、建议→必须、可能→会、必须→应；（strict）把描述升格为规范、把请求升格为义务；删除软限定词
+    exceptions: 同强度换词（不得↔禁止）允许；调用方显式授权「调整道义强度（规范强度）」时可以改
+    invariants: 三元组逐处不变
+    fork: yes
+    readings:
+      - id: A
+        reading: 授权「调整道义强度」覆盖「请→须」这类同时改变言语行为类型（请求→义务）的改动
+        behavior: 调用方要求把「请」统一为「须」时照做
+      - id: B
+        reading: 授权清单只列道义强度，言语行为类型不在其中；「请→须」被本条单独列为违规
+        behavior: 即使调用方要求也不改，或按清单外改动拒绝
+    notes: 低频，未升为 finding。另：§10 示例 2 的反例把「须」改为「必须」而未标 CTC-S003，隐含二者同强度，正文未明说。
+  - probe: CTC-A001
+    level: 必须
+    scope: 全部模式；review 模式有专门的不报条件
+    trigger: 来源指明执行者（含被动句施事）；或存在多个可能执行者且不同读法改变由谁执行
+    requires: 来源指明的执行者在输出中仍可定位；需要补出时，补出的执行者必须能从来源或上下文确定
+    prohibits: 把具名组件替换为笼统称呼；在不满足「多个可能执行者且改变由谁执行」时补执行者；虚构执行者（strict 段、§9 第 3 条）
+    exceptions: 不要求每句有显性主语；review 模式下施事可由上下文唯一推定时不产生 finding；执行者无法确定时转 CTC-A005
+    invariants: 执行者—动作—对象关系
+    fork: no
+  - probe: CTC-A005
+    level: 必须
+    scope: 全部模式；也是 CTC-A003、CTC-L004、CTC-P002 无证据时的去向
+    trigger: (a) 两种以上导致不同行为的读法，来源与上下文都不足以确定作者意图；(b) 缺少执行所需的参数、阈值、接收方或判据
+    requires: 保持原表述；在「待确认」中给出位置、竞争读法或缺失项、判定所需的信息；review 模式下作为 finding，严重级别 ERROR
+    prohibits: 静默择一；补出缺失项；输出多个完整备选版本；用流畅改写把歧义掩盖成确定句
+    exceptions: §5「不算真歧义」两种情形（一种读法不对应可执行操作；参数在运行时由外部唯一确定）；standard 下竞争读法的门槛更高
+    invariants: 该处原表述不变
+    fork: no
+    notes: (a) 进第 1 类，(b) 进第 5 类（「第 2–4 类之外……不论由哪条规则发现」），路由可消解。
+  - probe: CTC-P003
+    level: 应（正文中的「必须」按 §6 不改变本栏级别）
+    scope: 含成功判据、等待条件、验证方式或独立验证步骤的可执行流程
+    trigger: 来源给出成功判据、等待条件或验证方式；来源把验证单独列为一步；来源未给出成功判据
+    requires: 判据与所验证的步骤绑定，保持阻塞性质；独立验证步骤未获压缩授权时保持独立；获合并授权时，合并后仍由操作者执行、位于被守护动作之前、逐项列全原有判据；破坏性或不可逆、且后续安全取决于其成败的步骤缺判据时进「待确认」第 2 类
+    prohibits: 把判据移入附注、脚注或文末；把祈使的验证动作改写为系统行为描述；虚构判据；丢掉任一判据；对其余步骤的缺判据提出未决项
+    exceptions: 调用方授权合并步骤
+    invariants: 判据集合、阻塞性、执行者（操作者）、判据与动作的先后
+    fork: yes
+    readings:
+      - id: A
+        reading: 调用方只给出步骤数或长度上限（「压缩到不超过 2 步」）即构成「压缩授权」
+        behavior: 把验证步骤并入相邻步骤
+      - id: B
+        reading: 只有明确的「授权合并步骤」才能并入；上限不构成合并授权
+        behavior: 验证步骤保持独立，上限无法满足时按第 7 类报告
+    notes: 见 F10。
+  - probe: CTC-P004
+    level: 必须
+    scope: 含破坏性、不可逆或改变外部状态操作的步骤
+    trigger: 步骤含此类操作（删除、DROP、覆盖、重启、扩缩容、发布、回滚、密钥轮换、清空缓存），且来源给出了前置条件、前提或告警
+    requires: 该条件出现在被守护动作之前：同句前段，或紧邻的上一句
+    prohibits: 来源没有给出条件时虚构；移动独立告警结构块（按本条记为 CTC-R005 违规）
+    exceptions: 独立结构块形式的告警（「警告：」「注意：」段落、告警框）管辖所依附的整个流程，不论位于流程前后，不要求移动
+    invariants: 条件与被守护动作的绑定及先后
+    fork: yes
+    readings:
+      - id: A
+        reading: 位置要求约束来源本身的排列；前置条件与动作之间隔了其他步骤也算违规
+        behavior: 把条件重述进被守护步骤，或重排步骤；审阅时对此类正常 runbook 报 ERROR
+      - id: B
+        reading: 位置要求只约束改写造成的位移
+        behavior: 来源条件已在动作之前时原样保留
+    notes: 见 F6。另：「移动它属于 CTC-R005 违规」与 CTC-R005 的定义不一致——CTC-R005 保护的是层级、项数、行列等粒度，不涉及块的位置；改写时 CTC-R001 同样禁止移动，行为一致，只影响审阅时引用哪条规则，未升为 finding。
+  - probe: CTC-R001
+    level: 必须
+    scope: 任何改写或翻译任务；review 模式下即 finding 的「规则」字段
+    trigger: 任何改写或翻译，尤其来源已正确、清晰、合规时
+    requires: 每一处改动能归因到一条具体规则 ID；未触发任何规则的文本原样返回；改动可分别审查
+    prohibits: 以「更清楚」「更专业」为由的等义替换；为体现工作量而改写；混合不相关改动
+    exceptions: 调用方授权本身构成归因（§3）；CTC-R006 与 §4 允许的排版改动有规则 ID 可归因
+    invariants: 未触发处逐字不变
+    fork: no
+    notes: 本条自身单义；与之相关的分叉来自转述与授权处（F4「指定改写目标」、F7 第 7 步「规则并未要求」）。翻译任务中「原样返回」的基准未定义，但 CTC-R002／R003 会把直译残留归因修复，两种理解的输出大体收敛。
+  - probe: CTC-R002
+    level: 应
+    scope: 全部改写、翻译；strict 不改变其强度（「strict 提高的是歧义敏感度，不是显式化的数量要求」）
+    trigger: 输出中出现逐句重复的主语、机械拆分的短句，或不消除任何歧义的补充限定
+    requires: 删去；每个补出的主语、重复的中心语、拆出的短句都应对应一处可指认的歧义风险；修复取最小改动
+    prohibits: 不含该缺陷的文本借本条重写（§6 R 族表后说明）
+    exceptions: 多执行者交替时重复主语有消歧价值；写出可确定的动作、对象或位置属 CTC-P002，不在禁止之列
+    invariants: 层级低于 S、L 等第 1 层规则
+    fork: no
+    notes: 重复主语是受保护标记时，合并会改变标记次数（F5）。
+  - probe: CTC-R004
+    level: 应
+    scope: 规范性指令（agent 指令、SOP、策略、门禁条件）
+    trigger: 判定条件由无判据词承担——「尽量」「尽可能」「最好」「适当」「必要时」「合理」
+    requires: 新写时给出可观测的触发条件（阈值、状态或事件）；改写时在「待确认」中提出（第 4 类），按 §5 指出缺失判据、列出两种以上强度并给出建议
+    prohibits: 改写时补出来源没有的判据
+    exceptions: 目标文档中限定观测事实的普通副词（「该接口通常在 100 ms 内返回」）
+    invariants: 来源的规范条件原样保留
+    fork: yes
+    readings:
+      - id: A
+        reading: 无判据词限于所列六词及同类评价词；「多次」「尽快」类数量或时限词按第 5 类处理
+        behavior: 不填第四栏，类别记第 5 类
+      - id: B
+        reading: 任何承担规范条件的无判据数量或时限词都属第 4 类
+        behavior: 按 §5 填第四栏并给出建议
+    notes: 见 F8。新写时触发条件从何而来未写明，但 CTC-S002（第 1 层）压过本条，按阶梯可消解为「无素材时进待确认」。
+  - probe: §5 情态模糊段
+    level: 按 CTC-R004（应）；替换为具体强度或阈值同时触犯 CTC-S002／S003（必须）
+    scope: 改写时的规范性指令；新写；review 时作为 finding
+    trigger: 规范性指令中由无判据词承担义务的条件
+    requires: 改写：在「待确认」中指出缺失的判据，列出两种以上可能强度并给出建议（第四栏），然后停手；新写：给出可观测的触发条件
+    prohibits: 替换为具体强度或具体阈值
+    exceptions: 未写明
+    invariants: 原表述
+    fork: yes
+    readings:
+      - id: A
+        reading: 本段覆盖全部第 4 类条目（其定义句「由无判据词承担义务的条件」与第 4 类同范围）
+        behavior: 「多次失败」也要列强度并给建议，与 §3 示例不符
+      - id: B
+        reading: 本段只覆盖使义务强度未定的情形（标题句「情态强度的模糊」）
+        behavior: 只有「尽快」类填第四栏，与 §3 示例一致
+    notes: 见 F8。
+  - probe: 模式
+    threshold_difference: strict——只要存在一种在本文档语境下可执行、且导致不同动作的读法即算竞争读法；standard——只有普通技术读者会就此产生分歧时才算；review——按被审文档类型选 strict 或 standard 的阈值
+    changes_rule_levels: 否。「模式改变的是歧义阈值，不是规则级别」；S、L、T 三族的触发与阈值无关；严重级别只存在于 review 模式
+    default_inference: 审阅任务用 review；其余任务按 §3 两种适用范围推定；文档类型跨界时取 strict
+    fork: yes
+    readings:
+      - id: A
+        reading: 调用方显式给出的模式决定输出契约（「用 strict 审阅」→ 返回改写稿）
+        behavior: 输出改写后的正文
+      - id: B
+        reading: 任务决定流程，模式只决定阈值
+        behavior: 输出 finding 列表，用 strict 阈值
+      - id: C
+        reading: 状态提示或跨界文档在 review 中逐段取阈值／按 standard 处理
+        behavior: A、P 两族的触发数量与 A／B 读法下不同
+    notes: 见 F1、F2。
+  - probe: 「待确认」准入清单
+    content: 七类封闭清单——1 证据不足的歧义（A005）；2 来源从未给出的成功判据（P003，只限破坏性或不可逆且后续安全依赖其成败的步骤）；3 工具描述缺失的触发条件（P005）；4 无判据的规范条件（R004）；5 第 2–4 类之外、执行所需而来源与上下文都未提供的信息（S002，不论由哪条规则发现）；6 受保护标记拼写疑似有误（S005）；7 长度上限无法在不删除条件或例外的前提下满足（S001）。此外一律不得进入；不记录风格偏好；格式「位置 | 问题 | 需要的信息 | 建议（可选）」，第四栏只用于 §5 的情态模糊；仅存在未决项时追加
+    routes_in: CTC-A003、CTC-L004、CTC-P002 经 CTC-A005 进入；术语差异只在妨碍执行时按第 5 类进入；§2「第 1 层不可达」要求报告但无对应类别
+    fork: yes
+    readings:
+      - id: A
+        reading: 类别描述即准入边界（第 3 类只限工具描述的触发条件）
+        behavior: 系统提示缺少使用时机、工具缺少参数上限、§2 不可达情形不写入
+      - id: B
+        reading: 类别按所引规则的全部范围理解，或由第 5 类兜底
+        behavior: 写入
+    notes: 见 F3、F8。
+  - probe: 调用方授权清单
+    content: 调整道义强度（规范强度）；精确的单位换算；解除某个受保护标记的保护；指定改写目标或长度上限；规则条文中写明的授权（CTC-P003 合并步骤、CTC-R005 改变格式）。授权须显式；授权本身构成 CTC-R001 的归因；未获授权的同类改动一律不得做；授权不改变语义不变量的验证方式（第 7 步不把已授权改动计为不成立）。另：调用方可以向保护集追加字符串（这是加限制，不是解锁）
+    fork: yes
+    readings:
+      - id: A
+        reading: 「指定改写目标」可解锁为达成目标所需的任何改写；「换算」例外覆盖比例与百分比互换和改变数制；步骤数上限即压缩授权；道义强度授权覆盖「请→须」
+        behavior: 照调用方要求做这些改动
+      - id: B
+        reading: 清单逐项从严：改写目标不解锁语义改动；只有单位换算；只有明确的合并授权；言语行为类型不在清单内
+        behavior: 拒绝或按第 7 类报告
+    notes: 见 F4、F9、F10，以及 CTC-S003 探针。
+  - probe: review 流程与「未发现违规」时的输出
+    flow: 1 按 §7 第 1–3 步建立比对基准（受保护标记、语义骨架、按文档类型的歧义阈值）；2 逐句定位违规，每条唯一规则 ID，同处多规则分列；3 六字段（规则、严重级别、位置、问题、风险、建议修改），位置逐字引用；4 按严重级别、再按文档位置排序
+    severity: 必须→ERROR，应→WARNING，可以→STYLE；唯一升级：「应」级违规在「风险」字段指名操作者因此会做的不同动作时可以按 ERROR 报告；无其他升级，无降级；排版问题不得按 ERROR 上报
+    prohibitions: 报告无规则 ID 的 finding；为显得周全制造 finding；发现冲突后修改被审文本或验收标准
+    no_findings_output: 返回「未发现违规」，其后最多三条 STYLE 观察，每条引用规则 ID；没有 finding 是有效结果
+    fork: yes
+    readings:
+      - id: A
+        reading: 「未发现问题」指没有 ERROR／WARNING；只有 CTC-R006 类排版不一致时输出「未发现违规」加至多三条观察
+        behavior: 至多三条，非六字段格式
+      - id: B
+        reading: STYLE 也是 finding（可以→STYLE 映射）；只要有任何 finding 就输出完整的六字段列表
+        behavior: 全部 STYLE 条目按六字段列出，不设上限
+    notes: 影响限于格式与条数，未升为 finding。另：升级用「可以」，满足条件时是否升级由审阅者自行决定，同一违规在不同审阅者处可能得到不同级别；这是许可的本义，未列为分叉。
+  - probe: 返回前核对（§7 第 7 步）
+    requires: 渲染后与来源逐句对照，重新抽取第 1、2 步登记的全部项逐项比较；S、A、P、T、L 五族每条规则的保持项与来源相同；核对没有不消歧的补出成分、没有译文腔（R002、R003）、没有改动规则并未要求改动的地方（R001）；任一项不成立先修复再返回；调用方已授权的改动不计为不成立；不得以「我没有改变语义」作结论
+    fork: yes
+    readings:
+      - id: A
+        reading: 「规则并未要求改动」按字面——只保留规则要求的改动
+        behavior: 回退 CTC-R006 排版统一与全角数字半角化
+      - id: B
+        reading: 按 CTC-R001 原文——能归因到规则 ID 即可
+        behavior: 保留
+    notes: 见 F7。「保持项都须与来源相同」需理解为语义项，否则与 CTC-A002、CTC-P002、CTC-T001 要求的改动相撞；上下文可消解。§7 只覆盖改写与翻译，新写任务没有对应流程，第 7 步的「来源」在新写中指调用方素材，正文未明说。
+
+# T4 自然度与过度控制
+naturalness:
+  scale: 1 = 译文腔或机械化严重，5 = 自然的专业技术中文
+  score: 4
+  rationale: 主体是凝练、自然的技术中文，话题链与连动用得当；扣分处是元组与箭头记号、个别并列结构生硬，以及 §4 与 §7 第 7 步的长句。
+  quotes:
+    - "对歧义保持沉默是较轻的失败，替作者决定不是。"
+    - "保护的是**库存**：标记多重集必须相等。**绑定**由语义层负责——`发送 A 给 B` 与 `发送 B 给 A` 库存相同而语义相反。"
+    - "未定分两种：竞争读法，与操作未定（做哪个动作、对哪个对象、在哪个节点）"
+    - "本技能假定技术数值会被直接复制进单位由字段名固定的配置项，且文档不标明哪些值是这样的：换算在算术上无损，在操作上有损。"
+over_control:
+  scale: 1 = 几乎没有不必要的约束，5 = 普遍过度约束
+  score: 2
+  rationale: 多数规则带有明确边界与反例（CTC-A001、CTC-R002、CTC-P003 的未决项限制、§9），整体是在抑制过度控制；过度约束集中在少数位置：CTC-P004 的「紧邻的上一句」会在来源已正确时也触发（F6），CTC-P003 单元格过长，第 7 步与封闭准入清单的防御性措辞偏重。
+  quotes:
+    - "该条件必须出现在被守护动作之前——同句前段，或紧邻的上一句。"
+    - "**本步不得以「我没有改变语义」作结论**：模型对自身保持了语义的判断不是证据，也不能替代本步，只有逐项对照的结果算数。"
+    - "但合并后它必须仍是**由操作者执行**、位于被守护动作**之前**、且**逐项列全**原有判据的确认动作。"
+    - "其余步骤缺少判据不提出，以免正常的流程文档产生成串的未决项。"
+---
+judge_phase: 2
+reviewer_model: Opus 5.5 (claude-opus-5-5)
+files_read_phase2:
+  - SKILL.md
+  - dev/inbox/si/merge/SKILL.md
+
+# 29 条规则行逐行比对（基线 vs 候选，以「| CTC-xxx |」开头的表格行逐字比较）
+rule_rows:
+  identical: [CTC-S001, CTC-S002, CTC-S003, CTC-S004, CTC-S005, CTC-S006, CTC-S007, CTC-A001, CTC-A002, CTC-A003, CTC-A004, CTC-A005, CTC-P001, CTC-P002, CTC-P004, CTC-P005, CTC-T001, CTC-T002, CTC-L001, CTC-L002, CTC-L003, CTC-L004, CTC-R001, CTC-R002, CTC-R003, CTC-R004, CTC-R005, CTC-R006]
+  changed:
+    CTC-P003: V22
+  levels_changed: none
+  rule_id_ownership_changed: none
+  frontmatter: 逐字相同
+
+vs_baseline:
+  - id: V1
+    type: altered
+    severity: WARNING
+    rule_ids: []
+    location: §1 模式推定
+    baseline: "模式未指定时，按 §3 的适用范围推定，并在文档类型跨界时取更严的一档。"
+    candidate: "模式未指定时，审阅任务用 review；其余任务按 §3 中 strict 与 standard 的适用范围推定，文档类型跨界时取 strict。"
+    reason: 基线中「审阅一份 SOP、未指定模式」同时落在 review 适用范围（审计既有中文技术文本）与 strict 适用范围（SOP），可推定为 strict（改写）或 review；候选写明审阅任务用 review，消解了该分叉。「更严的一档」改为「strict」不改变含义。可能改变未指定模式的审阅请求的产出。
+  - id: V2
+    type: altered
+    severity: STYLE
+    rule_ids: [CTC-A001, CTC-A005]
+    location: §2 第 1 层、冲突裁决、§3、T 族说明
+    baseline: "施事—动作—受事关系"
+    candidate: "执行者—动作—对象关系"
+    reason: 术语统一（T001）：同类改动还有「分歧读法」→「竞争读法」（基线「分歧读法是一种」，与 CTC-A005 行的「竞争读法」不一致），「改写模式下差异本身不进「待确认」」→「strict／standard 模式下差异本身不进「待确认」」（基线「改写模式」不是已定义的模式名）。含义不变。
+  - id: V3
+    type: strengthened
+    severity: STYLE
+    rule_ids: [CTC-R006]
+    location: §2 冲突裁决「不得升格」
+    baseline: "体例或地区偏好不得为赢得争论而升格为语义规则"
+    candidate: "体例或地区偏好不得升格为语义规则"
+    reason: 删去目的状语，禁止不再限于「为赢得争论」；实际执行不变。
+  - id: V4
+    type: added
+    severity: STYLE
+    rule_ids: []
+    location: §3 模式总述
+    baseline: absent
+    candidate: "三种模式下全部规则按其级别生效"
+    reason: 基线 standard 行为只提 S、L、T、A、P 五族，R 族在 standard 下是否生效需由「模式改变的是歧义阈值，不是规则级别」推出；候选明说。执行不变。
+  - id: V5
+    type: strengthened
+    severity: STYLE
+    rule_ids: [CTC-S001, CTC-S005]
+    location: §3 模式总述
+    baseline: "条件、前提、例外、守护条件与成功判据不得为求简洁删除。"
+    candidate: "任何模式下都不得以简洁或长度为名删除条件、前提、例外、守护条件、成功判据、阈值、默认值或受保护标记（CTC-S001、CTC-S005）。"
+    reason: 基线 strict 与 standard（「以简洁为名删除条件、例外、阈值、默认值或受保护标记」）两份清单取并集，适用于全部模式，并加「长度」。CTC-S001 在两版中本已覆盖，执行不变。
+  - id: V6
+    type: altered
+    severity: STYLE
+    rule_ids: [CTC-S002, CTC-A005, CTC-R002, CTC-P001, CTC-S003]
+    location: §3 strict「不等于最大冗长」
+    baseline: "不得重复不消歧的主语；不得把复句拆成一行一句；不得把描述性陈述升格为规范条款，或把请求升格为义务；不得补写来源没有的告警。"
+    candidate: "不得重复不消歧的主语或机械拆句（CTC-R002、CTC-P001），不得把描述升格为规范、把请求升格为义务（CTC-S003）。"
+    reason: 各项补上规则 ID；「补写告警」并入「虚构…告警（CTC-S002、CTC-A005）」；「复句拆成一行一句」概括为「机械拆句」。断言集合不变。
+  - id: V7
+    type: altered
+    severity: STYLE
+    rule_ids: []
+    location: §3 review 行为
+    baseline: "歧义阈值按被审文档的类型选取（agent 指令与 runbook 用 strict 的阈值，说明性文档用 standard 的阈值）。"
+    candidate: "歧义阈值按被审文档的类型选取：属于 strict 适用范围的用 strict 的阈值，属于 standard 适用范围的用 standard 的阈值。"
+    reason: 由举例改为按 §3 适用范围映射，覆盖工具描述、告警等基线括注未提的类型；与基线意图一致。跨界文档与状态提示的缺口两版相同（F2）。
+  - id: V8
+    type: altered
+    severity: WARNING
+    rule_ids: [CTC-S002, CTC-P003]
+    location: §3「待确认」第 5 类
+    baseline: "执行所需、而来源与上下文都未提供的信息（CTC-S002）——缺失信息一律归第 5 类，不论是哪条规则先发现它；"
+    candidate: "第 2–4 类之外、执行所需而来源与上下文都未提供的信息，不论由哪条规则发现（CTC-S002）；"
+    reason: 基线「一律归第 5 类」与第 2–4 类重叠，且使 CTC-P003 明令「不提出」的非破坏性步骤缺判据可经第 5 类进入；候选规定第 2–4 类优先，堵住该通道。可能改变「待确认」的类别与条目。
+  - id: V9
+    type: altered
+    severity: STYLE
+    rule_ids: [CTC-R004]
+    location: §3「待确认」示例第 3 行
+    baseline: "尽快回滚 | 「尽快」承担义务，强度未定 | 作者意图的规范强度 |"
+    candidate: "尽快回滚 | 「尽快」未给出时限，所承担义务的强度未定 | 回滚时限与作者意图的规范强度 |"
+    reason: 示例在强度之外补列缺失的时限。仅示例。
+  - id: V10
+    type: added
+    severity: WARNING
+    rule_ids: [CTC-P003, CTC-R005, CTC-R001]
+    location: §3 调用方授权
+    baseline: "调用方可以显式授权四类本来禁止的改动：调整规范强度、精确的单位换算、解除某个受保护标记的保护、指定改写目标或长度上限。"
+    candidate: "以及规则条文中写明的授权（CTC-P003 的合并步骤、CTC-R005 的改变格式）"
+    reason: 基线封闭的「四类」与 CTC-P003、CTC-R005 行内的调用方授权冲突（「未获授权的同类改动一律不得做」）；候选并入清单并去掉计数。按字面读基线的 agent 可能拒绝合并步骤或改格式的请求。「调整规范强度」→「调整道义强度（规范强度）」是措辞澄清。
+  - id: V11
+    type: lost
+    severity: STYLE
+    rule_ids: [CTC-S001, CTC-S002, CTC-S003, CTC-S004, CTC-S005, CTC-S006, CTC-S007, CTC-A001, CTC-A002, CTC-A003, CTC-A004, CTC-A005, CTC-P001, CTC-P003, CTC-P004, CTC-T001, CTC-T002, CTC-L001, CTC-L002, CTC-L003, CTC-L004]
+    location: 基线 §4 语义不变量表（整节）
+    baseline: "**本节列出返回之前必须逐项验证的属性**，本节不指派严重级别。"
+    candidate: absent
+    reason: 21 行的「必须保持什么」与对应规则行逐一重合，返回前验证的义务移入候选 §7 第 7 步（「S、A、P、T、L 五族每条规则的保持项都须与来源相同」）；真正丢失的是「破坏后的后果」理据列。附注：基线「守护顺序」行写作「守护条件在被守护动作之前」，比 CTC-P004 的邻接要求宽，可佐证 F6 的读法 B，这段文字随表一起消失。
+  - id: V12
+    type: altered
+    severity: STYLE
+    rule_ids: [CTC-S005]
+    location: 基线 §5／候选 §4 受保护标记定义
+    baseline: "行内代码、围栏代码块含语言标注"
+    candidate: "行内代码；围栏代码块，不论是否带语言标注"
+    reason: 基线可误读为「只有带语言标注的围栏块才受保护」；两版的 CTC-S005 行都覆盖全部代码块，候选消除误读。候选另加交叉引用「只承载示意文本的围栏块，其例外见 CTC-S005。」，使本节与 CTC-S005 的示意文本例外一致。
+  - id: V13
+    type: lost
+    severity: STYLE
+    rule_ids: [CTC-S005]
+    location: 基线 §5 受保护内容第 2 条
+    baseline: "不得翻译标识符、改动大小写或分隔符、把标记内的半角符号改为全角、用描述替换命令、替换或补全占位符、规范化 URL。"
+    candidate: absent
+    reason: 各项都是「逐字符不变」或「标记多重集必须相等」的实例，候选保留了这两条上位要求，并在「不属于受保护标记」处保留「翻译标识符会造成不可逆损坏」。具体列举有助于识别，执行不变。
+  - id: V14
+    type: altered
+    severity: STYLE
+    rule_ids: [CTC-S004]
+    location: 数量保持表面形式的理据
+    baseline: "理由不在算术而在操作：技术数值会被直接复制进单位由字段名固定的配置项，而文档不保证标明哪些值是这样的。"
+    candidate: "本技能假定技术数值会被直接复制进单位由字段名固定的配置项，且文档不标明哪些值是这样的"
+    reason: 无来源的事实断言改为声明的假定。规则不变。
+  - id: V15
+    type: altered
+    severity: WARNING
+    rule_ids: [CTC-L001, CTC-P004]
+    location: 结构也承载语义
+    baseline: "标题、列表层级、表格单元格与告警块所建立的条件管辖其子树，这属于条件保持，按 CTC-L001 判定。"
+    candidate: "标题、列表层级与表格单元格建立的条件管辖其子树（CTC-L001），独立告警块管辖它所依附的整个流程（CTC-P004）"
+    reason: 基线这一段让告警块只管辖「子树」并归 CTC-L001，与基线自身 CTC-P004 行（「管辖它所依附的整个流程」）不一致；候选与 CTC-P004 行对齐。规则行未变，但依据这一段判断的读者对告警块管辖范围的结论会变，审阅时引用的规则 ID 也从 CTC-L001 变为 CTC-P004。
+  - id: V16
+    type: weakened
+    severity: WARNING
+    rule_ids: [CTC-A003, CTC-P002, CTC-R001]
+    location: 基线 §6／候选 §5 歧义处理首句
+    baseline: "**上下文能确定读法时，必须消歧**，并且所选读法必须有来源或上下文证据。"
+    candidate: "**上下文能确定读法时，按所触发的规则消歧**（CTC-A001–A004、CTC-P002 等），并且所选读法必须有来源或上下文证据。"
+    reason: 强度由一律「必须」改为随所触发规则的级别（CTC-A003、CTC-P002 为「应」）；没有规则触发的可消歧之处不再要求改动，与 CTC-R001 一致。基线该句与 CTC-A003／P002 的「应」级以及 CTC-R001 冲突；候选消解了冲突，同时降低了表面强度。
+  - id: V17
+    type: weakened
+    severity: WARNING
+    rule_ids: [CTC-A005, CTC-R004]
+    location: 歧义处理：上下文不能确定时的审阅严重级别
+    baseline: "review 模式作为一条 finding，严重级别为 ERROR。"
+    candidate: "review 模式下作为一条 finding 报告，严重级别按所引规则的级别（§8）。"
+    reason: 基线固定为 ERROR，与基线 §10「没有其他升级」冲突；候选按所引规则映射。引 CTC-A005 时仍为 ERROR；经「情态强度的模糊同样按本节处理」以 CTC-R004 报告的条目由 ERROR 变为 WARNING（满足升级条件时除外）。
+  - id: V18
+    type: lost
+    severity: STYLE
+    rule_ids: [CTC-A005, CTC-S002]
+    location: 基线 §6 对照两例之二
+    baseline: "「超时后重试，多次失败则升级处理」——「多次」与「升级」都缺少可执行所需的信息，保留原句并逐项进「待确认」。"
+    candidate: absent
+    reason: 示例。候选的「待确认」示例块仍有「多次失败」「升级处理」两行。基线这句把「多次」归为执行所需信息缺失，为 F8 的读法 A 提供了佐证；删除后 F8 的分叉略有加重。
+  - id: V19
+    type: altered
+    severity: WARNING
+    rule_ids: [CTC-R004]
+    location: 情态强度的模糊段
+    baseline: "规范性指令中由无判据词（见 CTC-R004）承担义务的条件，必须报告其可能的两种以上强度并给出建议，然后停手。"
+    candidate: "改写时，规范性指令中由无判据词（见 CTC-R004）承担义务的条件，按 CTC-R004 在「待确认」中提出：指出缺失的判据，列出其可能的两种以上强度并给出建议，然后停手"
+    reason: (a) 范围限定为改写，新写改按 CTC-R004 给出可观测的触发条件（候选句「新写时按 CTC-R004 给出可观测的触发条件。」）；基线未限定范围，与 CTC-R004 行的新写分支冲突。(b) 强度由段落中的「必须」改为经 CTC-R004（应）。(c) 新增「指出缺失的判据」这一输出成分。
+  - id: V20
+    type: altered
+    severity: STYLE
+    rule_ids: []
+    location: 基线 §7／候选 §6 级别说明
+    baseline: "级别与严重级别一一对应：**必须** = 违反即语义错误（ERROR）"
+    candidate: "级别由「级别」栏决定：**必须** = 硬性要求"
+    reason: 基线「一一对应」与基线 §10 的升级例外矛盾，「违反即语义错误」也不适用于 CTC-R001 这类非语义规则；候选改为「级别到严重级别的映射及其唯一的升级例外见 §8」。映射本身未变。
+  - id: V21
+    type: added
+    severity: WARNING
+    rule_ids: [CTC-P003, CTC-A003]
+    location: 候选 §6 级别说明
+    baseline: absent
+    candidate: "规则正文中的「必须」「不得」表达该规则的要求与禁止，不改变该栏的级别。"
+    reason: 新增的解释规则。CTC-P003（应）正文中的「必须仍是继续的前提」「合并后它必须仍是…」、CTC-A003 的「所选读法必须有证据」，在基线中可读作硬性要求；候选明确按「应」处理，可被更高优先级或明确边界推翻。两版审阅时都按栏取 WARNING；改写时对这些子句的可推翻性可能改变。
+  - id: V22
+    type: altered
+    severity: STYLE
+    rule_ids: [CTC-P003]
+    location: CTC-P003 规则行（29 条中唯一有改动的行）
+    baseline: "不得虚构验收标准"
+    candidate: "不得虚构判据"
+    reason: 术语与同行「成功判据」统一（T001）。同行另一处改动：基线「否则每份正常的流程文档都会产生成串的未决项」→候选「以免正常的流程文档产生成串的未决项」，全称断言改为目的说明。级别、触发、要求、禁止、例外均未变。
+  - id: V23
+    type: example-correction
+    severity: STYLE
+    rule_ids: [CTC-A001, CTC-R002]
+    location: 基线 §8 第 1 条／候选 §9 第 1 条示例
+    baseline: "应写成「打开控制台后，点击「设置」修改端口。」"
+    candidate: "写成「用户打开控制台后，点击设置修改端口。」"
+    reason: 基线期望输出删掉了来源指明的执行者「用户」，违反 CTC-A001「来源指明的执行者…必须在输出中仍可定位」，并给「设置」加了来源没有的引号；候选保留执行者一次，只去掉重复主语，与 CTC-A001、CTC-R002 一致。
+  - id: V24
+    type: lost
+    severity: STYLE
+    rule_ids: [CTC-P001, CTC-S002, CTC-P003]
+    location: 基线 §8 第 2 条示例
+    baseline: "「停止写入。等待。检查复制延迟。执行切换。」应写成「停止写入，等待复制延迟归零后执行切换。」"
+    candidate: absent
+    reason: 「不得一句一动词」并入候选 §9 第 1 条，示例删除。基线期望输出补出了来源没有的判据「归零」，并把「检查」动作改成等待条件，与 CTC-S002、CTC-P003 矛盾；删除消除了一个与规则相抵触的示例。
+  - id: V25
+    type: lost
+    severity: STYLE
+    rule_ids: [CTC-P001, CTC-S006, CTC-T002, CTC-S004, CTC-A002, CTC-A001, CTC-R003]
+    location: 基线 §8 第 3、4、5、6、7、10 条
+    baseline: "「撤销令牌」与「删除令牌」的生命周期不同（CTC-T002）"
+    candidate: absent
+    reason: 这几条的断言仍由规则行承载：不得一刀切禁用被动 → CTC-A001 与 CTC-R003 的被动例外；拆散连动句 → 候选 §9 第 1 条；强加「因此」→ CTC-S006；近义词合并 → CTC-T002；单位换算 → CTC-S004 与 §4；展开无歧义指代 → CTC-A002。丢失的是示例（抓取日志并分析慢查询；检查日志，因此导出指标；撤销／删除令牌；60000 ms；证书管理服务）。
+  - id: V26
+    type: lost
+    severity: STYLE
+    rule_ids: [CTC-R001, CTC-R002, CTC-R005]
+    location: 基线 §8 第 12 条
+    baseline: "**不得把无歧义的并列拆成编号分支。** 「检查磁盘空间和 inode 使用率。」不必拆成两条。"
+    candidate: absent
+    reason: 只由 CTC-R001（无规则触发不改）、CTC-R002（机械拆分的短句）、CTC-R005（列表粒度）间接承载，没有逐字对应。执行上不变。
+  - id: V27
+    type: lost
+    severity: STYLE
+    rule_ids: [CTC-R001]
+    location: 基线 §8 结尾
+    baseline: "**原样返回来源是一个合法的输出。** 一次没有改动的改写不是失职；一次没有依据的改动才是。"
+    candidate: absent
+    reason: 由 CTC-R001「未触发任何规则的文本原样返回」与候选 §10 过度编辑示例的「正例：原样返回。」承载。理据句丢失。
+  - id: V28
+    type: added
+    severity: STYLE
+    rule_ids: [CTC-A001, CTC-P001, CTC-R002, CTC-R001]
+    location: 候选 §9 各条括注
+    baseline: absent
+    candidate: "（CTC-A001、CTC-P001、CTC-R002）"
+    reason: 基线 §8 第 1、8、14 条没有规则 ID；候选补出（第 2 条 CTC-R002，第 5 条 CTC-R001）。归因与规则行一致。
+  - id: V29
+    type: altered
+    severity: WARNING
+    rule_ids: [CTC-S004, CTC-S005]
+    location: 改写流程第 1 步
+    baseline: "标出代码、命令、路径、标识符、字段名、URL、状态码、占位符、数值与单位。这些进入不可改集合。"
+    candidate: "标出受保护标记，进入保护集（§4）；数值与单位另行登记，按 §4 保持表面形式。"
+    reason: 基线把数值与单位放进「不可改集合」，与基线 §5 允许的「受保护标记之外的全角数字半角化」以及经授权的精确换算冲突；候选把二者分开。受保护标记之外的全角数字是否半角化，可能因此改变。
+  - id: V30
+    type: added
+    severity: STYLE
+    rule_ids: [CTC-A002]
+    location: 改写流程第 2 步
+    baseline: "量化论域、因果强度、否定作用域。这是第 5 步与第 7 步的比对基准。"
+    candidate: "否定作用域、指代先行词。这是第 5 步与第 7 步的比对基准。"
+    reason: 基线第 7 步要比较「指代」，第 2 步却没有登记；候选补齐。
+  - id: V31
+    type: strengthened
+    severity: STYLE
+    rule_ids: []
+    location: 改写流程第 7 步（并入基线 §11 自检第 1–11 项）
+    baseline: "重新抽取 (情态, 数值, 量化, 因果, 否定作用域, 施事, 指代, 条件, 时序, 受保护标记) 并与第 2 步的记录逐项比较"
+    candidate: "重新抽取第 1、2 步登记的全部项并逐项比较，S、A、P、T、L 五族每条规则的保持项都须与来源相同"
+    reason: 比较范围扩大到原子性分组、阈值与边界包含性、例外、步骤与术语。基线 §11 第 1–11 项的核对内容由本步承载，其中第 11 项原句保留为「没有改动任何规则并未要求改动的地方（CTC-R001）」。
+  - id: V32
+    type: added
+    severity: WARNING
+    rule_ids: [CTC-R001, CTC-S003, CTC-S004]
+    location: 改写流程第 7 步
+    baseline: absent
+    candidate: "调用方已授权的改动不计为不成立"
+    reason: 基线 §11「任一项为「否」，先修复再返回。」会把已授权的情态或单位改动判为「否」并要求修复，与基线 §3「按授权执行即可」冲突；候选豁免已授权改动。已授权改动是否在返回前被回退，可能因此改变。
+  - id: V33
+    type: weakened
+    severity: WARNING
+    rule_ids: [CTC-R005]
+    location: 基线 §11 自检第 12 项
+    baseline: "输出符合当前模式的输出契约吗——无前言、结构与列表粒度保留、「待确认」仅在确有未决项时出现？"
+    candidate: absent
+    reason: 要求本身由候选 §3 输出契约与第 8 步「按输出契约返回（§3）」保留；丢失的是返回前的核对项。候选第 7 步只核对 S、A、P、T、L 五族与 CTC-R001–R003，不含 CTC-R005 的结构粒度。
+  - id: V34
+    type: altered
+    severity: WARNING
+    rule_ids: [CTC-S005]
+    location: 翻译附加条款
+    baseline: "翻译任务在同一流程内执行，另加三条："
+    candidate: "翻译任务在同一流程内执行，另加："
+    reason: 基线写「三条」却列了四项，其中「标识符、命令与代码块一律不译（CTC-S005）」与 CTC-S005 行的示意文本围栏块例外（其中的自然语言说明可以翻译）冲突；候选删去该项与计数，交由 CTC-S005 管辖，标识符与命令仍逐字符不变。示意围栏块中的说明文字在翻译时是否译出，可能因此改变。
+  - id: V35
+    type: lost
+    severity: WARNING
+    rule_ids: []
+    location: 基线 §10 严重级别定义
+    baseline: "- **ERROR** — 语义损坏、不安全的歧义、受保护标记突变，或硬不变量被违反。"
+    candidate: absent
+    reason: 基线有两套判定：描述性定义（ERROR／WARNING／STYLE 三行）与级别映射，二者可冲突，例如 CTC-R003 违规按描述是 STYLE（「不影响语义的自然度…问题」）、按映射是 WARNING。候选只留映射。审阅输出的严重级别可能因此改变。
+  - id: V36
+    type: lost
+    severity: STYLE
+    rule_ids: [CTC-S003]
+    location: 基线 §10 finding 格式示例
+    baseline: "位置：「确认数据备份完成，且所有从节点已与主节点数据同步。」"
+    candidate: absent
+    reason: 六字段格式示例删除，字段名仍在候选 §8 第 3 步列出。仅示例。
+  - id: V37
+    type: strengthened
+    severity: STYLE
+    rule_ids: []
+    location: 未发现违规时的输出
+    baseline: "未发现问题时返回「未发现违规」，其后最多三条 STYLE 观察。"
+    candidate: "未发现问题时返回「未发现违规」，其后最多三条 STYLE 观察，每条引用规则 ID。"
+    reason: 与「不得报告没有规则 ID 的 finding」一致。
+  - id: V38
+    type: lost
+    severity: STYLE
+    rule_ids: [CTC-S003, CTC-R003]
+    location: 基线 §12 示例「情态强化」
+    baseline: "来源：如果你想在生产环境中部署该服务，请确保你已经配置了环境变量。"
+    candidate: absent
+    reason: 示例删除；「请→须」违规仍在 CTC-S003 行列出。候选不再有演示请求被升格为义务的示例。
+  - id: V39
+    type: lost
+    severity: STYLE
+    rule_ids: [CTC-L001]
+    location: 基线 §12 示例「例外删除」
+    baseline: "来源：所有实例都需重启，只读副本除外。"
+    candidate: absent
+    reason: 示例删除；CTC-L001 行仍以「只读副本除外」为例。
+  - id: V40
+    type: lost
+    severity: STYLE
+    rule_ids: [CTC-L004]
+    location: 基线 §12 示例「阈值边界翻转」
+    baseline: "来源：磁盘用量达到 90% 时触发告警。"
+    candidate: absent
+    reason: 示例删除；CTC-L004 行仍给出「达到 N」「超过 N」的包含性。
+  - id: V41
+    type: lost
+    severity: STYLE
+    rule_ids: [CTC-A005]
+    location: 基线 §12 示例「静默消歧」
+    baseline: "来源：隔离受感染的主机和网关通信。"
+    candidate: absent
+    reason: 示例删除。这是基线中唯一演示「待确认」怎样写竞争读法的示例；候选的「待确认」示例块只有缺失项与情态模糊，没有竞争读法。
+  - id: V42
+    type: lost
+    severity: STYLE
+    rule_ids: [CTC-A001, CTC-R003, CTC-R001]
+    location: 基线 §12 示例「执行者删除」
+    baseline: "来源：磁盘空间不足时，旧快照数据会被存储管理机制销毁。"
+    candidate: absent
+    reason: 示例删除。基线正例把施事已在同句给出的被动句改为主动句，并在反例批注「去被动正当」；这与 CTC-R003「被动用于…施事已在同句给出时是自然的技术表述」矛盾（无规则触发，按 CTC-R001 不应改）。删除消除了一个与规则相抵触的示例。
+  - id: V43
+    type: lost
+    severity: STYLE
+    rule_ids: [CTC-A004]
+    location: 基线 §12 示例「否定作用域」
+    baseline: "来源：业务高峰期禁止重启网关，也禁止清空缓存。"
+    candidate: absent
+    reason: 示例删除；CTC-A004 行保留了同一结构的例子（「禁止 A，也禁止 B」）。
+  - id: V44
+    type: example-correction
+    severity: WARNING
+    rule_ids: [CTC-P003, CTC-S001]
+    location: 基线 §12／候选 §10 示例「压缩指令与校验点」
+    baseline: "正例：1. 启动 `chunk-server`。2. 确认状态为 `READY` 且元数据已加载。3. 加入写入路由表。"
+    candidate: "正例：1. 启动 `chunk-server`。2. 确认状态为 `READY` 且元数据已加载后，加入写入路由表。"
+    reason: 指令「合并可合并的步骤」构成 CTC-P003 行所说的合并授权，该行允许并入相邻步骤，条件是合并后仍由操作者执行、位于被守护动作之前、逐项列全判据；候选正例满足这些条件。基线正例拒绝合并并报上限未满足，与 CTC-P003 行矛盾，也与第 7 类（只在不删除就无法满足时报告）矛盾。规则行未变，但这是唯一演示该条款的示例，期望行为由「不合并」翻转为「合并」，按「可能改变」记 WARNING。
+
+vs_baseline_counts:
+  by_type_and_severity:
+    lost:               {ERROR: 0, WARNING: 1, STYLE: 14}
+    weakened:           {ERROR: 0, WARNING: 3, STYLE: 0}
+    strengthened:       {ERROR: 0, WARNING: 0, STYLE: 4}
+    altered:            {ERROR: 0, WARNING: 6, STYLE: 8}
+    added:              {ERROR: 0, WARNING: 3, STYLE: 3}
+    example-correction: {ERROR: 0, WARNING: 1, STYLE: 1}
+  totals: {ERROR: 0, WARNING: 14, STYLE: 30, all: 44}
+
+phase1_reclassification:
+  findings:
+    - {id: F1, also_in_baseline: "yes", note: "基线 §1 同样没有规定任务与显式模式不一致时怎么办；基线还缺「审阅任务用 review」，连未指定模式的审阅也会分叉（候选修复了这一半，见 V1）。"}
+    - {id: F2, also_in_baseline: "yes", note: "基线 strict 适用范围同为「告警与错误信息」，§1 同列「状态提示」；基线 review 阈值只按两类举例，覆盖面更窄（V7）。"}
+    - {id: F3, also_in_baseline: "yes", note: "第 3、7 类与 §2「第 1 层不可达」在基线中逐字相同；基线第 5 类「缺失信息一律归第 5 类」兜底更宽，部分缓解 (a)，但这本身是候选修复的另一处冲突（V8）。"}
+    - {id: F4, also_in_baseline: "yes", note: "基线授权「四类」中同样有「指定改写目标或长度上限」。"}
+    - {id: F5, also_in_baseline: "yes", note: "基线 §5 句子逐字相同；基线 §11 第 5 项「受保护标记多重集与来源逐字符相等吗？」进一步加重读法 A。"}
+    - {id: F6, also_in_baseline: "yes", note: "CTC-P004 行逐字相同。基线不变量表「守护条件在被守护动作之前」与 §11 第 8 项「仍在该动作之前吗」偏向读法 B；候选删去这两处（V11、V31），分叉略加重。"}
+    - {id: F7, also_in_baseline: "yes", note: "基线 §11 第 11 项逐字相同：「我有没有改动任何规则并未要求改动的地方？」"}
+    - {id: F8, also_in_baseline: "yes", note: "三种称呼与「多次失败」示例行在基线中相同；基线 §6 第二个对照例把「多次」归为执行所需信息缺失，偏向读法 A，候选删去（V18）。"}
+    - {id: F9, also_in_baseline: "yes", note: "基线把例外写成并列清单之后的独立句「只有在…时，才可以换算。」，结合域歧义相同。"}
+    - {id: F10, also_in_baseline: "yes", note: "CTC-P003 行的「压缩授权／授权合并步骤」在基线中相同；基线授权清单连合并步骤都未列入。"}
+    - {id: F11, also_in_baseline: "yes", note: "CTC-R003 行逐字相同。"}
+  forks:
+    - {probe: CTC-S003, also_in_baseline: "yes", note: "基线「调整规范强度」与候选「调整道义强度（规范强度）」同样不说明是否涵盖言语行为类型的改变（请→须）。"}
+    - {probe: CTC-P003, also_in_baseline: "yes", note: "规则行相同；基线示例正例不合并，反而强化了读法 B。"}
+    - {probe: CTC-P004, also_in_baseline: "yes", note: "规则行相同；基线另有偏向读法 B 的不变量表与自检措辞（候选已删）。"}
+    - {probe: CTC-R004, also_in_baseline: "yes", note: "基线第 5 类「一律归第 5 类」与 §6 对照例偏向读法 A，分叉较候选弱。"}
+    - {probe: §5 情态模糊段, also_in_baseline: "yes", note: "基线 §6 同一段，定义句与标题句相同。"}
+    - {probe: 模式, also_in_baseline: "yes", note: "基线另有未指定模式时审阅任务落入 strict 或 review 的分叉，候选已消解（V1）。"}
+    - {probe: 「待确认」准入清单, also_in_baseline: "yes", note: "清单相同；第 5 类措辞不同（V8）。"}
+    - {probe: 调用方授权清单, also_in_baseline: "yes", note: "改写目标、换算范围、压缩授权、请→须四处在基线中都存在；基线另有封闭「四类」与 CTC-P003／R005 行内授权的冲突，候选已消解（V10）。"}
+    - {probe: review 流程与「未发现违规」时的输出, also_in_baseline: "yes", note: "基线同句；基线还有描述性严重级别定义，增加了 STYLE 归属的不确定（候选删去，V35）。"}
+    - {probe: 返回前核对（§7 第 7 步）, also_in_baseline: "yes", note: "基线 §11 第 11 项同一措辞；基线还缺「已授权改动不计为不成立」的豁免（V32）。"}
+  counts:
+    findings_also_in_baseline: {yes: 11, no: 0}
+    forks_also_in_baseline: {yes: 10, no: 0}
+
+summary: |
+  候选 232 行，基线 372 行。frontmatter 逐字相同。29 条规则行中 28 条逐字相同，只有 CTC-P003 行有两处措辞改动（「验收标准」→「判据」；理据句改为目的说明，V22）；规则级别与规则 ID 归属没有变化。
+  vs_baseline 共 44 项，没有 ERROR 级差异：WARNING 14 项，STYLE 30 项。
+  WARNING 项大多是消解基线内部冲突：§6「必须消歧」与规则级别（V16）；§6 固定 ERROR 与映射（V17）；封闭「四类」授权与规则行内授权（V10）；第 5 类与第 2–4 类重叠（V8）；第 1 步「不可改集合」与半角化许可（V29）；翻译「代码块一律不译」与 CTC-S005 示意块例外（V34）；§5 告警块管辖范围与 CTC-P004（V15）；自检与已授权改动（V32）；两套严重级别定义（V35）。另有审阅任务模式推定（V1）、情态模糊段的范围与强度（V19）、「规则正文中的必须不改变该栏级别」（V21），以及 CTC-P003 示例由不合并改为合并的 example-correction（V44）。
+  实质性丢失只有一项：返回前对输出契约与结构粒度的核对（V33，WARNING）。其余丢失都是示例、理据或在规则行中仍有承载的重复表述：基线 §12 八则示例删去六则，§8 十五条压缩为五条，§4 不变量表的「破坏后的后果」列，§10 finding 示例块。基线中与规则行矛盾的四则示例，候选删去两则（V24「归零」、V42「去被动正当」），更正两则（V23 删执行者、V44 拒绝已授权的合并）。
+  阶段 1 的 11 条 finding 与 10 个分叉在基线中全部存在，候选没有引入新的 finding 级问题。但候选删去了基线中两处偏向单一读法的佐证（不变量表与自检中的守护顺序措辞、§6 的「多次」对照例），使 F6、F8 的分叉略有加重。
