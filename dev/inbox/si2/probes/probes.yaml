@@ -1,0 +1,255 @@
+# si2 fork probes — pre-registered before any probe output was seen (2026-10-14).
+#
+# Each probe targets one open proposal from docs/decisions/006 (§ Open proposals) or one
+# ERROR-grade fork from dev/inbox/si/merge/review-opus.yaml. The model sees only `instruction`
+# and `source` (tools/ctc_eval.py build_prompt); `targets`, `expect`, `fail_if` and
+# `expect_basis` are never sent.
+#
+# A probe is run three times per SKILL.md version. A fork counts as demonstrated when the runs
+# disagree on the scored behaviour, or agree on the reading `fail_if` names.
+#
+# expect_basis says where the expected behaviour comes from:
+#   accepted  — an accepted decision or the harness's accepted semantics already fixes it
+#   proposed  — the orchestrator's reading; the human gate decides whether it stands
+cases:
+- id: PR-01
+  targets: [006-open-13, merge-F1]
+  task: review
+  mode: strict
+  instruction: 以 strict 模式审阅这份 runbook。
+  source: |
+    ## 证书轮换
+    1. 在 `vault` 中生成新证书。
+    2. 必要时重启 `gateway`。
+    3. 确认新证书已生效。
+  expect: 输出 finding 列表（规则 ID、严重级别等字段），不输出改写后的 runbook。
+  fail_if: 返回改写后的 runbook 正文（按「strict 决定输出契约」的读法执行）。
+  expect_basis: proposed
+
+- id: PR-02
+  targets: [006-open-11, merge-F6]
+  task: rewrite
+  mode: strict
+  over_edit_trap: true
+  source: |
+    ## 归档表清理
+    1. 确认 `orders_archive` 已完成全量备份，且备份校验通过。
+    2. 停止 `archive-sync` 服务。
+    3. 执行 `DROP TABLE orders_archive;`。
+    4. 启动 `archive-sync` 服务。
+  protected_tokens: [orders_archive, archive-sync, "DROP TABLE orders_archive;"]
+  expect: 正文原样返回；不出现关于守护条件位置的「待确认」。
+  fail_if: 把备份确认重述进第 3 步、调换第 1 与第 2 步，或为守护条件位置提出「待确认」。
+  expect_basis: proposed
+
+- id: PR-03
+  targets: [006-open-11, merge-F6]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这段 runbook，只输出问题清单。
+  source: |
+    ## 归档表清理
+    1. 确认 `orders_archive` 已完成全量备份，且备份校验通过。
+    2. 停止 `archive-sync` 服务。
+    3. 执行 `DROP TABLE orders_archive;`。
+    4. 启动 `archive-sync` 服务。
+  expect: 不出现引用 CTC-P004、指称守护条件不紧邻 DROP 的 finding。
+  fail_if: 以 CTC-P004 报告第 1 步与第 3 步之间隔了第 2 步。
+  expect_basis: proposed
+
+- id: PR-04
+  targets: [006-open-12, merge-F5]
+  task: rewrite
+  mode: strict
+  source: |
+    先调用 `create_order` 创建订单，再调用 `notify_user` 发送通知。若它返回 409，说明订单已存在，跳过通知。
+  protected_tokens: [create_order, notify_user, "409"]
+  expect: 「它」被替换为能确定的先行词（写出 `create_order`，或「创建订单的调用」等同指名词），或调整语序消除指代歧义。
+  fail_if: 「它」原样保留且未报告；或绑定到 `notify_user`；或以「标记多重集必须相等」为由拒绝写出 `create_order`。
+  expect_basis: accepted   # harness: repeating a protected token is not drift (r1 checker repair); CTC-A002
+
+- id: PR-05
+  targets: [merge-F3a]
+  task: rewrite
+  mode: strict
+  source: |
+    你是数据库值班助手。你可以调用 `kill_session` 工具终止数据库会话。回答要简洁。
+  protected_tokens: [kill_session]
+  expect: 不补写使用时机；在「待确认」中提出 `kill_session` 缺少使用时机（何时可以终止会话）。
+  fail_if: 补写来源没有的使用条件；或因第 3 类只写「工具描述」而不提出。
+  expect_basis: proposed   # CTC-P005 row says raise it; the category text is narrower
+
+- id: PR-07
+  targets: [006-open-6]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份文档，只输出问题清单。
+  source: |
+    ## 缓存节点下线
+    1. 将 `cache-07` 从负载均衡摘除。
+    2. 执行 `cachectl flush --node cache-07` 清空缓存。
+    3. 观察一段时间，确认流量正常后，执行 `cachectl decommission cache-07`。
+  expect: 「一段时间」与「流量正常」各被报告；记录每条 finding 引用的规则 ID 与严重级别。
+  fail_if: 三次运行对同一缺失项引用的规则 ID 或严重级别不一致（分叉）。
+  expect_basis: proposed
+
+- id: PR-08
+  targets: [006-open-4]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份文档，只输出问题清单。
+  source: |
+    ## 连接池
+    `pool.max_idle` 默认 30 秒：连接空闲超过该时长后被回收。
+
+    ## 常见问题
+    **空闲连接什么时候被回收？** 空闲 60 秒后回收，可以通过 `pool.max_idle` 调整。
+  expect: 报告 30 秒与 60 秒的文内冲突，位置引用两处；记录引用的规则 ID 与严重级别。
+  fail_if: 未报告该冲突；或三次运行引用的规则 ID／严重级别不一致。
+  expect_basis: proposed
+
+- id: PR-09
+  targets: [006-open-14, merge-F10]
+  task: rewrite
+  mode: strict
+  instruction: 请以 strict 模式改写下面的文本，压缩到不超过 2 步。
+  source: |
+    1. 启动 `index-builder`。
+    2. 确认 `/healthz` 返回 200，且索引版本号等于 `target_version`。
+    3. 将 `index-builder` 加入查询路由。
+  protected_tokens: [index-builder, /healthz, "200", target_version]
+  expect: 压缩为 2 步；确认动作并入相邻步骤，仍由操作者执行、位于加入路由之前、两项判据列全。
+  fail_if: 保持 3 步并以「未获合并授权」为由报告上限未满足；或校验被改写为状态描述、丢失任一判据。
+  expect_basis: accepted   # D004: a caller's compression instruction is followed; P003 guards the checkpoint
+
+- id: PR-10
+  targets: [merge-F9]
+  task: rewrite
+  mode: strict
+  instruction: 请以 strict 模式改写下面的文本，并把文中的比例统一写成百分比。
+  source: |
+    批处理任务的失败率超过 0.05 时告警；成功率低于 0.995 时暂停调度。
+  authorized_token_changes: ["0.05", "0.995"]
+  expect: 换算为 5% 与 99.5%，比较算子与边界不变。
+  fail_if: 以「授权清单只列单位换算」为由拒绝换算，或换算不精确。
+  expect_basis: accepted   # decision 003 policy 2: exact conversions, including ratio↔percentage, are allowed when the caller authorises them
+
+# Added 2026-10-14 after the first baseline probe pass, before any output of these two was seen.
+# PR-04 and PR-10 showed the rewrite side follows the accepted semantics; these test whether the
+# review side, reading §4 and §3 literally, flags those same correct rewrites.
+- id: PR-11
+  targets: [006-open-12, merge-F5]
+  task: review
+  mode: review
+  instruction: 下面给出原文与候选改写。审阅候选改写是否忠实于原文；只输出问题清单，不要整体重写。
+  source: |
+    原文：先调用 `create_order` 创建订单，再调用 `notify_user` 发送通知。若它返回 409，说明订单已存在，跳过通知。
+    候选改写：先调用 `create_order` 创建订单，再调用 `notify_user` 发送通知。若 `create_order` 返回 409，说明订单已存在，跳过通知。
+  expect: 不报告 `create_order` 出现次数增加；可以返回「未发现违规」。
+  fail_if: 以 CTC-S005（或 §4「标记多重集必须相等」）报告 `create_order` 出现次数从 2 变为 3。
+  expect_basis: accepted   # harness semantics since r1: repeating a protected token is not drift; CTC-A002 requires the noun anaphora
+
+- id: PR-12
+  targets: [merge-F9]
+  task: review
+  mode: review
+  instruction: 下面给出原文、调用方指令与候选改写。审阅候选改写是否忠实于原文并遵循调用方指令；只输出问题清单，不要整体重写。
+  source: |
+    原文：批处理任务的失败率超过 0.05 时告警；成功率低于 0.995 时暂停调度。
+    调用方指令：把文中的比例统一写成百分比。
+    候选改写：批处理任务的失败率超过 5% 时告警；成功率低于 99.5% 时暂停调度。
+  expect: 不把比例到百分比的精确换算报告为违规。
+  fail_if: 以 CTC-S004 或「调用方授权清单只列单位换算」为由报告该换算。
+  expect_basis: accepted   # decision 003 policy 2
+
+# Added 2026-10-14 with the first candidate, before any output was seen: the boundary where
+# CTC-P002 must still fire. E2 must not suppress it; E1 must not reroute it to A005.
+- id: PR-13
+  targets: [si2-E1, si2-E2]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这段 runbook，只输出问题清单。
+  source: |
+    ## 修改 `gateway` 限流阈值
+    1. 将 `gateway.yaml` 中的 `rate_limit.qps` 改为 `2000`。
+    2. 重启对应服务，使配置生效。
+  expect: 以 CTC-P002 报告「重启对应服务」，建议写出 `gateway`。
+  fail_if: 不报告「对应服务」；或以 CTC-A005 报告（对象可从上下文确定）。
+  expect_basis: accepted   # CTC-P002 row: 不得压缩为「对应服务」；可确定的部分应写出
+
+- id: PR-14
+  targets: [si2-E2]
+  task: rewrite
+  mode: strict
+  source: |
+    ## 修改 `gateway` 限流阈值
+    1. 将 `gateway.yaml` 中的 `rate_limit.qps` 改为 `2000`。
+    2. 重启对应服务，使配置生效。
+  protected_tokens: [gateway, gateway.yaml, rate_limit.qps, "2000"]
+  expect: 第 2 步写出 `gateway`（「重启 `gateway`」），其余原样。
+  fail_if: 「对应服务」原样保留且未报告；或补出来源没有的命令、命名空间。
+  expect_basis: accepted
+
+# Added 2026-10-14 from the independent reviews (dev/inbox/si2/review/), registered before any
+# v2 output was seen. PR-15 is the E2 exception on locations and the E1 route to A005; PR-16–19
+# are the E3 boundaries the reviewers named.
+- id: PR-15
+  targets: [si2-E1, si2-E2]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这段 runbook，只输出问题清单。
+  source: |
+    ## 发布 `api` v2
+    1. 在 `staging` 命名空间中部署 `api:v2`，确认冒烟测试通过。
+    2. 在 `prod` 命名空间中部署 `api:v2`。
+    3. 删除旧版本的 Deployment `api-v1`。
+  expect: 报告第 3 步删除 `api-v1` 的命名空间未定（staging、prod 或两者），引用 CTC-A005（ERROR）。
+  fail_if: 第 3 步的命名空间未定没有被报告；或以 CTC-P002 报告。
+  expect_basis: proposed   # adversarial review E2 missed_fire 2
+
+- id: PR-16
+  targets: [si2-E3]
+  task: rewrite
+  mode: strict
+  over_edit_trap: true
+  source: |
+    危险！以下命令会永久删除 `/data/cache` 下的全部文件，执行前确认已停止 `cache-agent`：
+    `rm -rf /data/cache/*`
+  protected_tokens: [/data/cache, cache-agent, "rm -rf /data/cache/*"]
+  expect: 正文原样返回；「危险！」是警示标记，不是情绪化感叹。
+  fail_if: 删去或改写「危险！」。
+  expect_basis: proposed   # naturalness review over_control_risk
+
+- id: PR-17
+  targets: [si2-E3]
+  task: rewrite
+  mode: strict
+  over_edit_trap: true
+  source: |
+    你是订单助手。调用 `create_order` 失败时，回复用户：「糟糕！订单没提交成功，请稍后再试。」不要编造失败原因。
+  protected_tokens: [create_order]
+  expect: 引号内规定的回复原样保留；目标文本是 agent 指令，不是错误信息本身。
+  fail_if: 删去或改写引号内的「糟糕！」或其余回复内容。
+  expect_basis: proposed   # adversarial review E3 false_fire 1
+
+- id: PR-18
+  targets: [si2-E3]
+  task: rewrite
+  mode: strict
+  source: |
+    告警：`orders-db` 主从延迟超过 30 秒，是夜间备份把磁盘 IO 占满了吧，先别切主。
+  protected_tokens: [orders-db, "30 秒"]
+  expect: 推测语气（「吧」或等强度的「可能」）保留，原因不被写成确定的；不补写原因或动作。
+  fail_if: 把「夜间备份把磁盘 IO 占满」写成确定原因（删去「吧」且无等强度替代）。
+  expect_basis: accepted   # CTC-S003, CTC-S006, §9 item 4
+
+- id: PR-19
+  targets: [si2-E3]
+  task: rewrite
+  mode: strict
+  source: |
+    糟糕！`payment-api` 返回 502，请稍后重试。
+  protected_tokens: [payment-api, "502"]
+  expect: 删去「糟糕！」，其余原样：「`payment-api` 返回 502，请稍后重试。」
+  fail_if: 「糟糕！」保留；或改动其余文字。
+  expect_basis: proposed   # adversarial review E3 missed_fire; G-R-011 rendering invariant

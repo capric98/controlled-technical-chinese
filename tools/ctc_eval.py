@@ -16,12 +16,16 @@ Run with uv so the dependency is transient:
     uv run tools/ctc_eval.py bundle --run RUN_DIR          # build judge input
     uv run tools/ctc_eval.py judge  --run RUN_DIR --judge gpt
     uv run tools/ctc_eval.py report --run RUN_DIR          # summarise verdicts
+
+Environment: CTC_SKILL=PATH runs a frozen copy of the skill instead of the root SKILL.md;
+CTC_CLAUDE_MODEL=ID pins the model behind `--model claude` / `--judge claude`.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -35,7 +39,8 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 GOLD = ROOT / "eval" / "gold"
 REPORTS = ROOT / "eval" / "reports"
-SKILL = ROOT / "SKILL.md"
+# CTC_SKILL lets a run hold a frozen copy while the root file is being edited
+SKILL = Path(os.environ.get("CTC_SKILL", ROOT / "SKILL.md"))
 JUDGE_PROMPT = ROOT / "dev" / "prompts" / "judge-semantic.v1.md"
 
 # ---------------------------------------------------------------- extraction
@@ -182,7 +187,9 @@ def is_prose_fence(block: str) -> bool:
 def deterministic_checks(source: str, output: str, case: dict | None = None) -> CheckResult:
     res = CheckResult()
     case = case or {}
-    review = case.get("mode") == "review"
+    # a review task may name strict or standard as its threshold ("以 strict 模式审阅"); it still
+    # returns findings, not the document
+    review = case.get("mode") == "review" or case.get("task") == "review"
     # Translation legitimately changes the units attached to a number (Chinese adds a
     # classifier: 147 -> 147 个) and rewrites the prose inside an untagged fence. Comparing
     # those across languages measures the language pair, not the translation.
@@ -273,7 +280,9 @@ def call_model(model: str, prompt: str) -> str:
     """Run each model in a scratch cwd so no repository instruction file leaks in."""
     with tempfile.TemporaryDirectory() as scratch:
         if model == "claude":
-            return _run(["claude", "-p", prompt], cwd=scratch)
+            # pin the model when a run must not drift with the CLI's default
+            pin = os.environ.get("CTC_CLAUDE_MODEL")
+            return _run(["claude", "-p", prompt] + (["--model", pin] if pin else []), cwd=scratch)
         if model == "gemini":
             return _run(
                 ["agy", "-p", prompt, "--model", "gemini-3.7-flash-high",
@@ -381,11 +390,12 @@ def cmd_run(args) -> int:
 def cmd_recheck(args) -> int:
     """Re-run deterministic checks over saved outputs. No model calls."""
     run_dir = REPORTS / "raw" / args.run_id
-    cases = {c["id"]: c for c in load_cases()}
+    cases = {c["id"]: c for c in load_cases(cases_dir=Path(args.cases_dir) if args.cases_dir else None)}
     changed = 0
     for path in sorted(run_dir.glob("*.json")):
         rec = json.loads(path.read_text(encoding="utf-8"))
-        case = cases.get(rec["case_id"], {})
+        # a case missing from the loaded set still has its task and mode on the record
+        case = cases.get(rec["case_id"]) or {"task": rec.get("task"), "mode": rec.get("mode")}
         before = rec["deterministic"]["passed"]
         res = deterministic_checks(rec["source"], rec["output"], case)
         rec["deterministic"] = res.as_dict()
@@ -449,17 +459,22 @@ def cmd_judge(args) -> int:
         prompt = (prompt_head + "\n\n## Records to judge\n\n```json\n"
                   + json.dumps(batch, ensure_ascii=False, indent=2) + "\n```\n")
         print(f"judging batch {i // args.batch + 1}: {ids}")
-        try:
-            raw = call_model(args.judge, prompt)
-            parsed = yaml.safe_load(strip_fences(raw)) or {}
-            got = parsed.get("verdicts", [])
-            if not isinstance(got, list):
-                raise ValueError("verdicts is not a list")
-            verdicts.extend(got)
-        except Exception as exc:  # noqa: BLE001 — one bad batch must not lose the rest
-            print(f"  ERROR judging {ids}: {exc}")
-            (REPORTS / f"judge-error-{args.run_id}-{i}.txt").write_text(
-                str(exc), encoding="utf-8")
+        # judges sometimes emit YAML that does not parse (an unquoted value opening with a
+        # backtick or a quote); a second call sometimes parses, and smaller batches fail less often
+        for attempt in (1, 2):
+            try:
+                raw = call_model(args.judge, prompt)
+                parsed = yaml.safe_load(strip_fences(raw)) or {}
+                got = parsed.get("verdicts", [])
+                if not isinstance(got, list):
+                    raise ValueError("verdicts is not a list")
+                verdicts.extend(got)
+                break
+            except Exception as exc:  # noqa: BLE001 — one bad batch must not lose the rest
+                print(f"  ERROR judging {ids} (attempt {attempt}): {exc}")
+                if attempt == 2:
+                    (REPORTS / f"judge-error-{args.run_id}-{i}.txt").write_text(
+                        str(exc), encoding="utf-8")
 
     out = REPORTS / f"verdicts-{args.run_id}.{args.judge}.yaml"
     out.write_text(yaml.dump({"judge": args.judge, "run": args.run_id,
@@ -512,6 +527,7 @@ def main() -> int:
 
     rc = sub.add_parser("recheck", help="re-run deterministic checks over saved outputs")
     rc.add_argument("--run-id", default="latest")
+    rc.add_argument("--cases-dir", help="load cases from here instead of eval/gold")
     rc.set_defaults(fn=cmd_recheck)
 
     b = sub.add_parser("bundle", help="package a run for independent semantic judging")

@@ -38,6 +38,15 @@ meta:
         - "005 structural gap 2: R002/R003 describe defects, not rewrite licences"
         - "005 self-demonstration: A001 positive example no longer swaps 销毁→清理 (T002)"
         - "D004 (commit 7cbdf21): P003 re-scoped for caller-authorised merges; authorized_merge example added"
+    - date: 2026-10-14
+      purpose: >-
+        Record the si2 iteration (007). IDs and levels are unchanged; P002 gains a boundary and review
+        mode gains a rule-ID routing sentence.
+      applied:
+        - "007 E1: review cites CTC-A005, and only CTC-A005, where A003, L004 or P002 already route an undecidable case to it; P002 findings are for parts the source or context determines"
+        - "007 E2: P002 exception for a named object that lacks only instance, node, environment, path or namespace detail; placeholders such as 「对应服务」 are not named objects"
+      not_applied_withdrawn:
+        - "007 E3 (R003 trigger for emotional interjections in alert, error and status text): withdrawn after the ablation in eval/reports/si2-summary.md; R003 is unchanged"
       not_applied_no_decision_record:   # SKILL.md changed here in commit a0678b6 without a decision record; the spec is left as-is
         - "P003: SKILL.md limits the missing-criterion 「待确认」 item to destructive or irreversible steps whose success gates what follows (regression: eval/gold/gold-ambiguity.yaml); spec P003 still allows reporting any missing criterion"
         - "P004: SKILL.md exempts standalone warning blocks — they govern the whole procedure wherever they sit and moving them is an R005 violation (regression: eval/gold/gold-logic.yaml); spec P004 has no such exemption"
@@ -220,7 +229,12 @@ modes:
       Severity follows the recorded level: MUST -> ERROR, SHOULD -> WARNING, MAY -> STYLE. The
       single permitted escalation: a SHOULD violation may be reported as ERROR only when the
       finding's 风险 field names the specific different action an operator would take as a result;
-      no other escalation, and no de-escalation (004 §6). Suggested corrections are fragment-level
+      no other escalation, and no de-escalation (004 §6). Where a rule's own text routes an
+      undecidable case to A005 (A003 without evidence, L004 with an ambiguous boundary, P002 that
+      cannot be determined), the finding cites A005 and not the original rule; a P002 finding is for
+      an action, object or location the source or context determines but the text omits. A finding
+      routed to A005 this way takes A005's level; it is not an escalation (007 E1, E1b).
+      Suggested corrections are fragment-level
       and are proposals, not applied edits. Text that triggers no rule produces no finding; absence
       of findings is a valid result.
     must_not: >-
@@ -687,7 +701,7 @@ rules:
     trigger: "目标文本是可执行步骤（runbook、SOP、agent 指令、工具使用说明），而某一步骤缺少执行所必需的成分：动作、动作对象、或对象所在位置。"
     requirement: "步骤应当可直接执行：动作、对象与位置在来源或上下文中可确定时应写出。无法确定时按 A005 在「待确认」中提出，不得猜测。"
     prohibition: "把已给出的操作对象压缩为「相关配置」「对应服务」「必要的调整」；把具体命令替换为「按需处理」；删除操作发生的位置（节点、环境、命名空间）。"
-    exceptions: "命令行或代码块已完整表达动作与对象时，不再补写自然语言描述，否则触发 R002。说明性文档中对机制的概述不属于步骤，不触发本规则。"
+    exceptions: "命令行或代码块已完整表达动作与对象时，不再补写自然语言描述，否则触发 R002。说明性文档中对机制的概述不属于步骤，不触发本规则。步骤已写出具体对象、只是未细化到实例、节点、环境、路径或命名空间时，不算缺少对象或位置，也不因此按 A005 报告；来源或上下文在对象或这些层级上出现多个可能的取值时除外。「相关配置」「对应服务」这类说法不算写出对象（007 E2；回归：G-R-007、PR-03、PR-13、PR-15）。"
     invariant: "step-executability — 步骤的 (动作, 对象, 位置) 三元组在来源中可确定的部分，在输出中仍然可确定。"
     detection: semantic
     examples:
