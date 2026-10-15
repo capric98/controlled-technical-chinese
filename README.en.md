@@ -124,11 +124,20 @@ and a mutation corpus of 45 single-defect mutants was detected 45/45. Full asses
 [`eval/reports/release-gates.md`](./eval/reports/release-gates.md).
 
 These measurements were taken on the 2026-08-29 version. The current `SKILL.md` is the si1 merge
-([decision 006](./docs/decisions/006-si1-merged-iteration.md)) plus the si2 iteration
-([decision 007](./docs/decisions/007-si2-review-routing-and-p002-boundary.md),
-[report](./eval/reports/si2-summary.md)), which routes undecidable review findings to `CTC-A005` and
-bounds `CTC-P002` to real gaps. On the gold corpus, run and judged by Claude Opus 5.5 only, it passes 52/56
-with no deterministic failure, the same count as the si1 merge it replaces.
+([decision 006](./docs/decisions/006-si1-merged-iteration.md)) plus two iterations:
+
+- si2 ([decision 007](./docs/decisions/007-si2-review-routing-and-p002-boundary.md),
+  [report](./eval/reports/si2-summary.md)) routes undecidable review findings to `CTC-A005` and bounds
+  `CTC-P002` to real gaps.
+- si3 ([decision 008](./docs/decisions/008-si3-register-r004-class-status-scope.md),
+  [report](./eval/reports/si3-summary.md)):
+  - puts status messages in strict mode;
+  - makes `CTC-R004`'s criterion-free words an open class;
+  - adds colloquial register to `CTC-R003`.
+
+On the gold corpus, run and judged by Claude Opus 5.5 only, it passes 53/56 with no deterministic
+failure. si2 passed 52/56, but single runs vary by two to three cases. The three register cases si3
+targets pass in all four of their runs.
 
 It is **not** a validated release. The gold corpus is agent-reviewed and cross-audited between two
 models but **not human-reviewed**, and every other gate is measured against that corpus — so a gate

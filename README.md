@@ -91,7 +91,15 @@ uv run tools/mutate.py --from eval/gold --out eval/mutations/generated.yaml
 
 `SKILL.md` 通过了格式、语义、歧义、自然度以及自托管门禁。在来自三个模型的 147 个输出中，未出现任何确定性失败，语义通过率为 80–88%，由 45 个单缺陷变异体构成的变异语料库检出率为 45/45。完整评估见 [`eval/reports/release-gates.md`](./eval/reports/release-gates.md)。
 
-以上结果测于 2026-08-29 的版本。当前的 `SKILL.md` 是在 si1 合并结果（[决策 006](./docs/decisions/006-si1-merged-iteration.md)）上做 si2 迭代后的版本（[决策 007](./docs/decisions/007-si2-review-routing-and-p002-boundary.md)，[报告](./eval/reports/si2-summary.md)）：审阅中无法确定的问题统一按 `CTC-A005` 报告，`CTC-P002` 只针对真实的缺口触发。对照 gold 语料库，在只用 Claude Opus 5.5 运行和评判的条件下，它通过 52/56，没有确定性失败，与它替换的 si1 合并版本通过数相同。
+以上结果测于 2026-08-29 的版本。当前的 `SKILL.md` 在 si1 合并结果（[决策 006](./docs/decisions/006-si1-merged-iteration.md)）上依次做了两轮迭代：
+
+- si2（[决策 007](./docs/decisions/007-si2-review-routing-and-p002-boundary.md)，[报告](./eval/reports/si2-summary.md)）：审阅中无法确定的问题统一按 `CTC-A005` 报告，`CTC-P002` 只针对真实的缺口触发。
+- si3（[决策 008](./docs/decisions/008-si3-register-r004-class-status-scope.md)，[报告](./eval/reports/si3-summary.md)）：
+  - 把状态提示归入 strict；
+  - 把 `CTC-R004` 的无判据词改为开放类；
+  - 在 `CTC-R003` 中加入口语腔。
+
+对照 gold 语料库，在只用 Claude Opus 5.5 运行和评判的条件下，它通过 53/56，没有确定性失败。si2 为 52/56，但单次运行之间本身会相差两到三个用例。si3 针对的三个语域用例，各自四次运行全部通过。
 
 这**不是**经过验证的发布版本。gold 语料库经过了 agent 审阅以及两个模型之间的交叉审计，但**未经人工审阅**，而所有其他门禁都是对照该语料库进行衡量的——对照未经审阅的预期来衡量，门禁反映的是预期本身，而不是产物。这是当前的阻塞项。与此并行记录了三个更小范围的差距：因缺少第四个模型，GPT 的输出未被裁决；一个模型的扫描覆盖了 56 个用例中的 35 个；反向解码阶段是由 Claude 阅读 Claude 渲染出的散文。
 

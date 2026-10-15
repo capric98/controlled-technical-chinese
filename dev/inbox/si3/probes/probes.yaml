@@ -1,0 +1,415 @@
+# si3 probes — pre-registered on 2026-10-14, before any si3 probe output was seen.
+#
+# si3 targets three open proposals from docs/decisions/007 (§ Open proposals after si2):
+#   3  — 状态提示 is in §1 scope but in neither the strict nor the standard scope list
+#   5  — whether CTC-R004's word list (尽量…合理) is closed or open
+#   16 — register cleanup in error, tool-description and agent-instruction text has no licensing rule
+#
+# The model sees only `instruction` and `source` (tools/ctc_eval.py build_prompt); `targets`,
+# `expect`, `fail_if`, `score` and `expect_basis` are never sent.
+#
+# Each probe runs three times per SKILL.md version. A fork counts as demonstrated when the runs
+# disagree on the scored behaviour, or agree on the reading `fail_if` names.
+#
+# expect_basis says where the expected behaviour comes from:
+#   accepted          — an accepted decision, 000-design.md or SKILL.md's own example fixes it
+#   proposed          — the orchestrator's reading; the human gate decides whether it stands
+#   product-decision  — no accepted text fixes it; the maintainer decides, and the probe only
+#                       measures whether the runs agree
+#
+# PR-07 and PR-16–PR-19 are copied verbatim from dev/inbox/si2/probes/probes.yaml, where their
+# expectations were registered. PR-07 gains an si3 note on the locus that 007 left open.
+#
+# The gold cases G-R-009, G-R-010 and G-R-011 are the targets of proposal 16. They are not
+# probes: they run from eval/gold with one gold run plus three replicates per version, together
+# with G-S-001 and G-L-006 as over-edit and error-message controls.
+cases:
+# ---------------------------------------------------------------- proposal 3: 状态提示
+# The instructions name no mode on purpose. The first line makes the inferred mode observable.
+- id: ST-01
+  targets: [007-open-3]
+  task: rewrite
+  mode: strict        # harness bookkeeping only; the instruction names no mode
+  instruction: 改写下面这条状态提示。先在第一行只写出你按本技能推定的模式名（strict 或 standard），从第二行起输出结果。
+  source: |
+    正在同步配置（3/10），同步完成前请勿关闭窗口。
+  protected_tokens: ["3/10"]
+  score: first-line mode name
+  expect: 三次运行推定同一模式。
+  fail_if: 三次运行推定的模式不一致；或推定的模式与维护者的决定不一致。
+  expect_basis: product-decision
+
+- id: ST-02
+  targets: [007-open-3]
+  task: review
+  mode: review
+  instruction: 审阅下面这条状态提示。先在第一行只写出你选用的歧义阈值（strict 或 standard），从第二行起只输出问题清单，不要整体重写。
+  source: |
+    索引重建中，预计还需几分钟；完成后服务将自动恢复写入。
+  score: first-line threshold name
+  expect: 三次运行选用同一阈值。
+  fail_if: 三次运行选用的阈值不一致；或与维护者的决定不一致。
+  expect_basis: product-decision
+
+# ---------------------------------------------------------------- proposal 5: CTC-R004 word list
+# 必要时 is on R004's list; 尽快 and 视情况 are not. §3's own 「待确认」 example treats 「尽快回滚」 as a
+# category-4 (R004) item with a suggestion column, and 000-design.md §26 lists such words as
+# examples (「Avoid ambiguous terms such as」), so the accepted reading is a class, not a closed list.
+- id: R4-01
+  targets: [007-open-5]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 SOP，只输出问题清单。
+  source: |
+    ## 主库切换
+    1. 主库不可用时，必要时手动触发切换。
+    2. 切换完成后，尽快通知业务方。
+    3. 视情况暂停 `batch-runner` 的定时任务。
+  score: rule ID and severity per locus (必要时 / 尽快 / 视情况)
+  expect: 三处各被报告，且引用同一规则 ID（CTC-R004）；三次运行一致。
+  fail_if: 「必要时」引 CTC-R004，而「尽快」或「视情况」引 CTC-A005 或未被报告；或同一处在三次运行中引用的规则 ID 不同。
+  expect_basis: accepted   # 000-design.md §26; SKILL.md §3 example line 3 (「尽快回滚」 as category 4)
+
+- id: R4-02
+  targets: [007-open-5]
+  task: rewrite
+  mode: strict
+  source: |
+    ## 主库切换
+    1. 主库不可用时，必要时手动触发切换。
+    2. 切换完成后，尽快通知业务方。
+    3. 视情况暂停 `batch-runner` 的定时任务。
+  protected_tokens: [batch-runner]
+  score: body changed or unchanged; which of the three loci appear in 「待确认」
+  expect: 正文原样返回；「待确认」对「必要时」「尽快」「视情况」各有一项；不补出具体时限、阈值或条件。
+  fail_if: 三处中任一处被替换为具体值或删除；或任一处未进入「待确认」；或三次运行进入「待确认」的项不一致。
+  expect_basis: accepted   # CTC-R004 row (改写时不得补出…在「待确认」中提出) + the class reading above
+
+# Boundary: the same word in a description of system behaviour, not a normative instruction.
+- id: R4-03
+  targets: [007-open-5]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这段 API 文档，只输出问题清单。
+  source: |
+    ### 重试策略
+    任务失败后，调度器会尽快将其重新入队；连续失败 3 次后，任务状态标记为 `failed`。
+  score: whether any finding cites CTC-R004 on 「尽快」
+  expect: 不出现针对「尽快」的 CTC-R004 finding（这是对系统行为的描述，不是规范性指令）；可以返回「未发现违规」。
+  fail_if: 以 CTC-R004 报告「尽快」。
+  expect_basis: accepted   # CTC-R004 row: 规范性指令（agent 指令、SOP、策略、门禁条件）only
+
+- id: PR-07
+  targets: [006-open-6, 007-open-5]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份文档，只输出问题清单。
+  source: |
+    ## 缓存节点下线
+    1. 将 `cache-07` 从负载均衡摘除。
+    2. 执行 `cachectl flush --node cache-07` 清空缓存。
+    3. 观察一段时间，确认流量正常后，执行 `cachectl decommission cache-07`。
+  score: rule ID and severity per locus (一段时间 / 流量正常)
+  expect: 「一段时间」与「流量正常」各被报告；记录每条 finding 引用的规则 ID 与严重级别。
+  fail_if: 三次运行对同一缺失项引用的规则 ID 或严重级别不一致（分叉）。
+  expect_basis: proposed
+  si3_note: >
+    si2 left a residual fork here: 「流量正常」 was cited CTC-R004 in some runs and CTC-A005 in
+    others; 「一段时间」 was A005 in every run. Whether an undefined state predicate (正常) belongs to
+    R004's class or to A005's 「缺少……判据」 is a product decision; the probe measures agreement.
+
+# ---------------------------------------------------------------- proposal 16: register
+# Copied verbatim from si2 (dev/inbox/si2/probes/probes.yaml): the boundary set 007 names.
+- id: PR-16
+  targets: [si2-E3, 007-open-16]
+  task: rewrite
+  mode: strict
+  over_edit_trap: true
+  source: |
+    危险！以下命令会永久删除 `/data/cache` 下的全部文件，执行前确认已停止 `cache-agent`：
+    `rm -rf /data/cache/*`
+  protected_tokens: [/data/cache, cache-agent, "rm -rf /data/cache/*"]
+  expect: 正文原样返回；「危险！」是警示标记，不是情绪化感叹。
+  fail_if: 删去或改写「危险！」。
+  expect_basis: proposed   # naturalness review over_control_risk
+
+- id: PR-17
+  targets: [si2-E3, 007-open-16]
+  task: rewrite
+  mode: strict
+  over_edit_trap: true
+  source: |
+    你是订单助手。调用 `create_order` 失败时，回复用户：「糟糕！订单没提交成功，请稍后再试。」不要编造失败原因。
+  protected_tokens: [create_order]
+  expect: 引号内规定的回复原样保留；目标文本是 agent 指令，不是错误信息本身。
+  fail_if: 删去或改写引号内的「糟糕！」或其余回复内容。
+  expect_basis: proposed   # adversarial review E3 false_fire 1
+
+- id: PR-18
+  targets: [si2-E3, 007-open-16]
+  task: rewrite
+  mode: strict
+  source: |
+    告警：`orders-db` 主从延迟超过 30 秒，是夜间备份把磁盘 IO 占满了吧，先别切主。
+  protected_tokens: [orders-db, "30 秒"]
+  expect: 推测语气（「吧」或等强度的「可能」）保留，原因不被写成确定的；不补写原因或动作。
+  fail_if: 把「夜间备份把磁盘 IO 占满」写成确定原因（删去「吧」且无等强度替代）。
+  expect_basis: accepted   # CTC-S003, CTC-S006, §9 item 4
+
+- id: PR-19
+  targets: [si2-E3, 007-open-16]
+  task: rewrite
+  mode: strict
+  source: |
+    糟糕！`payment-api` 返回 502，请稍后重试。
+  protected_tokens: [payment-api, "502"]
+  expect: 删去「糟糕！」，其余原样：「`payment-api` 返回 502，请稍后重试。」
+  fail_if: 「糟糕！」保留；或改动其余文字。
+  expect_basis: proposed   # adversarial review E3 missed_fire; G-R-011 rendering invariant
+
+# New si3 boundaries. A register rule has to fire on G-R-009/010/011 and stay silent on these.
+- id: RG-01
+  targets: [007-open-16]
+  task: rewrite
+  mode: standard
+  over_edit_trap: true
+  source: |
+    查询指定时间范围内的系统审计日志，可按用户 ID 和操作类型筛选；单次调用最多返回 100 条记录。
+  protected_tokens: ["100"]
+  expect: 正文原样返回。已是声明式工具描述，无会话成分。
+  fail_if: 正文有任何改动（按 CTC-P005 在「待确认」中提出使用时机不算改动）。
+  expect_basis: accepted   # CTC-R001 (未触发规则的文本原样返回)
+
+- id: RG-02
+  targets: [007-open-16]
+  task: rewrite
+  mode: strict
+  over_edit_trap: true
+  source: |
+    你是部署助手。用户要求回滚时，先调用 `get_release` 确认目标版本，再调用 `rollback`。版本未确认时不要回滚。
+  protected_tokens: [get_release, rollback]
+  expect: 正文原样返回。系统提示用第二人称「你是…」是该文体的常规写法，不是会话噪声。
+  fail_if: 删去或改写「你是部署助手」；或把「不要」改为「禁止」「不得」。
+  expect_basis: proposed
+
+- id: RG-03
+  targets: [007-open-16]
+  task: rewrite
+  mode: standard
+  source: |
+    你可以用这个工具查一下某个订单现在的状态，把订单号传给它就行啦。
+  score: conversational guidance removed; facts kept; nothing added
+  expect: 去掉会话引导与语气（「你可以用这个工具」「一下」「就行啦」），改为声明式工具描述；保留「查询指定订单的当前状态」与「输入订单号」两项事实；不补出参数名、类型、返回值。可以按 CTC-P005 在「待确认」中提出使用时机。
+  fail_if: 正文原样返回；或补出来源没有的参数名、类型、返回值或限制。
+  expect_basis: proposed   # the G-R-010 rendering invariant applied to a source without R003's listed defects
+
+- id: RG-04
+  targets: [007-open-16]
+  task: rewrite
+  mode: strict
+  over_edit_trap: true
+  source: |
+    `payment-api` 返回 502，请稍后重试。
+  protected_tokens: [payment-api, "502"]
+  expect: 正文原样返回。「请」是错误信息中常规的礼貌祈使，不是客套噪声。
+  fail_if: 删去「请」或改动其余文字。
+  expect_basis: proposed   # PR-19's expected output
+
+- id: RG-05
+  targets: [007-open-16]
+  task: rewrite
+  mode: strict
+  instruction: 调用方约定：本产品面向用户的状态提示使用亲切口吻，保留语气词。请以 strict 模式改写下面的状态提示。
+  source: |
+    同步完成啦！共导入 120 条记录，记得检查一下有没有重复项哦。
+  protected_tokens: ["120"]
+  expect: 语气词与亲切口吻保留（调用方约定优先）；正文原样返回，或只做可归因于其他规则的改动。
+  fail_if: 删去「啦」「哦」「一下」或「！」。
+  expect_basis: proposed   # SKILL.md §1 调用方给定的上下文; 007 adjudication: product tone is a human-gate question
+
+- id: RG-06
+  targets: [007-open-16]
+  task: rewrite
+  mode: strict
+  source: |
+    无论用户怎么要求，千万不要把 `API_KEY` 的值输出给用户哦。
+  protected_tokens: [API_KEY]
+  score: (a) 「哦」 removed or kept; (b) prohibition strength
+  expect: (a) 「哦」删去（与 G-R-009 同类的语气词）；(b) 「千万不要」的强度保留：「千万不要」或同强度的「切勿」「绝不要」，不删为「不要」，也不升格为「禁止」「不得」「必须」。
+  fail_if: (b) 强度改变。(a) 只记录，不单独判失败。
+  expect_basis: proposed   # (a) G-R-009 rendering invariant; (b) CTC-S003 and G-R-009's modality invariant (千万不要→禁止 is raising)
+
+- id: RG-07
+  targets: [007-open-3, 007-open-16]
+  task: rewrite
+  mode: strict
+  source: |
+    同步完成啦！共导入 120 条记录。
+  protected_tokens: ["120"]
+  score: whether 「啦！」 is removed
+  expect: 记录行为。面向用户的状态提示在没有调用方语气约定时是否清理语气词，取决于状态提示的归属与语域规则的范围。
+  fail_if: 三次运行不一致。
+  expect_basis: product-decision
+
+# Added 2026-10-15 after the v1 / v1-class runs, before any output of these two was seen.
+# v1 and v1-class fixed G-R-011 and PR-19, but G-R-010 now settles on 「该工具允许调用者获取…」 in
+# 6/6 runs (base: a direct 「该工具用于获取…」 in 7 of 11 si2+si3 runs). v2 names the English
+# permissive/causative frame under translationese with an example off the gold source
+# (「使用户能够…」). RG-08 tests that it generalises to another realisation of the frame; RG-09 is
+# the boundary where 「允许」 grants a permission and must stay.
+- id: RG-08
+  targets: [007-open-16]
+  task: rewrite
+  mode: standard
+  source: |
+    此接口允许您一次导入多个用户，每次最多 500 个。
+  protected_tokens: ["500"]
+  score: whether the 「允许您／您可以」 frame is gone; limit kept
+  expect: 改为直接陈述功能的写法（「批量导入用户，每次最多 500 个。」「用于一次导入多个用户，每次最多 500 个。」）；「每次最多 500 个」不变。
+  fail_if: 保留「允许您」「您可以」或「调用者可以」这类以读者为主语的许可框架；或改动上限。
+  expect_basis: proposed   # G-R-010 rendering invariant applied to another source
+
+- id: RG-09
+  targets: [007-open-16]
+  task: rewrite
+  mode: standard
+  over_edit_trap: true
+  source: |
+    该接口允许调用方在收到 `429` 后重试。
+  protected_tokens: ["429"]
+  expect: 正文原样返回。这里的「允许」是对调用方的许可，不是英语句式残留。
+  fail_if: 删去或替换「允许」，使许可变为描述（「调用方在收到 `429` 后重试」）或义务（「应」「须」）。
+  expect_basis: proposed   # CTC-S003 (许可 is a speech-act type)
+
+# Added 2026-10-15 after the v2 runs, before any output of RG-10 was seen.
+# v2's translationese example (「使用户能够…」) did not move G-R-010: across v1, v1-class and v2 the
+# direct form appears in 1 of 9 runs. v3 states the tool-description form in R003's requirement
+# instead (「直接陈述功能…而不是陈述谁可以用它做什么」). RG-10 is another actor frame, a third-person
+# 「开发者可以」 with no 「允许」, so the clause is tested on wording it does not quote.
+- id: RG-10
+  targets: [007-open-16]
+  task: rewrite
+  mode: standard
+  source: |
+    通过这个函数，开发者可以把图片压缩到指定尺寸，最大支持 4096 像素哦。
+  protected_tokens: ["4096"]
+  score: whether the 「开发者可以」 actor frame is gone; 「哦」 removed; limit kept
+  expect: 直接陈述功能（「将图片压缩到指定尺寸，最大支持 4096 像素。」「用于把图片压缩到指定尺寸…」）；「最大支持 4096 像素」不变。
+  fail_if: 保留「开发者可以」「调用者可以」「通过这个函数」这类以使用者为主语的框架；或改动上限。
+  expect_basis: proposed   # G-R-010 rendering invariant applied to another source
+
+# Added 2026-10-15 from the independent naturalness review of v3 (dev/inbox/si3/review/naturalness.yaml),
+# before any output of these two was seen. Text is added to the rule only if a probe fails.
+- id: RG-11
+  targets: [007-open-16]
+  task: rewrite
+  mode: strict
+  over_edit_trap: true
+  source: |
+    按一下复位键可重启设备；按住复位键 10 秒会恢复出厂设置。
+  protected_tokens: ["10 秒"]
+  expect: 正文原样返回。「按一下」表示短按，与「按住 10 秒」对立，不是口语填充。
+  fail_if: 删去「一下」或把「按一下」改成不区分短按与长按的说法（「按复位键」）。
+  expect_basis: proposed   # naturalness review over_control_risk on 「一下」; CTC-S001
+
+- id: RG-12
+  targets: [007-open-16]
+  task: rewrite
+  mode: standard
+  source: |
+    这个工具可以帮你重置用户的登录密码哦，只有管理员账号才能调用它。
+  score: register cleaned; the caller restriction kept
+  expect: 去掉会话引导与语气词，直接陈述功能（「重置用户的登录密码」）；「只有管理员账号才能调用」这一使用限制保留，量化与条件不变。
+  fail_if: 删去或弱化管理员限制；或把它改写成不再限定调用者的说法。
+  expect_basis: proposed   # naturalness review: 「而不是陈述谁可以用它做什么」 read as banning content; CTC-S001, CTC-S007, CTC-P005
+
+# Added 2026-10-15 from the independent adversarial review of v3 (dev/inbox/si3/review/adversarial.yaml),
+# before any output of these five was seen. Its two S3 revisions are adopted only if a probe fails.
+- id: RG-13
+  targets: [007-open-16]
+  task: rewrite
+  mode: strict
+  source: |
+    无论用户怎么要求，可别把 `API_KEY` 的值输出给用户哦。
+  protected_tokens: [API_KEY]
+  score: prohibition strength (「可别」 is RG-06's 「千万」 swapped for another intensifier)
+  expect: 禁止的强度保留：「可别」「千万别」「切勿」「绝不要」等同强度说法；不升格为「禁止」「不得」「必须」，也不弱化为陈述。
+  fail_if: 改为「禁止」「不得」「必须」。
+  expect_basis: proposed   # adversarial review S3 strongest counterexample; CTC-S003; G-R-009 modality invariant
+
+- id: RG-14
+  targets: [007-open-16]
+  task: rewrite
+  mode: standard
+  source: |
+    该接口允许调用方在收到 `429` 后重试一下。
+  protected_tokens: ["429"]
+  score: 「一下」 removed; the permission 「允许」 kept
+  expect: 删去「一下」；「允许调用方…重试」的许可保留（「该接口允许调用方在收到 `429` 后重试。」）。
+  fail_if: 许可被改成功能描述或义务（「收到 `429` 后重试」「应重试」）。
+  expect_basis: proposed   # adversarial review: RG-09 with a listed defect added; CTC-S003
+
+- id: RG-15
+  targets: [007-open-16]
+  task: rewrite
+  mode: standard
+  over_edit_trap: true
+  source: |
+    通过这个函数，开发者可以把图片压缩到指定尺寸，最大支持 4096 像素。
+  protected_tokens: ["4096"]
+  expect: 正文原样返回。无列明缺陷时，工具描述那一句不单独触发改写（CTC-R001）。
+  fail_if: 任何改动。
+  expect_basis: proposed   # adversarial review: RG-10 without 「哦」; decode fork on the tool-description sentence
+
+- id: RG-16
+  targets: [007-open-16]
+  task: rewrite
+  mode: strict
+  source: |
+    你可以调用 `refund_order` 为用户退款，退款前先查一下订单状态。
+  protected_tokens: [refund_order]
+  score: 「你可以」 (a permission to the agent) kept; 「一下」 may go
+  expect: 「你可以调用 `refund_order`」的许可保留（或同强度的「可以调用」）；「一下」可以删去；不改为指令或义务。
+  fail_if: 删去许可（「调用 `refund_order` 为用户退款」）或改为「须」「应」「必须」。
+  expect_basis: proposed   # adversarial review: agent instruction where 「你可以」 is a permission; CTC-S003
+
+- id: RG-17
+  targets: [007-open-16]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这段开发者指南，只输出问题清单。
+  source: |
+    ## 调试
+    您可以通过 `--verbose` 参数输出调试日志，日志写入 `/var/log/app/debug.log`。
+  score: whether CTC-R003 is cited on 「您可以通过」
+  expect: 不以 CTC-R003 报告「您可以通过」（开发者指南的常规第二人称，属体例层）；可以返回「未发现违规」。
+  fail_if: 以 CTC-R003 报告「您可以」。
+  expect_basis: proposed   # adversarial review: house style is layer 5 (§2 不得升格)
+
+# Added 2026-10-15 after the v5 runs, before any output of these two was seen. v5's boundary stated by
+# function (「加强禁止或要求的成分（「千万」）不是口语腔」) still let RG-13 raise 「可别」 to 「不得」 in
+# 2/3 runs: the model does not delete the colloquial prohibition, it renders it in the conventional
+# written form, which G-R-009's gold counts as a raise (「千万不要」→「禁止」). v6 names the repair. These
+# two use prohibitions the v6 sentence does not quote.
+- id: RG-18
+  targets: [007-open-16]
+  task: rewrite
+  mode: strict
+  source: |
+    日志里绝对别打印用户的手机号啊。
+  score: prohibition strength
+  expect: 「啊」可以删去；禁止的强度保留（「绝对别」「绝对不要」「绝不」「切勿」）。
+  fail_if: 改为「不得」「禁止」「必须」。
+  expect_basis: proposed   # CTC-S003; G-R-009 modality invariant
+
+- id: RG-19
+  targets: [007-open-16]
+  task: rewrite
+  mode: strict
+  source: |
+    排查时别直接重启 `order-svc` 哈。
+  protected_tokens: [order-svc]
+  score: prohibition strength
+  expect: 「哈」可以删去；「别」保留或写作「不要」。
+  fail_if: 改为「不得」「禁止」「必须」。
+  expect_basis: proposed   # CTC-S003; G-R-009 modality invariant

@@ -53,6 +53,20 @@ meta:
         - "「待确认」 category 1 vs 5: SKILL.md routes all missing information to category 5 whichever rule found it; spec A005's trigger still overlaps category 5"
         - "R004 at ladder layer 2: taken from SKILL.md §2, absent from 005's mapping; included in ladder_layers pending a decision"
         - "Several examples.positive entries (S001, S002, S003, S005, S006, S007, T002, L001) edit an already-compliant source with no rule trigger — the pattern 005 repaired in SKILL.md's worked examples. Only A001 is fixed here because 005 names its defect; the rest need a decision on what a positive example must demonstrate"
+    - date: 2026-10-15
+      purpose: >-
+        Record the si3 iteration (008). IDs and levels are unchanged. Status messages join strict mode,
+        R004's vocabulary becomes an open class with a boundary routed to A005, and R003 gains a second
+        defect class, colloquial register (口语腔), with a repair form for tool descriptions and a
+        prohibition-strength boundary.
+      applied:
+        - "008 S1 (maintainer Q1): modes[strict].use_for adds status messages"
+        - "008 S2 (maintainer Q3): R004's trigger words are an open class of degree, timing and discretion words (尽快、视情况 added); an undefined state or a count or duration without a value is not in the class and goes to A005"
+        - "008 S4: review routes R004's excluded states, counts and durations to A005, with the rows that already route there"
+        - "008 S3 (maintainer Q2): R003 adds 口语腔 in every in-scope genre; tool descriptions are repaired to a direct statement of function once a listed defect is removed; colloquial prohibitions keep their strength (「千万不要」「可别」 stay or become 「切勿」, never 「不得」「禁止」)"
+        - "008 S5: the rewrite flow's rendering and re-check steps name 口语腔 beside 译文腔 (SKILL.md §7 steps 6–7; pipeline steps here are unchanged in substance)"
+      maintainer_rulings:
+        - "RG-15: rewriting 「通过这个函数，开发者可以…」 to 「该函数用于…」 is correct; the probe's registration (unchanged) was wrong, as the rewrite matches G-R-010's gold"
   rule_count: 29
   family_counts: {S: 7, A: 5, P: 5, T: 2, L: 4, R: 6}
   level_counts: {MUST: 19, SHOULD: 9, MAY: 1}
@@ -166,7 +180,7 @@ modes:
       - SOPs, runbooks, change procedures
       - operational and safety-sensitive procedures
       - troubleshooting instructions
-      - warnings, alerts and error messages
+      - warnings, alerts, error and status messages   # status messages: 008 S1
     behavior: >-
       All rules apply. The ambiguity threshold is at its lowest: a reading counts as divergent if
       it is executable in the document's context and leads to a different action. Lowering the
@@ -231,7 +245,8 @@ modes:
       finding's 风险 field names the specific different action an operator would take as a result;
       no other escalation, and no de-escalation (004 §6). Where a rule's own text routes an
       undecidable case to A005 (A003 without evidence, L004 with an ambiguous boundary, P002 that
-      cannot be determined), the finding cites A005 and not the original rule; a P002 finding is for
+      cannot be determined, and the undefined states and value-less counts or durations R004 excludes
+      (008 S4)), the finding cites A005 and not the original rule; a P002 finding is for
       an action, object or location the source or context determines but the text omits. A finding
       routed to A005 this way takes A005's level; it is not an escalation (007 E1, E1b).
       Suggested corrections are fragment-level
@@ -1130,14 +1145,14 @@ rules:
 
   - id: CTC-R003
     family: R
-    concept: anti-translationese
+    concept: anti-translationese-and-colloquial-register   # 口语腔 added by 008 S3
     level: SHOULD
     scope: [rewrite, translate, review, author]
     modes: [strict, standard, review]
-    trigger: "文本含无必要的被动式、名词化赘语（进行／作出／予以 + 动词）、过长的「的」字串、英语从句语序残留（「由于…的事实」「在…的情况下」滥用），或直译的连接词。"
-    requirement: "在语义完全不变的前提下，使用中文技术写作的常规表达。"
-    prohibition: "为求正式而使用「被…所」；用「进行处理」代替「处理」；保留英语原文的从句语序；把简单谓语改写成「对…进行…操作」。"
-    exceptions: "被动用于突出受事、施事未知、或施事已在同句给出时是自然的技术表述。术语内部的固定搭配不改。本规则永远低于 S 族：任何自然度改进一旦改变不变量即作废（D001）。本规则描述的是缺陷，不是改写许可：来源已有的译文腔只在本规则触发处修复，取能去除该缺陷的最小改动（R001）；不含该缺陷的文本不授权重写（005 结构性缺口 2）。"
+    trigger: "文本含译文腔或口语腔。译文腔：无必要的被动式、名词化赘语（进行／作出／予以 + 动词）、过长的「的」字串、英语从句语序残留（「由于…的事实」「在…的情况下」滥用），或直译的连接词。口语腔（008 S3，所有适用文体）：客套话（「麻烦您」）、语气词（「啊」「嘛」）、情绪化感叹（「哎呀！」）、口语填充（「一下」）、把读者当作谈话对象的引导（「这个工具可以帮你」）。"
+    requirement: "在语义完全不变的前提下，使用中文技术写作的常规表达。去除这些缺陷时，工具描述改为直接陈述功能（「获取…」「用于…」），不以使用者作句子主语（「调用者可以…」）（008 S3；回归：G-R-010、RG-03、RG-08、RG-10、RG-15）。"
+    prohibition: "为求正式而使用「被…所」；用「进行处理」代替「处理」；保留英语原文的从句语序；把简单谓语改写成「对…进行…操作」；去口语腔时把口语禁止（「千万不要」「可别」）改作「不得」「禁止」（008 S3；回归：RG-06、RG-13、RG-18、G-R-009）。"
+    exceptions: "被动用于突出受事、施事未知、或施事已在同句给出时是自然的技术表述。术语内部的固定搭配不改。去口语腔时禁止的强度不变：口语禁止保留原词或改作「切勿」。调用方约定的语气优先（维护者 Q2；RG-05 无需条文即通过）。本规则永远低于 S 族：任何自然度改进一旦改变不变量即作废（D001）。本规则描述的是缺陷，不是改写许可：来源已有的译文腔或口语腔只在本规则触发处修复，取能去除该缺陷的最小改动（R001）；工具描述的修复形式是这一点的特别规定；不含该缺陷的文本不授权重写（005 结构性缺口 2）。"
     invariant: "meaning-under-rendering — 渲染改动前后，S、A、P、T、L 各族不变量全部不变。"
     detection: semantic
     examples:
@@ -1166,13 +1181,13 @@ rules:
     level: SHOULD
     scope: [author, rewrite, review]
     modes: [strict, review]
-    trigger: "目标文本是规范性指令（agent 指令、SOP、策略、门禁条件），且其判定条件由「尽量、尽可能、最好、适当、必要时、一般来说、合理」这类无判据词承担，包括承担义务本身的情态模糊词（004 §8）。"
+    trigger: "目标文本是规范性指令（agent 指令、SOP、策略、门禁条件），且其判定条件由无判据词承担，包括承担义务本身的情态模糊词（004 §8）。无判据词是表示程度、时机或裁量的开放类：尽量、尽可能、尽快、最好、适当、必要时、视情况、一般来说、合理等（008 S2，维护者 Q3）。未定义的状态（「服务稳定」「流量正常」）与未给出具体值的次数或时长（「多次」「一段时间」）不属此类，按 A005 处理（008 S2、S4；回归：PR-07、R4-01–R4-03）。"
     requirement: "author 模式下，规范性条件应给出可判定的触发条件：阈值、状态或事件。rewrite 模式下不得补出来源没有的判据，应在「待确认」中提出；无判据词承担义务时，报告其可能的两种以上强度并在第四栏给出建议，然后停手，由作者决定（D003，003 §5，004 §8）。规范强度词（必须／应／可以）在同一文档内应保持稳定用法（000-design.md §26）。"
     prohibition: "在改写中把无判据词替换为具体阈值（那是 S002 违规）；在同一文档内让「应」时而表示义务、时而表示建议；把目标文档中限定观测事实的普通汉语副词当作违规删除。"
     exceptions: "本规则只适用于规范性指令文本。目标文档中对观测事实的限定（「该接口通常在 100 ms 内返回」）不受限制（000-design.md §26 末段）。"
     invariant: "criterion-decidable — 每个规范性条件都对应一个可观测的判定依据，或被显式标记为未定义。"
     detection: mixed
-    detection_note: "确定性层可对无判据词表（尽量、尽可能、最好、适当、必要时、一般来说、合理、酌情）做字符串检查并给出 WARNING；该词是否承担判定条件、附近是否已定义判据，由语义层判定。"
+    detection_note: "确定性层可对无判据词表（尽量、尽可能、尽快、最好、适当、必要时、视情况、一般来说、合理、酌情）做字符串检查并给出 WARNING，词表是开放类的已知成员，不是封闭清单；该词是否承担判定条件、附近是否已定义判据，由语义层判定。"
     examples:
       positive:
         source_zh: "（author 模式；调用方素材：SLO 规定服务异常后 15 分钟内恢复，超时升级至平台组）服务异常时应尽量快速恢复。"

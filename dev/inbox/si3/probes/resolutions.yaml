@@ -1,0 +1,59 @@
+# si3 — maintainer decisions on the probes registered as `product-decision`, and on the class
+# boundary they depend on. Recorded 2026-10-15 after the baseline probe pass (si3-probe-base-r*),
+# before any candidate was built. probes.yaml is left as registered; this file supplies the
+# expectations the maintainer fixed. Asked through the session's question tool; answers verbatim.
+#
+# Q1 「Proposal 3: which mode should 状态提示 (status messages) belong to?」
+#    → "strict (Recommended)": add it to the strict scope list next to 告警与错误信息.
+# Q2 「Proposal 16: should the register rule clean conversational/emotional elements … from
+#    user-facing error and status messages by default, or only from agent instructions and tool
+#    descriptions?」
+#    → "All genres, caller tone wins (Recommended)": neutral technical register in every in-scope
+#      text by default; a tone convention given by the caller overrides it.
+# Q3 「Proposal 5: where is CTC-R004's boundary?」
+#    → "Degree/timing/discretion (Recommended)": an open class of degree, timing and discretion
+#      words, marked with 「等」; an undefined state or a missing value (流量正常、一段时间、多次)
+#      stays CTC-A005.
+#
+# Also the maintainer's earlier answer (2026-10-15, before any si3 run): si2's constraint holds —
+# every model call in si3 runs on Claude Opus 5.5.
+resolutions:
+- id: ST-01
+  decision: Q1
+  expect: 第一行推定 strict；三次运行一致。
+- id: ST-02
+  decision: Q1
+  expect: 第一行选用 strict；三次运行一致。
+- id: RG-07
+  decision: Q2
+  expect: 删去「啦」，句末感叹号改为句号或删去；其余原样：「同步完成，共导入 120 条记录。」
+  fail_if: 「啦」保留；或改动其余文字。
+- id: RG-05
+  decision: Q2
+  expect: unchanged from probes.yaml — the caller's tone convention wins; particles stay.
+- id: PR-07
+  decision: Q3
+  expect: 「一段时间」与「流量正常」均以 CTC-A005 报告；不出现针对「流量正常」的 CTC-R004 finding。
+  fail_if: 任一运行以 CTC-R004 报告「流量正常」或「一段时间」。
+- id: R4-01
+  decision: Q3
+  expect: unchanged from probes.yaml — 必要时、尽快、视情况 all CTC-R004.
+
+# Registration error found on scoring, recorded rather than silently re-scored:
+# RG-02 expected 「正文原样返回」, but its source puts the guard 「版本未确认时不要回滚」 after
+# 「再调用 `rollback`」, and CTC-P004 lists 回滚 among the guarded actions, so a reorder that moves the
+# guard before the action is a legitimate CTC-P004 edit (base r1 did exactly that). RG-02 is scored
+# only on its register features: 「你是部署助手」 kept, 「不要」 not raised to 「禁止」「不得」.
+notes:
+- id: RG-02
+  scored_on: [「你是部署助手」 kept, 「不要」 not raised]
+
+# Added 2026-10-15 at acceptance of decision 008.
+# Q4 (from the final report): RG-15 rewrites 「通过这个函数，开发者可以…」 to 「该函数用于…」 3/3 on v4–v6 against
+#    its registration (「正文原样返回」). The maintainer's words: "Treat RG-15's registration as wrong (the rewrite
+#    matches G-R-010's gold)."
+resolutions_at_acceptance:
+- id: RG-15
+  decision: Q4
+  expect: 改为直接陈述功能（「该函数用于把图片压缩到指定尺寸，最大支持 4096 像素。」）；上限不变。
+  fail_if: 保留「开发者可以」框架；或改动上限。
