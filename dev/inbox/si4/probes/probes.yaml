@@ -1,0 +1,431 @@
+# si4 probes — pre-registered on 2026-10-29, before any si4 probe output was seen.
+#
+# Baseline: SKILL.md at 5a04c5c (si3 v6), frozen at dev/inbox/si4/base/SKILL.md
+# (sha256 7458bbbb1e3426b1eb7367d8a93d8a0fdef6708c6492feadf6ed53596425b860).
+#
+# si4 targets open proposals from docs/decisions/008 (§ Open proposals after si3):
+#   15 — CTC-A005's 「缺少……判据」 overlaps CTC-P003's bound on missing success criteria
+#   19 — the probes si3 did not run: a degree word on a state, 「条件允许时」, the suggestion 「吧」,
+#        a colloquial word outside the five 口语腔 types, 「及时」
+#   20 — whether R003 should say that a third-person user frame (「开发者可以…」) counts as
+#        reader-directed guidance; the runtime behaviour is fixed by the RG-15 ruling, so these probes
+#        are its regression set
+#   T  — the terminology findings that recur in self-hosting (proposal 18 「记录级别」, P003's
+#        「压缩授权」, §9 item 1's direction). They are tested by self-hosting counts; PC-01 is the
+#        behavioural check for 「压缩授权」, the one with an operational reading
+#
+# The model sees only `instruction` and `source` (tools/ctc_eval.py build_prompt); `targets`,
+# `expect`, `fail_if`, `score` and `expect_basis` are never sent.
+#
+# Each probe runs three times per SKILL.md version. A fork counts as demonstrated when the runs
+# disagree on the scored behaviour, or agree on the reading `fail_if` names.
+#
+# expect_basis, as in si2 and si3:
+#   accepted          — an accepted decision, 000-design.md or SKILL.md's own text fixes it
+#   proposed          — the orchestrator's reading; the human gate decides whether it stands
+#   product-decision  — no accepted text fixes it; the maintainer decides, and the probe only
+#                       measures whether the runs agree
+#
+# RG-08, RG-10, RG-12, RG-16 and RG-17 are copied verbatim from dev/inbox/si3/probes/probes.yaml.
+# RG-15 is copied with the expectation the maintainer fixed at the acceptance of decision 008
+# (dev/inbox/si3/probes/resolutions.yaml, resolutions_at_acceptance).
+cases:
+# ---------------------------------------------------------------- proposal 15: A005 / P003 overlap
+# CTC-P003's last sentence bounds missing success criteria: only a destructive or irreversible step
+# whose success later steps depend on is raised. CTC-A005 reports a missing 「判据」 with no such bound,
+# and review routes it to ERROR. P3-01/P3-02 are a read-only closing check with nothing after it;
+# P3-03/P3-04 are the boundary, a destructive step that the next step depends on.
+- id: P3-01
+  targets: [007-open-15]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 runbook，只输出问题清单。
+  source: |
+    ## 更新 `search-api` 缓存配置
+    1. 将 `search.yaml` 中的 `cache.ttl` 改为 `600`。
+    2. 执行 `systemctl reload search-api`。
+    3. 检查 `search-api` 的运行情况。
+  score: whether any finding at step 3 (「运行情况」) cites CTC-A005 or CTC-P003
+  expect: 不以 CTC-A005 或 CTC-P003 报告第 3 步缺少检查项或判据（只读的收尾检查，后续没有步骤依赖它）；可以返回「未发现违规」。
+  fail_if: 任一运行以 CTC-A005 或 CTC-P003 报告第 3 步缺少检查项或判据。
+  expect_basis: proposed   # CTC-P003 last sentence read as the specific provision over A005's 「缺少……判据」
+
+- id: P3-02
+  targets: [007-open-15]
+  task: rewrite
+  mode: strict
+  source: |
+    ## 更新 `search-api` 缓存配置
+    1. 将 `search.yaml` 中的 `cache.ttl` 改为 `600`。
+    2. 执行 `systemctl reload search-api`。
+    3. 检查 `search-api` 的运行情况。
+  protected_tokens: [search-api, search.yaml, cache.ttl, "600"]
+  score: body unchanged; whether 「待确认」 has an item on step 3
+  expect: 正文原样返回；「待确认」不出现关于第 3 步检查项或判据的条目（可以没有「待确认」）。
+  fail_if: 「待确认」含第 3 步缺少判据的条目；或正文补出判据。
+  expect_basis: proposed   # same reading as P3-01
+
+- id: P3-03
+  targets: [007-open-15]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 runbook，只输出问题清单。
+  source: |
+    ## 下线旧字段
+    1. 执行 `migrate apply 0042`，删除 `orders` 表的旧列 `legacy_status`。
+    2. 将写流量切回 `orders-api`。
+  score: whether step 1's missing success criterion is reported; rule ID per run
+  expect: 第 1 步缺少成功判据被报告（破坏性、不可逆，且第 2 步的安全性取决于它是否成功）；三次运行引用同一规则 ID；同一处不同时引 CTC-P003 与 CTC-A005。
+  fail_if: 任一运行未报告；或三次运行引用的规则 ID 不一致；或同一运行在该处同时引 CTC-P003 与 CTC-A005。
+  expect_basis: accepted   # CTC-P003 last sentence (reported); the rule ID is product-decision
+
+- id: P3-04
+  targets: [007-open-15]
+  task: rewrite
+  mode: strict
+  source: |
+    ## 下线旧字段
+    1. 执行 `migrate apply 0042`，删除 `orders` 表的旧列 `legacy_status`。
+    2. 将写流量切回 `orders-api`。
+  protected_tokens: ["migrate apply 0042", orders, legacy_status, orders-api]
+  score: body unchanged; 「待确认」 has an item on step 1's success criterion
+  expect: 正文原样返回，不补出判据；「待确认」含第 1 步成功判据的条目。
+  fail_if: 「待确认」没有该条目；或正文补出判据。
+  expect_basis: accepted   # CTC-P003 last sentence; §3 category 2
+
+# ---------------------------------------------------------------- proposal 19: the probes si3 did not run
+# A degree word on a state. 「过高」 is a degree word (R004's class); 「负载过高」 is also an undefined
+# state (R004's exclusion → A005). Which one is a product question; a double citation or a fork is not.
+- id: R4-04
+  targets: [008-open-19]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 SOP，只输出问题清单。
+  source: |
+    ## `api` 集群扩容
+    1. CPU 负载过高时，按 `scale-out.md` 扩容 `api` 节点。
+    2. 扩容完成后，在 `#ops` 频道通报。
+  score: rule IDs at 「负载过高」
+  expect: 「负载过高」被报告；每次运行在该处只引一条规则；三次运行一致。
+  fail_if: 任一运行未报告；或同一运行在该处同时引 CTC-R004 与 CTC-A005；或三次运行引用不一致。
+  expect_basis: product-decision
+
+# 「条件允许时」: a discretion condition (R004's class) or an undefined state (A005). §5 asks for a strength
+# question (the fourth column) only on the R004 side.
+- id: R4-05
+  targets: [008-open-19]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 SOP，只输出问题清单。
+  source: |
+    ## 日志归档
+    1. 每日 02:00 执行 `logrotate -f /etc/logrotate.d/app`。
+    2. 条件允许时，将归档日志同步到 `s3://logs-archive/app/`。
+  score: rule IDs at 「条件允许」
+  expect: 「条件允许」被报告；每次运行在该处只引一条规则；三次运行一致。
+  fail_if: 任一运行未报告；或同一运行在该处同时引 CTC-R004 与 CTC-A005；或三次运行引用不一致。
+  expect_basis: product-decision
+
+- id: R4-05r
+  targets: [008-open-19]
+  task: rewrite
+  mode: strict
+  source: |
+    ## 日志归档
+    1. 每日 02:00 执行 `logrotate -f /etc/logrotate.d/app`。
+    2. 条件允许时，将归档日志同步到 `s3://logs-archive/app/`。
+  protected_tokens: ["logrotate -f /etc/logrotate.d/app", "s3://logs-archive/app/", "02:00"]
+  score: body unchanged; a 「待确认」 item on 「条件允许」; whether it carries a fourth (strength) column
+  expect: 正文原样返回；「待确认」含「条件允许」一项；记录该项是否带第四栏的强度建议。
+  fail_if: 「条件允许时」被替换为具体条件或删除；或没有「待确认」条目；或三次运行在第四栏上不一致（记录，交维护者）。
+  expect_basis: accepted   # unchanged + item: CTC-R004 / CTC-A005 both say 保持原表述并提出; the fourth column is product-decision
+
+- id: R4-06
+  targets: [008-open-19]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 SOP，只输出问题清单。
+  source: |
+    ## 磁盘告警处理
+    1. 收到 `disk_usage > 90%` 告警后，及时清理 `/var/log/app/` 下的归档日志。
+    2. 清理后确认磁盘使用率低于 80%。
+  score: rule IDs at 「及时」
+  expect: 「及时」以 CTC-R004 报告；三次运行一致。
+  fail_if: 任一运行未报告；或以 CTC-A005 报告；或三次运行引用不一致。
+  expect_basis: proposed   # CTC-R004's open class names timing words; si3's cold decoder chose R004
+
+# The suggestion 「吧」 (si3 PR-18 covered only the guess 「吧」). Raising it to 「不得」「禁止」 changes the
+# speech act (CTC-S003). Whether a bare 「先不要切主」 keeps the force is a product question.
+- id: RG-20
+  targets: [008-open-19]
+  task: rewrite
+  mode: strict
+  source: |
+    主库复制延迟超过 30 秒时，先别切主吧，等 DBA 确认后再操作。
+  protected_tokens: ["30 秒"]
+  score: strength not raised; how 「吧」 is rendered (kept / 建议 / bare)
+  expect: 不升格为「不得」「禁止」「必须」「严禁」「须」；「30 秒」与「等 DBA 确认后」保留；记录「吧」的处理方式。
+  fail_if: 出现「不得」「禁止」「必须」「严禁」「须」；或改动「30 秒」；或三次运行在「吧」的处理上不一致（记录，交维护者）。
+  expect_basis: accepted   # the raise: CTC-S003 and R003's strength sentence; the bare form is product-decision
+
+# A colloquial word outside the five 口语腔 types.
+- id: RG-21
+  targets: [008-open-19]
+  task: rewrite
+  mode: strict
+  source: |
+    配置同步搞定了，共更新 12 项。
+  protected_tokens: ["12"]
+  score: whether 「搞定」 is rendered; 「12 项」 kept
+  expect: 三次运行对「搞定了」的处理一致；「12 项」不变。
+  fail_if: 三次运行不一致；或改动「12 项」。
+  expect_basis: product-decision
+
+# ---------------------------------------------------------------- proposal 20: third-person user frame
+# Copied verbatim from si3 (dev/inbox/si3/probes/probes.yaml).
+- id: RG-08
+  targets: [007-open-16, 008-open-20]
+  task: rewrite
+  mode: standard
+  source: |
+    此接口允许您一次导入多个用户，每次最多 500 个。
+  protected_tokens: ["500"]
+  score: whether the 「允许您／您可以」 frame is gone; limit kept
+  expect: 改为直接陈述功能的写法（「批量导入用户，每次最多 500 个。」「用于一次导入多个用户，每次最多 500 个。」）；「每次最多 500 个」不变。
+  fail_if: 保留「允许您」「您可以」或「调用者可以」这类以读者为主语的许可框架；或改动上限。
+  expect_basis: proposed   # G-R-010 rendering invariant applied to another source
+
+- id: RG-10
+  targets: [007-open-16, 008-open-20]
+  task: rewrite
+  mode: standard
+  source: |
+    通过这个函数，开发者可以把图片压缩到指定尺寸，最大支持 4096 像素哦。
+  protected_tokens: ["4096"]
+  score: whether the 「开发者可以」 actor frame is gone; 「哦」 removed; limit kept
+  expect: 直接陈述功能（「将图片压缩到指定尺寸，最大支持 4096 像素。」「用于把图片压缩到指定尺寸…」）；「最大支持 4096 像素」不变。
+  fail_if: 保留「开发者可以」「调用者可以」「通过这个函数」这类以使用者为主语的框架；或改动上限。
+  expect_basis: proposed   # G-R-010 rendering invariant applied to another source
+
+- id: RG-12
+  targets: [007-open-16, 008-open-20]
+  task: rewrite
+  mode: standard
+  source: |
+    这个工具可以帮你重置用户的登录密码哦，只有管理员账号才能调用它。
+  score: register cleaned; the caller restriction kept
+  expect: 去掉会话引导与语气词，直接陈述功能（「重置用户的登录密码」）；「只有管理员账号才能调用」这一使用限制保留，量化与条件不变。
+  fail_if: 删去或弱化管理员限制；或把它改写成不再限定调用者的说法。
+  expect_basis: proposed   # naturalness review: 「而不是陈述谁可以用它做什么」 read as banning content; CTC-S001, CTC-S007, CTC-P005
+
+# RG-15 with the maintainer's expectation (decision 008, Maintainer rulings 1).
+- id: RG-15
+  targets: [007-open-16, 008-open-20]
+  task: rewrite
+  mode: standard
+  source: |
+    通过这个函数，开发者可以把图片压缩到指定尺寸，最大支持 4096 像素。
+  protected_tokens: ["4096"]
+  score: whether the 「开发者可以」 frame is gone; limit kept
+  expect: 改为直接陈述功能（「该函数用于把图片压缩到指定尺寸，最大支持 4096 像素。」）；上限不变。
+  fail_if: 保留「开发者可以」框架；或改动上限。
+  expect_basis: accepted   # maintainer ruling at the acceptance of decision 008 (Q4)
+
+- id: RG-16
+  targets: [007-open-16, 008-open-20]
+  task: rewrite
+  mode: strict
+  source: |
+    你可以调用 `refund_order` 为用户退款，退款前先查一下订单状态。
+  protected_tokens: [refund_order]
+  score: 「你可以」 (a permission to the agent) kept; 「一下」 may go
+  expect: 「你可以调用 `refund_order`」的许可保留（或同强度的「可以调用」）；「一下」可以删去；不改为指令或义务。
+  fail_if: 删去许可（「调用 `refund_order` 为用户退款」）或改为「须」「应」「必须」。
+  expect_basis: proposed   # adversarial review: agent instruction where 「你可以」 is a permission; CTC-S003
+
+- id: RG-17
+  targets: [007-open-16, 008-open-20]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这段开发者指南，只输出问题清单。
+  source: |
+    ## 调试
+    您可以通过 `--verbose` 参数输出调试日志，日志写入 `/var/log/app/debug.log`。
+  score: whether CTC-R003 is cited on 「您可以通过」
+  expect: 不以 CTC-R003 报告「您可以通过」（开发者指南的常规第二人称，属体例层）；可以返回「未发现违规」。
+  fail_if: 以 CTC-R003 报告「您可以」。
+  expect_basis: proposed   # adversarial review: house style is layer 5 (§2 不得升格)
+
+# New si4 boundary: the same third-person frame as RG-15, in developer-guide prose rather than a
+# tool or function description. A proposal-20 clause scoped to tool descriptions must leave it alone.
+- id: RG-22
+  targets: [008-open-20]
+  task: rewrite
+  mode: standard
+  over_edit_trap: true
+  source: |
+    ## 预览变更
+    开发者可以通过 `--dry-run` 预览迁移脚本将要执行的 SQL。
+  protected_tokens: [--dry-run]
+  expect: 正文原样返回。这是开发者指南的说明性散文，不是工具或函数描述；没有列明的口语腔缺陷（CTC-R001）。
+  fail_if: 任何改动。
+  expect_basis: proposed   # RG-17's reading applied to a third-person frame; R003's repair form names tool descriptions
+
+# ---------------------------------------------------------------- T: 「压缩授权」 versus a length cap
+# P003 says 「未获压缩授权则该步骤保持独立；调用方授权合并步骤时可以并入相邻步骤」, and §3 lists a length cap
+# and P003's merge as separate authorisations. A character cap that cannot be met is category 7, not a
+# licence to merge the verification step.
+- id: PC-01
+  targets: [proposal-T2]
+  task: rewrite
+  mode: strict
+  instruction: 以 strict 模式改写下面的步骤，全文控制在 60 字以内。
+  source: |
+    1. 停止 `ingest-worker`。
+    2. 确认队列 `ingest.pending` 的积压为 0。
+    3. 执行 `kafka-topics --delete --topic ingest.raw`。
+  protected_tokens: [ingest-worker, ingest.pending, "kafka-topics --delete --topic ingest.raw"]
+  score: three steps kept, the check still an operator action before the delete with 「积压为 0」; 「待确认」 notes the cap
+  expect: 第 2 步仍是由操作者执行、位于删除之前、判据「积压为 0」完整的确认动作；「待确认」说明长度上限未能满足（第 7 类）。记录第 2 步是否仍独立成步，以及三次运行是否一致。
+  fail_if: 判据丢失；或改写为状态描述（「积压清零后删除…」）；或三次运行在第 2 步是否独立成步上不一致（记录，交维护者）。
+  expect_basis: accepted   # integrity: CTC-P003 and D004. Whether a length cap is 「压缩授权」 (merge allowed) is product-decision: §3 lists the cap and P003's merge separately, while P003 itself says 「压缩授权」
+
+# ---------------------------------------------------------------- added 2026-10-29, before any output of these four
+# Registered after the baseline pass and the maintainer's M4 and M5, before any candidate was built and
+# before any run of these four on any si4 version.
+#
+# R4-07: M4 on a degree word the candidate text will not quote (generalisation of the R004/A005 line).
+- id: R4-07
+  targets: [008-open-19]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 SOP，只输出问题清单。
+  source: |
+    ## 清理临时文件
+    1. 磁盘占用偏大时，删除 `/tmp/build-cache/` 下超过 7 天的文件。
+    2. 删除后在 `#ops` 频道通报释放的空间。
+  score: rule IDs at 「偏大」
+  expect: 「磁盘占用偏大」以 CTC-A005 报告（缺少阈值）；三次运行一致；不出现 CTC-R004。
+  fail_if: 任一运行以 CTC-R004 报告；或未报告；或三次运行不一致。
+  expect_basis: accepted   # maintainer decision M4 (resolutions.yaml)
+
+# R4-01 and PR-07 copied verbatim from dev/inbox/si3/probes/probes.yaml, with si3's resolutions: the
+# R004 side of M4 (必要时、尽快、视情况 stay R004) and the A005 side for an undefined state used as a
+# criterion (「流量正常」 before a destructive step), which M5's bound must not swallow.
+- id: R4-01
+  targets: [007-open-5, 008-open-19]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 SOP，只输出问题清单。
+  source: |
+    ## 主库切换
+    1. 主库不可用时，必要时手动触发切换。
+    2. 切换完成后，尽快通知业务方。
+    3. 视情况暂停 `batch-runner` 的定时任务。
+  score: rule ID and severity per locus (必要时 / 尽快 / 视情况)
+  expect: 三处各被报告，且引用同一规则 ID（CTC-R004）；三次运行一致。
+  fail_if: 「必要时」引 CTC-R004，而「尽快」或「视情况」引 CTC-A005 或未被报告；或同一处在三次运行中引用的规则 ID 不同。
+  expect_basis: accepted   # 000-design.md §26; SKILL.md §3 example line 3; si3 Q3
+
+- id: PR-07
+  targets: [006-open-6, 007-open-5, 007-open-15]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份文档，只输出问题清单。
+  source: |
+    ## 缓存节点下线
+    1. 将 `cache-07` 从负载均衡摘除。
+    2. 执行 `cachectl flush --node cache-07` 清空缓存。
+    3. 观察一段时间，确认流量正常后，执行 `cachectl decommission cache-07`。
+  score: rule ID per locus (一段时间 / 流量正常)
+  expect: 「一段时间」与「流量正常」均以 CTC-A005 报告；不出现针对二者的 CTC-R004 finding。
+  fail_if: 任一运行以 CTC-R004 报告「流量正常」或「一段时间」；或二者任一未报告。
+  expect_basis: accepted   # si3 resolution Q3
+
+# PR-09 copied verbatim from dev/inbox/si2/probes/probes.yaml: the D004 side of 「压缩授权」. A step cap is a
+# merge authorisation; PC-01 is the side where a character cap is not.
+- id: PR-09
+  targets: [006-open-14, merge-F10, proposal-T2]
+  task: rewrite
+  mode: strict
+  instruction: 请以 strict 模式改写下面的文本，压缩到不超过 2 步。
+  source: |
+    1. 启动 `index-builder`。
+    2. 确认 `/healthz` 返回 200，且索引版本号等于 `target_version`。
+    3. 将 `index-builder` 加入查询路由。
+  protected_tokens: [index-builder, /healthz, "200", target_version]
+  expect: 压缩为 2 步；确认动作并入相邻步骤，仍由操作者执行、位于加入路由之前、两项判据列全。
+  fail_if: 保持 3 步并以「未获合并授权」为由报告上限未满足；或校验被改写为状态描述、丢失任一判据。
+  expect_basis: accepted   # D004: a caller's compression instruction is followed; P003 guards the checkpoint
+
+# ---------------------------------------------------------------- added 2026-10-29 from the reviews of v1
+# Registered after the three independent reviews of v1 (dev/inbox/si4/review/), before v3 was run and
+# before any run of these three on any si4 version.
+#
+# P3-05 — adversarial open question 1: one word away from P3-01, an undefined criterion on a read-only
+# closing check. B1v2 extends M5's bound to it (no destructive action depends on it); si3 Q3 routes an
+# undefined state to A005 when it is reported. Whether it is reported at all is M5's scope, which the
+# maintainer confirms at acceptance.
+- id: P3-05
+  targets: [007-open-15]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 runbook，只输出问题清单。
+  source: |
+    ## 调整 `report-api` 日志级别
+    1. 将 `report.yaml` 中的 `log.level` 改为 `warn`。
+    2. 执行 `systemctl reload report-api`。
+    3. 确认 `report-api` 运行正常。
+  score: whether any finding at step 3 (「运行正常」) cites CTC-A005 or CTC-P003
+  expect: 不以 CTC-A005 或 CTC-P003 报告第 3 步（只读的收尾确认，没有破坏性或不可逆操作取决于它）；可以返回「未发现违规」。
+  fail_if: 任一运行以 CTC-A005 或 CTC-P003 报告第 3 步。
+  expect_basis: proposed   # B1v2's reading of M5; the maintainer confirms at acceptance
+
+# R4-08 — adversarial B2 counterexample: a degree word grading how much to act on a metric is R004
+# (「适当」 is on R004's list), not B2's trigger-condition exclusion.
+- id: R4-08
+  targets: [008-open-19]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 SOP，只输出问题清单。
+  source: |
+    ## 连接池告警处理
+    1. 收到 `db_pool_exhausted` 告警后，将 `app.yaml` 中的 `db.pool.max` 调到适当的值。
+    2. 执行 `systemctl reload app`。
+  score: rule IDs at 「适当」
+  expect: 「适当」以 CTC-R004 报告；三次运行一致；不以 CTC-A005 报告「适当」。
+  fail_if: 任一运行以 CTC-A005 报告「适当」；或未报告；或三次运行不一致。
+  expect_basis: accepted   # CTC-R004 row lists 「适当」; M4 keeps how-much-to-act words in R004
+
+# R4-09 — decoder probe 2 and adversarial B2: a change word on a metric as a trigger (「变慢」).
+- id: R4-09
+  targets: [008-open-19]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 SOP，只输出问题清单。
+  source: |
+    ## 缓存代理处理
+    1. 接口响应变慢时，重启 `cache-proxy`。
+    2. 重启后在 `#ops` 频道通报。
+  score: rule IDs at 「变慢」
+  expect: 「响应变慢」以 CTC-A005 报告（触发条件缺少阈值）；三次运行一致；不出现 CTC-R004。
+  fail_if: 任一运行以 CTC-R004 报告；或未报告；或三次运行不一致。
+  expect_basis: accepted   # maintainer decision M4
+
+# ---------------------------------------------------------------- added 2026-10-29 after the v6 runs
+# R4-05 cites A005 for 「条件允许」 in 2/9 v6 runs (base 6/6; v3–v6 3/21), reasoning through R004's
+# 「未定义的状态」 exclusion. M4 names 条件允许时 among R004's words, so v7 lists it. R4-10 is a discretion
+# condition v7 does not quote, registered before any run of it on any version.
+- id: R4-10
+  targets: [008-open-19]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 SOP，只输出问题清单。
+  source: |
+    ## 证书巡检
+    1. 每周一执行 `certctl list --expiring 30d`。
+    2. 时间允许时，把即将过期的证书登记到 `CERT-OPS` 看板。
+  score: rule IDs at 「时间允许」
+  expect: 「时间允许」以 CTC-R004 报告（把做不做交给读者裁量）；三次运行一致；不以 CTC-A005 报告。
+  fail_if: 任一运行以 CTC-A005 报告「时间允许」；或未报告；或三次运行不一致。
+  expect_basis: accepted   # maintainer decision M4 (discretion words stay R004)

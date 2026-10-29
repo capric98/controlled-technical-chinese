@@ -10,7 +10,9 @@ Hard gates (exit 1 when any fails):
   - the three mode headings ### strict / ### standard / ### review
   - the five priority-ladder table rows (first cell starts with 1..5)
   - the six review finding fields (as example-block lines or listed in order in prose) and the three severities
-  - frontmatter name and description byte-identical to BASE
+  - frontmatter name and description byte-identical to BASE, after applying any
+    --fm-replace OLD NEW pairs to BASE's description (a maintainer-approved edit; each
+    OLD must occur exactly once)
   - tools/check_skill.py reports 0 errors
 
 Everything else is informational: size metrics, per-rule row diffs, structure
@@ -143,6 +145,8 @@ def main():
     ap.add_argument('cand')
     ap.add_argument('--prev')
     ap.add_argument('--json')
+    ap.add_argument('--fm-replace', nargs=2, action='append', default=[], metavar=('OLD', 'NEW'),
+                    help='apply this replacement to BASE description before the frontmatter gate')
     args = ap.parse_args()
 
     base, cand = read(args.base), read(args.cand)
@@ -182,11 +186,17 @@ def main():
     gates['finding_fields'] = {'pass': not missing_fields, 'missing': missing_fields}
     gates['severities'] = {'pass': not missing_sev, 'missing': missing_sev}
 
+    bdesc = fm_field(bfm, 'description')
+    bad_replace = [old for old, _new in args.fm_replace if (bdesc or '').count(old) != 1]
+    for old, new in args.fm_replace:
+        bdesc = (bdesc or '').replace(old, new, 1)
     gates['frontmatter'] = {
-        'pass': cfm is not None and fm_field(bfm, 'name') == fm_field(cfm, 'name')
-                and fm_field(bfm, 'description') == fm_field(cfm, 'description'),
+        'pass': cfm is not None and not bad_replace and fm_field(bfm, 'name') == fm_field(cfm, 'name')
+                and bdesc == fm_field(cfm, 'description'),
         'name_equal': fm_field(bfm, 'name') == fm_field(cfm, 'name'),
-        'description_equal': fm_field(bfm, 'description') == fm_field(cfm, 'description'),
+        'description_equal': bdesc == fm_field(cfm, 'description'),
+        'fm_replace': args.fm_replace,
+        'fm_replace_not_unique': bad_replace,
     }
 
     cs = run_check_skill(args.cand)

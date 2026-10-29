@@ -67,6 +67,24 @@ meta:
         - "008 S5: the rewrite flow's rendering and re-check steps name 口语腔 beside 译文腔 (SKILL.md §7 steps 6–7; pipeline steps here are unchanged in substance)"
       maintainer_rulings:
         - "RG-15: rewriting 「通过这个函数，开发者可以…」 to 「该函数用于…」 is correct; the probe's registration (unchanged) was wrong, as the rewrite matches G-R-010's gold"
+    - date: 2026-10-29
+      purpose: >-
+        Record the si4 iteration (009). IDs and levels are unchanged. A missing criterion on a check that
+        nothing destructive depends on is no longer reported, in rewrite or review; degree words on metric
+        trigger conditions go to A005; R003 names the third-person frame in tool descriptions; P003's merge
+        authorisation is named; one frontmatter clause changes.
+      applied:
+        - "009 B1 (maintainer M5): A005 exception for check or confirmation steps with no criterion or an undefined one, when no destructive or irreversible action depends on the result; P003's missing-criterion bound is scoped to an operation step's own criterion and hands check steps to A005; review routes them to A005"
+        - "009 B2 (maintainer M4): R004's exclusion adds degree words describing a metric in a trigger condition without a threshold; review routes the three excluded kinds to A005; how-much-to-act words (适当) stay R004"
+        - "009 C1 (proposal 20, maintainer ruling on RG-15 in 008): R003's 口语腔 list adds the third-person frame that states a tool's function; the repair sentence drops the duplicated subject clause"
+        - "009 T2: P003 names its merge authorisation (an explicit merge request or a step cap; a character cap is not one)"
+        - "009 R4L (maintainer M4): R004's word list adds 条件允许时 (R4-05 cited A005 in 2/9 v6 runs without it; R4-10 「时间允许时」 is the generalisation check)"
+        - "009 F1, T1, T3, T4, T5 (SKILL.md wording only): frontmatter clause 「上下文不足以确定的歧义只报告、不擅自消解」 (maintainer M2); 「记录级别」 → 「级别」; §9 item 1 gains 「应」; 「明确边界」 → 「规则条文写明的边界」; §6 「规则正文」 → 「规则条文」"
+      gold_amendments:
+        - "G-T-101 (maintainer M3): the first terminology invariant accepts raising the co-reference question in 「待确认」 beside unification, per 004 §3; merging 「全量发布」 still fails"
+      not_applied_no_decision:
+        - "M6: 「先别切主吧」 → 「先不要切主」 keeps the strength; no text change"
+        - "Open proposal 26: whether the missing-criterion threshold (破坏性或不可逆) should match P004's guarded operations, which include state-changing ones"
   rule_count: 29
   family_counts: {S: 7, A: 5, P: 5, T: 2, L: 4, R: 6}
   level_counts: {MUST: 19, SHOULD: 9, MAY: 1}
@@ -245,8 +263,9 @@ modes:
       finding's 风险 field names the specific different action an operator would take as a result;
       no other escalation, and no de-escalation (004 §6). Where a rule's own text routes an
       undecidable case to A005 (A003 without evidence, L004 with an ambiguous boundary, P002 that
-      cannot be determined, and the undefined states and value-less counts or durations R004 excludes
-      (008 S4)), the finding cites A005 and not the original rule; a P002 finding is for
+      cannot be determined, a check or confirmation step whose criterion is missing (P003, 009 B1), and
+      the undefined states, value-less counts or durations and metric trigger conditions R004 excludes
+      (008 S4, 009 B2)), the finding cites A005 and not the original rule; a P002 finding is for
       an action, object or location the source or context determines but the text omits. A finding
       routed to A005 this way takes A005's level; it is not an escalation (007 E1, E1b).
       Suggested corrections are fragment-level
@@ -638,7 +657,7 @@ rules:
     trigger: "来源存在两种以上读法且导致不同行为，而来源与调用上下文都不足以确定作者意图；或来源缺少执行所需的参数、阈值、接收方、判据。"
     requirement: "保持原有表述不做消歧改写，并在「待确认」中给出：位置、两种（或多种）读法或缺失项、判定所需的信息。review 模式下作为一条 finding 报告。"
     prohibition: "静默选定一种读法；用改写把歧义掩盖成流畅句子；补出缺失参数以使文本看起来可执行；在同一处既消歧又替换关键动词，使两处改动无法分别审查。"
-    exceptions: "调用方明确授权在指定读法下改写时，按授权执行并在「待确认」中记录所选读法。当一种读法在该领域中不可能成立（不对应任何可执行操作）时，不算真歧义。"
+    exceptions: "调用方明确授权在指定读法下改写时，按授权执行并在「待确认」中记录所选读法。当一种读法在该领域中不可能成立（不对应任何可执行操作）时，不算真歧义。检查或确认步骤没有给出判据或判据含义未定（「确认无异常」），而没有破坏性或不可逆操作取决于它的结果时，不提出、不报告（009 B1，维护者 M5；回归：P3-01、P3-02、P3-05，边界 PR-07）。"
     invariant: "ambiguity-conserved — 未获证据的歧义在输出中仍然存在，且被显式报告。"
     detection: semantic
     examples:
@@ -747,7 +766,7 @@ rules:
     scope: [rewrite, translate, review, author]
     modes: [strict, standard, review]
     trigger: "来源给出了某个步骤的成功判据、等待条件或验证方式。"
-    requirement: "成功判据应与它所验证的步骤保持绑定，并保持其阻塞性质：「直到…为止再继续」必须仍然是继续的前提。来源把验证单独列为一个步骤时：未获压缩授权则该步骤保持独立；调用方授权合并步骤时可以并入相邻步骤，但合并后它必须仍是由操作者执行、位于被守护动作之前、且逐项列全原有判据的确认动作（D004）。来源未给出判据时不得虚构，可在「待确认」中提出缺失。"
+    requirement: "成功判据应与它所验证的步骤保持绑定，并保持其阻塞性质：「直到…为止再继续」必须仍然是继续的前提。来源把验证单独列为一个步骤时，该步骤保持独立；调用方授权合并步骤（明确要求合并，或限定步骤数）时可以并入相邻步骤，但合并后它必须仍是由操作者执行、位于被守护动作之前、且逐项列全原有判据的确认动作（D004；009 T2，回归：PR-09、PC-01）。来源未给出操作步骤自身的成功判据时不得虚构；只有当该步是破坏性或不可逆操作、且后续步骤的安全性取决于它是否成功，才在「待确认」第 2 类中提出，其余操作步骤缺少判据不提出。检查或确认步骤缺少判据按 A005 处理（009 B1；回归：P3-03、P3-04）。"
     prohibition: "把阻塞条件移到附注、脚注或文末；把「确认 X 后再继续」改写为「随后可继续」；把祈使的验证动作改写为对系统行为的描述；为步骤补写来源没有的验收标准；合并步骤时把校验改写为不需要操作者动作的状态描述（「节点就绪后加入路由表」），或丢掉其中任一判据——两者都是删除校验点（D004）。"
     exceptions: "判据的呈现位置可以变化（正文、表格、检查清单），只要仍绑定同一步骤且保持阻塞性质。调用方授权压缩或合并步骤属于 R001 意义上的归因；本规则不要求独立的验证步骤在获授权时仍保持独立（D004 撤回了该条款）。"
     invariant: "verification-binding — (步骤, 判据, 是否阻塞) 三元组不变。"
@@ -1149,8 +1168,8 @@ rules:
     level: SHOULD
     scope: [rewrite, translate, review, author]
     modes: [strict, standard, review]
-    trigger: "文本含译文腔或口语腔。译文腔：无必要的被动式、名词化赘语（进行／作出／予以 + 动词）、过长的「的」字串、英语从句语序残留（「由于…的事实」「在…的情况下」滥用），或直译的连接词。口语腔（008 S3，所有适用文体）：客套话（「麻烦您」）、语气词（「啊」「嘛」）、情绪化感叹（「哎呀！」）、口语填充（「一下」）、把读者当作谈话对象的引导（「这个工具可以帮你」）。"
-    requirement: "在语义完全不变的前提下，使用中文技术写作的常规表达。去除这些缺陷时，工具描述改为直接陈述功能（「获取…」「用于…」），不以使用者作句子主语（「调用者可以…」）（008 S3；回归：G-R-010、RG-03、RG-08、RG-10、RG-15）。"
+    trigger: "文本含译文腔或口语腔。译文腔：无必要的被动式、名词化赘语（进行／作出／予以 + 动词）、过长的「的」字串、英语从句语序残留（「由于…的事实」「在…的情况下」滥用），或直译的连接词。口语腔（008 S3，所有适用文体）：客套话（「麻烦您」）、语气词（「啊」「嘛」）、情绪化感叹（「哎呀！」）、口语填充（「一下」）、把读者当作谈话对象的引导（「这个工具可以帮你」）、工具描述中以使用者作主语陈述功能的句式（「调用者可以…」，009 C1，维护者 008 RG-15 裁决）。"
+    requirement: "在语义完全不变的前提下，使用中文技术写作的常规表达。去除这些缺陷时，工具描述改为直接陈述功能（「获取…」「用于…」）（008 S3；009 C1 去掉了与缺陷项重复的「不以使用者作句子主语」；回归：G-R-010、RG-03、RG-08、RG-10、RG-15，边界 RG-12、RG-16、RG-17、RG-22）。"
     prohibition: "为求正式而使用「被…所」；用「进行处理」代替「处理」；保留英语原文的从句语序；把简单谓语改写成「对…进行…操作」；去口语腔时把口语禁止（「千万不要」「可别」）改作「不得」「禁止」（008 S3；回归：RG-06、RG-13、RG-18、G-R-009）。"
     exceptions: "被动用于突出受事、施事未知、或施事已在同句给出时是自然的技术表述。术语内部的固定搭配不改。去口语腔时禁止的强度不变：口语禁止保留原词或改作「切勿」。调用方约定的语气优先（维护者 Q2；RG-05 无需条文即通过）。本规则永远低于 S 族：任何自然度改进一旦改变不变量即作废（D001）。本规则描述的是缺陷，不是改写许可：来源已有的译文腔或口语腔只在本规则触发处修复，取能去除该缺陷的最小改动（R001）；工具描述的修复形式是这一点的特别规定；不含该缺陷的文本不授权重写（005 结构性缺口 2）。"
     invariant: "meaning-under-rendering — 渲染改动前后，S、A、P、T、L 各族不变量全部不变。"
@@ -1181,13 +1200,13 @@ rules:
     level: SHOULD
     scope: [author, rewrite, review]
     modes: [strict, review]
-    trigger: "目标文本是规范性指令（agent 指令、SOP、策略、门禁条件），且其判定条件由无判据词承担，包括承担义务本身的情态模糊词（004 §8）。无判据词是表示程度、时机或裁量的开放类：尽量、尽可能、尽快、最好、适当、必要时、视情况、一般来说、合理等（008 S2，维护者 Q3）。未定义的状态（「服务稳定」「流量正常」）与未给出具体值的次数或时长（「多次」「一段时间」）不属此类，按 A005 处理（008 S2、S4；回归：PR-07、R4-01–R4-03）。"
+    trigger: "目标文本是规范性指令（agent 指令、SOP、策略、门禁条件），且其判定条件由无判据词承担，包括承担义务本身的情态模糊词（004 §8）。无判据词是表示程度、时机或裁量的开放类：尽量、尽可能、尽快、最好、适当、必要时、视情况、条件允许时、一般来说、合理等（008 S2，维护者 Q3；条件允许时由 009 R4L 列入，维护者 M4，回归 R4-05、R4-10）。未定义的状态（「服务稳定」「流量正常」）、未给出具体值的次数或时长（「多次」「一段时间」），以及用程度词描述运行指标而未给出阈值的触发条件（「延迟较高时」「负载过高时」）不属此类，按 A005 处理（008 S2、S4；009 B2，维护者 M4；回归：PR-07、R4-01–R4-09）。表示做多少的程度词（「调到适当的值」）仍属此类（R4-08）。"
     requirement: "author 模式下，规范性条件应给出可判定的触发条件：阈值、状态或事件。rewrite 模式下不得补出来源没有的判据，应在「待确认」中提出；无判据词承担义务时，报告其可能的两种以上强度并在第四栏给出建议，然后停手，由作者决定（D003，003 §5，004 §8）。规范强度词（必须／应／可以）在同一文档内应保持稳定用法（000-design.md §26）。"
     prohibition: "在改写中把无判据词替换为具体阈值（那是 S002 违规）；在同一文档内让「应」时而表示义务、时而表示建议；把目标文档中限定观测事实的普通汉语副词当作违规删除。"
     exceptions: "本规则只适用于规范性指令文本。目标文档中对观测事实的限定（「该接口通常在 100 ms 内返回」）不受限制（000-design.md §26 末段）。"
     invariant: "criterion-decidable — 每个规范性条件都对应一个可观测的判定依据，或被显式标记为未定义。"
     detection: mixed
-    detection_note: "确定性层可对无判据词表（尽量、尽可能、尽快、最好、适当、必要时、视情况、一般来说、合理、酌情）做字符串检查并给出 WARNING，词表是开放类的已知成员，不是封闭清单；该词是否承担判定条件、附近是否已定义判据，由语义层判定。"
+    detection_note: "确定性层可对无判据词表（尽量、尽可能、尽快、最好、适当、必要时、视情况、条件允许时、一般来说、合理、酌情）做字符串检查并给出 WARNING，词表是开放类的已知成员，不是封闭清单；该词是否承担判定条件、附近是否已定义判据，由语义层判定。"
     examples:
       positive:
         source_zh: "（author 模式；调用方素材：SLO 规定服务异常后 15 分钟内恢复，超时升级至平台组）服务异常时应尽量快速恢复。"

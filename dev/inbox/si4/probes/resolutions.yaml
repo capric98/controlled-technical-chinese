@@ -1,0 +1,88 @@
+# si4 — maintainer decisions. probes.yaml is left as registered; this file supplies what the maintainer
+# fixed. Asked through the session's question tool; answers verbatim.
+#
+# Asked 2026-10-29 while the baseline runs were in flight, before any si4 output had been read.
+#
+# M1 「si4 的模型配置：候选运行和评判照旧用 Opus 5.5。三个独立审阅（对抗、冷解码、自然度）用什么？」
+#    → "全部 Opus 5.5 (Recommended)": as in si2 and si3, every model call stays on Claude Opus 5.5.
+#
+# M2 「frontmatter 的「歧义只报告不擅自消解」与 §5 矛盾（有证据时应消歧）。si3 的 8 次自审有 5 次报告它，
+#    si2 也报告过。它被 compare_skill.py 的硬门禁冻结。本轮要解冻吗？」
+#    → "只解冻这一处 (Recommended)": the clause becomes 「上下文不足以确定的歧义只报告、不擅自消解」; the rest
+#      of `description` stays byte-identical, and the gate allows only that one difference.
+#
+# M3 「G-T-101 自 r1 起每轮都失败：金标要求把「灰度发布／金丝雀发布／小流量验证」统一成一个术语，但已接受的
+#    决定 004 §3 规定同指不明确时报告、不合并，技能照此在「待确认」中提问。怎么处理？」
+#    → "修订金标对齐 004 (Recommended)": raising the co-reference question in 「待确认」 without merging
+#      「全量发布」 also passes; merging 「全量发布」 into the gray-release term still fails. The revision and
+#      its reason are recorded with the case.
+decisions:
+- id: M1
+  answer: all-opus
+- id: M2
+  answer: unfreeze-one-clause
+  from: 歧义只报告不擅自消解
+  to: 上下文不足以确定的歧义只报告、不擅自消解
+- id: M3
+  answer: amend-gold
+  case: G-T-101
+
+# Asked 2026-10-29 after the baseline probe pass (si4-probe-base-r*), before any candidate was built.
+#
+# M4 「R4-04：SOP 中「CPU 负载过高时，扩容 `api` 节点」在 3 次审阅里引了 A005、R004、A005，出现分叉。
+#    「过高」这类给可测量指标定了个没写出来的阈值的程度词，归哪条？」
+#    → "归 A005（缺少阈值） (Recommended)": like 「多次」「一段时间」, what is missing is a value. R004 keeps
+#      the words that leave whether, when or how much to act to the reader (尽量、尽快、及时、必要时、视情况、
+#      条件允许时).
+# M5 「P3-01：runbook 末步「检查 `search-api` 的运行情况」没有判据，且后面没有步骤依赖它。改写时 3/3 不提
+#    （按 CTC-P003 的限制），审阅时 2/3 经 A005 报 ERROR。应统一成哪种？」
+#    → "审阅也按 P003 的限制 (Recommended)": a missing verification method or criterion is reported only
+#      for a destructive or irreversible step that later steps depend on, in rewrite and review alike;
+#      A005 does not take these gaps (proposal 15).
+# M6 「RG-20：「先别切主吧，等 DBA 确认后再操作」3/3 被改成「先不要切主」，去掉了「吧」。这算保持强度吗？」
+#    → "算保持，不改文本 (Recommended)": the 「吧」 only softens; 「先不要」 is still a colloquial-strength
+#      prohibition, below 「不得」「禁止」.
+resolutions:
+- id: R4-04
+  decision: M4
+  expect: 「负载过高」以 CTC-A005 报告；三次运行一致；不出现 CTC-R004。
+  fail_if: 任一运行以 CTC-R004 报告「负载过高」；或未报告。
+- id: P3-01
+  decision: M5
+  expect: unchanged from probes.yaml — no CTC-A005 or CTC-P003 finding on step 3.
+- id: RG-20
+  decision: M6
+  expect: 不升格为「不得」「禁止」「必须」「严禁」「须」；「先不要切主」与保留「吧」都算通过。
+- id: RG-21
+  decision: none needed
+  note: rendered 「配置同步已完成」 3/3 on the baseline; the runs agree, so the product question does not arise.
+- id: R4-05r
+  decision: none needed
+  note: the fourth (strength) column appears 3/3 on the baseline; the runs agree.
+- id: PC-01
+  decision: none needed
+  note: three steps kept 3/3 on the baseline, with the cap reported as category 7; the runs agree that a
+        character cap is not a merge authorisation.
+
+# Scoring readings, recorded rather than silently re-scored. The registrations of P3-03 and R4-06 say
+# 「同一运行在该处同时引…」 meaning the same gap. In P3-03 base r2 the CTC-A005 finding quotes step 1 but
+# is about a different gap (where the write traffic is before the column is dropped); the criterion gap
+# is CTC-P003 in all three runs. In R4-06 base r1 the CTC-A005 finding quotes 「及时清理…」 but is about
+# what 「清理」 means; 「及时」 itself is CTC-R004 in all three runs. Both are scored on the gap. The
+# parser missed P3-03 r1 and R4-05 r3 (a 「**CTC-P003 · ERROR**（…）」 header with trailing text); both were
+# read by hand and score.py now parses that header.
+
+# Added 2026-10-29 when scoring v3. M4's answer names 条件允许时 among the words R004 keeps, which settles
+# R4-05's product question; it was consistent R004 on base and v1, so the registration's "agreement"
+# reading and M4's reading coincided until v3.
+- id: R4-05
+  decision: M4
+  expect: 「条件允许」以 CTC-R004 报告；三次运行一致。
+  fail_if: 任一运行以 CTC-A005 报告「条件允许」；或未报告。
+
+# Added 2026-10-29 at acceptance of decision 009. The maintainer accepted v8 with the recommended answers to
+# the acceptance items: M5's extension confirmed, F1 kept as M2 approved it, items 3 and 4 left open.
+resolutions_at_acceptance:
+- id: P3-05
+  decision: acceptance item 1
+  expect: unchanged from probes.yaml — no CTC-A005 or CTC-P003 finding on step 3; expect_basis now accepted.
