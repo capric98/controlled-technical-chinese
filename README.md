@@ -91,7 +91,7 @@ uv run tools/mutate.py --from eval/gold --out eval/mutations/generated.yaml
 
 `SKILL.md` 通过了格式、语义、歧义、自然度以及自托管门禁。在来自三个模型的 147 个输出中，未出现任何确定性失败，语义通过率为 80–88%，由 45 个单缺陷变异体构成的变异语料库检出率为 45/45。完整评估见 [`eval/reports/release-gates.md`](./eval/reports/release-gates.md)。
 
-以上结果测于 2026-08-29 的版本。当前的 `SKILL.md` 在 si1 合并结果（[决策 006](./docs/decisions/006-si1-merged-iteration.md)）上依次做了三轮迭代：
+以上结果测于 2026-08-29 的版本。当前的 `SKILL.md` 在 si1 合并结果（[决策 006](./docs/decisions/006-si1-merged-iteration.md)）上依次做了四轮迭代：
 
 - si2（[决策 007](./docs/decisions/007-si2-review-routing-and-p002-boundary.md)，[报告](./eval/reports/si2-summary.md)）：审阅中无法确定的问题统一按 `CTC-A005` 报告，`CTC-P002` 只针对真实的缺口触发。
 - si3（[决策 008](./docs/decisions/008-si3-register-r004-class-status-scope.md)，[报告](./eval/reports/si3-summary.md)）：
@@ -102,8 +102,12 @@ uv run tools/mutate.py --from eval/gold --out eval/mutations/generated.yaml
   - 检查或确认步骤缺少判据、且没有破坏性或不可逆操作取决于它时，改写与审阅都不再提出；
   - 用程度词描述运行指标而未给出阈值的触发条件（「负载过高时」）统一按 `CTC-A005` 处理；
   - 理顺自托管反复报告的术语与 frontmatter 措辞。
+- si5（[决策 010](./docs/decisions/010-si5-permission-description-exemptions-guarded-threshold.md)，[报告](./eval/reports/si5-summary.md)）：
+  - 只放宽操作者限制的许可条件（「若…，也可以…」）和只描述系统行为的文本，缺少阈值时不再提出或报告；许可的是破坏性、不可逆或改变外部状态的操作，或免除了来源规定的义务时，照常报告；
+  - 缺判据的报告门槛与 `CTC-P004` 守护的操作对齐（含重启、扩缩容、发布）；
+  - 可由前文唯一确定的省略对象保持省略；审阅中同指不明的术语差异按 `CTC-T001` 报告；全文统一用「规范强度」。
 
-对照 gold 语料库，在只用 Claude Opus 5.5 运行和评判的条件下，最终候选的各次完整运行通过 54–55/56，没有确定性失败；唯一每次都失败的是自 r1 起就失败的 G-A-002。si3 为 53/56，但单次运行之间本身会相差两到三个用例。G-T-101 的金标按决策 009 修订，与决策 004 §3 对齐。
+对照 gold 语料库，在只用 Claude Opus 5.5 运行和评判的条件下，si5 候选的完整运行通过 56/56，没有确定性失败，自然度均分 4.70；si4 的各次完整运行为 53–55/56，单次运行之间本身会相差两到三个用例。G-T-101 的金标按决策 009 修订，与决策 004 §3 对齐；自 r1 起每次都失败的 G-A-002 按决策 010 修订。
 
 这**不是**经过验证的发布版本。gold 语料库经过了 agent 审阅以及两个模型之间的交叉审计，但**未经人工审阅**，而所有其他门禁都是对照该语料库进行衡量的——对照未经审阅的预期来衡量，门禁反映的是预期本身，而不是产物。这是当前的阻塞项。与此并行记录了三个更小范围的差距：因缺少第四个模型，GPT 的输出未被裁决；一个模型的扫描覆盖了 56 个用例中的 35 个；反向解码阶段是由 Claude 阅读 Claude 渲染出的散文。
 

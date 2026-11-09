@@ -1,0 +1,3471 @@
+judge: claude-opus-5-5
+prompt: judge-semantic.v1.md
+note: si5 verdicts merged from per-run files; outputs in dev/inbox/si5/runs/outputs.jsonl
+  (field run).
+runs:
+  si5-gold-base-r1:
+  - case_id: G-A-002
+    model: claude
+    invariant_verdicts:
+    - kind: instruction
+      verdict: preserved
+      source_evidence: 续期失败时通知租户管理员并回滚到上一版本证书
+      output_evidence: '**CTC-A005 | ERROR**
+
+
+        - **位置**：「续期失败时通知租户管理员并回滚到上一版本证书」'
+      reasoning: 输出是一条问题清单，包含位置、问题、风险和建议修改四项。它没有改写参数说明，还明确写了「保留原句」。示例措辞「恢复为续期前在用的证书」只是建议，不构成主体改写。
+    - kind: over-edit
+      verdict: preserved
+      source_evidence: 由续期服务向 CA 发起续期请求
+      output_evidence: ''
+      reasoning: 输出没有把「由续期服务向 CA 发起续期请求」报告为施事缺失或被动语态问题，也没有用其他方式标记这一句。唯一的发现针对另一处文本。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings:
+    - finding: CTC-A005 ERROR：「上一版本证书」有两种读法：(a) 恢复为续期前在用的证书；(b) 回退到当前证书之前的那一版
+      legitimate: weak
+      judgment: 「回滚」本身意味着撤销一次已经发生的变更，所以自然读法是 (a)。读法 (b) 要求在什么都没替换的情况下「回滚」，比较牵强。输出称「两种读法下，读者对开启
+        auto_renew 后的影响判断相反」，夸大了风险。续期失败时新证书是否已经部署，确实可以追问，但原文用了「回滚」一词，基本已经交代了这一点。这条发现价值低，ERROR
+        级别偏高，更接近误报。不过它没有触及本记录的任何不变式，所以不影响 overall。
+    naturalness: 4
+    naturalness_note: 清单结构清楚，用语专业。风险段对读法 (b) 的推演有些过度。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-010
+    model: claude
+    invariant_verdicts:
+    - kind: fact
+      verdict: preserved
+      source_evidence: 这个工具能够允许调用者去获取指定时间范围内的系统审计日志，你可以用它来根据用户 ID 和操作类型进行日志筛选
+      output_evidence: 获取指定时间范围内的系统审计日志，支持按用户 ID 和操作类型筛选
+      reasoning: 核心功能（获取指定时间范围内的系统审计日志）完整保留，两个过滤维度「用户 ID」「操作类型」也都保留。「能够允许调用者」「你可以用它来」改成能力陈述「支持」，许可的操作集合不变。没有新增原文没有的内容。
+    - kind: threshold
+      verdict: preserved
+      source_evidence: 单次调用最多能够为你返回 100 条记录
+      output_evidence: 单次调用最多返回 100 条记录
+      reasoning: 数值 100、上限语义「最多」和计量范围「单次调用」都精确保留。
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 这个工具能够允许调用者去获取……你可以用它来根据用户 ID 和操作类型进行日志筛选，单次调用最多能够为你返回 100
+        条记录
+      output_evidence: 获取指定时间范围内的系统审计日志，支持按用户 ID 和操作类型筛选，单次调用最多返回 100 条记录。
+      reasoning: 「这个工具能够允许」「你可以用它来」「为你返回」都已删除，轻动词「进行日志筛选」改成「筛选」。改写后以动宾结构「获取……」开头，是声明式的工具契约写法。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 简洁地道，符合中文工具说明的惯用写法。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-012
+    model: claude
+    invariant_verdicts:
+    - kind: condition
+      verdict: preserved
+      source_evidence: 磁盘空间不足时，旧快照会被自动清理。
+      output_evidence: 保留原表述，请作者补充触发阈值和对应的卷或分区
+      reasoning: 这是审阅模式，输出没有改写原文，并明确建议保留原表述。「磁盘空间不足时」触发「自动清理旧快照」的绑定关系没有被改动。
+    - kind: rendering
+      verdict: unclear
+      source_evidence: 旧快照会被自动清理
+      output_evidence: '**位置**：「磁盘空间不足时」 …… **位置**：「旧快照」'
+      reasoning: 不变式写明的失败触发条件是报告「禁止使用被动语态」或「缺少明确施事者」，输出两者都没有报告，被动句「会被自动清理」也没有被标记。但该不变式同时规定正确行为是输出空列表，而实际输出了两条
+        ERROR 级发现（触发阈值未定义、「旧快照」范围未定义）。按评审规则 5，额外的发现只有在被标记文本确实无歧义且合规时才算误报。这两条是否合规，取决于技能规则中
+        CTC-R004 是否真有输出所引的排除项「用程度词描述运行指标而未给出阈值的触发条件」，以及该排除项是否把这类情况划给 CTC-A005。缺失的证据：技能中
+        CTC-R004 和 CTC-A005 的原文。如果该排除项存在，这两条发现有依据，用例的预期需要重新校准；如果不存在，它们是 ERROR 级误报，本用例应判失败。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings:
+    - finding: CTC-A005 ERROR：「磁盘空间不足时」未给出阈值，也未说明卷或分区
+      legitimate: unclear
+      judgment: 对于不可逆的删除操作，触发条件不明确确实会影响读者的判断，所以这条在实质上可以成立。但用例作者把原文定为合规，并设置了 over_edit_trap。合法性取决于输出所引的
+        CTC-R004 排除项是否真实存在，这里无法核实。
+    - finding: CTC-A005 ERROR：「旧快照」的清理范围和停止条件未定义
+      legitimate: unclear
+      judgment: 三种读法 (a)/(b)/(c) 确实会导致被删除的快照集合不同，这是可辩护的规格欠缺。但它属于内容不完整，不是语言歧义。用例把原文判为合规，在缺少技能规则原文的情况下，无法确定这条是否越出了
+        CTC-A005 的范围。
+    naturalness: 4
+    naturalness_note: 发现条目写得清楚，而且自我约束（「不得自行填入数值」）。是否该报告这两条，存疑。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-S-001
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: 因此建议先在只读副本上验证执行计划
+      output_evidence: 因此建议先在只读副本上验证执行计划
+      reasoning: 正文与源文逐字相同。「建议」仍是推荐，没有被改成强制前提。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 也可以推迟到下一维护窗口
+      output_evidence: 也可以推迟到下一维护窗口
+      reasoning: 正文与源文逐字相同。「也可以」仍是许可，没有被改成义务。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings:
+    - finding: 若延迟预算紧张 | 「紧张」没有可判定的阈值
+      legitimate: false
+      note: 正文没有改动，所以这不算过度编辑。但这一条是误报。「也可以推迟」只授予许可， 推迟永远是安全的选择，默认路径（在低流量窗口执行）也不需要满足这个条件才能安全进行。
+        这一步的安全不取决于「紧张」怎么判定，所以记为 spurious_pending_item。 另外，记录里没有给出 skill 列出的七个类别，无法核对这一条是否属于其中某类；
+        就算属于某一类，按「安全是否取决于它」这一条也已经不成立。
+    naturalness: 5
+    naturalness_note: 正文就是源文，读起来自然。「待确认」一条的格式清楚。
+    overall: pass
+    failure_kinds:
+    - spurious_pending_item
+  - case_id: G-T-101
+    model: claude
+    invariant_verdicts:
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 新版本先以灰度发布上线
+      output_evidence: 灰度发布／金丝雀发布／小流量验证 | 无法确定三者是否指同一阶段
+      reasoning: 三个术语保留原样，没有合并。「待确认」里明确提出了三者是否同指的问题， 这是不变量允许的第二种合格做法（决定 004 §3）。
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+      output_evidence: 4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+      reasoning: 「全量发布」原样保留，没有被并入灰度类术语，所以不存在错误归并。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 覆盖 5% 流量
+      output_evidence: 覆盖 5% 流量
+      reasoning: 正文逐字相同。5%、25%、50%、每 5 分钟、24 小时这些数值和单位都没有增删或改动。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings:
+    - finding: 小流量验证通过 | 未给出验证通过的判据
+      legitimate: true
+      note: 放量要以验证通过为前提，但源文没有给出判据，这一步的安全取决于它。
+    - finding: 灰度发布／金丝雀发布／小流量验证 | 是否指同一阶段
+      legitimate: true
+      note: 这正是不变量要求提出的同指问题。
+    - finding: 按 25%、50% 逐步放量 | 未给出每档推进条件
+      legitimate: true
+      note: 源文没有给出各档的推进判据或停留时长，而放量的安全取决于这些条件。
+    naturalness: 5
+    naturalness_note: 正文就是源文。「待确认」各条表述清楚，都能落到具体操作上。
+    overall: pass
+    failure_kinds: []
+  si5-gold-base-r2:
+  - case_id: G-A-002
+    model: claude
+    invariant_verdicts:
+    - kind: instruction
+      verdict: preserved
+      source_evidence: 续期失败时通知租户管理员并回滚到上一版本证书
+      output_evidence: '**CTC-A005 · ERROR**
+
+
+        - **位置**：「续期失败时通知租户管理员并回滚到上一版本证书」'
+      reasoning: 输出是一条问题清单，含位置、问题、风险、建议修改四项，没有改写整段参数说明。建议修改写的是「保持原文，请作者确认」，没有给出替换文本。
+    - kind: over-edit
+      verdict: preserved
+      source_evidence: 由续期服务向 CA 发起续期请求
+      output_evidence: ''
+      reasoning: 输出没有把「由续期服务向 CA 发起续期请求」当作施事缺失或被动语态问题报告，唯一的发现针对的是另一句。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings:
+    - finding: CTC-A005 · ERROR：「上一版本证书」指代不明（续期前的当前证书，还是更早的一份证书）
+      legitimate: true
+      note: 原文写的是续期「失败」后「回滚」。续期失败时新证书没有生效，那么回滚的对象和「上一版本」的参照点确实没有交代清楚，两种读法会导致不同的运维判断，所以这不是对一段无歧义、合规文本的误报。建议不改原文、交作者确认，处理方式恰当。只是
+        ERROR 这个严重级别可能偏高，因为这处歧义比较可能被读成「保持现有证书」。严重级别不在本条记录的不变量范围内，不据此判失败。
+    naturalness: 4
+    naturalness_note: 审阅意见清楚，用两种读法加各自风险的结构讲明歧义。风险段最后一句「按读法一理解，则会以为失败后什么都不用做」稍显生硬。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-010
+    model: claude
+    invariant_verdicts:
+    - kind: fact
+      verdict: preserved
+      source_evidence: 获取指定时间范围内的系统审计日志，你可以用它来根据用户 ID 和操作类型进行日志筛选
+      output_evidence: 获取指定时间范围内的系统审计日志，支持按用户 ID 和操作类型筛选
+      reasoning: 核心功能（指定时间范围内的系统审计日志）和两个筛选维度（用户 ID、操作类型）都保留了，没有新增也没有删除。
+    - kind: threshold
+      verdict: preserved
+      source_evidence: 单次调用最多能够为你返回 100 条记录
+      output_evidence: 单次调用最多返回 100 条记录
+      reasoning: 数值 100、上限语义「最多」和作用范围「单次调用」都精确保持了。
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 这个工具能够允许调用者去获取……你可以用它来……进行日志筛选……能够为你返回
+      output_evidence: 获取指定时间范围内的系统审计日志，支持按用户 ID 和操作类型筛选。单次调用最多返回 100 条记录。
+      reasoning: 交互口语套话和轻动词「进行日志筛选」都去掉了，改成以动宾结构开头的声明式工具契约描述。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 简洁，符合中文 API／工具文档的惯用写法。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-012
+    model: claude
+    invariant_verdicts:
+    - kind: condition
+      verdict: preserved
+      source_evidence: 磁盘空间不足时，旧快照会被自动清理。
+      output_evidence: 未发现违规
+      reasoning: 输出没有改写原文，「磁盘空间不足时」触发「自动清理旧快照」的条件关系保持不变。
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 旧快照会被自动清理
+      output_evidence: 未发现违规
+      reasoning: 没有误报被动语态问题或施事缺失问题，这正是审阅模式下的正确行为。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 正确地只给出「未发现违规」，没有多余内容。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-S-001
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: 因此建议先在只读副本上验证执行计划
+      output_evidence: 因此建议先在只读副本上验证执行计划
+      reasoning: 正文与原文逐字相同。「建议」仍是推荐，没有改成强制前提。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 也可以推迟到下一维护窗口
+      output_evidence: 也可以推迟到下一维护窗口
+      reasoning: 正文与原文逐字相同。「也可以」仍是许可，没有改成义务。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings:
+    - finding: 若延迟预算紧张 | 「紧张」没有给出阈值，无法判断何时可以推迟到下一维护窗口
+      legitimate: false
+      judgment: 这一条件只控制一项可选的许可，也就是推迟这项保守操作。默认路径是在低流量窗口执行， 这条路径本身完整、安全。阈值缺失不会让任何步骤变得不安全，因为操作员即使没有阈值，
+        也始终可以选择不推迟。这一条的安全性不依赖该阈值，所以判为误报的待确认项。 这些记录里没有列出 skill 的七个类别，所以本判定只依据「安全是否依赖该项」这一标准。
+    naturalness: 5
+    naturalness_note: 正文就是原文，本来就合规，读起来像称职的中文技术写作者所写。
+    overall: pass
+    failure_kinds:
+    - spurious_pending_item
+  - case_id: G-T-101
+    model: claude
+    invariant_verdicts:
+    - kind: terminology
+      verdict: preserved
+      source_evidence: '1. 新版本先以灰度发布上线，覆盖 5% 流量。
+
+        2. 金丝雀发布期间每 5 分钟检查一次错误率。
+
+        3. 小流量验证通过后'
+      output_evidence: 灰度发布／金丝雀发布／小流量验证 | 无法确定三者是否指同一阶段
+      reasoning: 输出保留了三个原术语，并在「待确认」中提出三者是否同指。这正是该不变量允许的第二种合格做法。
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+      output_evidence: 4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+      reasoning: 「全量发布」没有改动，也没有被归并进灰度类术语。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      output_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      reasoning: 所有数值和单位都与原文一致，没有增删或改动。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings:
+    - finding: 小流量验证通过 | 未给出「通过」的判据，放量取决于这一判定
+      legitimate: true
+      judgment: 放量能否进行取决于这个没有定义的判定，步骤 3 的安全性直接依赖它。
+    - finding: 每 5 分钟检查一次错误率 | 未给出错误率的阈值，也没有说明超过阈值时的处置动作
+      legitimate: true
+      judgment: 没有阈值和处置动作，这项检查就无法据以暂停放量或回滚，属于与安全相关的缺口。
+    naturalness: 4
+    naturalness_note: 正文与原文相同。「待确认」各项清楚、具体，但第一项把同指问题和检查时间范围两个问题合在了一条里。
+    overall: pass
+    failure_kinds: []
+  si5-gold-base-r3:
+  - case_id: G-A-002
+    model: claude
+    invariant_verdicts:
+    - kind: instruction
+      verdict: preserved
+      source_evidence: 续期失败时通知租户管理员并回滚到上一版本证书
+      output_evidence: '- **建议修改**：保持原表述，先向作者确认'
+      reasoning: The output is a findings list with rule, severity, location, problem,
+        risk and suggestion. It does not rewrite the parameter description and says
+        to keep the original wording.
+    - kind: over-edit
+      verdict: preserved
+      source_evidence: 由续期服务向 CA 发起续期请求
+      output_evidence: '- **位置**：「续期失败时通知租户管理员并回滚到上一版本证书」'
+      reasoning: The output does not report the explicit actor as missing, and it
+        does not flag passive voice. Its only finding is about a different clause.
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings:
+    - finding: CTC-A005 ERROR：「上一版本证书」可指续期前正在使用的证书或当前证书之前的那一版；回滚对象与触发阶段不确定
+      legitimate: partial
+      judgment: 'The two-reading claim is weak. In a rollback context, "上一版本" normally
+        means the certificate in use before the renewal attempt, and the second reading
+        (the version before the current one) is a stretch. The second point has some
+        merit: a failed CA request leaves nothing to roll back, so the rollback implies
+        a later failure stage that the source does not specify. The text is not fully
+        unambiguous, so this does not count as a clear false positive under rule 5.
+        The ERROR severity is overstated. The curator should check whether this belongs
+        in expected_issues.'
+    naturalness: 4
+    naturalness_note: Clear, idiomatic technical Chinese. The risk section somewhat
+      dramatises the weaker reading ("更旧、可能已经过期的证书").
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-010
+    model: claude
+    invariant_verdicts:
+    - kind: fact
+      verdict: preserved
+      source_evidence: 获取指定时间范围内的系统审计日志，你可以用它来根据用户 ID 和操作类型进行日志筛选
+      output_evidence: 获取指定时间范围内的系统审计日志，可按用户 ID 和操作类型筛选
+      reasoning: The output keeps the core function (time-range audit-log retrieval)
+        and both filter dimensions. Dropping "调用者" and "你" removes no truth condition.
+    - kind: threshold
+      verdict: preserved
+      source_evidence: 单次调用最多能够为你返回 100 条记录
+      output_evidence: 单次调用最多返回 100 条记录
+      reasoning: The value 100 and the upper-bound meaning of "最多" are kept exactly.
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 这个工具能够允许调用者去获取
+      output_evidence: 获取指定时间范围内的系统审计日志
+      reasoning: The output removes "这个工具能够允许", "你可以用它来" and "为你返回". It replaces the
+        light-verb phrase "进行日志筛选" with "筛选" and opens directly with a verb-object
+        phrase in declarative form.
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: Concise, standard tool-contract phrasing.
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-012
+    model: claude
+    invariant_verdicts:
+    - kind: condition
+      verdict: preserved
+      source_evidence: 磁盘空间不足时，旧快照会被自动清理。
+      output_evidence: '- **建议修改**：保留原表述，向作者确认触发阈值'
+      reasoning: This is a review output and it keeps the original wording. It does
+        not restate or alter the trigger "磁盘空间不足时" → "自动清理旧快照".
+    - kind: rendering
+      verdict: unclear
+      source_evidence: 旧快照会被自动清理
+      output_evidence: '- **位置**：「磁盘空间不足时」'
+      reasoning: 'The output does not commit the specific errors this invariant names:
+        it never reports passive voice or a missing actor, and it leaves the passive
+        construction alone. But the invariant also says the correct behaviour is an
+        empty list, and the output raises two ERROR findings: no threshold for "不足",
+        and no defined scope for "旧". Whether this violates the invariant depends
+        on whether CTC requires explicit thresholds and scope for automatic destructive
+        actions. That evidence is not in the record, so the verdict is unclear.'
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings:
+    - finding: CTC-A005 ERROR：「磁盘空间不足时」未给出阈值，也未说明是否由配置项决定
+      legitimate: unclear
+      judgment: 'This is real underspecification for a destructive automatic action:
+        "不足" has no stated threshold. The trap flag, however, declares the source
+        compliant. If CTC''s threshold-boundary rule does not apply to descriptive
+        prose like this, the finding is a false positive. In either case ERROR severity
+        is inflated.'
+    - finding: CTC-A005 ERROR：「旧快照」未界定清理范围
+      legitimate: unclear
+      judgment: 'The output lists several readings of "旧": a retention age, everything
+        except the newest, or oldest-first until enough space is free. These would
+        delete different snapshots, so the text is not strictly unambiguous. It conflicts
+        with the curator''s premise that the source is compliant, and the curator
+        should resolve that. ERROR severity is inflated.'
+    naturalness: 4
+    naturalness_note: Fluent and well structured. The risk wording ("无法恢复") states
+      as fact something the source does not say.
+    overall: pass
+    failure_kinds: []
+  - case_id: G-S-001
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: 因此建议先在只读副本上验证执行计划
+      output_evidence: 因此建议先在只读副本上验证执行计划
+      reasoning: 这一句与原文完全相同。「建议」仍然是推荐，没有变成强制前提。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 也可以推迟到下一维护窗口
+      output_evidence: 也可以将索引重建推迟到下一维护窗口
+      reasoning: 「也可以」仍然表示许可，没有变成义务。输出补出了宾语「索引重建」，模态强度没有变化。
+    over_edit_verdict: severe
+    review_recall: []
+    unexpected_findings:
+    - item: 若延迟预算紧张 | 「紧张」没有给出可判断的阈值
+      legitimate: unclear
+      note: 待确认项不影响 over_edit 判定。推迟本来就是许可，操作员可以自行决定，所以这一步的安全性可能并不依赖这个阈值；按这个理解，它可能是
+        spurious_pending_item。但记录里没有给出 skill 列出的七个类别，无法确认它是否属于其中某一类，因此不记入 failure_kinds。
+    naturalness: 5
+    naturalness_note: 补出「将索引重建」后行文通顺，但原文本来就合格，不需要这项改动。
+    overall: fail
+    failure_kinds:
+    - over_edit
+  - case_id: G-T-101
+    model: claude
+    invariant_verdicts:
+    - kind: terminology
+      verdict: preserved
+      source_evidence: '1. 新版本先以灰度发布上线，覆盖 5% 流量。
+
+        2. 金丝雀发布期间每 5 分钟检查一次错误率。
+
+        3. 小流量验证通过后'
+      output_evidence: 灰度发布／金丝雀发布／小流量验证 | 三个称呼是否指同一阶段无法确定
+      reasoning: 输出保留了三个原术语，并在「待确认」中提出它们是否同指。这是该不变量明确允许的第二种合格做法（报告，不合并）。
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+      output_evidence: 4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+      reasoning: 「全量发布」没有改动，也没有并入灰度类术语。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 覆盖 5% 流量 / 每 5 分钟 / 按 25%、50% / 24 小时
+      output_evidence: 覆盖 5% 流量 / 每 5 分钟 / 按 25%、50% / 24 小时
+      reasoning: 正文与原文一致，所有数值和单位都没有增删或改动。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings:
+    - item: 小流量验证通过后 | 没有给出验证通过的判据
+      legitimate: true
+      note: 第 3 步放量直接取决于验证结果，但原文没有给出通过判据。这是真实存在的缺口。由于记录里没有那七个类别，无法核对类别归属。
+    - item: 每 5 分钟检查一次错误率 | 没有给出错误率的判定阈值
+      legitimate: true
+      note: 检查必须有阈值和超限动作才有意义，它们关系到能否安全放量。
+    - item: 按 25%、50% 逐步放量 | 没有给出各档之间继续放量的条件
+      legitimate: true
+      note: 放量的安全性取决于各档之间的前提条件。这一项与上面的「通过判据」有部分重叠，但覆盖的是后续各档，不是重复。
+    naturalness: 5
+    naturalness_note: 正文没有改动。待确认项写得清楚、具体。
+    overall: pass
+    failure_kinds: []
+  si5-gold-v1-r1:
+  - case_id: G-A-002
+    model: claude
+    invariant_verdicts:
+    - kind: instruction
+      verdict: preserved
+      source_evidence: 开启后，证书到期前 7 天由续期服务向 CA 发起续期请求；续期失败时通知租户管理员并回滚到上一版本证书。
+      output_evidence: 未发现违规
+      reasoning: The output is an empty findings list. It does not rewrite the parameter
+        description, so it meets the review-mode output contract. With expected_issues
+        empty, there were no fields such as location or suggested fix to fill in.
+    - kind: over-edit
+      verdict: preserved
+      source_evidence: 由续期服务向 CA 发起续期请求
+      output_evidence: 未发现违规
+      reasoning: The output does not report the explicitly stated actor as missing,
+        and it raises no passive-voice issue. There is no false positive.
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: The output is a single standard review conclusion and contains
+      no rewritten text. The wording is concise and standard.
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-010
+    model: claude
+    invariant_verdicts:
+    - kind: fact
+      verdict: preserved
+      source_evidence: 获取指定时间范围内的系统审计日志，你可以用它来根据用户 ID 和操作类型进行日志筛选
+      output_evidence: 获取指定时间范围内的系统审计日志，可按用户 ID 和操作类型筛选
+      reasoning: The core function, the time-range scope, and both filter dimensions
+        (user ID and operation type) are all kept. No information is added or dropped.
+    - kind: threshold
+      verdict: preserved
+      source_evidence: 单次调用最多能够为你返回 100 条记录
+      output_evidence: 单次调用最多返回 100 条记录
+      reasoning: The value 100, the upper-bound meaning of 最多, and the 单次调用 scope
+        are all exactly the same as the source.
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 这个工具能够允许调用者去获取……你可以用它来……进行日志筛选……为你返回
+      output_evidence: 获取指定时间范围内的系统审计日志，可按用户 ID 和操作类型筛选，单次调用最多返回 100 条记录。
+      reasoning: The conversational filler is removed, and the light-verb phrase 进行日志筛选
+        becomes the direct verb 筛选. The text now opens with a verb–object phrase,
+        which is the declarative style a tool contract should use.
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: It is concise and natural, matching the usual style of Chinese
+      tool and API descriptions.
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-012
+    model: claude
+    invariant_verdicts:
+    - kind: condition
+      verdict: preserved
+      source_evidence: 磁盘空间不足时，旧快照会被自动清理。
+      output_evidence: 未发现违规
+      reasoning: The output does not change the source, so the link between the trigger
+        condition and the cleanup action is unaffected.
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 旧快照会被自动清理
+      output_evidence: 未发现违规
+      reasoning: The output does not wrongly flag the passive construction or a missing
+        actor. It correctly reports no issue.
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: The output is a standard review conclusion. The source text
+      was correctly left unchanged.
+    overall: pass
+    failure_kinds: []
+  - case_id: G-S-001
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: 因此建议先在只读副本上验证执行计划
+      output_evidence: 因此建议先在只读副本上验证执行计划
+      reasoning: 这句话逐字保留。「建议」仍是推荐，没有变成强制前提。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 若延迟预算紧张，也可以推迟到下一维护窗口
+      output_evidence: 若延迟预算紧张，也可以将索引重建推迟到下一维护窗口
+      reasoning: 「也可以」仍是许可，没有变成义务，所以情态强度不变。
+    over_edit_verdict: severe
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 改写后读起来通顺。但原文已经合规，补出宾语「将索引重建」属于实际文本改动，不是标点或排版上的调整。原文「推迟」的对象可以理解为索引重建，也可以理解为前一句的验证。输出把它定为索引重建，等于替作者做了指代判断，不能算修复了一个已确认的缺陷。
+    overall: fail
+    failure_kinds:
+    - over_edit
+  - case_id: G-T-101
+    model: claude
+    invariant_verdicts:
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 新版本先以灰度发布上线
+      output_evidence: 灰度发布／金丝雀发布／小流量验证 | 无法确定三者是否指同一阶段
+      reasoning: 正文保留了原来的三个术语，并在「待确认」中提出三者是否同指。这符合第二种合格做法。
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 全量发布后保留旧版本实例 24 小时，以便回滚。
+      output_evidence: 全量发布后保留旧版本实例 24 小时，以便回滚。
+      reasoning: 「全量发布」没有改动，也没有并入灰度类术语。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 覆盖 5% 流量
+      output_evidence: 覆盖 5% 流量
+      reasoning: 正文与原文逐字相同。5%、25%、50%、5 分钟、24 小时都没有增删或改动。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings:
+    - finding: 小流量验证通过后 — 「通过」没有给出判据
+      legitimate: true
+      note: 是否放量取决于验证是否通过，所以这项缺失会影响安全。不过评审材料没有附上技能列出的七个类别，无法确认这一项属于哪个类别。
+    - finding: 按 25%、50% 逐步放量 — 没有给出各档之间的放量判据
+      legitimate: true
+      note: 每档之间的放量条件会影响安全。这一项和第一项部分重叠，但关注的是另一个放量步骤。类别归属同样无法核对。
+    - finding: 全量发布后 — 没有从 50% 切到全量的操作
+      legitimate: true
+      note: 原文确实缺少切到 100% 的步骤，第 4 步正依赖这个切换。
+    - finding: 灰度发布／金丝雀发布／小流量验证是否同指
+      legitimate: true
+      note: 这正是第一条不变量要求提出的同指问题。
+    naturalness: 5
+    naturalness_note: 正文就是原文。「待确认」各项用的是「位置 | 原因 | 所需信息」格式，表述清楚，第一项和第二项略有重叠。由于没有那七个类别的定义，无法确定各项是否全部可以接受，但没有发现哪一项提在与安全无关的步骤上。
+    overall: pass
+    failure_kinds: []
+  si5-gold-v1-r2:
+  - case_id: G-A-002
+    model: claude
+    invariant_verdicts:
+    - kind: instruction
+      verdict: preserved
+      source_evidence: 开启后，证书到期前 7 天由续期服务向 CA 发起续期请求；续期失败时通知租户管理员并回滚到上一版本证书。
+      output_evidence: 未发现违规
+      reasoning: 输出是审阅结论（零条问题），没有返回改写后的参数说明，主体不是重写文本。expected_issues 为空，报告无问题是合规的清单形式。
+    - kind: over-edit
+      verdict: preserved
+      source_evidence: 由续期服务向 CA 发起续期请求
+      output_evidence: 未发现违规
+      reasoning: 输出未把该句报告为施事缺失或被动语态问题，没有误报。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 4
+    naturalness_note: 结论简洁明确。零问题的审阅只能给出这样的短结论，可评的语言内容很少。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-010
+    model: claude
+    invariant_verdicts:
+    - kind: fact
+      verdict: preserved
+      source_evidence: 获取指定时间范围内的系统审计日志，你可以用它来根据用户 ID 和操作类型进行日志筛选
+      output_evidence: 获取指定时间范围内的系统审计日志，支持按用户 ID 和操作类型筛选日志
+      reasoning: 核心功能（指定时间范围、系统审计日志）完整保留，两个筛选维度「用户 ID」「操作类型」也都保留。删去「调用者」是去掉交互套话，不改变功能契约，也没有添加原文没有的内容。
+    - kind: threshold
+      verdict: preserved
+      source_evidence: 单次调用最多能够为你返回 100 条记录
+      output_evidence: 单次调用最多返回 100 条记录
+      reasoning: 数值 100、上限语义「最多」和作用范围「单次调用」都精确保留。
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 这个工具能够允许调用者去获取
+      output_evidence: 获取指定时间范围内的系统审计日志，支持按用户 ID 和操作类型筛选日志
+      reasoning: 「这个工具能够允许」「你可以用它来」「为你返回」等口语套话已全部删除，轻动词「进行日志筛选」改成了「筛选日志」，句首以动宾结构直接破题，属于声明式写法。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 读起来就是标准的工具契约描述。「日志」在句中出现两次，略有冗余，但不影响理解。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-012
+    model: claude
+    invariant_verdicts:
+    - kind: condition
+      verdict: preserved
+      source_evidence: 磁盘空间不足时，旧快照会被自动清理。
+      output_evidence: 未发现违规
+      reasoning: 审阅输出没有改写原文，也没有对条件与动作的绑定提出任何修改，「磁盘空间不足时」对「自动清理旧快照」的触发关系不受影响。
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 旧快照会被自动清理
+      output_evidence: 未发现违规
+      reasoning: 输出没有报告被动语态或施事缺失，属于正确的不报告行为，没有过度控制误报。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 4
+    naturalness_note: 正确地返回了无问题结论，可评的语言内容很少。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-S-001
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: 因此建议先在只读副本上验证执行计划
+      output_evidence: 因此建议先在只读副本上验证执行计划
+      reasoning: 推荐语气「建议」原样保留，没有改成强制前提。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 也可以推迟到下一维护窗口
+      output_evidence: 也可以将索引重建推迟到下一维护窗口
+      reasoning: 「也可以」仍是许可，强度没有变。补出的宾语「索引重建」符合原文最自然的读法，没有把许可改成义务。
+    over_edit_verdict: severe
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 4
+    naturalness_note: 补宾语后句子通顺，但「索引重建」在同一段里出现两次，略显冗余。原文本来就符合规范，不需要这处补充。
+    overall: fail
+    failure_kinds:
+    - over_edit
+  - case_id: G-T-101
+    model: claude
+    invariant_verdicts:
+    - kind: terminology
+      verdict: preserved
+      source_evidence: '1. 新版本先以灰度发布上线，覆盖 5% 流量。
+
+        2. 金丝雀发布期间每 5 分钟检查一次错误率。
+
+        3. 小流量验证通过后'
+      output_evidence: 不清楚它与第 1 步的「灰度发布」、第 3 步的「小流量验证」是否指同一阶段
+      reasoning: 正文保留了三个原术语，没有合并，并在「待确认」里明确提出三者是否同指。这符合不变量允许的第二种合格做法（报告、不合并）。
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+      output_evidence: 4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+      reasoning: 「全量发布」原样保留，没有并入灰度类术语。待确认第 4 项也把「进入全量发布」当作单独的阶段处理。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 覆盖 5% 流量 / 每 5 分钟 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      output_evidence: 覆盖 5% 流量 / 每 5 分钟 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      reasoning: 正文逐字没变，所有数值和单位都没有增删或改动。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings:
+    - item: 每 5 分钟检查一次错误率 | 未给出错误率的判定阈值
+      judgment: 可能有道理。是否回滚、是否暂停放量取决于阈值，所以这一步的安全性依赖它。但本记录没有列出技能定义的七个类别，无法确认它是否属于其中之一。判为
+        unclear，不计为 spurious_pending_item。
+    - item: 小流量验证通过后 | 未给出「验证通过」的判据
+      judgment: 可能有道理。放量的前提就是这个判据，安全性依赖它。类别归属同样无法核实，判为 unclear。
+    - item: 按 25%、50% 逐步放量 | 未给出从 25% 升到 50% 的条件
+      judgment: 可能有道理，理由同上。类别归属无法核实，判为 unclear。
+    naturalness: 4
+    naturalness_note: 正文就是原文，读起来自然。「待确认」只是一行纯文本，没有用标题标记，格式略显随意，但不影响理解。
+    overall: pass
+    failure_kinds: []
+  si5-gold-v1-r3:
+  - case_id: G-A-002
+    model: claude
+    invariant_verdicts:
+    - kind: instruction
+      verdict: preserved
+      source_evidence: 开启后，证书到期前 7 天由续期服务向 CA 发起续期请求；续期失败时通知租户管理员并回滚到上一版本证书。
+      output_evidence: 未发现违规
+      reasoning: 输出是一份空的问题清单，不是改写后的参数说明，符合审阅模式要求。没有发现问题时，自然也就没有位置、风险和修改建议这些字段。
+    - kind: over-edit
+      verdict: preserved
+      source_evidence: 由续期服务向 CA 发起续期请求
+      output_evidence: 未发现违规
+      reasoning: 输出没有把这句当作施事缺失或被动语态问题报告，所以没有误报。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 审阅输出没有改动正文，简短结论用语规范。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-010
+    model: claude
+    invariant_verdicts:
+    - kind: fact
+      verdict: preserved
+      source_evidence: 获取指定时间范围内的系统审计日志，你可以用它来根据用户 ID 和操作类型进行日志筛选
+      output_evidence: 获取指定时间范围内的系统审计日志，可按用户 ID 和操作类型筛选
+      reasoning: 核心功能（获取指定时间范围内的系统审计日志）完整保留，两个筛选维度（用户 ID、操作类型）都在。原文用的就是「获取」，没有改变语义。
+    - kind: threshold
+      verdict: preserved
+      source_evidence: 单次调用最多能够为你返回 100 条记录
+      output_evidence: 单次调用最多返回 100 条记录
+      reasoning: 数值 100 和上限语义「最多」都准确保留。
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 这个工具能够允许调用者去获取……你可以用它来……进行日志筛选……能够为你返回
+      output_evidence: 获取指定时间范围内的系统审计日志，可按用户 ID 和操作类型筛选，单次调用最多返回 100 条记录。
+      reasoning: 口语套话「这个工具能够允许」「你可以用它来」「为你返回」和轻动词「进行日志筛选」都已去掉，改成以动宾结构开头的声明式契约描述。用「可按……筛选」表达能力，与原文的「可以」强度一致。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 语句简洁，符合工具描述的惯用写法。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-012
+    model: claude
+    invariant_verdicts:
+    - kind: condition
+      verdict: preserved
+      source_evidence: 磁盘空间不足时，旧快照会被自动清理。
+      output_evidence: 未发现违规
+      reasoning: 审阅模式下正文没有改动，条件「磁盘空间不足时」与动作「自动清理旧快照」之间的触发关系保持不变。
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 旧快照会被自动清理
+      output_evidence: 未发现违规
+      reasoning: 输出没有报告「禁止被动语态」或「缺少施事」，正确判断出原句合规、无歧义。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 原文没有改动，结论正确。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-S-001
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: 因此建议先在只读副本上验证执行计划
+      output_evidence: 因此建议先在只读副本上验证执行计划
+      reasoning: 输出与原文逐字一致。「建议」仍是推荐，没有改成强制前提。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 也可以推迟到下一维护窗口
+      output_evidence: 也可以推迟到下一维护窗口
+      reasoning: 输出与原文逐字一致。「也可以」仍是许可，没有改成义务。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 原文已经合规，输出原样返回，只去掉了末尾换行。这属于空白差异，不算改动。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-T-101
+    model: claude
+    invariant_verdicts:
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 新版本先以灰度发布上线，覆盖 5% 流量。
+      output_evidence: 第 1–3 步「灰度发布」「金丝雀发布」「小流量验证」| 三处说法可能指同一阶段，也可能指不同阶段
+      reasoning: 正文保留了三个原术语，没有合并，并在「待确认」里提出三者是否同指。这是该不变量允许的第二种合格做法（决定 004 §3）。
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 全量发布后保留旧版本实例 24 小时，以便回滚。
+      output_evidence: 全量发布后保留旧版本实例 24 小时，以便回滚。
+      reasoning: 第 4 步的「全量发布」原样保留，没有被并入灰度类术语，没有发生错误归并。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 覆盖 5% 流量
+      output_evidence: 覆盖 5% 流量
+      reasoning: 正文与原文逐字一致。5%、25%、50%、每 5 分钟、24 小时都没有增删或改动。「待确认」各项也没有引入新数值。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 正文没有改动。「待确认」四项都定位到具体步骤，依次写明问题和需要确认的内容，表述清楚。第 2–4 项（错误率阈值及超阈值处理、验证通过判据、放量节奏）都关系到放量、回滚这类决策，在这里不像误报。但本批记录没有给出
+      skill 列出的七个类别，所以无法逐项确认它们属于哪个类别。我没有记 spurious_pending_item，这一点应判为 unclear，需要那份类别清单才能定论。
+    overall: pass
+    failure_kinds: []
+  si5-gold-v2-r1:
+  - case_id: G-A-002
+    model: claude
+    invariant_verdicts:
+    - kind: instruction
+      verdict: preserved
+      source_evidence: 开启后，证书到期前 7 天由续期服务向 CA 发起续期请求；续期失败时通知租户管理员并回滚到上一版本证书。
+      output_evidence: 未发现违规
+      reasoning: 输出是一个空的审阅结论，没有返回改写后的参数说明，符合审阅模式要求。expected_issues 为空，所以空清单是恰当的输出形式。
+    - kind: over-edit
+      verdict: preserved
+      source_evidence: 由续期服务向 CA 发起续期请求
+      output_evidence: 未发现违规
+      reasoning: 输出没有把施事已明确的句子报告为施事缺失或被动语态问题，因此没有误报。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 4
+    naturalness_note: 输出只有一句结论，简洁且得体。它没有多少行文可供评价自然度。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-010
+    model: claude
+    invariant_verdicts:
+    - kind: fact
+      verdict: preserved
+      source_evidence: 获取指定时间范围内的系统审计日志，你可以用它来根据用户 ID 和操作类型进行日志筛选
+      output_evidence: 获取指定时间范围内的系统审计日志，支持按用户 ID 和操作类型筛选
+      reasoning: 核心功能（指定时间范围内的系统审计日志）完整保留，两个筛选维度也完整保留。核心动词沿用原文的「获取」，没有引入原文以外的内容。删去「调用者」只是去掉了对话套话，没有改变操作范围。
+    - kind: threshold
+      verdict: preserved
+      source_evidence: 单次调用最多能够为你返回 100 条记录
+      output_evidence: 单次调用最多返回 100 条记录
+      reasoning: 数值 100 和「最多」这一上限语义都精确保留。
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 这个工具能够允许调用者去获取……你可以用它来……进行日志筛选……为你返回
+      output_evidence: 获取指定时间范围内的系统审计日志，支持按用户 ID 和操作类型筛选，单次调用最多返回 100 条记录。
+      reasoning: 交互口语套话已全部删除，轻动词「进行日志筛选」改成了「筛选」。全句以动宾结构直接开头，是声明式的工具契约描述。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 读起来像标准的 API 或工具说明，简洁规范。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-012
+    model: claude
+    invariant_verdicts:
+    - kind: condition
+      verdict: preserved
+      source_evidence: 磁盘空间不足时，旧快照会被自动清理。
+      output_evidence: 未发现违规
+      reasoning: 输出没有改动原文，条件与动作之间的触发关系保持不变。
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 旧快照会被自动清理
+      output_evidence: 未发现违规
+      reasoning: 输出没有把被动语态或施事缺失报告为问题，这正是本案期望的空结果，不存在过度控制误报。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 4
+    naturalness_note: 输出只有一句结论，简洁且得体。它没有多少行文可供评价自然度。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-S-001
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: 因此建议先在只读副本上验证执行计划
+      output_evidence: 因此建议先在只读副本上验证执行计划
+      reasoning: 「建议」保持为推荐，没有改成强制前提。这句话与原文完全相同。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 若延迟预算紧张，也可以推迟到下一维护窗口
+      output_evidence: 若延迟预算紧张，也可以将索引重建推迟到下一维护窗口
+      reasoning: 「也可以」仍然是许可，没有变成义务。补出的宾语「索引重建」可以从原文上下文推出，真值条件没有变化。
+    over_edit_verdict: severe
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 输出通顺自然。不过原文本来就合规，补出宾语「将索引重建」并没有修正真实缺陷，属于多余改写。
+    overall: fail
+    failure_kinds:
+    - over_edit
+  - case_id: G-T-101
+    model: claude
+    invariant_verdicts:
+    - kind: terminology
+      verdict: preserved
+      source_evidence: '1. 新版本先以灰度发布上线，覆盖 5% 流量。
+
+        2. 金丝雀发布期间每 5 分钟检查一次错误率。
+
+        3. 小流量验证通过后'
+      output_evidence: 「灰度发布」「金丝雀发布」「小流量验证」是否指同一阶段不明确
+      reasoning: 输出保留了原来的三个术语，并在「待确认」中明确提出三者是否同指。这是该不变量允许的第二种合格做法（决定 004 §3）。
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+      output_evidence: 4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+      reasoning: 「全量发布」原样保留，没有被并入灰度类术语。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      output_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      reasoning: 所有数值和单位都没有增删或改动。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings:
+    - finding: 小流量验证通过后 | 来源未给出「通过」的判据
+      legitimate: true
+      note: 是否放量取决于验证是否通过，但原文没有给出通过的判据（阈值和观察时长），所以这一步的安全性确实取决于这一项，不算虚假待确认项。但记录里没有附
+        skill 列出的七个类别，我无法逐项核对它属于哪一类；大概率属于缺失阈值或判据一类。
+    - finding: 灰度发布、金丝雀发布、小流量验证是否同指
+      legitimate: true
+      note: 这一项正是 terminology 不变量要求的同指问题。它也影响错误率检查覆盖哪些放量阶段，与安全相关。
+    naturalness: 5
+    naturalness_note: 正文与原文相同，没有改动。「待确认」各项用竖线分隔，写得清楚。
+    overall: pass
+    failure_kinds: []
+  si5-gold-v2-r2:
+  - case_id: G-A-002
+    model: claude
+    invariant_verdicts:
+    - kind: instruction
+      verdict: preserved
+      source_evidence: 开启后，证书到期前 7 天由续期服务向 CA 发起续期请求
+      output_evidence: 未发现违规
+      reasoning: 输出是审阅结论，不是改写后的参数说明。expected_issues 为空，因此空问题清单（"未发现违规"）就是正确的清单形式，没有违反只输出问题清单的要求。
+    - kind: over-edit
+      verdict: preserved
+      source_evidence: 由续期服务向 CA 发起续期请求
+      output_evidence: 未发现违规
+      reasoning: 输出没有把施事缺失或被动语态当作问题报告，所以没有误报。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 结论简短，用语规范，适合作为审阅模式下的无问题结论。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-010
+    model: claude
+    invariant_verdicts:
+    - kind: fact
+      verdict: preserved
+      source_evidence: 获取指定时间范围内的系统审计日志，你可以用它来根据用户 ID 和操作类型进行日志筛选
+      output_evidence: 获取指定时间范围内的系统审计日志，可按用户 ID 和操作类型筛选
+      reasoning: 核心功能（指定时间范围、系统审计日志）完整保留，两个筛选维度（用户 ID、操作类型）也都保留。"可按"保持了原文"可以用它来"的可选含义，没有改成强制。删去"调用者"后，真值条件没有变化。
+    - kind: threshold
+      verdict: preserved
+      source_evidence: 单次调用最多能够为你返回 100 条记录
+      output_evidence: 单次调用最多返回 100 条记录
+      reasoning: 数值 100 和上限语义"最多"都准确保留。
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 这个工具能够允许调用者去获取
+      output_evidence: 获取指定时间范围内的系统审计日志
+      reasoning: 输出删去了"这个工具能够允许""你可以用它来""为你返回"等口语套话，"进行日志筛选"也改成了直接动词"筛选"。整句以动宾结构开头，是声明式的工具契约描述。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 简洁地道，符合中文工具描述的常见写法。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-012
+    model: claude
+    invariant_verdicts:
+    - kind: condition
+      verdict: preserved
+      source_evidence: 磁盘空间不足时，旧快照会被自动清理。
+      output_evidence: 未发现违规
+      reasoning: 审阅模式下输出没有改写原文，条件和动作之间的触发关系保持不变。
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 旧快照会被自动清理
+      output_evidence: 未发现违规
+      reasoning: 输出没有把被动语态或施事缺失报告为问题，这正是本例要求的正确行为。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 正确报告无问题，没有多余输出。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-S-001
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: 因此建议先在只读副本上验证执行计划
+      output_evidence: 因此建议先在只读副本上验证执行计划
+      reasoning: 输出与原文逐字相同，「建议」仍是推荐，没有改成强制前提。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 若延迟预算紧张，也可以推迟到下一维护窗口
+      output_evidence: 若延迟预算紧张，也可以推迟到下一维护窗口
+      reasoning: 输出与原文逐字相同，「也可以推迟」仍是许可，没有变成义务。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 正文原样返回，与原文只差末尾换行，这属于空白差异。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-T-101
+    model: claude
+    invariant_verdicts:
+    - kind: terminology
+      verdict: preserved
+      source_evidence: '1. 新版本先以灰度发布上线，覆盖 5% 流量。
+
+        2. 金丝雀发布期间每 5 分钟检查一次错误率。
+
+        3. 小流量验证通过后'
+      output_evidence: 第 1–3 步「灰度发布」「金丝雀发布」「小流量验证」 | 三个称呼是否都指第 1 步覆盖 5% 流量的阶段无法确定
+      reasoning: 输出保留了三个原术语，并在「待确认」中明确提出三者是否同指、应统一用哪个术语。这是不变量列出的第二种合格做法（报告、不合并）。
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+      output_evidence: 4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+      reasoning: 第 4 步「全量发布」未被改动，也没有被归入灰度类术语，因此没有发生错误归并。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      output_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      reasoning: 正文未改动，所有数值和单位都没有增删或改动。「待确认」中提到的错误率阈值、持续时长是提问，没有写进正文当作事实。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings:
+    - finding: 待确认第 1 项：第 3 步「小流量验证通过后」缺少通过判据，第 2 步错误率检查也没有阈值
+      legitimate: true
+      note: 第 3 步继续放量取决于验证是否通过，所以该判据关系到这一步的安全，不属于 spurious_pending_item。本记录没有给出 skill
+        列出的七个类别，无法逐字核对类别归属；按常见分类，它应属于「缺失判定条件/阈值」类，暂判可接受。
+    - finding: 待确认第 2 项：三个术语是否同指
+      legitimate: true
+      note: 这正是术语不变量要求的报告，可以接受。
+    naturalness: 5
+    naturalness_note: 正文原样保留，「待确认」各项按「位置 | 原因 | 需确认内容」排列，表述清楚、符合技术写作习惯。
+    overall: pass
+    failure_kinds: []
+  si5-gold-v2-r3:
+  - case_id: G-A-002
+    model: claude
+    invariant_verdicts:
+    - kind: instruction
+      verdict: preserved
+      source_evidence: 开启后，证书到期前 7 天由续期服务向 CA 发起续期请求；续期失败时通知租户管理员并回滚到上一版本证书。
+      output_evidence: 未发现违规
+      reasoning: 审阅模式下输出是一个空的问题清单（未发现问题），不是改写后的参数说明，也没有重写正文。由于没有任何发现，不需要位置、风险和修改建议等字段。
+    - kind: over-edit
+      verdict: preserved
+      source_evidence: 由续期服务向 CA 发起续期请求
+      output_evidence: 未发现违规
+      reasoning: 原文施事「续期服务」已明确，输出没有把它报告为施事缺失或被动语态问题，因此没有误报。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 4
+    naturalness_note: 审阅结论简洁明确。无问题的情况下仅给出结论是合适的，但没有说明检查了哪些方面。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-010
+    model: claude
+    invariant_verdicts:
+    - kind: fact
+      verdict: preserved
+      source_evidence: 获取指定时间范围内的系统审计日志，你可以用它来根据用户 ID 和操作类型进行日志筛选
+      output_evidence: 获取指定时间范围内的系统审计日志，支持按用户 ID 和操作类型筛选
+      reasoning: 核心功能（指定时间范围内的系统审计日志）和两个筛选维度（用户 ID、操作类型）都完整保留。「能够允许调用者去获取」压缩为「获取」，这是工具契约描述的惯常写法，真值条件不变。
+    - kind: threshold
+      verdict: preserved
+      source_evidence: 单次调用最多能够为你返回 100 条记录
+      output_evidence: 单次调用最多返回 100 条记录
+      reasoning: 上限数值 100 和「最多」的上界语义都精确保留。
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 这个工具能够允许调用者去获取
+      output_evidence: 获取指定时间范围内的系统审计日志
+      reasoning: 「这个工具能够允许」「你可以用它来」「为你返回」等口语套话已全部删除；轻动词「进行日志筛选」改为「筛选」。全句以动宾结构开头，是声明式的工具契约描述。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 简洁规范，符合中文 API/工具说明的惯常写法。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-012
+    model: claude
+    invariant_verdicts:
+    - kind: condition
+      verdict: preserved
+      source_evidence: 磁盘空间不足时，旧快照会被自动清理。
+      output_evidence: 未发现违规
+      reasoning: 输出没有改动原文，也没有提出改动，所以「磁盘空间不足时」与「自动清理旧快照」之间的触发关系保持不变。
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 旧快照会被自动清理
+      output_evidence: 未发现违规
+      reasoning: 输出正确地没有报告任何问题，没有把被动语态或施事缺失误报为问题。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 4
+    naturalness_note: 结论正确且简洁。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-S-001
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: 因此建议先在只读副本上验证执行计划
+      output_evidence: 因此建议先在只读副本上验证执行计划
+      reasoning: 输出与原文逐字相同。「建议」仍是推荐，没有变成强制前提。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 也可以推迟到下一维护窗口
+      output_evidence: 也可以推迟到下一维护窗口
+      reasoning: 输出与原文逐字相同。「也可以」仍是许可，没有变成义务。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 原样返回原文，只少了末尾换行，属于空白差异。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-T-101
+    model: claude
+    invariant_verdicts:
+    - kind: terminology
+      verdict: violated
+      source_evidence: 3. 小流量验证通过后，按 25%、50% 逐步放量。
+      output_evidence: 第 2 步的「金丝雀发布」和第 1 步的「灰度发布」是否指同一阶段，原文没有说明
+      reasoning: 输出保留了三个原术语，符合「报告、不合并」的做法。但待确认中的同指问题只覆盖「灰度发布」和「金丝雀发布」这一对，没有覆盖「小流量验证」。第三项把「小流量验证」当作独立阶段，只询问它的通过判据，没有问它是否与另外两个术语同指。不变量要求提出三者是否同指，因此「小流量验证」与前两个术语之间仍有一组同指关系没有统一，也没有报告。
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+      output_evidence: 4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+      reasoning: 「全量发布」保持原样，没有并入灰度类术语。待确认第 4 项也把「进入全量发布」当作单独的概念处理。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 覆盖 5% 流量
+      output_evidence: 覆盖 5% 流量
+      reasoning: 正文逐字未改。5%、25%、50%、5 分钟、24 小时都保留，待确认部分也没有引入新的数值。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 正文没有改动。待确认各项用语清楚，每项都写明了缺失信息和需要确认的内容。第 2 至 4 项涉及错误率阈值、验证判据和放量条件，这些都会决定改变外部状态的步骤是否安全，看起来可以接受。不过本记录没有给出技能规定的七个类别，无法逐项核对它们是否属于这些类别。
+    overall: fail
+    failure_kinds:
+    - terminology
+  si5-gs-base-r1:
+  - case_id: G-S-001
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: 因此建议先在只读副本上验证执行计划
+      output_evidence: 因此建议先在只读副本上验证执行计划
+      reasoning: 正文与源文逐字相同。「建议」仍是推荐，没有被改成强制前提。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 若延迟预算紧张，也可以推迟到下一维护窗口。
+      output_evidence: 若延迟预算紧张，也可以推迟到下一维护窗口。
+      reasoning: 正文与源文逐字相同。「也可以推迟」仍是许可，没有被改成义务。待确认条目只提问，不改动正文的情态。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings:
+    - finding: 也可以推迟到下一维护窗口 | 推迟的对象不明
+      legitimate: false
+      note: 判为误报。全句的话题是「在低流量窗口执行索引重建」，「推迟到下一维护窗口」与「低流量窗口」相对， 指的是推迟索引重建。在只读副本上验证执行计划不会占用在线请求的延迟预算，因此「延迟预算紧张」
+        不可能成为推迟验证的理由。所以这里没有真正的指代歧义。而且推迟本身是许可、又是保守方向， 两种读法下都不会造成不安全的操作。按规则 4，记为 spurious_pending_item。
+    - finding: 若延迟预算紧张 | 「紧张」没有判据
+      legitimate: false
+      note: 判为误报。这个条件触发的只是许可，而且许可的方向（推迟）是保守的。即使操作员对「紧张」判断有误， 结果也只是照常在低流量窗口执行，或推迟执行，两种情况都不是不安全的操作。这一步的安全不依赖这个阈值。
+        本记录没有给出技能规定的七个类别，所以无法核对这两项是否形式上属于某一类别。 以上结论只基于安全依赖性判断，七类核对一项为 unclear。
+    naturalness: 5
+    naturalness_note: 正文与源文相同，读起来像合格的中文技术写作。两条待确认条目格式规整，但都不需要提出。
+    overall: pass
+    failure_kinds:
+    - spurious_pending_item
+  si5-gs-base-r2:
+  - case_id: G-S-001
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: 因此建议先在只读副本上验证执行计划
+      output_evidence: 因此建议先在只读副本上验证执行计划
+      reasoning: 正文与原文逐字相同。「建议」仍是推荐，没有被提高为强制前提。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 也可以推迟到下一维护窗口
+      output_evidence: 也可以推迟到下一维护窗口
+      reasoning: 正文与原文逐字相同。「也可以」仍是许可，没有被改成义务。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings:
+    - finding: 也可以推迟到下一维护窗口 | 未指明推迟的对象
+      legitimate: false
+      note: 判为误报。前文已说明，影响在线请求的是索引重建，而推迟的条件「延迟预算紧张」只与这个操作有关。在只读副本上验证不会占用线上延迟预算，所以「推迟」只能自然读作推迟索引重建。原文没有真正的指代歧义，也没有哪一步的安全依赖这一项。记为
+        spurious_pending_item。
+    - finding: 若延迟预算紧张 | 「紧张」没有给出阈值
+      legitimate: false
+      note: 判为误报，把握中等。「推迟」只是一项可选许可：执行或推迟都发生在维护窗口内，两种选择都安全，所以安全不依赖阈值是否量化。这一项只影响运维人员何时行使许可，原文本来就允许由运维人员判断。限制：记录中没有给出技能列出的七个类别，所以无法核实这一项是否属于某个允许的类别（例如阈值类）。不过，就算它属于某个类别，仍然要满足「安全依赖于它」这一条件，而它不满足。
+    naturalness: 5
+    naturalness_note: 正文与原文完全相同。原文本身就是合格、自然的中文技术写作。
+    overall: pass
+    failure_kinds:
+    - spurious_pending_item
+  si5-gs-base-r3:
+  - case_id: G-S-001
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: 因此建议先在只读副本上验证执行计划
+      output_evidence: 因此建议先在只读副本上验证执行计划
+      reasoning: 正文与源文逐字相同，「建议」仍是推荐，没有改成强制前提。待确认部分也没有把验证说成索引重建必须先满足的条件。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 也可以推迟到下一维护窗口
+      output_evidence: 也可以推迟到下一维护窗口
+      reasoning: 正文没有改动，「也可以」仍然只是允许推迟，没有变成义务。待确认第一条照原文引用了「也可以推迟」，没有改变语气强度。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings:
+    - finding: 也可以推迟到下一维护窗口 | 推迟的对象未定
+      legitimate: unclear
+      note: 按最自然的读法，推迟的对象是索引重建，因为它和前文的「在低流量窗口执行索引重建」相对；不过「先在只读副本上验证」也可以读成被推迟的操作，所以这条歧义有一定根据。能否成立，取决于它属不属于技能列出的七类待确认事项，而这份清单不在本批记录里。如果这七类里有「指代对象不明」，就可以算合理。
+    - finding: 若延迟预算紧张 | 「紧张」没有给出判定阈值
+      legitimate: false
+      note: 「也可以推迟」只是允许推迟，推迟本身是保守做法。操作员不论怎样理解「紧张」，选择推迟都不会带来风险。这个步骤的安全性不取决于阈值，所以这条是误报。
+    naturalness: 5
+    naturalness_note: 正文就是源文原样，读起来是自然、合格的中文技术写作。待确认部分格式清楚。
+    overall: pass
+    failure_kinds:
+    - spurious_pending_item
+  si5-gs-base-r4:
+  - case_id: G-S-001
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: 因此建议先在只读副本上验证执行计划
+      output_evidence: 因此建议先在只读副本上验证执行计划
+      reasoning: 正文与源文逐字相同。「建议」仍是推荐，没有改成强制前提。附加的待确认条目也没有把验证说成必需步骤。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 若延迟预算紧张，也可以推迟到下一维护窗口
+      output_evidence: 若延迟预算紧张，也可以推迟到下一维护窗口
+      reasoning: 正文逐字保留。「也可以」仍是许可，没有变成义务。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings:
+    - finding: 也可以推迟到下一维护窗口 | 「推迟」的对象不明
+      legitimate: false
+      note: 「推迟到下一维护窗口」和前文「在低流量窗口执行索引重建」形成窗口对照，被推迟的显然是索引重建。在只读副本上做验证本来就不受维护窗口约束，这处歧义并不存在。而且两种读法都只是许可，不会让哪个步骤变得不安全。这是一个虚假的待确认条目。不过评审方没有提供
+        skill 列出的七个类别，所以无法逐一核对它属于哪个类别。
+    - finding: 若延迟预算紧张 | 「紧张」没有给出阈值
+      legitimate: false
+      note: 这个条件开启的是推迟的许可，推迟本身是保守方向。操作员无论怎么理解「紧张」，选择推迟或者不推迟都在源文允许的范围内，所以步骤的安全性不依赖这个阈值。这是一个虚假的待确认条目。同样，没有七个类别的清单，无法核对它属于哪个类别。
+    naturalness: 5
+    naturalness_note: 正文就是源文，读起来是合格的中文技术写作。待确认部分格式清楚。
+    overall: pass
+    failure_kinds:
+    - spurious_pending_item
+  si5-gs-v1-r1:
+  - case_id: G-S-001
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: 因此建议先在只读副本上验证执行计划
+      output_evidence: 因此建议先在只读副本上验证执行计划
+      reasoning: 输出逐字保留了「建议」。验证仍是推荐做法，没有变成执行索引重建的强制前提。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 也可以推迟到下一维护窗口
+      output_evidence: 也可以将索引重建推迟到下一维护窗口
+      reasoning: 输出保留了「也可以」，推迟仍是许可而非义务。补出的宾语「索引重建」可以从源文前句「执行索引重建」恢复，所以真值条件不变。
+    over_edit_verdict: severe
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 4
+    naturalness_note: 改写后读起来自然、通顺，但它在本已清楚的省略句里补出「将索引重建」，与前文「执行索引重建」重复，略显冗余。源文中「推迟」承接前文的对象，在中文技术写作里完全清楚。
+    overall: fail
+    failure_kinds:
+    - over_edit
+  si5-gs-v1-r2:
+  - case_id: G-S-001
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: 因此建议先在只读副本上验证执行计划
+      output_evidence: 因此建议先在只读副本上验证执行计划
+      reasoning: 这一句与源文逐字相同。「建议」仍然是推荐，没有改成「必须」或「验证后方可执行」。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 也可以推迟到下一维护窗口
+      output_evidence: 也可以将索引重建推迟到下一维护窗口
+      reasoning: 「也可以」仍然只是允许推迟，没有变成义务，所以情态强度没变。输出补上了宾语「将索引重建」，属于措辞上的改动，不影响这条情态不变量。
+    over_edit_verdict: severe
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 4
+    naturalness_note: 读起来通顺。不过前一句已经说到「执行索引重建」，后面再写「将索引重建」有些重复，源文省略宾语本来就是自然的写法。
+    overall: fail
+    failure_kinds:
+    - over_edit
+    over_edit_note: 这条源文本身已经正确且合规（over_edit_trap 为 true），但输出在正文里加了「将索引重建」，属于空白以外的实质改动，不是在修真实缺陷。源文「也可以推迟」没写宾语，推迟的对象既可以理解为索引重建，也可以理解为前面的验证步骤。输出把它限定为索引重建，等于替源文做了一次源文本身没做的消歧。末尾换行的差异只是空白，不计入。
+  si5-gs-v1-r3:
+  - case_id: G-S-001
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: 因此建议先在只读副本上验证执行计划
+      output_evidence: 因此建议先在只读副本上验证执行计划
+      reasoning: The output matches the source word for word. 「建议」 is still a recommendation
+        and has not become a requirement or a precondition.
+    - kind: modality
+      verdict: preserved
+      source_evidence: 若延迟预算紧张，也可以推迟到下一维护窗口
+      output_evidence: 若延迟预算紧张，也可以推迟到下一维护窗口
+      reasoning: The output matches the source word for word. 「也可以推迟」 still grants
+        permission and has not become an obligation.
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: The output is the compliant source returned unchanged, apart
+      from the trailing newline, which is whitespace. It reads naturally as technical
+      Chinese.
+    overall: pass
+    failure_kinds: []
+  si5-gs-v1-r4:
+  - case_id: G-S-001
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: 因此建议先在只读副本上验证执行计划
+      output_evidence: 因此建议先在只读副本上验证执行计划
+      reasoning: 输出与源文本逐字相同，「建议」仍是推荐语气，没有被改成强制前提。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 若延迟预算紧张，也可以推迟到下一维护窗口。
+      output_evidence: 若延迟预算紧张，也可以推迟到下一维护窗口。
+      reasoning: 输出与源文本逐字相同，「也可以推迟」仍是许可，没有被改成义务。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 源文本原样返回，只少了末尾换行，属于空白差异。原文本身就是合格的中文技术写作。
+    overall: pass
+    failure_kinds: []
+  si5-gs-v2-r1:
+  - case_id: G-S-001
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: 因此建议先在只读副本上验证执行计划
+      output_evidence: 因此建议先在只读副本上验证执行计划
+      reasoning: 输出与源文本逐字相同。「建议」仍是推荐，没有改成强制前提。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 也可以推迟到下一维护窗口
+      output_evidence: 也可以推迟到下一维护窗口
+      reasoning: 输出与源文本逐字相同。「也可以」仍表示允许推迟，没有变成必须推迟。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 正文原样返回，与源文本只差末尾一个换行符，属于空白差异。文字本身是通顺的中文技术写作。
+    overall: pass
+    failure_kinds: []
+  si5-gs-v2-r2:
+  - case_id: G-S-001
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: 因此建议先在只读副本上验证执行计划
+      output_evidence: 因此建议先在只读副本上验证执行计划
+      reasoning: 输出原样保留「建议」，仍是推荐，没有改成强制前提。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 若延迟预算紧张，也可以推迟到下一维护窗口
+      output_evidence: 若延迟预算紧张，也可以推迟到下一维护窗口
+      reasoning: 输出原样保留「也可以」，仍是许可，没有改成义务。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 与源文本逐字相同，只少了末尾换行（属空白差异）。源文本本身读起来就是规范的中文技术写作。
+    overall: pass
+    failure_kinds: []
+  si5-gs-v2-r3:
+  - case_id: G-S-001
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: 因此建议先在只读副本上验证执行计划
+      output_evidence: 因此建议先在只读副本上验证执行计划
+      reasoning: 输出保留了原文措辞。「建议」仍然只是推荐，没有改成「必须」，也没有把验证写成执行前必须满足的条件。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 若延迟预算紧张，也可以推迟到下一维护窗口。
+      output_evidence: 若延迟预算紧张，也可以推迟到下一维护窗口。
+      reasoning: 输出保留了原文措辞。「也可以推迟」仍然是允许推迟，没有改成必须推迟；前提「若延迟预算紧张」也保留了。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 输出与原文相同，只少了末尾换行，属于空白差异。原文已经合规，读起来像称职的中文技术写作者写的。
+    overall: pass
+    failure_kinds: []
+  si5-gs-v2-r4:
+  - case_id: G-S-001
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: 因此建议先在只读副本上验证执行计划
+      output_evidence: 因此建议先在只读副本上验证执行计划
+      reasoning: 输出保留了原文的「建议」，这项验证仍然只是推荐做法，没有被改成必须完成或执行前必须满足的条件。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 若延迟预算紧张，也可以推迟到下一维护窗口
+      output_evidence: 若延迟预算紧张，也可以推迟到下一维护窗口
+      reasoning: 输出仍用「也可以推迟」，表示允许推迟，没有把它改成必须推迟。触发条件「若延迟预算紧张」也原样保留。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 输出和原文的唯一差别是少了末尾换行，这只是空白差异。原文本身已经是规范、通顺的中文技术写作。
+    overall: pass
+    failure_kinds: []
+  si5-gt-base-r1:
+  - case_id: G-T-101
+    model: claude
+    invariant_verdicts:
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 金丝雀发布期间每 5 分钟检查一次错误率。
+      output_evidence: 灰度发布期间每 5 分钟检查一次错误率。
+      reasoning: The output uses the first option the invariant allows. It picks the
+        灰度 term from step 1 and uses it for the same stage everywhere. Step 2 now
+        reads 灰度发布 and step 3 reads 灰度验证. Both are anchored to that one stage, and
+        only one term family is left. The output does not use two or more different
+        terms for the 5% stage, so this is not a terminology inconsistency. Merging
+        the terms instead of raising them in 待确认 is an option the invariant explicitly
+        permits.
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 全量发布后保留旧版本实例 24 小时，以便回滚。
+      output_evidence: 全量发布后保留旧版本实例 24 小时，以便回滚。
+      reasoning: Step 4 keeps 全量发布 (the 100% rollout). It was not folded into the
+        unified 灰度 term, so the two stages were not wrongly merged (§17.5). The second
+        待确认 item also treats "从 50% 进入全量" as a separate transition, so the distinction
+        is kept.
+    - kind: fact
+      verdict: preserved
+      source_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      output_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      reasoning: 'All values and units are the same: 5%, 25%, 50%, 5 minutes and 24
+        hours. Nothing was added or removed. The 待确认 section asks questions and does
+        not state any new value in the body.'
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 4
+    naturalness_note: 'The body reads naturally, and 灰度验证通过后 is idiomatic. The 待确认
+      heading is a bare line with no Markdown heading level, and the items use a pipe-separated
+      field layout. That is a bit mechanical but readable. The two pending items point
+      at real gating conditions that an operator''s next step depends on: the pass
+      criterion and the conditions for moving to the next rollout step. They are not
+      spurious on their face. The seven-category list from the skill was not provided,
+      so whether each item fits a category could not be checked.'
+    overall: pass
+    failure_kinds: []
+  si5-gt-base-r2:
+  - case_id: G-T-101
+    model: claude
+    invariant_verdicts:
+    - kind: terminology
+      verdict: preserved
+      source_evidence: '1. 新版本先以灰度发布上线，覆盖 5% 流量。
+
+        2. 金丝雀发布期间每 5 分钟检查一次错误率。
+
+        3. 小流量验证通过后，按 25%、50% 逐步放量。'
+      output_evidence: 「灰度发布」「金丝雀发布」「小流量验证」是否指同一阶段尚未确定
+      reasoning: 输出保留了三个原术语，没有合并。它在「待确认」中明确提出三者是否指同一阶段，属于本条不变量认可的第二种合格做法（同指不明确时报告、不合并）。
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+      output_evidence: 4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+      reasoning: 「全量发布」原样保留，没有被替换成灰度类术语，所以不存在错误归并。「待确认」中的同指问题只涉及前三个术语，没有把全量发布拉进来。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      output_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      reasoning: 正文与原文逐字相同。所有数值和单位都没有增删或改动。「待确认」中的「例如错误率上限」只是在问需要补哪类信息，没有向正文加入新事实。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings:
+    - finding: 小流量验证通过 | 没有给出验证通过的判据
+      legitimate: true
+      note: 第 3 步的放量以「验证通过」为前提，而原文没有给出判定指标或阈值。放量是否安全取决于这个判据，所以这一条是合理的待确认项，不是 spurious_pending_item。
+    naturalness: 4
+    naturalness_note: 正文与原文相同，是合格的技术中文。「待确认」节标题没有 Markdown 标题标记，和前面的「## 发布流程」格式不一致，属于轻微的格式问题，不影响语义。
+    overall: pass
+    failure_kinds: []
+  si5-gt-base-r3:
+  - case_id: G-T-101
+    model: claude
+    invariant_verdicts:
+    - kind: terminology
+      verdict: preserved
+      source_evidence: '1. 新版本先以灰度发布上线，覆盖 5% 流量。
+
+        2. 金丝雀发布期间每 5 分钟检查一次错误率。
+
+        3. 小流量验证通过后，按 25%、50% 逐步放量。'
+      output_evidence: 金丝雀发布期间 | 「灰度发布」「金丝雀发布」「小流量验证」是否指同一阶段（5% 流量阶段）未定，影响检查错误率的起止时间
+        | 三者是否同指；如不同，「金丝雀发布期间」的起止节点
+      reasoning: 输出没有改动三个原术语，并在「待确认」中明确提出三者是否指同一阶段。这是该不变式允许的第二种合格做法（报告同指问题，不合并），符合决定
+        004 §3。
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+      output_evidence: 4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+      reasoning: 「全量发布」原样保留，没有并入灰度类术语，也没有被列进同指问题。不存在错误归并（§17.5）。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      output_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      reasoning: 正文与原文逐字相同，所有数值和单位都没有增删或改动。「待确认」里的「如错误率阈值、观察时长」是用括号举例的提问，没有作为事实写进正文。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 正文与原文相同，读起来就是合格的中文技术写作。第二条待确认项（「小流量验证通过」没有判据）针对的是第 3 步的放量门槛。放量是否安全直接取决于这个判据，所以不算
+      spurious_pending_item。但本记录没有附上 skill 列出的七个类别，我无法逐一核对这一项属于哪一类；如需严格判定它能否被接受，需要那份类别清单。
+    overall: pass
+    failure_kinds: []
+  si5-gt-base-r4:
+  - case_id: G-T-101
+    model: claude
+    invariant_verdicts:
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 新版本先以灰度发布上线，覆盖 5% 流量。
+      output_evidence: 灰度发布／金丝雀发布／小流量验证 | 无法确定三者是否都指覆盖 5% 流量的阶段，因此步骤 2 检查错误率的时段不确定
+        | 三者是否指同一阶段；如果不是，各自的起止节点
+      reasoning: The body keeps all three original terms. The 待确认 section explicitly
+        asks whether 灰度发布, 金丝雀发布 and 小流量验证 refer to the same stage. This is the second
+        acceptable path in this invariant (keep the terms and raise the co-reference
+        question), so the terms are not counted as inconsistent.
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 全量发布后保留旧版本实例 24 小时，以便回滚。
+      output_evidence: 全量发布后保留旧版本实例 24 小时，以便回滚。
+      reasoning: 全量发布 in step 4 is unchanged. It is not replaced with a 灰度-type term,
+        so there is no wrong merge.
+    - kind: fact
+      verdict: preserved
+      source_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      output_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      reasoning: The body is identical to the source. No value or unit was added,
+        removed or changed.
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings:
+    - finding: 小流量验证通过后 — 没有给出验证通过的判据
+      legitimate: true
+      note: Whether scaling up is safe depends on what counts as passing, and the
+        source gives no criterion. The step's safety depends on this, so it is not
+        spurious. The record does not include the skill's seven categories, so I could
+        not confirm which category it belongs to.
+    - finding: 按 25%、50% 逐步放量 — 没有给出进档条件或等待时长
+      legitimate: unclear
+      note: This is plausibly an admissible missing-condition item. It might also
+        be a pending item for detail the source never meant to give. Without the skill's
+        list of seven categories I cannot decide which.
+    - finding: 全量发布后 — 没有给出从 50% 进入全量的步骤与条件
+      legitimate: true
+      note: The source does jump from 50% to 全量 without a step or trigger. Rollback
+        and release safety depend on this transition. The category list is missing
+        here too, so I could not check it against the categories.
+    naturalness: 5
+    naturalness_note: The body is unchanged from the source and already reads naturally.
+      The 待确认 items are short and well structured.
+    overall: pass
+    failure_kinds: []
+  si5-gt-base-r5:
+  - case_id: G-T-101
+    model: claude
+    invariant_verdicts:
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 新版本先以灰度发布上线，覆盖 5% 流量。
+      output_evidence: 「金丝雀发布」与第 1 步的「灰度发布」、第 3 步的「小流量验证」是否指同一个 5% 流量阶段未定
+      reasoning: 输出保留了三个原术语，没有合并，并在「待确认」中明确问三者是否指同一阶段，还追问如果不是同一阶段，金丝雀发布从哪里开始、到哪里结束。这是
+        invariant 允许的第二种合格做法，符合决定 004 §3。
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 全量发布后保留旧版本实例 24 小时，以便回滚。
+      output_evidence: 全量发布后保留旧版本实例 24 小时，以便回滚。
+      reasoning: 第 4 步的「全量发布」原样保留，没有改成灰度类术语，「待确认」也没有把它算进同指问题。不存在 §17.5 所说的错误归并。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      output_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      reasoning: 正文与原文逐字相同。所有数值和单位都没有增加、删除或改动。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 正文没有改动，保持了原文自然、合格的技术写作。「待确认」第二项问的是放量所依赖的通过标准。按第 3 步，放量要等验证通过，所以这一项关系到这一步的安全，看起来可以接受。不过本记录没有列出七个类别，无法逐项核对。「待确认」用的是纯文本标题而不是
+      Markdown 标题，这只是排版问题，不影响判定。
+    overall: pass
+    failure_kinds: []
+  si5-gt-base-r6:
+  - case_id: G-T-101
+    model: claude
+    invariant_verdicts:
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 新版本先以灰度发布上线，覆盖 5% 流量。
+      output_evidence: 第 2 步「金丝雀发布期间」、第 3 步「小流量验证」 | 无法确定它们与第 1 步的「灰度发布」是否指同一阶段
+      reasoning: 输出保留了三个原术语，没有合并，并在「待确认」中明确提出三者是否同指 5% 流量阶段。这是本条不变量认可的第二种合格做法，符合决定
+        004 §3。
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 全量发布后保留旧版本实例 24 小时，以便回滚。
+      output_evidence: 全量发布后保留旧版本实例 24 小时，以便回滚。
+      reasoning: 第 4 步原样保留「全量发布」，没有把它替换成灰度类术语，因此不存在错误归并。待确认第 3 项里的「从 50% 进入全量」也把全量当作独立的后续阶段，理解正确。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      output_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      reasoning: 正文与原文逐字相同，所有数值和单位都没有增删或改动。待确认中的「例如错误率阈值」只是向作者提问时举的例子，没有作为事实写进正文。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings:
+    - finding: 第 3 步「小流量验证通过后」没有给出验证通过的判据
+      legitimate: true
+      note: 放量以验证通过为前提，原文却没有定义怎样算通过。这个缺失直接影响后续放量是否安全，不属于误报。
+    - finding: 第 3 步「按 25%、50% 逐步放量」没有给出各档之间的进入条件
+      legitimate: true
+      note: 原文没有给出各档之间的前进条件，也没有给出从 50% 进入全量的条件。这个缺失直接影响放量是否安全，提问正当。注意：本记录没有附上 skill
+        列出的七个类别，所以这两项在类别上是否合规无法逐项核对，但从内容看都不是在与安全无关的步骤上提出的。
+    naturalness: 5
+    naturalness_note: 正文与原文相同，读起来就是合格的中文技术文档。待确认各项用「位置 | 问题 | 需确认内容」三段式表述，清楚简洁。
+    overall: pass
+    failure_kinds: []
+  si5-gt-v2-r1:
+  - case_id: G-T-101
+    model: claude
+    invariant_verdicts:
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 新版本先以灰度发布上线，覆盖 5% 流量。
+      output_evidence: 「金丝雀发布」、第 1 步的「灰度发布」和第 3 步的「小流量验证」是否指同一阶段，无法确定
+      reasoning: 正文保留了三个原术语，没有合并，并在「待确认」中明确提出三者是否同指。这是该不变量列出的第二种合格做法，符合决定 004 §3 “同指不明确时报告、不合并”。
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 全量发布后保留旧版本实例 24 小时，以便回滚。
+      output_evidence: 全量发布后保留旧版本实例 24 小时，以便回滚。
+      reasoning: 第 4 步原样保留「全量发布」，没有归并为灰度类术语。待确认中“进入全量发布的条件”也把全量当作独立阶段，没有错误归并。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      output_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      reasoning: 正文与源文本逐字相同，所有数值和单位都没有增删或改动。待确认部分只提出问题，没有引入新数值。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings:
+    - finding: 小流量验证通过 — 缺少通过判据和错误率异常时的处理动作
+      legitimate: true
+      note: 放量是否继续取决于“通过”这一判定，而源文本没有给出判定条件，所以后续步骤的安全确实依赖这一点，不属于 spurious_pending_item。它是否落在
+        skill 列出的七个类别内，我无法核对，因为本记录没有提供类别清单。
+    - finding: 按 25%、50% 逐步放量 — 缺少各档进入条件、停留时长和进入全量的条件
+      legitimate: true
+      note: 放量各档之间的门控条件直接关系发布安全，源文本确实没有写明，属于合理的待确认项。类别归属同样无法依据本记录核对。
+    - finding: 金丝雀发布期间 — 附带提问每 5 分钟检查错误率是否也适用于 25%、50% 阶段
+      legitimate: true
+      note: 这是同指问题的自然延伸。源文本只在金丝雀阶段规定了检查频率，后续档位是否检查确实不明确，没有超出源文本。
+    naturalness: 4
+    naturalness_note: 正文就是源文本，读起来自然。「待确认」部分用竖线分隔的格式比较机械，标题也没有 Markdown 标记，但每项都清楚、可以执行。待确认项是否在七个许可类别之内，因为证据缺失而判为
+      unclear，不影响结论。
+    overall: pass
+    failure_kinds: []
+  si5-gt-v2-r2:
+  - case_id: G-T-101
+    model: claude
+    invariant_verdicts:
+    - kind: terminology
+      verdict: preserved
+      source_evidence: '1. 新版本先以灰度发布上线，覆盖 5% 流量。
+
+        2. 金丝雀发布期间每 5 分钟检查一次错误率。
+
+        3. 小流量验证通过后，按 25%、50% 逐步放量。'
+      output_evidence: 不确定「金丝雀发布」与第 1 步的「灰度发布」、第 3 步的「小流量验证」是否指同一阶段
+      reasoning: 正文保留了三个原术语，没有合并。「待确认」第一条明确提出三者是否同指，还指出这会影响错误率检查覆盖哪些阶段。这是该不变式认可的第二种合格做法，符合决定
+        004 §3「同指不明确时报告、不合并」。
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+      output_evidence: 4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+      reasoning: 「全量发布」原样保留，没有被并入灰度类术语，所以不存在 §17.5 所说的错误归并。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      output_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      reasoning: 正文与原文逐字相同，数值和单位都没有增删或改动。「待确认」里只引用原有数值，没有加入新的数值。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings:
+    - finding: 待确认第 2 条：小流量验证通过后——没有错误率判定阈值，也没有「验证通过」的判据
+      legitimate: true
+      note: 第 3 步的放量以「验证通过」为前提，但原文没有给出判据，这一步能否安全执行取决于它，所以不算误报。这类条目是否属于技能列出的七类，本记录没有附上清单，无法逐条核对；从内容看，它最可能属于缺失阈值或判据一类。
+    - finding: 待确认第 3 条：按 25%、50% 逐步放量——没有给出进入下一档的条件
+      legitimate: true
+      note: 什么时候进入下一档，直接决定逐步放量能否安全执行。原文第 4 步「全量发布后」表明 50% 之后还会进入全量，所以「从 50% 进入全量」能从原文推出，不是添加的内容。这一条同样无法对照七类清单逐条核实。
+    naturalness: 4
+    naturalness_note: 正文没有改动，读起来就是普通的技术文档。「待确认」按「位置 | 问题 | 需确认事项」三栏列出，信息清楚。扣一分是因为「待确认」没有用标题标记（例如
+    overall: pass
+    failure_kinds: []
+  si5-gt-v2-r3:
+  - case_id: G-T-101
+    model: claude
+    invariant_verdicts:
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 新版本先以灰度发布上线，覆盖 5% 流量。
+      output_evidence: 「金丝雀发布」与「灰度发布」「小流量验证」是否同指不明。可读作只在 5% 阶段检查，也可读作在 25%、50% 放量期间同样检查
+      reasoning: 正文保留了三个原术语，没有合并。「待确认」中明确提出三者是否同指，并说明了两种读法对检查范围的影响。这符合不变式允许的第二种合格形式（同指不明确时报告、不合并）。
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 全量发布后保留旧版本实例 24 小时，以便回滚。
+      output_evidence: 全量发布后保留旧版本实例 24 小时，以便回滚。
+      reasoning: 第 4 步的「全量发布」原样保留，没有被并入灰度类术语，也没有出现在同指问题里，因此不存在错误归并。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      output_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      reasoning: 正文与源文逐字一致。所有数值和单位都没有增加、删除或改动。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings:
+    - finding: 小流量验证通过后 | 「验证通过」没有给出判据，而放量取决于这一结果
+      legitimate: true
+      note: 放量操作直接取决于「验证通过」这个条件，而源文没有给出判据（阈值、观察时长等）。这一步的安全性确实依赖该项，所以不是 spurious_pending_item。本记录没有附上
+        skill 列出的七个类别，因此只能判断它看起来属于未定义判据或阈值一类，无法逐条核对。
+    naturalness: 5
+    naturalness_note: 正文就是源文，读起来自然。「待确认」各项按「位置 | 问题 | 需确认内容」的格式写成，简洁清楚。
+    overall: pass
+    failure_kinds: []
+  si5-gt-v2-r4:
+  - case_id: G-T-101
+    model: claude
+    invariant_verdicts:
+    - kind: terminology
+      verdict: preserved
+      source_evidence: '1. 新版本先以灰度发布上线，覆盖 5% 流量。
+
+        2. 金丝雀发布期间每 5 分钟检查一次错误率。
+
+        3. 小流量验证通过后'
+      output_evidence: 「金丝雀发布」与第 1 步的「灰度发布」及第 3 步的「小流量验证」是否指同一阶段，无法确定
+      reasoning: 输出保留了三个原术语，没有合并，并在「待确认」中明确提出三者是否同指（「三者是否同指 5% 流量阶段」）。这是本条不变量认可的第二种合格做法（决定
+        004 §3）。
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+      output_evidence: 4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+      reasoning: 第 4 步原样保留「全量发布」，没有换成灰度类术语，因此没有错误归并。待确认第 3 项把「进入全量发布的条件」当作独立阶段处理，说明输出也把它理解为不同概念。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      output_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      reasoning: 正文与原文逐字相同，所有数值和单位都没有增删或改动。待确认各项只提问，没有在正文中加入新数值。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings:
+    - item: 小流量验证通过后 | 「通过」没有判据；第 2 步检查错误率也没有给出阈值
+      legitimate: true
+      note: 原文让放量取决于验证是否通过，却没有给出判据，这一步的安全性确实取决于这个缺口。这里不是 over_edit_trap 案例，所以不按 spurious_pending_item
+        处理。记录里没有附技能列出的七个类别，无法逐项核对类别归属。
+    - item: 按 25%、50% 逐步放量 | 没有给出每档放量之间的推进条件，也没有给出从 50% 到全量的步骤与条件
+      legitimate: true
+      note: 原文确实没有写从 50% 到全量的过渡条件，也没有写每档的推进判据，放量安全性取决于这些信息。类别归属同样因缺少七类清单而无法核实。
+    naturalness: 5
+    naturalness_note: 正文未改动，读起来就是合格的技术写作。待确认各项格式统一，表述简洁、准确。
+    overall: pass
+    failure_kinds: []
+  si5-gt-v2-r5:
+  - case_id: G-T-101
+    model: claude
+    invariant_verdicts:
+    - kind: terminology
+      verdict: preserved
+      source_evidence: '1. 新版本先以灰度发布上线，覆盖 5% 流量。
+
+        2. 金丝雀发布期间每 5 分钟检查一次错误率。
+
+        3. 小流量验证通过后，按 25%、50% 逐步放量。'
+      output_evidence: 灰度发布／金丝雀发布／小流量验证 | 这三个说法是否指同一阶段无法确定，因此第 2 步的检查期间和第 3 步的验证对象也无法确定
+        | 三者是否同指 5% 流量阶段
+      reasoning: 输出保留了三个原术语，没有合并，并在「待确认」中明确提出三者是否同指 5% 流量阶段。这是该不变量允许的两种合格做法之一，符合决定
+        004 §3 的「报告、不合并」。
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+      output_evidence: 4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+      reasoning: 第 4 步「全量发布」原样保留，没有被替换为灰度类术语。「待确认」的同指问题也只列出第 1–3 步的三个术语，没有错误归并。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      output_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      reasoning: 正文逐字未改，所有数值和单位都没有增删或改动。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings:
+    - finding: 小流量验证通过后 | 放量前的验证没有给出通过判据，第 2 步也没有给出错误率阈值 | 验证通过的判据，如错误率阈值和观察时长
+      legitimate: true
+      note: 不在不变量范围内，但这个问题有原文依据。第 3 步的放量取决于「验证通过」，而原文没有给出判据或错误率阈值，所以这一步能否安全执行确实取决于这个缺失条件，不算无关的待确认项。记录中没有给出技能列出的七个类别，无法逐项核对它属于哪一类，因此不计入
+        failure_kinds。
+    naturalness: 4
+    naturalness_note: 正文保持原样，读起来自然。「待确认」只是一行纯文本标题，不是二级标题，与正文的「## 发布流程」层级不一致。条目用竖线分隔字段，可读性略显机械。这些只是形式上的小问题。
+    overall: pass
+    failure_kinds: []
+  si5-gt-v2-r6:
+  - case_id: G-T-101
+    model: claude
+    invariant_verdicts:
+    - kind: terminology
+      verdict: preserved
+      source_evidence: '2. 金丝雀发布期间每 5 分钟检查一次错误率。
+
+        3. 小流量验证通过后，按 25%、50% 逐步放量。'
+      output_evidence: '2. 灰度发布期间每 5 分钟检查一次错误率。
+
+        3. 灰度验证通过后，按 25%、50% 逐步放量。'
+      reasoning: 'The output takes the first allowed path: it uses one term for the
+        5% stage throughout. In step 2, 「金丝雀发布」 becomes 「灰度发布」. In step 3, 「小流量验证」
+        becomes 「灰度验证」, meaning the verification of that same 灰度 stage, so it does
+        not introduce a second name for the stage. No two different terms for the
+        stage remain, so the output does not need to raise the co-reference question
+        in 「待确认」. The invariant explicitly accepts this merge, so it is not treated
+        as a truth-condition change.'
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+      output_evidence: 4. 全量发布后保留旧版本实例 24 小时，以便回滚。
+      reasoning: Step 4 is unchanged. 「全量发布」 was not replaced with the unified gray-release
+        term, so the output does not wrongly merge it into the 灰度 stage.
+    - kind: fact
+      verdict: preserved
+      source_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      output_evidence: 覆盖 5% 流量 / 每 5 分钟检查一次错误率 / 按 25%、50% 逐步放量 / 保留旧版本实例 24 小时
+      reasoning: 5%, 25%, 50%, 5 minutes and 24 hours all appear unchanged, with the
+        same units. No number was added or removed.
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 'The body reads naturally, and 「灰度验证通过后」 is common usage. The
+      「待确认」 items are admissible on their face: whether to advance the rollout depends
+      on the pass criterion, the error-rate threshold and the conditions for moving
+      to the next tier, so these steps are safety-relevant. Items 1 and 3 overlap
+      somewhat on the advancement criterion. That is not spurious. The prompt does
+      not list the seven categories, so this verdict does not confirm which category
+      each item falls in.'
+    overall: pass
+    failure_kinds: []
+  si5-v2:
+  - case_id: G-A-001
+    model: claude
+    invariant_verdicts:
+    - kind: actor
+      verdict: preserved
+      source_evidence: 网关将不健康事件上报调度器，随后把该实例从负载均衡池中摘除。
+      output_evidence: 网关将不健康事件上报调度器，随后把该实例从负载均衡池中摘除。
+      reasoning: 输出逐字保留原句，没有把「网关」或「调度器」写成确定的摘除施事，因此没有补全源文中不存在的事实。不标注待确认也符合该不变量，因为它明确允许原样保留。
+    - kind: actor
+      verdict: preserved
+      source_evidence: 网关连续 5 次收到上游实例返回的 `503`，判定该实例不健康。
+      output_evidence: 网关连续 5 次收到上游实例返回的 `503`，判定该实例不健康。
+      reasoning: 第 1、2 步的施事「网关」都保留了，也没有改成无施事的被动句。
+    - kind: procedure
+      verdict: preserved
+      source_evidence: 摘除后 60 秒内不再向该实例转发请求。
+      output_evidence: 摘除后 60 秒内不再向该实例转发请求。
+      reasoning: 60 秒仍是摘除后的结果约束，没有改成前置条件。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 正文与源文相同，只少了末尾换行。源文本身就是规范、自然的技术中文。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-A-002
+    model: claude
+    invariant_verdicts:
+    - kind: instruction
+      verdict: preserved
+      source_evidence: 开启后，证书到期前 7 天由续期服务向 CA 发起续期请求；续期失败时通知租户管理员并回滚到上一版本证书。
+      output_evidence: 未发现违规
+      reasoning: 输出是一条无问题的审查结论，没有改写整段参数说明。expected_issues 为空，所以没有应报却未报的项目。按理说，这样一条空结论不需要位置、风险或修改建议。
+    - kind: over-edit
+      verdict: preserved
+      source_evidence: 由续期服务向 CA 发起续期请求
+      output_evidence: 未发现违规
+      reasoning: 输出没有把这里报告为施事缺失或被动语态问题，因此没有误报。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 4
+    naturalness_note: 结论简短清楚，作为审查结果可以接受。没有说明审查依据，但本用例的 invariant 不要求说明。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-A-003
+    model: claude
+    invariant_verdicts:
+    - kind: actor
+      verdict: preserved
+      source_evidence: 1. 停止写入流量，等待 `replication_lag` 降至 0。
+      output_evidence: 1. 停止写入流量，等待 `replication_lag` 降至 0。
+      reasoning: 正文与源文逐字相同，四步仍是不带主语的祈使句，没有补写施事。
+    - kind: procedure
+      verdict: preserved
+      source_evidence: 3. 修改 `pgbouncer.ini` 中的 `host` 指向新主库，并 reload `pgbouncer`。
+      output_evidence: 3. 修改 `pgbouncer.ini` 中的 `host` 指向新主库，并 reload `pgbouncer`。
+      reasoning: 仍是 4 步，第 3 步没有被拆开。
+    - kind: token
+      verdict: preserved
+      source_evidence: '`replication_lag`、`pg_ctl promote`、`pgbouncer.ini`、`host`、`pgbouncer`、`#oncall`'
+      output_evidence: '`replication_lag`、`pg_ctl promote`、`pgbouncer.ini`、`host`、`pgbouncer`、`#oncall`'
+      reasoning: 所有标识符都逐字出现在输出中。
+    - kind: procedure
+      verdict: preserved
+      source_evidence: 2. 执行 `pg_ctl promote` 提升备库。
+      output_evidence: '- 第 2 步 `pg_ctl promote` | 提升操作不可逆，第 3 步把流量切向新主库之前需要确认提升成功，但来源没有给出判据'
+      reasoning: 输出只提了一条待确认项，没有逐条为缺判据的步骤追加。这一条针对的 promote 是不可逆操作， 第 3 步把连接切到新主库是否安全取决于提升是否成功，正好符合不变量允许提出缺失判据的例外。
+        第 1、3、4 步都没有被提出，所以没有误报。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 正文原样保留。待确认项写得简洁，指明了要确认什么。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-A-004
+    model: claude
+    invariant_verdicts:
+    - kind: reference
+      verdict: preserved
+      source_evidence: 并将其状态标记为 `失败`
+      output_evidence: 「其」可指工作节点，也可指重新入队的任务，两种读法下被标记为 `失败` 的对象不同
+      reasoning: 正文保留了有歧义的「其」，没有替作者选定一种读法。歧义已列为待确认项，两种读法都写出来了。这正是该不变量要求的处理方式。
+    - kind: reference
+      verdict: preserved
+      source_evidence: 会将其上运行中的任务重新入队
+      output_evidence: 会将其上运行中的任务重新入队
+      reasoning: 第一个「其」只能指工作节点，输出原样保留，没有展开成长名词短语，待确认项也没有涉及它。
+    - kind: actor
+      verdict: preserved
+      source_evidence: 调度器检测到工作节点心跳超时后
+      output_evidence: 调度器检测到工作节点心跳超时后
+      reasoning: 施事「调度器」原样保留，没有改成无施事的被动句。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 正文与源文一致。待确认项写得简洁，指出了真实的歧义。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-A-005
+    model: claude
+    invariant_verdicts:
+    - kind: reference
+      verdict: preserved
+      source_evidence: 校验和不一致时删除它，并重新执行本任务。
+      output_evidence: 校验和不一致时删除它，并重新执行本任务。
+      reasoning: 正文保留原句，没有替「它」指定先行词。待确认项把两种读法（本地快照、S3 上的快照）都列了出来，属于不变式允许的「显式标注待确认」。
+    - kind: procedure
+      verdict: preserved
+      source_evidence: 并重新执行本任务
+      output_evidence: 并重新执行本任务
+      reasoning: 原文照录，没有收窄成重新上传或重新计算校验和，重跑范围仍是步骤 1–3。
+    - kind: token
+      verdict: preserved
+      source_evidence: '`s3://backup-prod/daily/`'
+      output_evidence: '`s3://backup-prod/daily/`'
+      reasoning: S3 路径（含末尾斜杠）和 SHA-256 都逐字保留，待确认项中的路径也一字不差。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings:
+    - finding: 待确认：步骤 3「删除它」指代不明，删除对象可能是本地快照，也可能是 S3 上的快照
+      legitimate: true
+      note: 删除是破坏性操作，这一步是否安全取决于「它」指什么，与不变式所述的歧义一致，不属于 spurious_pending_item。
+    naturalness: 4
+    naturalness_note: 正文与源文一致，读起来通顺。待确认项用「|」分栏，内容清楚，格式偏机械。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-A-006
+    model: claude
+    invariant_verdicts:
+    - kind: reference
+      verdict: preserved
+      source_evidence: 若其中任意一条记录未通过 Schema 校验，该请求整体失败
+      output_evidence: 若其中任意一条记录未通过 Schema 校验，该请求整体失败
+      reasoning: 「其中」和「该请求」都原样保留。每个都只有一个可指的对象，输出没有把它们换成冗长的名词短语。
+    - kind: fact
+      verdict: preserved
+      source_evidence: '该请求整体失败，
+
+        且不写入任何记录'
+      output_evidence: '该请求整体失败，
+
+        且不写入任何记录'
+      reasoning: 全有或全无的语义没有变，也没有引入部分写入的意思。
+    - kind: token
+      verdict: preserved
+      source_evidence: '`POST /v2/ingest/batch`'
+      output_evidence: '`POST /v2/ingest/batch`'
+      reasoning: '`POST /v2/ingest/batch`、`errors[].index`、500 都逐字保留。'
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 输出与原文逐字相同，只少了末尾换行，属于空白差异。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-A-007
+    model: claude
+    invariant_verdicts:
+    - kind: scope
+      verdict: preserved
+      source_evidence: '`cleanup.sh` 会删除超过 30 天的日志文件和临时索引，删除后不可恢复。'
+      output_evidence: 「超过 30 天的」既可只限定「日志文件」（删除全部临时索引），也可同时限定「日志文件」和「临时索引」，两种读法下删除范围不同
+      reasoning: 正文保留了原来有歧义的写法，没有采用任何一种读法；待确认部分准确列出了两种读法，并指出删除范围不同，属于正确标注，不是擅自消歧。
+    - kind: fact
+      verdict: preserved
+      source_evidence: '删除后不可恢复。
+
+        > 执行前请先确认 `/var/lib/search/tmp` 已完成快照。'
+      output_evidence: '删除后不可恢复。
+
+        > 执行前请先确认 `/var/lib/search/tmp` 已完成快照。'
+      reasoning: 不可恢复的后果说明和快照前置要求都逐字留在告警块内，没有被弱化或移出。
+    - kind: token
+      verdict: preserved
+      source_evidence: '`cleanup.sh` 会删除超过 30 天的日志文件'
+      output_evidence: '`cleanup.sh` 会删除超过 30 天的日志文件'
+      reasoning: '`cleanup.sh`、`/var/lib/search/tmp` 和 30 天都逐字保留。'
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings:
+    - item: 待确认：超过 30 天的日志文件和临时索引的修饰范围
+      legitimate: true
+      note: 删除不可恢复，所以删除范围直接关系到操作安全，这一项不是 spurious_pending_item。我看不到该技能列出的七个类别，只能判断它看起来属于范围或修饰歧义。
+    naturalness: 5
+    naturalness_note: 正文没有改动。待确认条目表述清楚，但「待确认」标题后没有分隔格式，结构略显简陋，不影响正文。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-A-008
+    model: claude
+    invariant_verdicts:
+    - kind: scope
+      verdict: preserved
+      source_evidence: '`confd-agent` 每小时从配置中心拉取一次配置并重启守护进程'
+      output_evidence: '`confd-agent` 每小时从配置中心拉取一次配置并重启守护进程'
+      reasoning: 与源文逐字相同，没有加入「配置发生变更时」「拉取成功后才」之类的触发条件。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 拉取失败时保留上一次成功的配置
+      output_evidence: 拉取失败时保留上一次成功的配置
+      reasoning: 原样保留，含义没有变化。
+    - kind: token
+      verdict: preserved
+      source_evidence: 运行日志写入 `/var/log/confd-agent.log`。
+      output_evidence: 运行日志写入 `/var/log/confd-agent.log`。
+      reasoning: '`confd-agent` 和日志路径逐字保留。'
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 正文与源文相同，只去掉了末尾换行。源文本身就是合格的技术写作。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-L-001
+    model: claude
+    invariant_verdicts:
+    - kind: condition
+      verdict: preserved
+      source_evidence: 仅当健康检查在 2 分钟内连续失败 3 次，且主集群已进入只读状态时，才切换到备用集群。
+      output_evidence: 仅当健康检查在 2 分钟内连续失败 3 次，且主集群已进入只读状态时，才切换到备用集群。
+      reasoning: 两个前提都在，仍用「且」连接。
+    - kind: condition
+      verdict: preserved
+      source_evidence: 3. 任一次检查恢复成功后，将连续失败计数清零。
+      output_evidence: 3. 任一次检查恢复成功后，将连续失败计数清零。
+      reasoning: 「连续失败」的说法和清零规则都保留了，没有改成在时间窗口内累计失败。
+    - kind: threshold
+      verdict: preserved
+      source_evidence: 在 2 分钟内连续失败 3 次
+      output_evidence: 在 2 分钟内连续失败 3 次
+      reasoning: 2 分钟和 3 次都没变。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 与源文相同，只去掉了末尾换行。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-L-002
+    model: claude
+    invariant_verdicts:
+    - kind: condition
+      verdict: preserved
+      source_evidence: 仅当灰度发布完成且错误率已回到基线时
+      output_evidence: 原文的前提条件「错误率已回到基线」被删除。有两个前提的切换变成了只有一个前提的切换。
+      reasoning: 审阅明确指出原文要求两个条件同时成立，也指出候选改写删掉了错误率这个条件。
+    - kind: scope
+      verdict: preserved
+      source_evidence: 才将全部流量切换到新版本
+      output_evidence: 操作者只要看到灰度发布完成就会切换全部流量。错误率仍高于基线时也会照切，故障会扩散到全部流量。
+      reasoning: 审阅把被删除的条件对应到「切换全部流量」这个动作上，没有误判成只影响灰度阶段。
+    over_edit_verdict: not_applicable
+    review_recall:
+    - category: condition-deletion
+      found: true
+      note: 以 CTC-L001 | ERROR 报出，规则号与严重级别都和预期一致。
+    unexpected_findings:
+    - finding: CTC-L002 | ERROR —「仅当…才」的必要条件被改成了只表示时间先后的「…后」
+      legitimate: true
+      note: 这条成立，而且和 L001 不重复。「灰度发布完成后，将…」只交代先后顺序，原文「条件不满足时不得切换」的排他性读不出来了。不算误报。
+    naturalness: 4
+    naturalness_note: 整体清楚、专业。「有两个前提的切换变成了只有一个前提的切换」一句略显拗口。审阅没有整体改写输入，只给了逐条修改建议，符合
+      review 模式。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-L-003
+    model: claude
+    task_note: null
+    invariant_verdicts:
+    - kind: condition
+      verdict: preserved
+      source_evidence: Start cross-region replication only if both the primary and
+        secondary backup checks pass.
+      output_evidence: 仅当主备份检查和次备份检查均通过时，才启动跨区域复制。
+      reasoning: 「仅当……才」表达必要条件，与 only if 对应，两项检查都必须通过。
+    - kind: quantifier
+      verdict: preserved
+      source_evidence: both the primary and secondary backup checks pass
+      output_evidence: 主备份检查和次备份检查均通过
+      reasoning: 「均」是全称量化，涵盖两项检查，没有被弱化成「任一」或「至少一项」。
+    - kind: condition
+      verdict: preserved
+      source_evidence: A failure in either check leaves replication disabled.
+      output_evidence: 任一检查失败，复制保持禁用状态。
+      reasoning: 「任一」对应 either。「保持禁用状态」与 leaves disabled 一样是确定性的结果描述，没有变成可选行为。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 4
+    naturalness_note: 「次备份检查」不如「辅助备份检查」或「备用备份检查」常见，但语义没有偏差。其余部分是地道的技术中文。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-L-004
+    model: claude
+    invariant_verdicts:
+    - kind: quantifier
+      verdict: preserved
+      source_evidence: 除审计日志和当前活动会话外，执行 `purge` 会删除该租户的所有临时数据
+      output_evidence: 除审计日志和当前活动会话外，执行 `purge` 会删除该租户的所有临时数据
+      reasoning: 删除范围和两项排除都原样保留。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 对保留租户不得执行 `purge`
+      output_evidence: 对保留租户不得执行 `purge`
+      reasoning: 「不得」仍是禁止，强度没有降低。
+    - kind: token
+      verdict: preserved
+      source_evidence: '`purge`'
+      output_evidence: '`purge`'
+      reasoning: 操作名逐字保留，仍指同一个删除操作。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 4
+    naturalness_note: 输出与原文相同，只有末尾换行不同。「除…外」放在句首，离被修饰的「所有临时数据」稍远，但仍是正常的技术写法。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-L-005
+    model: claude
+    invariant_verdicts:
+    - kind: quantifier
+      verdict: preserved
+      source_evidence: 原文：向除审计命名空间和计费命名空间之外的所有命名空间应用限流策略。
+      output_evidence: 操作者会把限流策略也应用到审计命名空间和计费命名空间，影响这两个命名空间的正常流量
+      reasoning: 审阅明确指出两个排除项被删除，候选改写把它们也纳入了限流范围。
+    over_edit_verdict: not_applicable
+    review_recall:
+    - category: exception-set-deletion
+      found: true
+      note: 第一条以 CTC-L001、ERROR 级别命中，位置写为「向所有命名空间应用限流策略」，覆盖了预期位置「所有命名空间」。
+    unexpected_findings:
+    - finding: CTC-S007 | ERROR | 「所有命名空间」 量化范围被扩大
+      legitimate: true
+      note: 这一条与 CTC-L001 指向同一个缺陷，换了一个说得通的规则编号。它不是误报，只是重复；flagged text 确实有缺陷，因此不计入精确率扣分。
+    naturalness: 4
+    naturalness_note: 发现表格清晰，风险说明也具体。第二条基本重复第一条，建议修改栏只写了「同上」，略显冗余。只在建议栏给出恢复后的句子，不算整体重写。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-L-006
+    model: claude
+    invariant_verdicts:
+    - kind: quantifier
+      verdict: preserved
+      source_evidence: 由于该资源正在被另一个进程占用的事实
+      output_evidence: 由于该资源正在被另一个进程占用
+      reasoning: 「另一个进程」保持单数特指，没有改成「其他进程」。删去「的事实」只是去掉冗余的名词化，真值条件不变。
+    - kind: reference
+      verdict: preserved
+      source_evidence: 释放该进程持有的锁后重试。
+      output_evidence: 释放该进程持有的锁后重试。
+      reasoning: 「该进程」仍指占用资源的那个进程，解锁动作的范围没有扩大。
+    - kind: token
+      verdict: preserved
+      source_evidence: 错误 `E_LOCKED`
+      output_evidence: 错误 `E_LOCKED`
+      reasoning: 错误标识逐字保留。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 去掉「…的事实」后因果句更顺，是对真实缺陷的最小修正。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-L-007
+    model: claude
+    invariant_verdicts:
+    - kind: quantifier
+      verdict: preserved
+      source_evidence: Apply the patch to at least one eligible replica in each region
+      output_evidence: 将补丁应用到每个区域中至少一个符合条件的副本
+      reasoning: 「每个区域中至少一个」保留了原有的量词层级，即每个区域都要有至少一个副本，没有弱化成只要某个区域有一个。
+    - kind: negation
+      verdict: preserved
+      source_evidence: do not apply it to every replica
+      output_evidence: 不得将其应用到全部副本
+      reasoning: 「不得……全部副本」禁止的是给所有副本都应用补丁这一整体操作，否定在外、全称在内，与源文一致，没有变成禁止给任何副本应用补丁。
+    - kind: condition
+      verdict: preserved
+      source_evidence: unless the rollout is approved
+      output_evidence: 除非发布已获批准
+      reasoning: 批准条件保留了，并且仍然只解除第二项禁止。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings:
+    - finding: 待确认：「全部副本」的范围是全局还是按区域
+      legitimate: true
+      note: 源文前半句按区域分配，所以「every replica」可以理解为全局所有副本，也可以理解为每个区域内的所有副本， 两种理解下允许的操作不同，这一条提得有道理。它附在正文之后，没有改动译文本身。
+    naturalness: 4
+    naturalness_note: 准确通顺。「将其应用到」略带翻译腔，可以写成「对……应用补丁」，但不影响理解。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-L-008
+    model: claude
+    invariant_verdicts:
+    - kind: negation
+      verdict: preserved
+      source_evidence: 不得同时重启 `controller-a` 和 `controller-b`
+      output_evidence: 不得同时重启 `controller-a` 和 `controller-b`
+      reasoning: 正文没有改动，禁止的仍是「同时重启」这一组合，没有变成分别禁止重启两个控制器。
+    - kind: order
+      verdict: preserved
+      source_evidence: 可以先重启其中一个，待其恢复后再重启另一个
+      output_evidence: 可以先重启其中一个，待其恢复后再重启另一个
+      reasoning: 等待点和先后顺序都原样保留。
+    - kind: token
+      verdict: preserved
+      source_evidence: '`controller-a` 和 `controller-b`'
+      output_evidence: '`controller-a` 和 `controller-b`'
+      reasoning: 两个标识符逐字符一致，仍分别指两个控制器。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings:
+    - finding: 待确认：「恢复」没有给出判定标准
+      legitimate: unclear
+      note: 第二次重启要等「恢复」之后才能执行，而禁止两台控制器同时停机正是这条规定的安全目的。所以这一步的安全确实取决于怎样判定「恢复」，不属于在无关步骤上提问。不过记录里没有给出
+        skill 规定的七类待确认类别，无法核实这一项归哪一类。因此不记为 spurious_pending_item，但类别是否合规算作未确认。
+    naturalness: 5
+    naturalness_note: 正文原样返回。待确认项另起一节附在后面，不算改动正文。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-L-009
+    model: claude
+    invariant_verdicts:
+    - kind: negation
+      verdict: preserved
+      source_evidence: 系统不会在工作时间重启主数据库并清空缓存。
+      output_evidence: 改写拆成「禁止 A，亦禁止 B」，变成了分别否定，否定作用域和原文不同。
+      reasoning: 审阅指出候选采用了分别否定。它说原文否定作用于整体，这一点略有绝对化，因为原文作用域本身有歧义，但风险说明用了「可以读作」加以限定，核心缺陷已正确找到。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 系统不会
+      output_evidence: 原文「系统不会……」描述的是系统的行为，候选改写把它改成了「禁止」，属于规范性禁令。
+      reasoning: 审阅明确指出行为描述被改成了规范性禁令，与不变式一致。
+    over_edit_verdict: not_applicable
+    review_recall:
+    - category: negation-scope
+      found: true
+      note: 第 3 条，CTC-A004，ERROR，位置与预期相符。
+    - category: modality-drift
+      found: true
+      note: 第 1 条，CTC-S003，ERROR，位置与预期相符。
+    unexpected_findings:
+    - finding: CTC-A001：「系统」从动作执行者变成了禁令发出者，执行者无法确定
+      legitimate: true
+      note: 改写后「系统禁止重启」确实改变了执行者—动作关系，被标出的文本并不合规。这一条与情态漂移相关但角度不同，属于正确的额外发现。
+    naturalness: 4
+    naturalness_note: 审阅意见结构清楚，表述专业。第 3 条把原文的作用域说成确定的整体否定，措辞稍显绝对。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-L-010
+    model: claude
+    invariant_verdicts:
+    - kind: threshold
+      verdict: preserved
+      source_evidence: 当待处理任务数达到 100 条时
+      output_evidence: 当待处理任务数达到 100 条时
+      reasoning: 「达到」包含恰为 100 的情况，原样保留。
+    - kind: threshold
+      verdict: preserved
+      source_evidence: 降到 80 条以下后恢复接收
+      output_evidence: 降到 80 条以下后恢复接收
+      reasoning: 「以下」不包含恰为 80 的情况，原样保留。
+    - kind: threshold
+      verdict: preserved
+      source_evidence: 达到 100 条时，调度器停止接收新任务；降到 80 条以下后恢复接收
+      output_evidence: 达到 100 条时，调度器停止接收新任务；降到 80 条以下后恢复接收
+      reasoning: 停止阈值 100 和恢复阈值 80 都保留，没有互换。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 输出与原文逐字相同，只有末尾换行不同。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-L-011
+    model: claude
+    invariant_verdicts:
+    - kind: threshold
+      verdict: preserved
+      source_evidence: 等待时间在 30 s 以内时返回结果
+      output_evidence: 等待时间在 30 s 以内时返回结果
+      reasoning: 输出与源文一致。「以内」按中文惯例包含边界值，等于 30 s 时仍返回结果，与不变量一致。
+    - kind: scope
+      verdict: preserved
+      source_evidence: 超过 30 s 时返回 `timeout`
+      output_evidence: 超过 30 s 时返回 `timeout`
+      reasoning: '`timeout` 仍只用于「超过 30 s」这一分支，没有扩展到等于 30 s 的情况。'
+    - kind: token
+      verdict: preserved
+      source_evidence: '`max_wait` ... `timeout`'
+      output_evidence: '`max_wait` ... `timeout`'
+      reasoning: 参数名和返回值逐字保留。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 输出与源文相同，只少了末尾换行。表格句子简洁规范。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-L-012
+    model: claude
+    invariant_verdicts:
+    - kind: order
+      verdict: preserved
+      source_evidence: 1. 暂停写入。
+      output_evidence: 1. 暂停写入。
+      reasoning: 输出与源文逐字相同，暂停写入仍是提升备用库之前的第 1 步。
+    - kind: order
+      verdict: preserved
+      source_evidence: 2. 等待 `replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`。
+      output_evidence: 2. 等待 `replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`。
+      reasoning: 两个等待条件都保留，且仍在提升备用库之前。
+    - kind: negation
+      verdict: preserved
+      source_evidence: 警告：第 3 步不得与第 1、2 步并行。
+      output_evidence: 警告：第 3 步不得与第 1、2 步并行。
+      reasoning: 禁止并行的警告逐字保留。
+    - kind: token
+      verdict: preserved
+      source_evidence: '`replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`'
+      output_evidence: '`replica_lag_ms` 降为 `0`，并确认快照状态为 `COMPLETED`'
+      reasoning: 三个标记逐字符保留，与复制延迟、快照状态的绑定关系也不变。
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 警告：第 3 步不得与第 1、2 步并行。
+      output_evidence: 警告：第 3 步不得与第 1、2 步并行。
+      reasoning: 警告仍是末尾的独立结构块，没有移动，也没有并入任何步骤。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 输出与源文只差末尾换行，属于空白差异。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-L-013
+    model: claude
+    invariant_verdicts:
+    - kind: order
+      verdict: preserved
+      source_evidence: 原文：冻结写入，等待快照完成后删除旧卷。
+      output_evidence: 原文中「快照完成」与「删除旧卷」是先后关系（「等待快照完成后删除旧卷」）。改写用「同时」把它变成了并发关系。
+      reasoning: 审阅明确指出原文是先等快照完成、后删除旧卷，而候选改写用「同时」让删除和等待可以并行进行。这正是不变量要求指出的差异。冻结写入仍在最前，候选改写没有改变这一点，审阅不提它不算遗漏。
+    - kind: condition
+      verdict: preserved
+      source_evidence: 等待快照完成后删除旧卷
+      output_evidence: 改写里的「等待」不再是删除的前提，只是一个并行的动作。
+      reasoning: CTC-L003 和 CTC-P003 两条发现都把差异定性为语义问题：快照完成不再是删除的必要前提，会在快照完成前删除旧卷，造成数据丢失。审阅没有只把它描述成行文顺序变化。CTC-P004
+        的说法偏向阅读顺序（「读到「删除旧卷」时还没有看到前置条件」），但另外两条已经给出语义层面的定性，所以不构成失败。
+    over_edit_verdict: not_applicable
+    review_recall:
+    - category: temporal-order
+      found: true
+      note: 用 CTC-L003、ERROR 级别命中了预期位置「删除旧卷，同时等待快照完成」，并正确说明这是先后关系被改成了并发关系。
+    unexpected_findings:
+    - finding: CTC-P004 ERROR：破坏性操作的前置条件被移到删除动作之后
+      legitimate: true
+      note: 被标出的文本确实有缺陷，但这和 CTC-L003 是同一个缺陷，只是换了一个角度。它的理由偏重阅读顺序，没有抓住语义上的并发问题，属于重复发现，不算误报。
+    - finding: CTC-P003 ERROR（由「应」级升级）：阻塞等待变成了并行动作
+      legitimate: true
+      note: 判断正确，但仍然是同一个缺陷的重复。另外，标题写着「2 ERROR，1 WARNING」，表格里三条却都标为 ERROR，内部不一致，影响清晰度，但不影响召回。
+    naturalness: 4
+    naturalness_note: 表述清楚、专业。同一缺陷被拆成三条报告，有冗余；标题里的严重级别计数和表格不一致。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-P-001
+    model: claude
+    invariant_verdicts:
+    - kind: procedure
+      verdict: preserved
+      source_evidence: '2. 观察 10 分钟。
+
+        3. 无异常则继续放量至 50%'
+      output_evidence: 观察 10 分钟／无异常 | 没有说明观察哪些指标，也没有给出「无异常」的判定标准
+      reasoning: 正文原样保留，「无异常」缺少判定依据这一点在待确认中以问题形式指出，缺口仍然可见。invariant 要求的就是这一处理。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 无异常则继续放量至 50%
+      output_evidence: 观察的指标及判定为异常的阈值（如错误率、延迟）
+      reasoning: 「错误率、延迟」只出现在待确认项里，用「如」引出，作为请作者补充的示例。它们没有写成门禁条件，没有阈值，也没有指定判定方，正文中也没有任何新增的指标或判定标准，所以不属于凭空补全事实。这里有一点风险：如果把
+        invariant 中「不得出现源文没有的指标名」逐字理解，示例里的指标名也可能被挑出来。但按真值条件判断，输出没有断言任何新的门禁条件，所以判为
+        preserved。
+    - kind: procedure
+      verdict: preserved
+      source_evidence: '1. 将新版本发布到 5% 流量。
+
+        2. 观察 10 分钟。
+
+        3. 无异常则继续放量至 50%，再观察 10 分钟。
+
+        4. 仍无异常则全量发布。'
+      output_evidence: '1. 将新版本发布到 5% 流量。
+
+        2. 观察 10 分钟。
+
+        3. 无异常则继续放量至 50%，再观察 10 分钟。
+
+        4. 仍无异常则全量发布。'
+      reasoning: 放量档位 5%、50%、全量，以及两次「观察 10 分钟」，都逐字保留。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 仍无异常则全量发布。
+      output_evidence: 没有说明出现异常时怎么处理 | 发现异常后的动作（停止放量、回滚或其他）及执行方
+      reasoning: 正文没有补写异常处理分支。「停止放量、回滚或其他」只是待确认中列出的候选项，用来请作者确认，没有断言异常时应该怎么做。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings:
+    - finding: 无异常则继续放量／仍无异常则全量发布 — 未说明异常时的处置
+      legitimate: true
+      note: 每次放量能否安全执行，直接取决于出现异常时停不停、回不回滚。这一项关系到步骤安全，不属于 spurious_pending_item。
+    naturalness: 5
+    naturalness_note: 正文没有改动。待确认的两项表述简洁，用语符合技术写作习惯。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-P-002
+    model: claude
+    invariant_verdicts:
+    - kind: procedure
+      verdict: preserved
+      source_evidence: "通过单次 `PUT /v1/keyring` 请求完成换位：同一请求内把新密钥写入 `active` 槽位、\n \
+        \  把当前密钥移入 `previous` 槽位（服务端原子生效）。"
+      output_evidence: "通过单次 `PUT /v1/keyring` 请求完成换位：同一请求内把新密钥写入 `active` 槽位、\n \
+        \  把当前密钥移入 `previous` 槽位（服务端原子生效）。"
+      reasoning: 第 1 步与源文逐字相同。两次槽位写入仍在同一步、同一次请求内，原子性说明也保留了。
+    - kind: procedure
+      verdict: preserved
+      source_evidence: 确认 `GET /v1/keyring/status` 返回的 `synced_nodes` 等于节点总数后，清空 `previous`
+        槽位。
+      output_evidence: 确认 `GET /v1/keyring/status` 返回的 `synced_nodes` 等于节点总数后，清空 `previous`
+        槽位。
+      reasoning: 前置校验仍在第 3 步，清空动作没有提前，也没有与第 2 步合并。
+    - kind: token
+      verdict: preserved
+      source_evidence: '`PUT /v1/keyring`、`active`、`previous`、`GET /v1/keyring/status`、`synced_nodes`'
+      output_evidence: '`PUT /v1/keyring`、`active`、`previous`、`GET /v1/keyring/status`、`synced_nodes`'
+      reasoning: 五个标识符都逐字保留，反引号格式也没有变。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 正文与源文一致，读起来自然。附加的待确认项问的是第 2 步超时后怎么办。这一步的安全不取决于这个答案：危险操作（清空 `previous`）已经由第
+      3 步的 `synced_nodes` 等于节点总数这一校验把关。同步一直没完成时，操作只会停在第 3 步之前，不会在不安全的状态下继续执行。这一项影响的是流程能否走完，不涉及安全，按规则判为
+      spurious_pending_item。另外，记录里没有给出 skill 列出的七个类别，所以无法核对这一项的类别归属。按判定规则，这一项不导致 fail。
+    overall: pass
+    failure_kinds:
+    - spurious_pending_item
+  - case_id: G-P-003
+    model: claude
+    invariant_verdicts:
+    - kind: procedure
+      verdict: preserved
+      source_evidence: '2. 在管理端确认新节点状态为 `READY`，且分片元数据已全部加载。
+
+        3. 将新节点加入写入路由表。'
+      output_evidence: 2. 在管理端确认新节点状态为 `READY` 且分片元数据已全部加载后，将新节点加入写入路由表。
+      reasoning: 合并后的步骤仍以操作者执行的「在管理端确认」开头。该动作同时列出 `READY` 和分片元数据已全部加载两个条件，并用「后」放在「加入写入路由表」之前。核对点没有消失，也没有改成无需操作者动作的陈述，两个条件都在。
+    - kind: procedure
+      verdict: preserved
+      source_evidence: 4. 观察 15 分钟无写入错误后，下线旧节点。
+      output_evidence: 3. 观察 15 分钟无写入错误后，下线旧节点。
+      reasoning: 前置条件原样保留。时长「15 分钟」和判据「无写入错误」都在。
+    - kind: instruction
+      verdict: preserved
+      source_evidence: '1. 在新节点上启动 `chunk-server`。
+
+        2. 在管理端确认新节点状态为 `READY`，且分片元数据已全部加载。
+
+        3. 将新节点加入写入路由表。
+
+        4. 观察 15 分钟无写入错误后，下线旧节点。'
+      output_evidence: '1. 在新节点上启动 `chunk-server`。
+
+        2. 在管理端确认新节点状态为 `READY` 且分片元数据已全部加载后，将新节点加入写入路由表。
+
+        3. 观察 15 分钟无写入错误后，下线旧节点。'
+      reasoning: 输出压缩到 3 步，任何校验条件都没有丢。压缩只是把核对点和随后的动作合进同一步，执行顺序和行为都没变。
+    - kind: token
+      verdict: preserved
+      source_evidence: '`chunk-server`、`READY`'
+      output_evidence: '`chunk-server`、`READY`'
+      reasoning: 两个标记都逐字保留。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 合并后的「确认……后，将……」读起来自然紧凑，是常见的中文操作步骤写法。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-P-004
+    model: claude
+    invariant_verdicts:
+    - kind: over-edit
+      verdict: preserved
+      source_evidence: 1. 在发布平台点击「回滚到上一版本」，确认目标版本号为 `v3.14.2`。
+      output_evidence: 1. 在发布平台点击「回滚到上一版本」，确认目标版本号为 `v3.14.2`。
+      reasoning: 正文三步逐字未改。没有补写主语，没有新增步骤，也没有拆句。
+    - kind: procedure
+      verdict: preserved
+      source_evidence: 2. 回滚完成后刷新健康检查页，确认 `/healthz` 连续 3 次返回 `200`。
+      output_evidence: 2. 回滚完成后刷新健康检查页，确认 `/healthz` 连续 3 次返回 `200`。
+      reasoning: 仍为 3 步，第 2 步没有拆开。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 3. 在 `#incident` 频道同步回滚结果与影响范围。
+      output_evidence: 3. 在 `#incident` 频道同步回滚结果与影响范围。
+      reasoning: 正文没有新增步骤或分支。待确认部分只是提问，不是新步骤，也不是新事实。
+    - kind: token
+      verdict: preserved
+      source_evidence: '`v3.14.2` `/healthz` `200` `#incident` 5 分钟 3 次'
+      output_evidence: '`v3.14.2` `/healthz` `200` `#incident` 5 分钟 3 次'
+      reasoning: 所有受保护标记和数值都逐字保留。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings:
+    - finding: 待确认：第 1 步版本确认的时机（回滚执行前核对 vs 执行后核对）
+      legitimate: false
+      note: 不变量已明确「条件与顺序清晰，不存在歧义」。「目标版本号」指的是将要回滚到的版本，确认动作自然落在执行之前；执行后应核对的是「当前版本」。所以这里没有真实的歧义，属于误报。本次输入没有提供
+        skill 列出的七个类别，无法核对该条目属于哪一类；判为误报的依据是原文本身没有歧义。按规则 4，正文未改动，过度改写判为 none。
+    naturalness: 5
+    naturalness_note: 正文保持原样。待确认部分格式清楚，但内容多余。
+    overall: pass
+    failure_kinds:
+    - spurious_pending_item
+  - case_id: G-P-005
+    model: claude
+    invariant_verdicts:
+    - kind: instruction
+      verdict: preserved
+      source_evidence: 监控平台收到抑制规则更新后通知各采集端，随后重新加载规则文件。
+      output_evidence: '**审阅结果（review 模式）**'
+      reasoning: 输出是问题清单，唯一的一条包含位置、问题、风险和建议修改，没有返回整段改写的文档。
+    - kind: actor
+      verdict: preserved
+      source_evidence: 随后重新加载规则文件
+      output_evidence: 一种按话题链读作监控平台，另一种读作刚被通知的各采集端。来源和上下文都无法确定是哪一个。
+      reasoning: 输出明确说源文不足以判定执行者，并建议向作者确认，同时给出两种候选写法，没有擅自选定其中一种。
+    - kind: reference
+      verdict: preserved
+      source_evidence: 该文件位于 `/etc/alerting/rules.d/`
+      output_evidence: 也决定了 `/etc/alerting/rules.d/` 在哪台主机上
+      reasoning: 输出没有报告「该文件」与目录不匹配的问题。按约定，不报告不算失败。
+    - kind: over-edit
+      verdict: preserved
+      source_evidence: 监控平台收到抑制规则更新后通知各采集端
+      output_evidence: 监控平台收到抑制规则更新后通知各采集端，各采集端随后重新加载规则文件。
+      reasoning: 第一分句只在建议改法中原样出现，没有被当作施事缺失或被动语态问题报告。
+    over_edit_verdict: not_applicable
+    review_recall:
+    - category: actor-omission-ambiguous
+      found: true
+      note: 以 CTC-A005、ERROR 级别报告，定位到「随后重新加载规则文件」。
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 清单结构清楚，风险说明具体，提到了加载失败发生在哪一端，也提到了排查时会不会找错节点。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-P-006
+    model: claude
+    invariant_verdicts:
+    - kind: instruction
+      verdict: preserved
+      source_evidence: 在任何情况下，服务提供方对于因不可抗力所导致的服务中断，不承担任何形式的赔偿责任。
+      output_evidence: 在任何情况下，服务提供方对于因不可抗力所导致的服务中断，不承担任何形式的赔偿责任。
+      reasoning: 受保护区域里的两行标记和中间的正文在输出中逐字符一致，标点也没有改动。
+    - kind: instruction
+      verdict: preserved
+      source_evidence: '--- BEGIN CONTRACT ---'
+      output_evidence: '--- BEGIN CONTRACT ---'
+      reasoning: 标记行的位置和边界都没有变，两行标记之间没有插入内容，承诺原文也没有被移出标记。前面的说明行同样原样保留。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 会先把流量切换到备用区域，然后再进行根因的排查。在切换的过程当中，可能会出现最长 30 秒的写入不可用的情况。
+      output_evidence: 先把流量切换到备用区域，再排查根因。切换过程中可能出现最长 30 秒的写入不可用。
+      reasoning: 两项事实都保留了：先切流量、再排查根因的先后关系没变；「最长 30 秒」的数值和「可能」的模态强度也没变。改动只是压缩了冗余措辞。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 受保护区域外的改写简洁利落，删掉了「的时候」「进行……的排查」「的情况」等冗余措辞，读起来像熟练的中文技术写作。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-P-007
+    model: claude
+    invariant_verdicts:
+    - kind: over-edit
+      verdict: preserved
+      source_evidence: 报表较大时转为异步导出：接口立即返回 `202` 和 `task_id`
+      output_evidence: 报表较大时转为异步导出：接口立即返回 `202` 和 `task_id`
+      reasoning: 输出与源文相同，只少了末尾换行。没有拆成编号步骤，没有补显式主语，也没有把条件展开成「如果…那么…」。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 报表较大时
+      output_evidence: 报表较大时
+      reasoning: 没有填入任何阈值或替代条件。
+    - kind: token
+      verdict: preserved
+      source_evidence: '`GET /v1/reports/{id}/export`、`202`、`task_id`、`GET /v1/tasks/{task_id}`、Webhook'
+      output_evidence: '`GET /v1/reports/{id}/export`、`202`、`task_id`、`GET /v1/tasks/{task_id}`、Webhook'
+      reasoning: 所有标记逐字保留，Webhook 的大小写也没有变。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 原文没有改动，本身就符合合格技术写作的水准。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-001
+    model: claude
+    invariant_verdicts:
+    - kind: actor
+      verdict: preserved
+      source_evidence: The SDK will perform parsing
+      output_evidence: SDK 会解析上传的配置文件
+      reasoning: 施事者 SDK 仍是主语，统领两个并列动作，没有漂移到其他组件。
+    - kind: causality
+      verdict: preserved
+      source_evidence: carry out validity checks by invoking the schema validator
+      output_evidence: 并调用 schema 校验器执行有效性检查
+      reasoning: 「调用……执行……」连动结构保留了手段与目的的关系，调用校验器是执行检查的手段，顺序没有倒置。
+    - kind: rendering
+      verdict: preserved
+      source_evidence: will perform parsing of ... and carry out validity checks
+      output_evidence: SDK 会解析上传的配置文件，并调用 schema 校验器执行有效性检查。
+      reasoning: 全文只有一个句子。「解析」直接用作动词，不算名物化。即使把「执行有效性检查」算作一个轻动词结构，全句也只有一个，没有达到两个或以上的失败阈值。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 去掉了英文的轻动词名物化堆叠，是地道的中文技术表述。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-002
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: Read-only replicas do not process write requests
+      output_evidence: 只读副本不处理写请求
+      reasoning: 「不处理」是对系统行为的客观陈述，没有强化成「禁止」「不得」这类规范性表述。
+    - kind: quantifier
+      verdict: preserved
+      source_evidence: forward all write operations to the primary database
+      output_evidence: 将所有写操作转发到主数据库
+      reasoning: 全称量词 all 完整译成「所有」。
+    - kind: rendering
+      verdict: preserved
+      source_evidence: Read-only replicas do not process write requests and will automatically
+        forward
+      output_evidence: 只读副本不处理写请求，并会自动将所有写操作转发到主数据库。
+      reasoning: 输出用主谓顺承的方式表达，没有「对于……而言」的从句外壳，也没有冗余代词「它们」。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 语句简洁地道，没有翻译腔。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-003
+    model: claude
+    invariant_verdicts:
+    - kind: causality
+      verdict: preserved
+      source_evidence: Due to the fact that the connection was closed by the remote
+        peer, uncommitted transactions were aborted and an error code `ERR_CONN_RESET`
+        was returned
+      output_evidence: 由于连接被远程对端关闭，未提交的事务已中止，并向客户端返回了错误码 `ERR_CONN_RESET`
+      reasoning: 「由于」同时管辖「事务中止」和「返回错误码」两个结果，因果关系完整，没有弱化成并列。
+    - kind: condition
+      verdict: preserved
+      source_evidence: uncommitted transactions were aborted
+      output_evidence: 未提交的事务已中止
+      reasoning: 「未提交」这一限定准确保留，没有扩大范围。
+    - kind: fact
+      verdict: preserved
+      source_evidence: an error code `ERR_CONN_RESET` was returned to the client
+      output_evidence: 向客户端返回了错误码 `ERR_CONN_RESET`
+      reasoning: 错误码逐字保留，接收方「客户端」也保留。
+    - kind: rendering
+      verdict: preserved
+      source_evidence: Due to the fact that ... was closed ... were aborted ... was
+        returned
+      output_evidence: 由于连接被远程对端关闭，未提交的事务已中止，并向客户端返回了错误码
+      reasoning: 输出没有「由于...的事实」。全句只有一处「被」，不构成连续的「被...被...」。后两个被动已改为主动或无标记语序，冠词「an」也已省去。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 4
+    naturalness_note: 整体自然流畅。「远程对端」略显冗余，用「对端」即可。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-004
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: 修改配置后须重启网关生效。
+      output_evidence: 修改配置后须重启网关生效。
+      reasoning: 「须」逐字保留，既没有弱化，也没有扩写。
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 修改配置后须重启网关生效。
+      output_evidence: 修改配置后须重启网关生效。
+      reasoning: 输出没有加人称代词，没有补从句外壳，也没有拆句，与源文相同。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 输出与源文只差末尾换行，属于空白差异。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-005
+    model: claude
+    invariant_verdicts:
+    - kind: threshold
+      verdict: preserved
+      source_evidence: 单次上限 500 条
+      output_evidence: 单次上限 500 条
+      reasoning: 数值 500 和「单次」这个范围都原样保留。
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 接口支持批量写入，单次上限 500 条。
+      output_evidence: 接口支持批量写入，单次上限 500 条。
+      reasoning: 输出和原文一致（只差末尾换行），没有加入客套主语、轻动词或扩写。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 原样返回了本身已经合规的原文。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-006
+    model: claude
+    invariant_verdicts:
+    - kind: threshold
+      verdict: preserved
+      source_evidence: 磁盘用量超 90% 触发告警。
+      output_evidence: 磁盘用量超 90% 触发告警。
+      reasoning: 开区间「超 90%」原样保留。
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 磁盘用量超 90% 触发告警。
+      output_evidence: 磁盘用量超 90% 触发告警。
+      reasoning: 紧缩句没有被扩写，输出与源文相同，只少了末尾换行。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 原文没有改动，是标准的告警紧缩句。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-007
+    model: claude
+    invariant_verdicts:
+    - kind: order
+      verdict: preserved
+      source_evidence: 备份数据库后，将流量路由至备用集群。
+      output_evidence: 未发现违规
+      reasoning: 审阅模式下没有改写，源文先备份后路由的时序没有被改动。
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 备份数据库后，将流量路由至备用集群。
+      output_evidence: 未发现违规
+      reasoning: 正确地没有报告问题。没有误报「缺少主语」「单句多动词」或「词性不当」。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 审阅输出简洁，没有改写全文。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-008
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: 生产环境禁用调试模式。
+      output_evidence: 生产环境禁用调试模式。
+      reasoning: 输出与原文相同，「禁用」的强度没变。
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 生产环境禁用调试模式。
+      output_evidence: 生产环境禁用调试模式。
+      reasoning: 输出没有加主语，也没有膨胀改写。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 原文已经合规，输出原样返回。唯一的差别是末尾换行，属于空白差异。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-009
+    model: claude
+    invariant_verdicts:
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 请您在注意到用户的输入里面好像有 SQL 相关词汇的时候，尽可能帮忙调用一下 `sanitize_query` 工具对输入进行清理哦
+      output_evidence: 请在注意到用户输入中疑似含有 SQL 相关词汇时，尽可能调用 `sanitize_query` 工具清理输入
+      reasoning: 「您」「帮忙」「一下」「哦」都已清除。剩下的「请」是中文技术文档常用的祈使标记，不属于「请您……」那种整句客套。清除这些词后语义没有改变。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 尽可能帮忙调用一下 `sanitize_query` 工具
+      output_evidence: 尽可能调用 `sanitize_query` 工具清理输入
+      reasoning: 正文保留了「尽可能」，调用义务没有升级。「千万不要」改为「切勿」，两者都是强禁止，强度相同。待确认中「建议按前者确认」只是向作者提问，不改正文，不算提高义务等级。
+    - kind: condition
+      verdict: preserved
+      source_evidence: 好像有 SQL 相关词汇的时候
+      output_evidence: 疑似含有 SQL 相关词汇时
+      reasoning: 「疑似」保留了源文的不确定性，没有改成可判定的确定条件。待确认中还另外标出了触发范围未定，属于明确允许的处理方式。
+    - kind: token
+      verdict: preserved
+      source_evidence: '`sanitize_query`'
+      output_evidence: '`sanitize_query`'
+      reasoning: 逐字保留。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 4
+    naturalness_note: 正文简洁规范。「将输入直接用于拼接字符串」补出的宾语可以从源文推出。待确认第一条带了倾向性建议（建议按「必须调用」确认），但没有写进正文。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-010
+    model: claude
+    invariant_verdicts:
+    - kind: fact
+      verdict: preserved
+      source_evidence: 获取指定时间范围内的系统审计日志，你可以用它来根据用户 ID 和操作类型进行日志筛选
+      output_evidence: 获取指定时间范围内的系统审计日志，可按用户 ID 和操作类型筛选
+      reasoning: 输出保留了核心功能（获取指定时间范围内的系统审计日志）和两个筛选维度（用户 ID、操作类型），没有增删任何条件。不变量写的是「查询」，源文写的是「获取」，输出沿用源文用词，真值条件相同。
+    - kind: threshold
+      verdict: preserved
+      source_evidence: 单次调用最多能够为你返回 100 条记录
+      output_evidence: 单次调用最多返回 100 条记录
+      reasoning: 上限数值 100 和上限语义「最多」都原样保留，没有改成模糊说法。
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 这个工具能够允许调用者去获取……你可以用它来……进行日志筛选……能够为你返回
+      output_evidence: 获取指定时间范围内的系统审计日志，可按用户 ID 和操作类型筛选，单次调用最多返回 100 条记录。
+      reasoning: 「这个工具能够允许」「你可以用它来」「为你返回」这些口语套话都已删除。轻动词「进行日志筛选」改成了直接动词「筛选」。全句以动宾结构「获取……日志」开头，是声明式的工具契约写法。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 简洁的声明式工具描述，符合中文技术文档写法。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-011
+    model: claude
+    invariant_verdicts:
+    - kind: fact
+      verdict: preserved
+      source_evidence: 系统好像无法连接到数据库服务器 `10.0.1.5:5432` 了，请求在等待 5000ms 后超时
+      output_evidence: 系统似乎无法连接到数据库服务器 `10.0.1.5:5432`，请求在等待 5000ms 后超时
+      reasoning: 输出逐字保留了数据库连接超时这一故障、目标地址 `10.0.1.5:5432` 和超时时间 5000ms。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 由于某些未知的网络连接问题，系统好像无法连接
+      output_evidence: 由于某些未知的网络连接问题，系统似乎无法连接
+      reasoning: 输出用「似乎」替换了「好像」，作用范围和推测强度都不变，「由于」小句和「未知的」也原样保留。输出没有把网络问题写成已确认的原因，因此原因未确认这一状态与源文一致。
+    - kind: scope
+      verdict: preserved
+      source_evidence: 请您稍后重试或者联系管理员检查网络
+      output_evidence: 请稍后重试或联系管理员检查网络
+      reasoning: 两条替代动作都保留了，并且仍用「或」连接，是选择关系，没有改成必须同时执行。
+    - kind: threshold
+      verdict: preserved
+      source_evidence: 请求在等待 5000ms 后超时
+      output_evidence: 请求在等待 5000ms 后超时
+      reasoning: 超时边界和单位都与源文逐字一致。
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 糟糕！由于某些未知的网络连接问题
+      output_evidence: 由于某些未知的网络连接问题，系统似乎无法连接到数据库服务器 `10.0.1.5:5432`
+      reasoning: 「糟糕！」已删除。输出只有一句，这一句包含了故障对象（数据库连接）和目标地址。用「似乎」代替「好像」是允许的。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 4
+    naturalness_note: 整体书面、准确，但句子以原因小句开头，故障对象出现得较晚。「某些未知的网络连接问题」略显冗长。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-012
+    model: claude
+    invariant_verdicts:
+    - kind: condition
+      verdict: preserved
+      source_evidence: 磁盘空间不足时，旧快照会被自动清理。
+      output_evidence: 未发现违规
+      reasoning: 审阅模式下没有改写正文，「磁盘空间不足时」与自动清理之间的触发关系没有被改动，也没有被错误标记。
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 旧快照会被自动清理
+      output_evidence: 未发现违规
+      reasoning: 被动句准确且无歧义，正确行为是不报告问题。输出没有误报「禁止被动语态」或「缺少施事者」，不属于过度控制。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 输出简洁、准确，与陷阱用例的正确预期一致。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-013
+    model: claude
+    invariant_verdicts:
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 当用户打开控制台时，用户必须点击设置菜单。然后用户需要选择网络配置，并且用户应当修改端口号。
+      output_evidence: 全句只有「用户」一个执行者，主语却重复了四次，没有消除任何歧义
+      reasoning: 审阅报告了主语「用户」机械重复四次的问题，位置是整段，规则是 CTC-R002，严重级别是 WARNING，和必报项完全一致。建议改写只保留首次出现的「用户」，后续分句承前省略，这就是话题链写法。「必须」「需要」「应当」三种情态强度都保留了，「…时」的条件和「然后」表达的顺序也没变，没有引入新的执行者，也没有新增条件。
+    - kind: over-edit
+      verdict: preserved
+      source_evidence: 当用户打开控制台时，用户必须点击设置菜单。然后用户需要选择网络配置
+      output_evidence: 还把连续的操作拆成了两句
+      reasoning: 句式割裂是可选观察项。审阅把它并入 R002 一起提到，并建议合并成一句，按 invariant 不算误报。合并后三种情态强度仍分别保留，没有出现强度被抹平的问题。
+    over_edit_verdict: not_applicable
+    review_recall:
+    - category: over-control-subject-repetition
+      found: true
+      note: 用 CTC-R002 报告，位置是整段，严重级别 WARNING，和 expected_issues 一致。
+    unexpected_findings:
+    - finding: CTC-A005 ERROR：「并且用户应当修改端口号」没有给出目标端口值，也没有说明取值来源
+      legitimate: unclear
+      note: 源文确实没给目标值，单看这段文字无法执行，因此不能断定被标记的文本「明确且合规」，不应直接判为误报。不过这可能只是片段，端口值也许在上下文中另有说明；而且
+        invariant 写明唯一必报项是主语重复，标成 ERROR 可能定级过高。要判断它是否成立，需要 CTC-A005 的规则定义和这段话的上下文。该发现没有改写原文，处理方式也正确：保留原表述，请作者补充。
+    naturalness: 4
+    naturalness_note: 建议改写「用户打开控制台时，必须点击设置菜单，然后需要选择网络配置，并应当修改端口号。」是自然的话题链。一句话里叠用三个情态词稍显生硬，但这是为了保留源文的强度，可以接受。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-R-014
+    model: claude
+    invariant_verdicts:
+    - kind: actor
+      verdict: preserved
+      source_evidence: 管理员必须把流量进行路由操作到备用集群
+      output_evidence: 管理员必须将流量路由到备用集群
+      reasoning: 责任主体「管理员」保留，义务强度「必须」未变。
+    - kind: order
+      verdict: preserved
+      source_evidence: 在执行对生产数据库的备份操作之后
+      output_evidence: 备份生产数据库后
+      reasoning: 「……后」仍表示先备份、后路由，时序不变。
+    - kind: causality
+      verdict: preserved
+      source_evidence: 以便使得流量切换能够成功完成
+      output_evidence: 以使流量切换成功完成
+      reasoning: 「以使」仍是目的关系，没有改成路由后切换必然完成的结果断言。
+    - kind: rendering
+      verdict: preserved
+      source_evidence: 在执行对生产数据库的备份操作之后，管理员必须把流量进行路由操作到备用集群，以便使得流量切换能够成功完成
+      output_evidence: 备份生产数据库后，管理员必须将流量路由到备用集群，以使流量切换成功完成
+      reasoning: 「执行……备份操作」「进行路由操作」已改回动词表达，责任主体保留。「以便使得……能够」压成「以使」，冗余外壳已基本消除。「以使……成功完成」仍略显书面，但不违反不变量。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 4
+    naturalness_note: 整体自然。「以使流量切换成功完成」可再压成「以完成流量切换」，属小瑕疵。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-S-001
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: 因此建议先在只读副本上验证执行计划
+      output_evidence: 因此建议先在只读副本上验证执行计划
+      reasoning: 原样保留，仍是推荐，不是强制前提。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 也可以推迟到下一维护窗口
+      output_evidence: 也可以推迟到下一维护窗口
+      reasoning: 原样保留，仍是许可，不是义务。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 输出与源文相同，只去掉了末尾换行。陷阱题按原文返回是正确处理。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-S-002
+    model: claude
+    task_note: null
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: operators are advised to test the eviction policy in staging
+      output_evidence: 建议操作人员在预发布环境中测试淘汰策略
+      reasoning: 「are advised to」译为「建议」，仍是推荐语气。输出里没有「必须」「须」，也没有把测试写成启用的前提。
+    - kind: modality
+      verdict: preserved
+      source_evidence: A temporary sandbox may skip this test, but the operator must
+        record the reason.
+      output_evidence: 临时沙箱可以跳过此测试，但操作人员必须记录原因。
+      reasoning: 「may skip」译为「可以跳过」，许可语气保留；「must record」译为「必须记录」，义务语气保留。许可和附带的记录义务都在。
+    - kind: condition
+      verdict: preserved
+      source_evidence: A temporary sandbox may skip this test
+      output_evidence: 临时沙箱可以跳过此测试
+      reasoning: 跳过测试的许可只给了临时沙箱，没有扩大到其他环境。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 译文通顺自然，术语（预发布环境、淘汰策略）用得准确。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-S-003
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: 操作员必须确认最近一次备份已完成
+      output_evidence: 操作员必须确认最近一次备份已完成
+      reasoning: 正文没有改动，「必须」这一强制义务原样保留。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 未确认时不得继续
+      output_evidence: 未确认时不得继续
+      reasoning: 正文没有改动，「不得」这一禁止原样保留。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 测试租户可以取消本次轮换
+      output_evidence: 测试租户可以取消本次轮换
+      reasoning: 正文没有改动，仍是许可，没有变成义务。附加的「待确认」条目指出两处不确定：执行者是谁（测试租户本身，还是对象为测试租户时由操作员执行），以及这项许可是否只在未确认备份时适用。取消权限由谁行使会影响授权，这项质疑看起来有实质意义。但本记录没有提供
+        skill 列出的七个类别，无法核实它属于哪一类，因此不记为 spurious_pending_item。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 正文与源文相同，源文本身就是合格的技术中文。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-S-004
+    model: claude
+    invariant_verdicts:
+    - kind: modality
+      verdict: preserved
+      source_evidence: 确保数据已成功备份
+      output_evidence: 「确保」要求读者把这两种状态做到；「确认」只要求读者检查一下。言语行为的类型变了。
+      reasoning: 审阅明确指出「确保」（使状态成立、必要时补救）与「确认」（仅检查）不等价，并说明了风险：操作者检查后不会补做，所以满足了不变量。
+    over_edit_verdict: not_applicable
+    review_recall:
+    - category: modality-weakening
+      found: true
+      note: 以 CTC-S003 ERROR 定位到「确认数据备份完成」，规则 ID 与预期一致，定位也正确。
+    unexpected_findings:
+    - finding: CTC-S001 ERROR：「已成功备份」改为「备份完成」，丢失「成功」
+      legitimate: true
+      note: 「备份完成」不能断言备份成功，任务完成但结果失败的情况会被当作满足条件，真值条件确实变了。这条额外发现正确。
+    - finding: CTC-S001 ERROR：「已正确同步」改为「已与主节点数据同步」，丢失「正确」
+      legitimate: true
+      note: 删除「正确」后，只要发生过同步就算满足条件，质量断言弱化了。这条额外发现正确。
+    naturalness: 4
+    naturalness_note: 发现条目表述清楚，风险说明具体。个别措辞略显口语化（如「检查一下」），不影响准确性。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-S-005
+    model: claude
+    invariant_verdicts:
+    - kind: fact
+      verdict: preserved
+      source_evidence: 超时可能与连接池耗尽有关。目前只确认两者同时出现，根因尚未确定。
+      output_evidence: 超时可能与连接池耗尽有关。目前只确认两者同时出现，根因尚未确定。
+      reasoning: 输出与源文相同，连接池耗尽仍只是候选解释，根因仍未确定。
+    - kind: causality
+      verdict: preserved
+      source_evidence: 目前只确认两者同时出现
+      output_evidence: 目前只确认两者同时出现
+      reasoning: 没有出现「导致」「引起」等表示确定因果的表述。
+    - kind: scope
+      verdict: preserved
+      source_evidence: 超时可能与连接池耗尽有关
+      output_evidence: 超时可能与连接池耗尽有关
+      reasoning: 没有新增「通常」「最常见」之类的频率限定。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 过去 24 小时的日志显示
+      output_evidence: 过去 24 小时的日志显示
+      reasoning: 证据时间窗口没有改变。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 原样返回源文，只去掉了末尾换行（属于空白字符），合规。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-S-006
+    model: claude
+    invariant_verdicts:
+    - kind: fact
+      verdict: preserved
+      source_evidence: may be associated with DNS cache expiry
+      output_evidence: 可能与 DNS 缓存过期有关
+      reasoning: 「可能……有关」保留了推测语气，没有升级为已确认的关联或根因。
+    - kind: fact
+      verdict: preserved
+      source_evidence: Packet captures remain incomplete, so the root cause is still
+        unconfirmed.
+      output_evidence: 抓包数据仍不完整，因此根本原因尚未确认。
+      reasoning: 抓包不完整、根因未确认两项认识限制都保留了。
+    - kind: causality
+      verdict: preserved
+      source_evidence: may be associated with
+      output_evidence: 可能与 DNS 缓存过期有关
+      reasoning: 没有建立 DNS 缓存过期导致超时的确定因果。「因此」对应源文的 "so"，连接的是抓包不完整与根因未确认，不是新增因果。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 符合中文技术写作习惯，中西文之间的空格规范。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-S-007
+    model: claude
+    invariant_verdicts:
+    - kind: threshold
+      verdict: preserved
+      source_evidence: 单次请求超时为 250 ms。
+      output_evidence: 单次请求超时为 250 ms。
+      reasoning: 数值、单位都没有变。
+    - kind: threshold
+      verdict: preserved
+      source_evidence: '首次失败后等待 2 s；最多重试 3 次。
+
+        - 总等待时间不得超过 10 s。'
+      output_evidence: '首次失败后等待 2 s；最多重试 3 次。
+
+        - 总等待时间不得超过 10 s。'
+      reasoning: 2 s 和 10 s 都原样保留。
+    - kind: threshold
+      verdict: preserved
+      source_evidence: 最多重试 3 次
+      output_evidence: 最多重试 3 次
+      reasoning: 没有改成「总共发送 3 次请求」，最大总尝试次数仍为 4 次。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 总等待时间不得超过 10 s
+      output_evidence: 总等待时间不得超过 10 s
+      reasoning: 上限约束保留，没有改成建议值或固定等待时间。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 正文没有改动。待确认的两项都是真实的规格缺口：后续重试的间隔未给出，「总等待时间」的统计口径未定。两项都没有在正文里被静默补全。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-S-008
+    model: claude
+    invariant_verdicts:
+    - kind: causality
+      verdict: preserved
+      source_evidence: 启用压缩与 CPU 使用率升高同时出现
+      output_evidence: 启用压缩与 CPU 使用率升高同时出现
+      reasoning: 输出与源文完全相同，只说两者共现，没有断言压缩导致 CPU 使用率升高。
+    - kind: causality
+      verdict: preserved
+      source_evidence: 不能证明压缩导致请求超时
+      output_evidence: 不能证明压缩导致请求超时
+      reasoning: 输出保留了这条否定性限定，没有建立压缩与请求超时之间的因果关系。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 三组观测均显示……现有数据只支持相关性
+      output_evidence: 三组观测均显示……现有数据只支持相关性
+      reasoning: 证据范围仍是三组观测，结论仍限于相关性，没有把观测说成受控实验。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 源文本身已经合规，输出原样返回，没有引入问题。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-S-009
+    model: claude
+    invariant_verdicts:
+    - kind: fact
+      verdict: preserved
+      source_evidence: 收到 `503` 时，检查上游服务状态和最近一次部署记录。
+      output_evidence: 收到 `503` 时，检查上游服务状态和最近一次部署记录。
+      reasoning: 正文没有改动，没有新增「通常」「默认」或「最常见」之类的判断。
+    - kind: condition
+      verdict: preserved
+      source_evidence: 检查上游服务状态和最近一次部署记录
+      output_evidence: 检查上游服务状态和最近一次部署记录
+      reasoning: 输出没有新增「只需」，也没有把任何单一动作写成足以恢复的充分条件。
+    - kind: modality
+      verdict: preserved
+      source_evidence: 不要自动重启服务
+      output_evidence: 不要自动重启服务
+      reasoning: 正文没有改动，禁止原样保留。附加的「待确认」条目质疑「服务」到底指哪个服务。如果按最宽的读法（两者都不得自动重启）执行，不会导致不安全的操作，所以这个条目的安全价值有限。但禁止范围确实决定了哪些动作可以自动化，而且本记录没有提供七个类别，无法确认它是否越界，因此不判为
+        spurious_pending_item，只记录这一不确定性。
+    - kind: token
+      verdict: preserved
+      source_evidence: 收到 `503` 时
+      output_evidence: 收到 `503` 时
+      reasoning: 状态码逐字符保留，并且仍然是检查上游状态和部署记录的触发条件。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 正文与源文相同，没有改写。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-T-001
+    model: claude
+    invariant_verdicts:
+    - kind: token
+      verdict: preserved
+      source_evidence: '`POST /v1/jobs/{job_id}:cancel`'
+      output_evidence: '`POST /v1/jobs/{job_id}:cancel`'
+      reasoning: 方法、路径、路径参数和冒号动作语法逐字符一致。
+    - kind: token
+      verdict: preserved
+      source_evidence: '| `409` | 读取字段 `retry_after_ms`，并设置 `JOB_CANCEL_RETRY=1`。
+        |'
+      output_evidence: '| `409` | 读取字段 `retry_after_ms`，并设置 `JOB_CANCEL_RETRY=1`。
+        |'
+      reasoning: 状态码、字段名和环境变量赋值都没有变化。
+    - kind: scope
+      verdict: preserved
+      source_evidence: '| `409` | 读取字段 `retry_after_ms`，并设置 `JOB_CANCEL_RETRY=1`。
+        |'
+      output_evidence: '| `409` | 读取字段 `retry_after_ms`，并设置 `JOB_CANCEL_RETRY=1`。
+        |'
+      reasoning: 两项客户端行为仍在同一表格行内，绑定在 `409` 分支。
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: 输出与原文相同，只去掉了末尾换行。原文本身合规，原样返回是正确处理。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-T-002
+    model: claude
+    invariant_verdicts:
+    - kind: token
+      verdict: preserved
+      source_evidence: 工具 `sync-config` 接受 `--dry-run` 和 `--config=/etc/ctc/agent.yaml`
+      output_evidence: 工具 `sync-config` 接受 `--dry-run` 和 `--config=/etc/ctc/agent.yaml`
+      reasoning: 工具名、标志和带值参数都逐字保留。
+    - kind: token
+      verdict: preserved
+      source_evidence: 仅当 `CTC_SYNC_MODE=verify` 时，工具执行验证而不写入；验证失败时返回退出码 `2`。
+      output_evidence: 仅当 `CTC_SYNC_MODE=verify` 时，工具执行验证而不写入；验证失败时返回退出码 `2`。
+      reasoning: 环境变量赋值（包括大小写）和退出码都没有改变。
+    - kind: condition
+      verdict: preserved
+      source_evidence: 仅当 `CTC_SYNC_MODE=verify` 时，工具执行验证而不写入
+      output_evidence: 仅当 `CTC_SYNC_MODE=verify` 时，工具执行验证而不写入
+      reasoning: 正文没有改动，不写入的行为仍以 verify 模式为条件。待确认项只提出疑问，没有把验证模式写成默认行为或无条件行为。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings:
+    - finding: 待确认：`--dry-run` 的作用未说明，且按「仅当」的字面意思，未设 verify 时传入 `--dry-run` 仍会写入
+      legitimate: unclear
+      note: 正文没有改动，所以附加的待确认项不算文本修改。这个问题看起来是实质性的：按「仅当」的字面意思，传入 `--dry-run` 但没有设置 verify
+        时仍会写入配置，是否写入直接关系到操作安全，所以不像 spurious_pending_item。但我无法核实它是否属于 skill 列出的七个类别之一，因为本次材料没有给出这份类别清单。
+    naturalness: 5
+    naturalness_note: 正文原样保留。待确认项按「位置 | 原因 | 待确认内容」的结构写成，表述清楚。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-T-101
+    model: claude
+    invariant_verdicts:
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 新版本先以灰度发布上线
+      output_evidence: 步骤 1「灰度发布」、步骤 2「金丝雀发布」、步骤 3「小流量验证」 | 无法确认三者是否指同一阶段
+      reasoning: 输出保留了原有三个术语，并在「待确认」中提出三者是否同指，符合第二种合格路径（报告、不合并）。
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 全量发布后保留旧版本实例 24 小时，以便回滚。
+      output_evidence: 全量发布后保留旧版本实例 24 小时，以便回滚。
+      reasoning: 第 4 步「全量发布」原样保留，没有并入灰度类术语。
+    - kind: fact
+      verdict: preserved
+      source_evidence: 覆盖 5% 流量
+      output_evidence: 覆盖 5% 流量
+      reasoning: 正文与源文完全一致。5%、25%、50%、每 5 分钟、24 小时均未改动，「待确认」也没有引入新数值。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings:
+    - finding: 步骤 3「小流量验证通过」未给出判据
+      legitimate: true
+      note: 放量的安全性直接取决于验证判据，属合理待确认项。
+    - finding: 步骤 2 未给出错误率阈值及超阈值处置
+      legitimate: true
+      note: 每 5 分钟的检查要起控制作用，需要阈值和处置动作。与步骤 3 的判据相关但不重复，可以接受。
+    naturalness: 4
+    naturalness_note: 正文保留源文，本身通顺。「待确认」各条按「位置 | 问题 | 所需信息」组织，清楚但略显机械。
+    overall: pass
+    failure_kinds: []
+  - case_id: G-T-102
+    model: claude
+    invariant_verdicts:
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 修改 `upstream` 配置后须重启 `confd`；重启期间约 2 秒不可用。
+      output_evidence: 修改 `upstream` 配置后须重启 `confd`；重启期间约 2 秒不可用。
+      reasoning: The output still says 「重启」 in the first bullet and 「重载（`kill -HUP`）」
+        in the second. Each keeps its own consequence (about 2 seconds unavailable
+        vs. connections not interrupted). The two operations were not merged or swapped.
+    - kind: terminology
+      verdict: preserved
+      source_evidence: 集群内的三份副本用于在线容灾，不能替代备份。
+      output_evidence: 集群内的三份副本用于在线容灾，不能替代备份。
+      reasoning: 「备份」 and 「副本」 keep their original meanings and stay separate. The
+        statement 「不能替代备份」 is kept word for word.
+    - kind: over-edit
+      verdict: preserved
+      source_evidence: '- 仅修改日志级别时执行重载（`kill -HUP`），连接不中断。'
+      output_evidence: '- 仅修改日志级别时执行重载（`kill -HUP`），连接不中断。'
+      reasoning: The body matches the source character for character. The only difference
+        is the missing final newline, which is whitespace. No term was replaced in
+        the name of "unifying terminology."
+    - kind: token
+      verdict: preserved
+      source_evidence: 每晚 02:00 生成一份备份并上传对象存储
+      output_evidence: 每晚 02:00 生成一份备份并上传对象存储
+      reasoning: '`confd`, `upstream`, `kill -HUP` and 02:00 are kept exactly. 「2
+        秒」 and 「三份」 are unchanged.'
+    over_edit_verdict: none
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 5
+    naturalness_note: The output is the source text unchanged. The source already
+      reads like competent Chinese technical writing.
+    overall: pass
+    failure_kinds: []
+  - case_id: G-T-103
+    model: claude
+    invariant_verdicts:
+    - kind: terminology
+      verdict: preserved
+      source_evidence: '任务队列积压超过 8000 时，先确认消费者线程数是否被调低，再决定是否扩容调度器。
+
+        消息队列积压通常与下游消费者故障有关，处理路径不同。'
+      output_evidence: '**任务队列**（调度器内部维护，内存，容量上限 10000，暂存待分发的作业）：积压超过 8000 时，先确认消费者线程数是否被调低，再决定是否扩容调度器。
+
+        - **消息队列**（跨服务通知，Kafka topic `job-events`）：积压通常与下游消费者故障有关，处理路径与任务队列不同。'
+      reasoning: 每条判断仍挂在源文指定的对象下。8000 阈值、线程数检查和扩容都放在任务队列条目里，下游消费者故障放在消息队列条目里。各对象的属性也没有错配：内存、10000、作业暂存归任务队列，Kafka
+        和 `job-events` 归消息队列。输出写成“与任务队列不同”，只是把源文“处理路径不同”里隐含的比较对象写了出来。上下文只有这两个对象，所以这个对象可以从源文推出，没有引入新事实。
+    - kind: reference
+      verdict: preserved
+      source_evidence: 任务队列积压超过 8000 时
+      output_evidence: '**任务队列**（调度器内部维护，内存，容量上限 10000，暂存待分发的作业）：积压超过 8000 时'
+      reasoning: 输出中所有“队列”都带有“任务”或“消息”限定，没有出现无限定的“队列积压超过 8000”。每个条目都以加粗的对象名开头，后面的陈述明确属于该对象。输出也没有用近义词替换对象名。
+    - kind: token
+      verdict: preserved
+      source_evidence: Kafka topic `job-events`
+      output_evidence: Kafka topic `job-events`
+      reasoning: “`job-events`”、10000 和 8000 都逐字保留。
+    over_edit_verdict: not_applicable
+    review_recall: []
+    unexpected_findings: []
+    naturalness: 4
+    naturalness_note: 按对象分条，排查时容易定位。括号里堆了四项属性，读起来略显拥挤，但仍是合格的技术写法。
+    overall: pass
+    failure_kinds: []

@@ -1,0 +1,109 @@
+# si5 — maintainer decisions. probes.yaml is left as registered; this file supplies what the maintainer
+# fixed. Asked through the session's question tool; answers verbatim.
+#
+# Asked 2026-11-09 while the baseline runs were in flight, before any si5 output had been read.
+#
+# M1 「si5 的模型配置：候选运行和评判照旧用 Opus 5.5。三个独立审阅用什么？」
+#    → "全部 Opus 5.5 (Recommended)".
+# M2 「提案 22：「道义强度」与「规范强度」指同一概念，自审几乎每轮都报。统一成哪个？」
+#    → "全文用「规范强度」 (Recommended)": CTC-S003's tuple and §3's authorisation list say 「规范强度」, and the
+#      parenthesis goes; the frontmatter already says it and does not change.
+# M3 「G-A-002 自 r1 起每轮都失败：金标认为「续期失败时通知租户管理员并回滚到上一版本证书」的回滚执行方不确定，
+#    模型每次都报「未发现违规」。「通知 X 并 Y」里两个动词共用主语，管理员回滚的读法需要「通知管理员回滚」这种
+#    兼语句。怎么处理？」
+#    → "修订金标 (Recommended)": the expected 「执行方不可确定」 finding goes; 「不得整篇重写」 and 「不得把由续期服务
+#      发起报为施事缺失」 stay. The reason is recorded in decision 010.
+#
+# Asked 2026-11-09 after the baseline probe pass (si5-probe-base-r*), before any candidate was built.
+#
+# M4 「提案 23：「若导出队列较长，也可以拆成多批提交」这类只授予许可的模糊条件，基线改写和审阅都 3/3 报 A005
+#    （G-S-001 的金标认为这是合规原文）。要不要报？」
+#    → "不报 (Recommended)": a condition that only widens what the operator may do, with the default action
+#      unchanged, leaves discretion on purpose; it is neither raised nor reported.
+# M5 「OR-03：纯描述系统行为的句子（「连接数接近上限时，网关会拒绝新的长连接请求」）在审阅中 3/3 被报 A005
+#    （G-R-012 的金标认为是误报）。要不要报？」
+#    → "不报 (Recommended)": a description of system behaviour asks the reader to decide nothing, so a missing
+#      threshold is not an ambiguity; only a condition that governs an action the reader performs is reported.
+# M6 「提案 26：缺判据的报告门槛，文本写「破坏性或不可逆」，但基线对守护重启、放量的检查也 3/3 报告。门槛应覆盖
+#    哪些操作？」
+#    → "对齐 P004 (Recommended)": destructive, irreversible or state-changing operations (restart, scaling,
+#      release …) all count, as the runtime already behaves; text only.
+# M7 「提案 21：审阅中同指不明的术语差异，基线 6/6 引 CTC-T001（WARNING）。文本写「一条普通 finding」，没有规则
+#    ID。写成哪条？」
+#    → "CTC-T001 (Recommended)": as the runtime already behaves; text only.
+decisions:
+- {id: M1, answer: all-opus}
+- {id: M2, answer: 规范强度 everywhere}
+- {id: M3, answer: amend-gold, case: G-A-002}
+- {id: M4, answer: do-not-report permission conditions}
+- {id: M5, answer: do-not-report descriptive statements}
+- {id: M6, answer: threshold aligned to P004's guarded operations}
+- {id: M7, answer: CTC-T001 for review-mode term variants}
+resolutions:
+- id: OR-01
+  decision: M4
+  expect: unchanged from probes.yaml — body unchanged; no 「待确认」 item on 「较长」.
+- id: OR-02
+  decision: M4
+  expect: unchanged from probes.yaml — no CTC-A005 or CTC-R004 finding on 「较长」.
+- id: OR-03
+  decision: M5
+  expect: unchanged from probes.yaml — no CTC-A005 or CTC-R004 finding on 「接近上限」.
+- id: TH-01
+  decision: M6
+  expect: 「配置无异常」以 CTC-A005 报告（它守护重启）；三次运行一致。
+  fail_if: 任一运行未报告；或三次运行不一致。
+- id: TH-02
+  decision: M6
+  expect: 正文原样返回；「待确认」含「无异常」一项；三次运行一致。
+  fail_if: 正文补出判据；或任一运行没有该项。
+- id: TV-01
+  decision: M7
+  expect: 「实例」与「节点」的差异以 CTC-T001 报告；三次运行一致。
+  fail_if: 任一运行以 CTC-A005 报告该差异；或三次运行不一致。
+- id: TV-02
+  decision: M7
+  expect: 同指问题以 CTC-T001 报告；三次运行一致。
+  fail_if: 任一运行以 CTC-A005 报告同指问题本身；或未报告。
+
+# Asked 2026-11-09 after the v1 runs and the three reviews (OR-06, OR-07, HR-01, HR-02 run on base and v1).
+#
+# M8 「OR-06：「若磁盘紧张，也可以删除 `/backup/` 下 30 天前的备份」属于许可句，但许可的是不可逆的删除。基线 3/3
+#    报 A005，v1 按 M4 的字面 3/3 不报。M4 的豁免要覆盖这种吗？」
+#    → "不覆盖，照报 (Recommended)": the exemption holds only when the permitted action is not destructive,
+#      irreversible or state-changing (the operations P004 guards); 「也可以推迟」「也可以拆批」 stay unreported.
+# M9 「H2：把 CTC-P003 自身判据的门槛也扩到「改变外部状态」。对普通发布 runbook，基线审阅已 3/3 报「helm upgrade
+#    成功判据缺失」，改写却 0/3 提出；v1 改写也提出这一项（只此一项，没有成串）。对抗审阅建议去掉 H2。保留吗？」
+#    → "保留 H2 (Recommended)": rewrite and review agree; a release, restart or similar step that later steps'
+#      safety depends on is raised when it lacks a criterion.
+# M10 「G-S-001：去掉「紧张」项后，v1 在 7 次里有 4 次把「也可以推迟」补成「也可以将索引重建推迟」（基线 1/7），
+#    金标判为过度编辑。本轮修还是留到下一轮？」
+#    → "本轮修 (Recommended)": CTC-P002 says that an object omitted but uniquely recoverable from the preceding
+#      text (zero anaphora) is not a missing object and stays omitted; PR-13 (「重启对应服务」) must still be
+#      reported.
+decisions_after_v1:
+- {id: M8, answer: permission exemption excludes destructive, irreversible or state-changing actions}
+- {id: M9, answer: keep H2}
+- {id: M10, answer: fix zero-object insertion in CTC-P002 this round}
+resolutions_after_v1:
+- id: OR-06
+  decision: M8
+  expect: 「磁盘紧张」以 CTC-A005 报告；三次运行一致。
+  fail_if: 任一运行未报告；或三次运行不一致。
+- id: OR-06r
+  decision: M8
+  expect: 正文原样返回；「待确认」含「磁盘紧张」一项。
+  fail_if: 正文被改写；或任一运行没有该项。
+- id: HR-01
+  decision: M9
+  expect: 正文原样返回；「待确认」只含第 2 步（`helm upgrade`）成功判据一项，不出现成串的判据条目。
+  fail_if: 正文补出判据；或没有该项；或出现两项以上判据条目。
+- id: HR-02
+  decision: M9
+  expect: 第 2 步缺少成功判据以 CTC-P003 报告（第 3 步的安全取决于它）；不出现针对第 1、3 步成功判据的 finding。
+  fail_if: 未报告第 2 步；或报告第 1 步或第 3 步缺少成功判据。
+
+# Scoring reading, recorded rather than silently re-scored: in TV-02 the CTC-A005 findings on the baseline
+# quote 「金丝雀发布期间」 or 「小流量验证通过后」 but are about other gaps (an error-rate threshold, how long each
+# stage lasts, the criterion before ramp-up); the co-reference finding itself is CTC-T001 in all three runs.
+# TV-02 is scored on the co-reference gap.

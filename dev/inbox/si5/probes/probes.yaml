@@ -1,0 +1,407 @@
+# si5 probes — pre-registered on 2026-11-09, before any si5 probe output was seen.
+#
+# Baseline: SKILL.md at 283ec5a (si4 v8), frozen at dev/inbox/si5/base/SKILL.md
+# (sha256 31e5bc0ad648d551bb7501f3e1f34c70736cced9d759c1d803b150b404ceab62).
+#
+# si5 targets open proposals from docs/decisions/009 (§ Open proposals after si4):
+#   23 — a vague condition on a permitted, conservative option is raised in 「待确认」 (G-S-001), and the
+#        related over-report: a descriptive statement of system behaviour drawing CTC-A005 in review
+#        (G-R-012: base 2/3 runs with findings in si4's replicates)
+#   21 — review-mode term variants of unclear co-reference have no rule ID (「review 模式下它是一条普通 finding」)
+#   26 — the missing-criterion threshold (「破坏性或不可逆」) versus P004's guarded operations, which include
+#        state-changing ones (restart, scale-out, release)
+#   22 and 8 are textual (道义强度／规范强度; P004 attributing a moved warning block to R005) and are tested by
+#   self-hosting counts.
+#
+# The model sees only `instruction` and `source`; `targets`, `expect`, `fail_if`, `score` and
+# `expect_basis` are never sent. Three runs per probe per version; a fork counts as demonstrated when the
+# runs disagree on the scored behaviour, or agree on the reading `fail_if` names. expect_basis as in si2–si4:
+# accepted / proposed / product-decision.
+#
+# Regression probes copied verbatim from dev/inbox/si4/probes/probes.yaml, with the expectations the
+# maintainer fixed there (resolutions.yaml M4, M5 and the acceptance ruling on P3-05): P3-01, P3-03, P3-05,
+# PR-07, R4-01, R4-04, R4-07, R4-08.
+cases:
+# ---------------------------------------------------------------- proposal 23: vague conditions on permissions
+# G-S-001's gold treats 「若延迟预算紧张，也可以推迟到下一维护窗口」 as compliant: the condition only widens what
+# the operator may do. si4's B2 routes a degree word on a metric trigger condition to A005, and R004/A005 do
+# not say whether that covers a condition that grants a permission rather than requiring an action.
+- id: OR-01
+  targets: [009-open-23]
+  task: rewrite
+  mode: strict
+  over_edit_trap: true
+  source: |
+    批量导出建议放在凌晨执行，以减少对线上查询的影响。若导出队列较长，也可以拆成多批提交。
+  score: body unchanged; whether 「待确认」 has an item on 「较长」
+  expect: 正文原样返回；不出现关于「导出队列较长」的「待确认」条目。
+  fail_if: 「待确认」含「较长」的条目；或正文被改写。
+  expect_basis: product-decision   # G-S-001's gold (over-edit trap) versus si4 B2's literal scope
+
+- id: OR-02
+  targets: [009-open-23]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这段运维说明，只输出问题清单。
+  source: |
+    批量导出建议放在凌晨执行，以减少对线上查询的影响。若导出队列较长，也可以拆成多批提交。
+  score: whether any finding cites 「较长」
+  expect: 不以 CTC-A005 或 CTC-R004 报告「较长」；可以返回「未发现违规」。
+  fail_if: 任一运行以 CTC-A005 或 CTC-R004 报告「较长」。
+  expect_basis: product-decision
+
+# Boundary: the same condition gating a required action stays reportable (M4, si4 B2).
+- id: OR-04
+  targets: [009-open-23]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这段运维说明，只输出问题清单。
+  source: |
+    批量导出须放在凌晨执行。若导出队列较长，须拆成多批提交。
+  score: rule ID at 「较长」
+  expect: 「较长」以 CTC-A005 报告；三次运行一致。
+  fail_if: 任一运行未报告「较长」；或以 CTC-R004 报告；或三次运行不一致。
+  expect_basis: accepted   # maintainer decision M4 (si4)
+
+# ---------------------------------------------------------------- related over-report: descriptive statements
+# G-R-012's gold: a description of system behaviour gives the reader nothing to decide, so a missing
+# threshold is not an ambiguity. R004 names normative instructions only; A005 has no such scope sentence.
+- id: OR-03
+  targets: [009-open-23]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这段 API 文档，只输出问题清单。
+  source: |
+    ### 连接限制
+    连接数接近上限时，网关会拒绝新的长连接请求，已建立的连接不受影响。
+  score: whether any finding cites 「接近上限」
+  expect: 不以 CTC-A005 或 CTC-R004 报告「接近上限」（对系统行为的描述，读者无须据此决定动作）；可以返回「未发现违规」。
+  fail_if: 任一运行以 CTC-A005 或 CTC-R004 报告「接近上限」。
+  expect_basis: proposed   # G-R-012's gold; CTC-R004 row (规范性指令 only)
+
+# Boundary: the same description followed by an instruction the condition gates.
+- id: OR-05
+  targets: [009-open-23]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这段运维说明，只输出问题清单。
+  source: |
+    ### 连接限制
+    连接数接近上限时，网关会拒绝新的长连接请求；此时须扩容网关。
+  score: rule ID at 「接近上限」
+  expect: 「接近上限」以 CTC-A005 报告（它决定何时扩容）；三次运行一致。
+  fail_if: 任一运行未报告；或以 CTC-R004 报告；或三次运行不一致。
+  expect_basis: accepted   # maintainer decision M4 (si4)
+
+# ---------------------------------------------------------------- proposal 21: term variants in review
+# The T paragraph says a term difference of unclear co-reference is 「一条普通 finding」 in review, without a
+# rule ID; CTC-T001 needs 「同一概念」, and A005 needs readings that change behaviour.
+- id: TV-01
+  targets: [009-open-21]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 runbook，只输出问题清单。
+  source: |
+    ## 扩容 `web`
+    1. 在控制台把 `web` 的实例数调到 6。
+    2. 确认 6 个节点都已注册到负载均衡。
+  score: whether the 实例／节点 difference is reported; rule ID per run
+  expect: 三次运行对「实例」与「节点」的处理一致（是否报告、引用的规则 ID）。
+  fail_if: 三次运行在是否报告或规则 ID 上不一致。
+  expect_basis: product-decision
+
+- id: TV-02
+  targets: [009-open-21]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份发布流程，只输出问题清单。
+  source: |
+    ## 发布流程
+    1. 新版本先以灰度发布上线，覆盖 5% 流量。
+    2. 金丝雀发布期间每 5 分钟检查一次错误率。
+    3. 小流量验证通过后，按 25%、50% 逐步放量。
+  score: rule ID on the 灰度发布／金丝雀发布／小流量验证 co-reference finding
+  expect: 同指问题被报告；三次运行引用同一规则 ID。
+  fail_if: 任一运行未报告同指问题；或三次运行引用的规则 ID 不一致。
+  expect_basis: product-decision   # reported: 004 §3 and G-T-101 (M3); the ID is the product question
+
+# ---------------------------------------------------------------- proposal 26: the threshold's scope
+# B1 (si4) excludes a check with no or an undefined criterion when no destructive or irreversible action
+# depends on it. A restart is in P004's guarded list as a state-changing operation, not as destructive.
+- id: TH-01
+  targets: [009-open-26]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 runbook，只输出问题清单。
+  source: |
+    ## 调整 `nginx` 连接数
+    1. 将 `nginx.conf` 中的 `worker_connections` 改为 `4096`。
+    2. 确认配置无异常后，执行 `systemctl restart nginx`。
+  score: whether 「配置无异常」 is reported; rule ID
+  expect: 三次运行对「配置无异常」的处理一致（报告与否、规则 ID）。
+  fail_if: 三次运行不一致。
+  expect_basis: product-decision
+
+- id: TH-02
+  targets: [009-open-26]
+  task: rewrite
+  mode: strict
+  source: |
+    ## 调整 `nginx` 连接数
+    1. 将 `nginx.conf` 中的 `worker_connections` 改为 `4096`。
+    2. 确认配置无异常后，执行 `systemctl restart nginx`。
+  protected_tokens: [nginx.conf, worker_connections, "4096", "systemctl restart nginx"]
+  score: body unchanged; whether 「待确认」 has an item on 「无异常」
+  expect: 正文原样返回；三次运行对是否提出「无异常」一致。
+  fail_if: 正文补出判据；或三次运行不一致。
+  expect_basis: product-decision
+
+# ---------------------------------------------------------------- regression, copied verbatim from si4
+- id: P3-01
+  targets: [007-open-15]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 runbook，只输出问题清单。
+  source: |
+    ## 更新 `search-api` 缓存配置
+    1. 将 `search.yaml` 中的 `cache.ttl` 改为 `600`。
+    2. 执行 `systemctl reload search-api`。
+    3. 检查 `search-api` 的运行情况。
+  score: whether any finding at step 3 (「运行情况」) cites CTC-A005 or CTC-P003
+  expect: 不以 CTC-A005 或 CTC-P003 报告第 3 步缺少检查项或判据（只读的收尾检查，后续没有步骤依赖它）；可以返回「未发现违规」。
+  fail_if: 任一运行以 CTC-A005 或 CTC-P003 报告第 3 步缺少检查项或判据。
+  expect_basis: accepted   # si4 M5
+
+- id: P3-03
+  targets: [007-open-15]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 runbook，只输出问题清单。
+  source: |
+    ## 下线旧字段
+    1. 执行 `migrate apply 0042`，删除 `orders` 表的旧列 `legacy_status`。
+    2. 将写流量切回 `orders-api`。
+  score: whether step 1's missing success criterion is reported; rule ID per run
+  expect: 第 1 步缺少成功判据被报告（破坏性、不可逆，且第 2 步的安全性取决于它是否成功）；三次运行引用同一规则 ID；同一处不同时引 CTC-P003 与 CTC-A005。
+  fail_if: 任一运行未报告；或三次运行引用的规则 ID 不一致；或同一运行在该处同时引 CTC-P003 与 CTC-A005。
+  expect_basis: accepted
+
+- id: P3-05
+  targets: [007-open-15]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 runbook，只输出问题清单。
+  source: |
+    ## 调整 `report-api` 日志级别
+    1. 将 `report.yaml` 中的 `log.level` 改为 `warn`。
+    2. 执行 `systemctl reload report-api`。
+    3. 确认 `report-api` 运行正常。
+  score: whether any finding at step 3 (「运行正常」) cites CTC-A005 or CTC-P003
+  expect: 不以 CTC-A005 或 CTC-P003 报告第 3 步（只读的收尾确认，没有破坏性或不可逆操作取决于它）；可以返回「未发现违规」。
+  fail_if: 任一运行以 CTC-A005 或 CTC-P003 报告第 3 步。
+  expect_basis: accepted   # si4 acceptance ruling 1
+
+- id: PR-07
+  targets: [006-open-6, 007-open-5, 007-open-15]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份文档，只输出问题清单。
+  source: |
+    ## 缓存节点下线
+    1. 将 `cache-07` 从负载均衡摘除。
+    2. 执行 `cachectl flush --node cache-07` 清空缓存。
+    3. 观察一段时间，确认流量正常后，执行 `cachectl decommission cache-07`。
+  score: rule ID per locus (一段时间 / 流量正常)
+  expect: 「一段时间」与「流量正常」均以 CTC-A005 报告；不出现针对二者的 CTC-R004 finding。
+  fail_if: 任一运行以 CTC-R004 报告「流量正常」或「一段时间」；或二者任一未报告。
+  expect_basis: accepted   # si3 resolution Q3
+
+- id: R4-01
+  targets: [007-open-5, 008-open-19]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 SOP，只输出问题清单。
+  source: |
+    ## 主库切换
+    1. 主库不可用时，必要时手动触发切换。
+    2. 切换完成后，尽快通知业务方。
+    3. 视情况暂停 `batch-runner` 的定时任务。
+  score: rule ID and severity per locus (必要时 / 尽快 / 视情况)
+  expect: 三处各被报告，且引用同一规则 ID（CTC-R004）；三次运行一致。
+  fail_if: 「必要时」引 CTC-R004，而「尽快」或「视情况」引 CTC-A005 或未被报告；或同一处在三次运行中引用的规则 ID 不同。
+  expect_basis: accepted
+
+- id: R4-04
+  targets: [008-open-19]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 SOP，只输出问题清单。
+  source: |
+    ## `api` 集群扩容
+    1. CPU 负载过高时，按 `scale-out.md` 扩容 `api` 节点。
+    2. 扩容完成后，在 `#ops` 频道通报。
+  score: rule IDs at 「负载过高」
+  expect: 「负载过高」以 CTC-A005 报告；三次运行一致；不出现 CTC-R004。
+  fail_if: 任一运行以 CTC-R004 报告「负载过高」；或未报告。
+  expect_basis: accepted   # si4 M4
+
+- id: R4-07
+  targets: [008-open-19]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 SOP，只输出问题清单。
+  source: |
+    ## 清理临时文件
+    1. 磁盘占用偏大时，删除 `/tmp/build-cache/` 下超过 7 天的文件。
+    2. 删除后在 `#ops` 频道通报释放的空间。
+  score: rule IDs at 「偏大」
+  expect: 「磁盘占用偏大」以 CTC-A005 报告（缺少阈值）；三次运行一致；不出现 CTC-R004。
+  fail_if: 任一运行以 CTC-R004 报告；或未报告；或三次运行不一致。
+  expect_basis: accepted   # si4 M4
+
+- id: R4-08
+  targets: [008-open-19]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 SOP，只输出问题清单。
+  source: |
+    ## 连接池告警处理
+    1. 收到 `db_pool_exhausted` 告警后，将 `app.yaml` 中的 `db.pool.max` 调到适当的值。
+    2. 执行 `systemctl reload app`。
+  score: rule IDs at 「适当」
+  expect: 「适当」以 CTC-R004 报告；三次运行一致；不以 CTC-A005 报告「适当」。
+  fail_if: 任一运行以 CTC-A005 报告「适当」；或未报告；或三次运行不一致。
+  expect_basis: accepted
+
+# ---------------------------------------------------------------- added 2026-11-09 after the reviews of v1
+# Registered before any run of these two on any version. The cold decoder (probe 1(g)) and the naturalness
+# reviewer both found that D1's permission exemption, read literally, also covers a permission to perform a
+# destructive or irreversible action under a vague condition. M4 was asked with a benign permission (「拆成
+# 多批提交」); whether the exemption reaches a permitted destructive action is a product question.
+- id: OR-06
+  targets: [009-open-23]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这段运维说明，只输出问题清单。
+  source: |
+    ### 磁盘清理
+    每周日清理 `/var/log/app/` 下超过 14 天的日志。若磁盘紧张，也可以删除 `/backup/` 下 30 天前的备份。
+  score: whether 「紧张」 is reported; rule ID
+  expect: 三次运行对「磁盘紧张」的处理一致（报告与否、规则 ID）。
+  fail_if: 三次运行不一致。
+  expect_basis: product-decision
+
+- id: OR-06r
+  targets: [009-open-23]
+  task: rewrite
+  mode: strict
+  source: |
+    ### 磁盘清理
+    每周日清理 `/var/log/app/` 下超过 14 天的日志。若磁盘紧张，也可以删除 `/backup/` 下 30 天前的备份。
+  protected_tokens: [/var/log/app/, /backup/, "14 天", "30 天"]
+  score: body unchanged; whether 「待确认」 has an item on 「紧张」
+  expect: 正文原样返回；三次运行对是否提出「磁盘紧张」一致。
+  fail_if: 正文被改写；或三次运行不一致。
+  expect_basis: product-decision
+
+# ---------------------------------------------------------------- added 2026-11-09 from the adversarial review of v1
+# Registered before any run of these four on any version (dev/inbox/si5/review/adversarial.yaml,
+# other_observations H and D1).
+#
+# OR-07 — the adversarial reviewer's strongest D1 counterexample: a permission that waives a control the
+# source requires. Logically it is 「不紧急时须先复核」, an obligation with a vague trigger (OR-04's shape).
+- id: OR-07
+  targets: [009-open-23]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份变更规范，只输出问题清单。
+  source: |
+    ## 生产变更
+    1. 生产变更须经双人复核后执行。
+    2. 情况紧急时，也可以先执行、事后补复核。
+  score: whether 「情况紧急」 is reported; rule ID
+  expect: 「情况紧急」以 CTC-A005 报告（它决定能否免除第 1 步规定的复核）；三次运行一致。
+  fail_if: 任一运行未报告「情况紧急」；或三次运行不一致。
+  expect_basis: proposed   # adversarial review; si4 M4 and OR-04 for the obligation it waives
+
+# OR-08 — a troubleshooting document whose 「现象」 section is pure description but, through the headings,
+# decides when the 「处理」 steps run.
+- id: OR-08
+  targets: [009-open-23]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份排障文档，只输出问题清单。
+  source: |
+    ## 现象
+    接口响应明显变慢。
+    ## 处理
+    1. 执行 `systemctl restart cache-proxy`。
+    2. 在 `#ops` 频道通报。
+  score: whether 「明显变慢」 is reported; rule ID
+  expect: 「明显变慢」以 CTC-A005 报告（它通过标题结构决定何时执行重启）；三次运行一致。
+  fail_if: 任一运行未报告；或以 CTC-R004 报告；或三次运行不一致。
+  expect_basis: proposed   # adversarial review; CTC-L001 (structure governs its subtree), si4 M4
+
+# HR-01/HR-02 — an ordinary deploy runbook whose non-destructive, state-changing steps give no success
+# criterion of their own. H2 extends P003's own-step bound to such steps; the baseline P003 bound raises
+# nothing here. Tests whether H2 brings back chains of 「待确认」 items or P003 findings.
+- id: HR-01
+  targets: [009-open-26]
+  task: rewrite
+  mode: strict
+  source: |
+    ## 发布 `checkout`
+    1. 将 `values.yaml` 中的 `image.tag` 改为 `v2.4.1`。
+    2. 执行 `helm upgrade checkout ./chart -n prod`。
+    3. 将 `checkout` 的流量权重调到 100%。
+  protected_tokens: [values.yaml, image.tag, v2.4.1, "helm upgrade checkout ./chart -n prod", checkout, "100%"]
+  score: body unchanged; number of 「待确认」 items on a step's success criterion
+  expect: 正文原样返回；「待确认」不出现关于各步成功判据的条目（P003 末句的原意：普通流程文档不产生成串的未决项）。
+  fail_if: 「待确认」含任一步骤缺少成功判据的条目；或正文补出判据。
+  expect_basis: proposed   # P003's last sentence as in the baseline; adversarial review on H2
+
+- id: HR-02
+  targets: [009-open-26]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 runbook，只输出问题清单。
+  source: |
+    ## 发布 `checkout`
+    1. 将 `values.yaml` 中的 `image.tag` 改为 `v2.4.1`。
+    2. 执行 `helm upgrade checkout ./chart -n prod`。
+    3. 将 `checkout` 的流量权重调到 100%。
+  score: number of CTC-P003 (or CTC-A005) findings on a step's missing success criterion
+  expect: 不以 CTC-P003 或 CTC-A005 报告各步缺少成功判据；可以返回「未发现违规」。
+  fail_if: 任一运行以 CTC-P003 或 CTC-A005 报告某步缺少成功判据。
+  expect_basis: proposed
+
+# ---------------------------------------------------------------- added 2026-11-09 after M8–M10
+# Registered before v2 was built and before any run of these two on any version. M10: an object omitted
+# but uniquely recoverable from the preceding text (zero anaphora) is not a missing object. G-S-001 is the
+# target (v1 inserts 「将索引重建」 in 4/7 runs, base 1/7). ZA-01 is the same shape on other words; PR-13
+# (copied verbatim from dev/inbox/si2/probes/probes.yaml) is the boundary where P002 must still fire.
+- id: ZA-01
+  targets: [m10-zero-anaphora]
+  task: rewrite
+  mode: strict
+  over_edit_trap: true
+  source: |
+    在业务低峰执行 `vacuum full` 可以减少锁等待，因此建议先在测试库上评估耗时。若本周窗口已满，也可以顺延到下周窗口。
+  protected_tokens: [vacuum full]
+  score: body unchanged; whether an object is inserted after 「顺延」
+  expect: 正文原样返回；不在「顺延」前补出对象（「将 `vacuum full` 顺延」）。
+  fail_if: 补出「顺延」的对象；或正文有其他改动；或出现「待确认」条目。
+  expect_basis: accepted   # maintainer decision M10
+
+- id: PR-13
+  targets: [si2-E1, si2-E2, m10-zero-anaphora]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这段 runbook，只输出问题清单。
+  source: |
+    ## 修改 `gateway` 限流阈值
+    1. 将 `gateway.yaml` 中的 `rate_limit.qps` 改为 `2000`。
+    2. 重启对应服务，使配置生效。
+  expect: 以 CTC-P002 报告「重启对应服务」，建议写出 `gateway`。
+  fail_if: 不报告「对应服务」；或以 CTC-A005 报告（对象可从上下文确定）。
+  expect_basis: accepted   # CTC-P002 row: 不得压缩为「对应服务」；可确定的部分应写出

@@ -85,6 +85,25 @@ meta:
       not_applied_no_decision:
         - "M6: 「先别切主吧」 → 「先不要切主」 keeps the strength; no text change"
         - "Open proposal 26: whether the missing-criterion threshold (破坏性或不可逆) should match P004's guarded operations, which include state-changing ones"
+    - date: 2026-11-09
+      purpose: >-
+        Record the si5 iteration (010). IDs and levels are unchanged. A permission condition that only relaxes
+        what the operator may do, and text that only describes system behaviour, are not raised for a missing
+        criterion; the missing-criterion threshold names P004's guarded operations; an omitted object that the
+        preceding text recovers stays omitted; review-mode term variants are T001; one name for the deontic
+        strength.
+      applied:
+        - "010 D1' (maintainer M4, M5, M8): A005's exceptions add two kinds that are not raised or reported under A005 or R004 even without a criterion or threshold: a condition that only relaxes what the operator may do (「若…，也可以…」) while the default action is unchanged, no obligation of the source is waived and the permitted action is not destructive, irreversible or state-changing; and text that only describes system behaviour. R004 points to them"
+        - "010 H1' (maintainer M6, proposal 26): A005's check-step exception is restated as a contrapositive and its threshold names destructive, irreversible or state-changing operations"
+        - "010 H2' (maintainer M9): P003's own-step bound names the same three kinds of operation"
+        - "010 Z1 (maintainer M10): P002 — an object omitted but uniquely recoverable from the preceding text (zero anaphora) is not missing and stays omitted"
+        - "010 V1' (maintainer M7, proposal 21): T001 — a review-mode term variant of unclear co-reference is a T001 finding"
+        - "010 S1' (proposal 8, in part): R005 — standalone warning blocks keep their position"
+        - "010 N1', N2 (maintainer M2, proposal 22): one name, 规范强度, for the deontic strength in S003's tuple and the caller authorisation (SKILL.md §3: 「调整来源中的规范强度」)"
+      gold_amendments:
+        - "G-A-002 (maintainer M3): the expected 「执行方不可确定」 finding on 「通知租户管理员并回滚到上一版本证书」 is removed; in 「通知 X 并 Y」 the two verbs share the subject, and the administrator-rolls-back reading needs a pivotal construction (「通知管理员回滚」). The over-edit and agent-misattribution invalid transformations stay"
+      not_applied_no_decision:
+        - "Open proposals 27–31 (decision 010): the guarded-operation class is defined only by P004's examples; a failed exemption does not say the item must then be raised; 「情况紧急时」 forks between R004 and A005; 「指定改写目标」 is undefined; rewrite raises a term difference that blocks execution at MUST (category 5, S002) while review reports it at SHOULD (T001)"
   rule_count: 29
   family_counts: {S: 7, A: 5, P: 5, T: 2, L: 4, R: 6}
   level_counts: {MUST: 19, SHOULD: 9, MAY: 1}
@@ -358,10 +377,10 @@ rules:
     scope: [rewrite, translate, review, author]
     modes: [strict, standard, review]
     trigger: "来源含有情态词、义务表述、请求、许可、禁止、建议或对系统行为的描述性陈述。"
-    requirement: "输出必须保持三项：认识情态强度（可能／会／一定）、道义情态强度（必须／应／建议／可以／不得）、以及言语行为类型（描述陈述／规范要求／请求／许可）。要求的行为类型本身也必须保持：要求「使其为真」不得降级为要求「核对是否为真」。"
+    requirement: "输出必须保持三项：认识情态强度（可能／会／一定）、规范强度（必须／应／建议／可以／不得）、以及言语行为类型（描述陈述／规范要求／请求／许可）。要求的行为类型本身也必须保持：要求「使其为真」不得降级为要求「核对是否为真」。"
     prohibition: "可能→会；建议→必须；请→须；确保→确认；不会→禁止；禁止→不建议；必须→应；描述性陈述→规范条款；规范条款→描述性陈述；把可选步骤写成必需步骤或反之。"
     exceptions: "同强度同类型的词形替换允许（不得↔禁止，应↔应当）。调用方明确要求调整规范强度时允许，且该调整不属于渲染决定。"
-    invariant: "modality-profile — (认识强度, 道义强度, 言语行为类型) 三元组逐处不变。"
+    invariant: "modality-profile — (认识强度, 规范强度, 言语行为类型) 三元组逐处不变。"
     detection: mixed
     detection_note: "确定性层对情态词表做出现剖面差分（可能／会／必须／应／建议／请／确保／确认／禁止／不得／可以），差异输出 WARNING；强度是否真的改变由语义层判定，因为合法改写可以改变表层词形。"
     examples:
@@ -375,14 +394,14 @@ rules:
       boundary:
         source_zh: "不得在生产环境启用调试日志。"
         output_zh: "禁止在生产环境启用调试日志。"
-        why_not_triggered: "「不得」与「禁止」同为禁止级道义情态，言语行为类型同为规范条款，词形变化未改变强度。"
+        why_not_triggered: "「不得」与「禁止」同为禁止级的规范强度，言语行为类型同为规范条款，词形变化未改变强度。"
     justification: "情态是中文技术文本中最容易被自然度改写顺手替换的成分，且替换后句子完全通顺，读者无从察觉。"
     gate_evidence:
       failing_input: "D001 §1: 确保数据已被成功备份，并且所有从节点都已正确地同步了主节点的数据。 / D001 §2: 如果你想在生产环境中部署该服务，请确保你已经配置了环境变量。 / D001 §4: 系统不会在工作时间重启主数据库并清空缓存。"
       observed_bad_output: "确认数据备份完成，且所有从节点已与主节点数据同步。 / 在生产环境部署该服务前，须完成环境变量配置。 / 工作时间内，系统禁止重启主数据库，亦禁止清空缓存。"
       risk: "义务降级为核验会删除补救责任；请求升级为义务会替作者做出规范决定；描述升级为禁令改变了真值条件与受众——前者描述系统行为，后者向人下达规则。"
       not_covered_by: "三例都发生在一次自称 meaning_delta: none 的自然度改写中（D001），即「保持语义」的一般性要求不足以阻止它。S001 不触发：没有任何断言消失，只是强度与言语行为类型变了。R003 反译文腔规则本身就是驱动这些替换的力量，不可能同时约束它们。"
-      distinguishing_criterion: "对来源与输出逐句抽取 (认识强度, 道义强度, 言语行为类型)；任一处不同即失败。该判据可作为 gold case 的 invariant kind: modality 直接使用。"
+      distinguishing_criterion: "对来源与输出逐句抽取 (认识强度, 规范强度, 言语行为类型)；任一处不同即失败。该判据可作为 gold case 的 invariant kind: modality 直接使用。"
 
   - id: CTC-S004
     family: S
@@ -657,7 +676,7 @@ rules:
     trigger: "来源存在两种以上读法且导致不同行为，而来源与调用上下文都不足以确定作者意图；或来源缺少执行所需的参数、阈值、接收方、判据。"
     requirement: "保持原有表述不做消歧改写，并在「待确认」中给出：位置、两种（或多种）读法或缺失项、判定所需的信息。review 模式下作为一条 finding 报告。"
     prohibition: "静默选定一种读法；用改写把歧义掩盖成流畅句子；补出缺失参数以使文本看起来可执行；在同一处既消歧又替换关键动词，使两处改动无法分别审查。"
-    exceptions: "调用方明确授权在指定读法下改写时，按授权执行并在「待确认」中记录所选读法。当一种读法在该领域中不可能成立（不对应任何可执行操作）时，不算真歧义。检查或确认步骤没有给出判据或判据含义未定（「确认无异常」），而没有破坏性或不可逆操作取决于它的结果时，不提出、不报告（009 B1，维护者 M5；回归：P3-01、P3-02、P3-05，边界 PR-07）。"
+    exceptions: "调用方明确授权在指定读法下改写时，按授权执行并在「待确认」中记录所选读法。当一种读法在该领域中不可能成立（不对应任何可执行操作）时，不算真歧义。检查或确认步骤没有给出判据或判据含义未定（「确认无异常」）时，只有当破坏性、不可逆或改变外部状态的操作取决于它的结果，才提出或报告（009 B1，维护者 M5；010 H1'，维护者 M6；回归：P3-01、P3-02、P3-05、TH-01、TH-02，边界 PR-07）。以下两种情形即使缺少判据或阈值，也不按本规则或 R004 提出或报告：条件只放宽对操作者的限制（「若…，也可以…」），而默认动作不变、来源规定的义务不被免除、所许可的也不是破坏性、不可逆或改变外部状态的操作；文本只描述系统行为，不要求读者据此行动（010 D1'，维护者 M4、M5、M8；回归：OR-01、OR-02、OR-03、G-S-001、G-R-012，边界 OR-04、OR-05、OR-06、OR-07、OR-08）。"
     invariant: "ambiguity-conserved — 未获证据的歧义在输出中仍然存在，且被显式报告。"
     detection: semantic
     examples:
@@ -735,7 +754,7 @@ rules:
     trigger: "目标文本是可执行步骤（runbook、SOP、agent 指令、工具使用说明），而某一步骤缺少执行所必需的成分：动作、动作对象、或对象所在位置。"
     requirement: "步骤应当可直接执行：动作、对象与位置在来源或上下文中可确定时应写出。无法确定时按 A005 在「待确认」中提出，不得猜测。"
     prohibition: "把已给出的操作对象压缩为「相关配置」「对应服务」「必要的调整」；把具体命令替换为「按需处理」；删除操作发生的位置（节点、环境、命名空间）。"
-    exceptions: "命令行或代码块已完整表达动作与对象时，不再补写自然语言描述，否则触发 R002。说明性文档中对机制的概述不属于步骤，不触发本规则。步骤已写出具体对象、只是未细化到实例、节点、环境、路径或命名空间时，不算缺少对象或位置，也不因此按 A005 报告；来源或上下文在对象或这些层级上出现多个可能的取值时除外。「相关配置」「对应服务」这类说法不算写出对象（007 E2；回归：G-R-007、PR-03、PR-13、PR-15）。"
+    exceptions: "命令行或代码块已完整表达动作与对象时，不再补写自然语言描述，否则触发 R002。说明性文档中对机制的概述不属于步骤，不触发本规则。步骤已写出具体对象、只是未细化到实例、节点、环境、路径或命名空间时，不算缺少对象或位置，也不因此按 A005 报告；来源或上下文在对象或这些层级上出现多个可能的取值时除外。「相关配置」「对应服务」这类说法不算写出对象（007 E2；回归：G-R-007、PR-03、PR-13、PR-15）。省略的对象可由前文唯一确定（零形回指）时，不算缺少对象，保持省略（010 Z1，维护者 M10；回归：G-S-001、ZA-01，边界 PR-13）。"
     invariant: "step-executability — 步骤的 (动作, 对象, 位置) 三元组在来源中可确定的部分，在输出中仍然可确定。"
     detection: semantic
     examples:
@@ -766,7 +785,7 @@ rules:
     scope: [rewrite, translate, review, author]
     modes: [strict, standard, review]
     trigger: "来源给出了某个步骤的成功判据、等待条件或验证方式。"
-    requirement: "成功判据应与它所验证的步骤保持绑定，并保持其阻塞性质：「直到…为止再继续」必须仍然是继续的前提。来源把验证单独列为一个步骤时，该步骤保持独立；调用方授权合并步骤（明确要求合并，或限定步骤数）时可以并入相邻步骤，但合并后它必须仍是由操作者执行、位于被守护动作之前、且逐项列全原有判据的确认动作（D004；009 T2，回归：PR-09、PC-01）。来源未给出操作步骤自身的成功判据时不得虚构；只有当该步是破坏性或不可逆操作、且后续步骤的安全性取决于它是否成功，才在「待确认」第 2 类中提出，其余操作步骤缺少判据不提出。检查或确认步骤缺少判据按 A005 处理（009 B1；回归：P3-03、P3-04）。"
+    requirement: "成功判据应与它所验证的步骤保持绑定，并保持其阻塞性质：「直到…为止再继续」必须仍然是继续的前提。来源把验证单独列为一个步骤时，该步骤保持独立；调用方授权合并步骤（明确要求合并，或限定步骤数）时可以并入相邻步骤，但合并后它必须仍是由操作者执行、位于被守护动作之前、且逐项列全原有判据的确认动作（D004；009 T2，回归：PR-09、PC-01）。来源未给出操作步骤自身的成功判据时不得虚构；只有当该步是破坏性、不可逆或改变外部状态的操作，且后续步骤的安全性取决于它是否成功，才在「待确认」第 2 类中提出，其余操作步骤缺少判据不提出。检查或确认步骤缺少判据按 A005 处理（009 B1；010 H2'，维护者 M9；回归：P3-03、P3-04、HR-01、HR-02）。"
     prohibition: "把阻塞条件移到附注、脚注或文末；把「确认 X 后再继续」改写为「随后可继续」；把祈使的验证动作改写为对系统行为的描述；为步骤补写来源没有的验收标准；合并步骤时把校验改写为不需要操作者动作的状态描述（「节点就绪后加入路由表」），或丢掉其中任一判据——两者都是删除校验点（D004）。"
     exceptions: "判据的呈现位置可以变化（正文、表格、检查清单），只要仍绑定同一步骤且保持阻塞性质。调用方授权压缩或合并步骤属于 R001 意义上的归因；本规则不要求独立的验证步骤在获授权时仍保持独立（D004 撤回了该条款）。"
     invariant: "verification-binding — (步骤, 判据, 是否阻塞) 三元组不变。"
@@ -889,7 +908,7 @@ rules:
     trigger: "同一概念在本次工作单位（被改写的文本，加上调用方给出的上下文）内出现两种以上称呼。"
     requirement: "同一概念应统一为一个术语。选择顺序：调用方提供的术语约定 > 来源中最明确且出现最多的形式 > 来源中首次出现的形式。"
     prohibition: "引入来源与上下文都没有出现过的新术语或新译名；在同一文档内无理由地交替使用中英形式；把来源已经统一的术语替换为模型自己偏好的说法。"
-    exceptions: "首次出现处给出中英对照属于术语定义，不算不一致。引用外部系统或标准的固有名称时保持原名。本技能不附带产品术语表（000-design.md §7.4）：术语只能来自来源文本与调用上下文。作用域仅限本次调用可见的文本加调用方术语表（004 §3）；只有明确同指时才统一，不明确时不合并，各说法保持原样——改写模式下差异本身不进「待确认」，只有当它妨碍执行时按第 5 类（S002）报告；review 模式下它是一条普通 finding（005 C1）。"
+    exceptions: "首次出现处给出中英对照属于术语定义，不算不一致。引用外部系统或标准的固有名称时保持原名。本技能不附带产品术语表（000-design.md §7.4）：术语只能来自来源文本与调用上下文。作用域仅限本次调用可见的文本加调用方术语表（004 §3）；只有明确同指时才统一，不明确时不合并，各说法保持原样——改写模式下差异本身不进「待确认」，只有当它妨碍执行时按第 5 类（S002）报告；review 模式下它是一条 T001 finding（005 C1；010 V1'，维护者 M7；回归：TV-01、TV-02）。"
     invariant: "concept-to-term — 概念到术语的映射在工作单位内是函数（一个概念一个术语）。"
     detection: mixed
     detection_note: "当调用方提供了术语约定时，约定内术语可做确定性字符串检查；无约定时，同义变体的识别属于语义层。"
@@ -1203,7 +1222,7 @@ rules:
     trigger: "目标文本是规范性指令（agent 指令、SOP、策略、门禁条件），且其判定条件由无判据词承担，包括承担义务本身的情态模糊词（004 §8）。无判据词是表示程度、时机或裁量的开放类：尽量、尽可能、尽快、最好、适当、必要时、视情况、条件允许时、一般来说、合理等（008 S2，维护者 Q3；条件允许时由 009 R4L 列入，维护者 M4，回归 R4-05、R4-10）。未定义的状态（「服务稳定」「流量正常」）、未给出具体值的次数或时长（「多次」「一段时间」），以及用程度词描述运行指标而未给出阈值的触发条件（「延迟较高时」「负载过高时」）不属此类，按 A005 处理（008 S2、S4；009 B2，维护者 M4；回归：PR-07、R4-01–R4-09）。表示做多少的程度词（「调到适当的值」）仍属此类（R4-08）。"
     requirement: "author 模式下，规范性条件应给出可判定的触发条件：阈值、状态或事件。rewrite 模式下不得补出来源没有的判据，应在「待确认」中提出；无判据词承担义务时，报告其可能的两种以上强度并在第四栏给出建议，然后停手，由作者决定（D003，003 §5，004 §8）。规范强度词（必须／应／可以）在同一文档内应保持稳定用法（000-design.md §26）。"
     prohibition: "在改写中把无判据词替换为具体阈值（那是 S002 违规）；在同一文档内让「应」时而表示义务、时而表示建议；把目标文档中限定观测事实的普通汉语副词当作违规删除。"
-    exceptions: "本规则只适用于规范性指令文本。目标文档中对观测事实的限定（「该接口通常在 100 ms 内返回」）不受限制（000-design.md §26 末段）。"
+    exceptions: "本规则只适用于规范性指令文本。目标文档中对观测事实的限定（「该接口通常在 100 ms 内返回」）不受限制（000-design.md §26 末段）。只放宽对操作者限制的许可条件与只描述系统行为的文本，按 A005 例外中的两种情形处理，不按本规则报告（010 D1'）。"
     invariant: "criterion-decidable — 每个规范性条件都对应一个可观测的判定依据，或被显式标记为未定义。"
     detection: mixed
     detection_note: "确定性层可对无判据词表（尽量、尽可能、尽快、最好、适当、必要时、视情况、条件允许时、一般来说、合理、酌情）做字符串检查并给出 WARNING，词表是开放类的已知成员，不是封闭清单；该词是否承担判定条件、附近是否已定义判据，由语义层判定。"
@@ -1236,7 +1255,7 @@ rules:
     trigger: "来源包含 Markdown 结构：标题层级、有序或无序列表、表格、围栏代码块及其语言标注、链接、引用块。"
     requirement: "结构标记及其承载的粒度应保持不变：表格仍是表格，代码块仍是代码块并保留语言标注，列表项数保持一致（P001 允许的合法拆合除外），标题层级不变。"
     prohibition: "把表格展平为句子；把围栏代码块改为行内代码或普通段落；删除语言标注；把编号步骤改写成散文段落；调整标题层级从而改变文档结构。"
-    exceptions: "调用方明确要求改变格式时按要求执行。把顺序敏感的无序列表改为有序列表是允许的，前提是顺序已由来源给出（否则属 S002 新增）。结构所承载的条件作用域（标题或父级列表项的条件管辖其子树）不属于本规则，属 L001 的 MUST 级条件保持，调用方的格式授权不能豁免它；本规则只管格式与粒度（005 C8）。"
+    exceptions: "调用方明确要求改变格式时按要求执行。把顺序敏感的无序列表改为有序列表是允许的，前提是顺序已由来源给出（否则属 S002 新增）。结构所承载的条件作用域（标题或父级列表项的条件管辖其子树）不属于本规则，属 L001 的 MUST 级条件保持，调用方的格式授权不能豁免它；本规则只管格式与粒度（005 C8）。独立告警块应保持原位：它管辖整个流程，P004 把移动它算作本规则的违规（010 S1'）。"
     invariant: "structure-counts — (标题层级序列, 列表项数, 代码块数与语言标注, 表格行列数) 不变。"
     detection: mixed
     detection_note: "确定性层可比较结构计数（标题、列表项、代码围栏与语言标注、表格行列）并给出 WARNING；差异是否被任务授权由语义层判定。"
@@ -1316,7 +1335,7 @@ self_check:
       - "列出全部受保护标记（S005）。"
       - "列出全部 (数值, 单位) 与精度（S004）。"
       - "列出每个阈值的比较方向与边界包含性（L004）。"
-      - "逐句记录 (认识强度, 道义强度, 言语行为类型)（S003）。"
+      - "逐句记录 (认识强度, 规范强度, 言语行为类型)（S003）。"
       - "列出全部条件、前提与例外，及其限定对象（L001）。"
       - "列出每个量化位置的 (量化类型, 论域)（S007）。"
       - "列出全部具名施事及其动作（A001）。"

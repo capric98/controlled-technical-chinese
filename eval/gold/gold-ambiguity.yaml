@@ -96,14 +96,6 @@ cases:
       若输出的主体是重写文本——即使重写本身正确——判为失败。
 
       '
-  - kind: actor
-    detail: '清单须指出「回滚到上一版本证书」的执行方不可确定：既可读作续期服务自动回滚，也可读作由被
-
-      通知的租户管理员手动回滚，二者决定该功能是否需要人工介入。若清单只给出一种「正确写法」而
-
-      不说明源文无法判定，判为擅自决定。
-
-      '
   - kind: over-edit
     detail: '「由续期服务向 CA 发起续期请求」的施事已明确，不得作为施事缺失或被动语态问题报告；
 
@@ -114,11 +106,7 @@ cases:
   - '`auto_renew`'
   - '`false`'
   authorized_token_changes: []
-  expected_issues:
-  - category: actor-omission-ambiguous
-    rule: CTC-A005
-    severity: ERROR
-    locus: 通知租户管理员并回滚到上一版本证书
+  expected_issues: []
   invalid_transformations:
   - output: '开启后，续期服务在证书到期前 7 天向 CA 发起续期请求；续期失败时，续期服务通知租户管理员，
 
@@ -127,8 +115,7 @@ cases:
       '
     violated:
     - instruction
-    - actor
-    reason: 'review 模式被当成 rewrite 执行；且「自动回滚」是源文没有的事实，把一种读法写成了规格。
+    reason: 'review 模式被当成 rewrite 执行；「自动」还是源文没有的事实。
 
       '
   - output: '问题 1（ERROR，位置：由续期服务向 CA 发起续期请求）：施事表述冗余，建议改为主动句「续期服务向 CA 发起续期请求」。
@@ -138,13 +125,18 @@ cases:
       '
     violated:
     - over-edit
-    - actor
-    reason: '问题 1 是误报（施事本已明确）；问题 2 把回滚方定死为续期服务，且未指出源文不足以判定。
+    reason: '问题 1 是误报（施事本已明确）；问题 2 只是把共用的主语写出来，不对应任何违规。
 
       '
   over_edit_trap: false
   provenance: orchestrator-reviewed
   notes: '同时测两件事：review 不得整篇重写，以及 review 不得用「建议改为」偷偷消歧。
+
+    2026-11-09 修订（si5，维护者决定 M3，决定 010）：删去 actor 不变量与预期 finding。「通知租户管理员并回滚」
+
+    中「并」连接的两个动词共用主语，回滚执行方可以确定；读作管理员回滚需要「通知租户管理员回滚」这种兼语句。
+
+    自 r1 起各模型都没有报这一项。保留 instruction 与 over-edit 两条不变量，「未发现违规」可以通过。
 
     '
   source_file: r2-claude-cases.yaml
