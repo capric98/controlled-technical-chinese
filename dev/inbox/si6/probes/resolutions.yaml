@@ -1,0 +1,103 @@
+# si6 — maintainer decisions. probes.yaml is left as registered; this file supplies what the maintainer
+# fixed. Asked through the session's question tool; answers verbatim.
+#
+# Asked 2026-11-09 before the probes were registered and before any si6 output existed.
+#
+# M1 「si6 的模型配置：候选运行、评判和三个独立审阅照旧全部用 Claude Opus 5.5 吗？」
+#    → "全部 Opus 5.5 (Recommended)".
+# M2 「提案 10：si5 的 6 次自托管中有 5 次报 CTC-P005——frontmatter 的 description 写了使用时机，却没写 §1 已有的
+#    不适用范围（营销文案、品牌叙事、文学写作、SEO、一般润色）。要解冻 frontmatter，在 description 末尾补一句
+#    「不用于营销文案、品牌叙事、文学写作、SEO 与一般性文字润色」吗？」
+#    → "解冻，补上排除项 (Recommended)": only that sentence; the hard gate allows exactly this replacement
+#      through --fm-replace.
+# M3 「提案 29：OR-07「生产变更须经双人复核后执行。情况紧急时，也可以先执行、事后补复核。」每次都被报告，但规则
+#    ID 在 CTC-R004（WARNING）和 CTC-A005（ERROR）之间分化，基线就是这样。「情况紧急时」归哪条？」
+#    → "CTC-R004 (Recommended)": by si4 M4's criterion, words that leave whether, when or how much to act to
+#      the reader are R004 (必要时、视情况、条件允许时); 「紧急时」 is one of them. A finding whose risk field
+#      names the different action may still be reported as ERROR (§8).
+# M4 「提案 31：同一处妨碍执行的术语差异（如「实例数调到 4」与「确认 4 个节点就绪」），改写时进「待确认」第 5 类
+#    （CTC-S002，必须），审阅时按 M7 报 CTC-T001（应，WARNING，可按 §8 升级）。审阅要不要改成与改写对齐？」
+#    → "保持 T001，不改 (Recommended)": rewrite has no severity, so 「必须」 there is a category label; a
+#      review finding on a difference that blocks execution can reach ERROR through the risk field. The
+#      reason is recorded in decision 011 and proposal 31 is closed.
+decisions:
+- {id: M1, answer: all-opus}
+- {id: M2, answer: unfreeze the description and add §1's exclusions}
+- {id: M3, answer: 「情况紧急时」 is CTC-R004}
+- {id: M4, answer: keep CTC-T001 for review-mode term variants; close proposal 31 without a text change}
+
+# Asked 2026-11-09 after the baseline probe pass (si6-probe-base-r*), before any candidate was built. The
+# question tool was declined; the three questions were put in the session's text with options and a
+# recommendation each, and the maintainer answered "按推荐继续" (take the recommended option for all three).
+#
+# M5 「提案 27，GO-03：许可句「若变更较多，也可以分两批发布」的豁免，该怎么判断？A（推荐）只看许可是否新增了默认
+#    动作里没有的危险操作：拆批发布仍是发布，不报；「也可以删除旧备份」「也可以改保留期」新增了操作，照报。B 只要
+#    许可的操作本身会改变外部状态就报。」
+#    → A: the exemption asks whether the permitted way of doing it adds a destructive, irreversible or
+#      state-changing operation beyond the default action. GO-03 is not reported; OR-06 and GO-02 still are.
+# M6 「提案 27，GO-01：运行时已经 3/3 把「备份后执行 DROP」中备份缺少判据提出来，但 P003 的字面门槛不明显包括备份。
+#    A（推荐）在 P003 里写明「为后续破坏性操作建立恢复点的备份、快照也算」，只改文字；B 不改文字；C 收紧，备份不再
+#    提出。」
+#    → A: text only, as the runtime already behaves.
+# M7 「提案 30，AU-01：「把要求放宽一些」没有指明放宽哪几条、放宽到什么强度。A（推荐）正文不动，按第 5 类在「待确认」
+#    中请调用方指明；B 全文统一降一级。」
+#    → A: a strength authorisation that names neither the items nor the target strength changes nothing;
+#      the request for both goes to 「待确认」 as category 5.
+decisions_after_baseline:
+- {id: M5, answer: the permission exemption tests what the permitted way of doing it adds beyond the default action}
+- {id: M6, answer: P003's own-step bound names backups and snapshots that create a recovery point for a later guarded operation; text only}
+- {id: M7, answer: an unspecific strength authorisation changes nothing and is raised as category 5}
+resolutions:
+- id: GO-03
+  decision: M5
+  expect: 「变更较多」不报告；三次运行一致。
+  fail_if: 任一运行以 CTC-A005 或 CTC-R004 报告「变更较多」。
+- id: GO-01
+  decision: M6
+  expect: 第 1 步（备份）缺少成功判据以 CTC-P003 报告；三次运行一致。
+  fail_if: 任一运行未报告；或三次运行不一致。
+- id: GO-01r
+  decision: M6
+  expect: 正文原样返回；「待确认」含备份成功判据一项；三次运行一致。
+  fail_if: 正文被改写；或任一运行没有该项。
+- id: GO-04
+  decision: M6 (by the same reading of the class)
+  expect: 「确认服务无异常」以 CTC-A005 报告（发送给客户的通知不可撤回）；三次运行一致。
+  fail_if: 任一运行未报告；或三次运行不一致。
+- id: AU-01
+  decision: M7
+  expect: 正文原样返回；「待确认」请调用方指明放宽哪几条、放宽到何种强度。
+  fail_if: 正文中任一规范强度被改动；或「待确认」没有对应条目。
+
+# Asked 2026-11-09 after the v1 reviews and the v2a/v2b runs (si6-probe-v2a-r*, si6-probe-v2b-r*, the gold reps
+# si6-g2-v2a-r*, si6-g2-v2b-r*). Put in the session's text with a recommendation each; the maintainer answered
+# "按推荐继续". GO-06, GO-07 and GO-08 were registered as measure-only before any output; the expectations below
+# were fixed after the v2 outputs, so the v3 run is their first confirmation, not their source.
+#
+# M8 「提案 27，G1 的范围：许可豁免只看「不引入默认动作之外的危险操作」（v2a，M5 字面），还是另加「不减少这类操作之前的
+#    检查或复核，也不更换其执行者」（v2b，对抗审阅的收窄写法）？两者只在 GO-07（建议由 DBA 执行；紧急情况下值班工程师
+#    也可以执行）分开：基线 A005 3/3，v2a 不报 3/3，v2b R004 3/3。推荐 v2b。」
+#    → v2b: a permission that skips a check or review before such an operation, or hands it to another performer,
+#      lowers a safeguard and is not exempt. GO-06 and GO-07 are reported; GO-08 (an earlier deletion of the same
+#      kind) stays exempt.
+# M9 「提案 27，B1：M6 的前提「只改文字，行为不变」不成立。基线不加这句话已 3/3 把 GO-01 的备份判据提出来；加上后 GO-05
+#    （备份是最后一步）合计 3/6 误报，G-R-007 在 v2a 上 1/3 失败，理由都是「备份是恢复点」。推荐删掉 B1，M6 改选「不改
+#    文字」，把冷读者的分叉记入决定记录。」
+#    → drop B1: M6 becomes option B (no text change). GO-01, GO-01r and GO-05 keep their expectations; the cold
+#      decode's reading of the bound goes to decision 011 as an open observation.
+decisions_after_v2:
+- {id: M8, answer: the permission exemption also requires that the permitted way of doing it does not reduce the checks or reviews before such an operation and does not change its performer (G1b)}
+- {id: M9, answer: drop B1; M6 becomes no text change}
+resolutions_after_v2:
+- id: GO-06
+  decision: M8
+  expect: 「若改动较小，也可以直接在生产执行」被报告（规则 ID 不限）；三次运行一致。
+  fail_if: 任一运行未报告。
+- id: GO-07
+  decision: M8
+  expect: 「紧急情况下，值班工程师也可以执行切换」被报告（规则 ID 不限；按 M3 应为 CTC-R004）；三次运行一致。
+  fail_if: 任一运行未报告。
+- id: GO-08
+  decision: M8
+  expect: 「若磁盘紧张，也可以提前到周五清理」不报告；三次运行一致。
+  fail_if: 任一运行以 CTC-A005 或 CTC-R004 报告「磁盘紧张」。

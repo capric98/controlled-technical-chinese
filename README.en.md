@@ -124,7 +124,7 @@ and a mutation corpus of 45 single-defect mutants was detected 45/45. Full asses
 [`eval/reports/release-gates.md`](./eval/reports/release-gates.md).
 
 These measurements were taken on the 2026-08-29 version. The current `SKILL.md` is the si1 merge
-([decision 006](./docs/decisions/006-si1-merged-iteration.md)) plus four iterations:
+([decision 006](./docs/decisions/006-si1-merged-iteration.md)) plus five iterations:
 
 - si2 ([decision 007](./docs/decisions/007-si2-review-routing-and-p002-boundary.md),
   [report](./eval/reports/si2-summary.md)) routes undecidable review findings to `CTC-A005` and bounds
@@ -149,10 +149,19 @@ These measurements were taken on the 2026-08-29 version. The current `SKILL.md` 
     included);
   - keeps an omitted object that the preceding text recovers; reports review-mode term variants of unclear
     co-reference as `CTC-T001`; uses one name, 「规范强度」, for normative strength.
+- si6 ([decision 011](./docs/decisions/011-si6-permission-increment-emergency-authorisation-description.md),
+  [report](./eval/reports/si6-summary.md)):
+  - judges a permission by what the permitted way adds to the default action: a permission that only changes
+    how it is done (in batches, earlier) is not reported; one that introduces a new guarded operation, reduces
+    the checks or reviews before one, or changes who performs it is still reported;
+  - adds 「紧急时」 to `CTC-R004`'s criterion-free words;
+  - leaves the text unchanged when a strength authorisation names neither the items nor the target strength,
+    and asks the caller in 「待确认」;
+  - adds §1's exclusions to the frontmatter `description`.
 
-On the gold corpus, run and judged by Claude Opus 5.5 only, the si5 candidate's full run passes 56/56 with
-no deterministic failure and naturalness 4.70; si4's full runs passed 53–55/56, and single runs vary by two
-to three cases. G-T-101's gold was amended by decision 009 to align with decision 004 §3, and G-A-002, which
+On the gold corpus, run and judged by Claude Opus 5.5 only, the si6 candidate's full run passes 56/56 with
+no deterministic failure and naturalness 4.68; the si5 candidate's passed 56/56 at 4.70 and si4's full runs
+53–55/56, and single runs vary by two to three cases. G-T-101's gold was amended by decision 009 to align with decision 004 §3, and G-A-002, which
 had failed every run since r1, by decision 010.
 
 It is **not** a validated release. The gold corpus is agent-reviewed and cross-audited between two

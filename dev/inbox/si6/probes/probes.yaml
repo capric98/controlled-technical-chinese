@@ -1,0 +1,557 @@
+# si6 probes — pre-registered on 2026-11-09, before any si6 probe output was seen.
+#
+# Baseline: SKILL.md at 37b5983 (si5 v2), frozen at dev/inbox/si6/base/SKILL.md
+# (sha256 759bc53cd9c63baf0f5ba3b0d9e198af908b306b2fba57bfbbe64675f1b5d1c7).
+#
+# si6 targets open proposals from docs/decisions/010 (§ Open proposals after si5):
+#   27 — 「破坏性、不可逆或改变外部状态的操作」 is undefined: a backup that a destructive step depends on
+#        (GO-01, GO-01r), a config change that deletes data (GO-02), a permitted variant of an action the
+#        default already performs (GO-03), an irreversible notification gated by an undefined check (GO-04)
+#   29 — 「情况紧急时」 between R004 and A005; the maintainer chose R004 (si6 M3): OR-07, EM-01, boundary EM-02
+#   30 — 「指定改写目标」 and a vague strength authorisation (AU-01, AU-02)
+#   10 — the frontmatter description omits §1's exclusions (P005 in 5/6 si5 self-hosting runs); the
+#        maintainer unfroze that clause (si6 M2). Tested by self-hosting counts.
+#   31 — closed by the maintainer without a text change (si6 M4); TV-01 stays as regression.
+#   28 — a failed exemption's fallback: no failing run; OR-06 and OR-07 are its regression.
+#
+# The model sees only `instruction` and `source`; `targets`, `expect`, `fail_if`, `score` and
+# `expect_basis` are never sent. Three runs per probe per version. expect_basis as in si2–si5:
+# accepted / proposed / product-decision.
+#
+# Regression probes copied verbatim from dev/inbox/si5/probes/probes.yaml (P3-01, P3-05, PR-07 originally
+# si4's), with the expectations the maintainer fixed there (si5 resolutions.yaml M7–M9) or here (OR-07: M3).
+cases:
+- id: OR-01
+  targets:
+  - 009-open-23
+  task: rewrite
+  mode: strict
+  over_edit_trap: true
+  source: '批量导出建议放在凌晨执行，以减少对线上查询的影响。若导出队列较长，也可以拆成多批提交。
+
+    '
+  score: body unchanged; whether 「待确认」 has an item on 「较长」
+  expect: 正文原样返回；不出现关于「导出队列较长」的「待确认」条目。
+  fail_if: 「待确认」含「较长」的条目；或正文被改写。
+  expect_basis: product-decision
+- id: OR-02
+  targets:
+  - 009-open-23
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这段运维说明，只输出问题清单。
+  source: '批量导出建议放在凌晨执行，以减少对线上查询的影响。若导出队列较长，也可以拆成多批提交。
+
+    '
+  score: whether any finding cites 「较长」
+  expect: 不以 CTC-A005 或 CTC-R004 报告「较长」；可以返回「未发现违规」。
+  fail_if: 任一运行以 CTC-A005 或 CTC-R004 报告「较长」。
+  expect_basis: product-decision
+- id: OR-03
+  targets:
+  - 009-open-23
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这段 API 文档，只输出问题清单。
+  source: '### 连接限制
+
+    连接数接近上限时，网关会拒绝新的长连接请求，已建立的连接不受影响。
+
+    '
+  score: whether any finding cites 「接近上限」
+  expect: 不以 CTC-A005 或 CTC-R004 报告「接近上限」（对系统行为的描述，读者无须据此决定动作）；可以返回「未发现违规」。
+  fail_if: 任一运行以 CTC-A005 或 CTC-R004 报告「接近上限」。
+  expect_basis: proposed
+- id: OR-06
+  targets:
+  - 009-open-23
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这段运维说明，只输出问题清单。
+  source: '### 磁盘清理
+
+    每周日清理 `/var/log/app/` 下超过 14 天的日志。若磁盘紧张，也可以删除 `/backup/` 下 30 天前的备份。
+
+    '
+  score: whether 「紧张」 is reported; rule ID
+  expect: 「磁盘紧张」以 CTC-A005 报告；三次运行一致。
+  fail_if: 任一运行未报告；或三次运行不一致。
+  expect_basis: 'accepted   # si5 M8'
+- id: OR-07
+  targets:
+  - 010-open-29
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份变更规范，只输出问题清单。
+  source: '## 生产变更
+
+    1. 生产变更须经双人复核后执行。
+
+    2. 情况紧急时，也可以先执行、事后补复核。
+
+    '
+  score: whether 「情况紧急」 is reported; rule ID
+  expect: 「情况紧急」以 CTC-R004 报告（si6 M3）；三次运行一致。
+  fail_if: 任一运行未报告；或以 CTC-A005 报告；或三次运行不一致。
+  expect_basis: 'accepted   # si6 M3'
+- id: OR-08
+  targets:
+  - 009-open-23
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份排障文档，只输出问题清单。
+  source: '## 现象
+
+    接口响应明显变慢。
+
+    ## 处理
+
+    1. 执行 `systemctl restart cache-proxy`。
+
+    2. 在 `#ops` 频道通报。
+
+    '
+  score: whether 「明显变慢」 is reported; rule ID
+  expect: 「明显变慢」以 CTC-A005 报告；三次运行一致。
+  fail_if: 任一运行未报告；或以 CTC-R004 报告；或三次运行不一致。
+  expect_basis: 'accepted   # si5 OR-08 resolution'
+- id: HR-01
+  targets:
+  - 009-open-26
+  task: rewrite
+  mode: strict
+  source: '## 发布 `checkout`
+
+    1. 将 `values.yaml` 中的 `image.tag` 改为 `v2.4.1`。
+
+    2. 执行 `helm upgrade checkout ./chart -n prod`。
+
+    3. 将 `checkout` 的流量权重调到 100%。
+
+    '
+  protected_tokens:
+  - values.yaml
+  - image.tag
+  - v2.4.1
+  - helm upgrade checkout ./chart -n prod
+  - checkout
+  - 100%
+  score: body unchanged; number of 「待确认」 items on a step's success criterion
+  expect: 正文原样返回；「待确认」只含第 2 步（`helm upgrade`）成功判据一项。
+  fail_if: 正文补出判据；或没有该项；或出现两项以上判据条目。
+  expect_basis: 'accepted   # si5 M9'
+- id: HR-02
+  targets:
+  - 009-open-26
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 runbook，只输出问题清单。
+  source: '## 发布 `checkout`
+
+    1. 将 `values.yaml` 中的 `image.tag` 改为 `v2.4.1`。
+
+    2. 执行 `helm upgrade checkout ./chart -n prod`。
+
+    3. 将 `checkout` 的流量权重调到 100%。
+
+    '
+  score: number of CTC-P003 (or CTC-A005) findings on a step's missing success criterion
+  expect: 第 2 步缺少成功判据以 CTC-P003 报告；不出现针对第 1、3 步成功判据的 finding。
+  fail_if: 未报告第 2 步；或报告第 1 步或第 3 步缺少成功判据。
+  expect_basis: 'accepted   # si5 M9'
+- id: TV-01
+  targets:
+  - 009-open-21
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 runbook，只输出问题清单。
+  source: '## 扩容 `web`
+
+    1. 在控制台把 `web` 的实例数调到 6。
+
+    2. 确认 6 个节点都已注册到负载均衡。
+
+    '
+  score: whether the 实例／节点 difference is reported; rule ID per run
+  expect: 「实例」与「节点」的差异以 CTC-T001 报告；三次运行一致。
+  fail_if: 任一运行以 CTC-A005 报告该差异；或未报告；或三次运行不一致。
+  expect_basis: 'accepted   # si5 M7; si6 M4'
+- id: ZA-01
+  targets:
+  - m10-zero-anaphora
+  task: rewrite
+  mode: strict
+  over_edit_trap: true
+  source: '在业务低峰执行 `vacuum full` 可以减少锁等待，因此建议先在测试库上评估耗时。若本周窗口已满，也可以顺延到下周窗口。
+
+    '
+  protected_tokens:
+  - vacuum full
+  score: body unchanged; whether an object is inserted after 「顺延」
+  expect: 正文原样返回；不在「顺延」前补出对象（「将 `vacuum full` 顺延」）。
+  fail_if: 补出「顺延」的对象；或正文有其他改动；或出现「待确认」条目。
+  expect_basis: accepted
+- id: PR-13
+  targets:
+  - si2-E1
+  - si2-E2
+  - m10-zero-anaphora
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这段 runbook，只输出问题清单。
+  source: '## 修改 `gateway` 限流阈值
+
+    1. 将 `gateway.yaml` 中的 `rate_limit.qps` 改为 `2000`。
+
+    2. 重启对应服务，使配置生效。
+
+    '
+  expect: 以 CTC-P002 报告「重启对应服务」，建议写出 `gateway`。
+  fail_if: 不报告「对应服务」；或以 CTC-A005 报告（对象可从上下文确定）。
+  expect_basis: accepted
+- id: P3-01
+  targets:
+  - 007-open-15
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 runbook，只输出问题清单。
+  source: '## 更新 `search-api` 缓存配置
+
+    1. 将 `search.yaml` 中的 `cache.ttl` 改为 `600`。
+
+    2. 执行 `systemctl reload search-api`。
+
+    3. 检查 `search-api` 的运行情况。
+
+    '
+  score: whether any finding at step 3 (「运行情况」) cites CTC-A005 or CTC-P003
+  expect: 不以 CTC-A005 或 CTC-P003 报告第 3 步缺少检查项或判据（只读的收尾检查，后续没有步骤依赖它）；可以返回「未发现违规」。
+  fail_if: 任一运行以 CTC-A005 或 CTC-P003 报告第 3 步缺少检查项或判据。
+  expect_basis: accepted
+- id: P3-05
+  targets:
+  - 007-open-15
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 runbook，只输出问题清单。
+  source: '## 调整 `report-api` 日志级别
+
+    1. 将 `report.yaml` 中的 `log.level` 改为 `warn`。
+
+    2. 执行 `systemctl reload report-api`。
+
+    3. 确认 `report-api` 运行正常。
+
+    '
+  score: whether any finding at step 3 (「运行正常」) cites CTC-A005 or CTC-P003
+  expect: 不以 CTC-A005 或 CTC-P003 报告第 3 步（只读的收尾确认，没有破坏性或不可逆操作取决于它）；可以返回「未发现违规」。
+  fail_if: 任一运行以 CTC-A005 或 CTC-P003 报告第 3 步。
+  expect_basis: accepted
+- id: PR-07
+  targets:
+  - 006-open-6
+  - 007-open-5
+  - 007-open-15
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份文档，只输出问题清单。
+  source: '## 缓存节点下线
+
+    1. 将 `cache-07` 从负载均衡摘除。
+
+    2. 执行 `cachectl flush --node cache-07` 清空缓存。
+
+    3. 观察一段时间，确认流量正常后，执行 `cachectl decommission cache-07`。
+
+    '
+  score: rule ID per locus (一段时间 / 流量正常)
+  expect: 「一段时间」与「流量正常」均以 CTC-A005 报告；不出现针对二者的 CTC-R004 finding。
+  fail_if: 任一运行以 CTC-R004 报告「流量正常」或「一段时间」；或二者任一未报告。
+  expect_basis: accepted
+- id: GO-01
+  targets:
+  - 010-open-27
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 runbook，只输出问题清单。
+  source: '## 清理归档表
+
+    1. 备份 `orders` 库。
+
+    2. 执行 `DROP TABLE orders_archive;`。
+
+    3. 在 `#dba` 频道通报。
+
+    '
+  score: whether step 1's missing success criterion is reported; rule ID
+  expect: 三次运行对第 1 步（备份）缺少成功判据的处理一致（报告与否、规则 ID）。
+  fail_if: 三次运行不一致。
+  expect_basis: product-decision
+- id: GO-01r
+  targets:
+  - 010-open-27
+  task: rewrite
+  mode: strict
+  source: '## 清理归档表
+
+    1. 备份 `orders` 库。
+
+    2. 执行 `DROP TABLE orders_archive;`。
+
+    3. 在 `#dba` 频道通报。
+
+    '
+  protected_tokens:
+  - orders
+  - DROP TABLE orders_archive;
+  - '#dba'
+  score: body unchanged; whether 「待确认」 has an item on the backup step's success criterion
+  expect: 正文原样返回；三次运行对是否提出备份的成功判据一致。
+  fail_if: 正文被改写；或三次运行不一致。
+  expect_basis: product-decision
+- id: GO-02
+  targets:
+  - 010-open-27
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这段运维说明，只输出问题清单。
+  source: '### 日志保留
+
+    `app` 的日志默认保留 30 天。若磁盘紧张，也可以把 `retention_days` 改为 `14`。
+
+    '
+  score: whether 「紧张」 is reported; rule ID
+  expect: 「磁盘紧张」以 CTC-A005 报告（所许可的改动会删除 15–30 天的日志，并改变运行中服务的配置）；三次运行一致。
+  fail_if: 任一运行未报告；或三次运行不一致。
+  expect_basis: 'accepted   # si5 M8'
+- id: GO-03
+  targets:
+  - 010-open-27
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这段发布说明，只输出问题清单。
+  source: '## 发布窗口
+
+    版本发布建议安排在工作日 14:00–17:00。若待发布的变更较多，也可以分两批发布。
+
+    '
+  score: whether 「较多」 is reported; rule ID
+  expect: 三次运行对「变更较多」的处理一致（报告与否、规则 ID）。
+  fail_if: 三次运行不一致。
+  expect_basis: product-decision
+- id: GO-04
+  targets:
+  - 010-open-27
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 runbook，只输出问题清单。
+  source: '## 故障恢复后
+
+    1. 确认服务无异常。
+
+    2. 向受影响的客户发送恢复通知邮件。
+
+    '
+  score: whether 「无异常」 is reported; rule ID
+  expect: 三次运行对「确认服务无异常」缺少判据的处理一致（报告与否、规则 ID）。
+  fail_if: 三次运行不一致。
+  expect_basis: product-decision
+- id: EM-01
+  targets:
+  - 010-open-29
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份操作规范，只输出问题清单。
+  source: '## 主从切换
+
+    1. 主从切换须由 DBA 执行。
+
+    2. 紧急情况下，值班工程师也可以执行切换。
+
+    '
+  score: whether 「紧急情况下」 is reported; rule ID
+  expect: 「紧急情况下」以 CTC-R004 报告（si6 M3）；三次运行一致。
+  fail_if: 任一运行未报告；或以 CTC-A005 报告；或三次运行不一致。
+  expect_basis: 'accepted   # si6 M3'
+- id: EM-02
+  targets:
+  - 010-open-29
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这条发布规则，只输出问题清单。
+  source: '## 发布暂停
+
+    服务不稳定时，暂停所有发布。
+
+    '
+  score: whether 「不稳定」 is reported; rule ID
+  expect: 「服务不稳定」以 CTC-A005 报告（R004 排除项：未定义的状态）；三次运行一致。
+  fail_if: 任一运行以 CTC-R004 报告；或未报告。
+  expect_basis: 'accepted   # si4 B2'
+- id: AU-01
+  targets:
+  - 010-open-30
+  task: rewrite
+  mode: strict
+  instruction: 改写这份 SOP，把要求放宽一些。
+  source: '## 数据库变更
+
+    1. 变更必须在维护窗口内执行。
+
+    2. 执行前必须完成全量备份。
+
+    3. 变更脚本应先在预发环境验证。
+
+    '
+  score: which normative words change in the body; whether 「待确认」 raises the scope of the authorisation
+  expect: 三次运行的处理一致（是否改动规范强度、改动哪几处、是否在「待确认」中请调用方指明范围）。
+  fail_if: 三次运行不一致。
+  expect_basis: product-decision
+- id: AU-02
+  targets:
+  - 010-open-30
+  task: rewrite
+  mode: standard
+  instruction: 改写这段 API 说明，改写目标：让刚入职的工程师也能看懂。
+  source: '`POST /v1/orders` 创建订单。请求体中 `idempotency_key` 相同的请求在 24 小时内只处理一次，重复请求返回首次请求的结果。
+
+    '
+  protected_tokens:
+  - POST /v1/orders
+  - idempotency_key
+  - 24 小时
+  score: propositions in the body that the source does not have (read by hand)
+  expect: 输出不含来源没有的命题（如对幂等的解释、用途、示例）；可以调整语序或措辞。
+  fail_if: 输出新增了来源没有的命题。
+  expect_basis: 'accepted   # CTC-S002; §3 「授权…不改变任何语义不变量的验证方式」'
+
+# ---------------------------------------------------------------- added 2026-11-09 after M5–M7
+# Registered before any run of these two on any version, as the boundaries of the M6 and M7 edits.
+# AU-03 — an authorisation that names the item and the target strength must still be applied (M7's boundary).
+- id: AU-03
+  targets: [010-open-30]
+  task: rewrite
+  mode: strict
+  instruction: 改写这份 SOP：把第 3 条的「应」改为「必须」，其余不变。
+  source: |
+    ## 数据库变更
+    1. 变更必须在维护窗口内执行。
+    2. 执行前必须完成全量备份。
+    3. 变更脚本应先在预发环境验证。
+  score: item 3's strength; whether anything else changes; pending items
+  expect: 只把第 3 条的「应」改为「必须」；其余原样；不出现「待确认」。
+  fail_if: 第 3 条未改；或其他条目被改动；或出现「待确认」条目。
+  expect_basis: accepted   # §3 调用方授权：调整来源中的规范强度
+# GO-05 — a backup that nothing later depends on: P003's bound does not raise its criterion (M6's boundary).
+- id: GO-05
+  targets: [010-open-27]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份检查清单，只输出问题清单。
+  source: |
+    ## 发布前检查
+    1. 执行 `make test`。
+    2. 将 `config/` 目录备份到 `/backup/config/`。
+  score: whether step 2's missing success criterion is reported
+  expect: 不以 CTC-P003 或 CTC-A005 报告第 2 步缺少成功判据（后续没有依赖它的操作）；可以返回「未发现违规」。
+  fail_if: 任一运行报告第 2 步缺少成功判据。
+  expect_basis: accepted   # CTC-P003 末句：其余操作步骤缺少判据不提出
+
+# ---------------------------------------------------------------- added 2026-11-09 after the reviews of v1
+# Registered before any run of these on any version (dev/inbox/si6/review/adversarial.yaml, decode.yaml,
+# naturalness.yaml). GO-06–GO-08 are permissions that G1's literal reading exempts but the baseline's
+# reading may report; the maintainer has not ruled on them (M5 was asked with GO-03).
+- id: GO-06
+  targets: [010-open-27]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这段变更说明，只输出问题清单。
+  source: |
+    ## 数据库变更
+    变更脚本建议先在预发环境验证。若改动较小，也可以直接在生产执行。
+  score: whether 「较小」 is reported; rule ID
+  expect: 三次运行对「改动较小」的处理一致（报告与否、规则 ID）。
+  fail_if: 三次运行不一致。
+  expect_basis: product-decision
+- id: GO-07
+  targets: [010-open-27, 010-open-29]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份操作说明，只输出问题清单。
+  source: |
+    ## 主从切换
+    主从切换建议由 DBA 执行。紧急情况下，值班工程师也可以执行切换。
+  score: whether 「紧急情况下」 is reported; rule ID
+  expect: 三次运行对「紧急情况下」的处理一致（报告与否、规则 ID）。
+  fail_if: 三次运行不一致。
+  expect_basis: product-decision
+- id: GO-08
+  targets: [010-open-27]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这段运维说明，只输出问题清单。
+  source: |
+    ### 日志清理
+    每周日清理 `/var/log/app/` 下超过 14 天的日志。若磁盘紧张，也可以提前到周五清理。
+  score: whether 「紧张」 is reported; rule ID
+  expect: 三次运行对「磁盘紧张」的处理一致（报告与否、规则 ID）。
+  fail_if: 三次运行不一致。
+  expect_basis: product-decision
+# GO-09 — B1's boundary: snapshots before restarts (state-changing, not destructive) do not each draw an item.
+- id: GO-09
+  targets: [010-open-27]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这份 runbook，只输出问题清单。
+  source: |
+    ## 滚动重启
+    1. 为 `node-1` 创建快照。
+    2. 重启 `node-1`。
+    3. 为 `node-2` 创建快照。
+    4. 重启 `node-2`。
+  score: number of findings on a snapshot step's missing success criterion
+  expect: 不以 CTC-P003 或 CTC-A005 报告快照步骤缺少成功判据（其后是重启，不是破坏性或不可逆操作）。
+  fail_if: 任一运行报告某个快照步骤缺少成功判据。
+  expect_basis: accepted   # maintainer decision M6: 「为后续破坏性操作建立恢复点的备份、快照」
+# EM-03 — R1's boundary: 「紧急变更」 names a change category; R1 must not move it into R004.
+- id: EM-03
+  targets: [010-open-29]
+  task: review
+  mode: review
+  instruction: 以 review 模式审阅这条变更规范，只输出问题清单。
+  source: |
+    ## 变更分类
+    紧急变更须在 24 小时内补录变更单，并提交变更委员会复核。
+  score: rule ID on 「紧急变更」, if any
+  expect: 候选对「紧急变更」的处理（报告与否、规则 ID）与基线一致；不因 R1 改报 CTC-R004。
+  fail_if: 候选以 CTC-R004 报告「紧急变更」而基线不这样报告。
+  expect_basis: proposed   # naturalness review: 「时」 keeps 「紧急时」 off nouns like 「紧急变更」
+# AU-04, AU-05 — U1's boundaries: an item named without a target strength (M7: 授权须指明对象和目标强度);
+# a vague authorisation must not block a fix another rule triggers.
+- id: AU-04
+  targets: [010-open-30]
+  task: rewrite
+  mode: strict
+  instruction: 改写这份 SOP，把第 2 条放宽一些。
+  source: |
+    ## 数据库变更
+    1. 变更必须在维护窗口内执行。
+    2. 执行前必须完成全量备份。
+    3. 变更脚本应先在预发环境验证。
+  score: which normative words change in the body; pending items
+  expect: 正文规范强度不变；「待确认」请调用方指明第 2 条调整到何种强度。
+  fail_if: 正文中任一规范强度被改动；或「待确认」没有对应条目。
+  expect_basis: accepted   # maintainer decision M7
+- id: AU-05
+  targets: [010-open-30]
+  task: rewrite
+  mode: strict
+  instruction: 改写这份 SOP，把要求放宽一些。
+  source: |
+    ## 数据库变更
+    1. 变更必须在维护窗口内执行。
+    2. 执行前必须进行全量备份的操作。
+  score: normative words in the body; whether 「进行…的操作」 is repaired; pending items
+  expect: 规范强度不变；第 2 条的名词化赘语可以按 CTC-R003 修复；「待确认」请调用方指明放宽范围。
+  fail_if: 任一规范强度被改动；或「待确认」没有对应条目。
+  expect_basis: accepted   # maintainer decision M7; CTC-R003

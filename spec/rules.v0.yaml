@@ -104,6 +104,23 @@ meta:
         - "G-A-002 (maintainer M3): the expected 「执行方不可确定」 finding on 「通知租户管理员并回滚到上一版本证书」 is removed; in 「通知 X 并 Y」 the two verbs share the subject, and the administrator-rolls-back reading needs a pivotal construction (「通知管理员回滚」). The over-edit and agent-misattribution invalid transformations stay"
       not_applied_no_decision:
         - "Open proposals 27–31 (decision 010): the guarded-operation class is defined only by P004's examples; a failed exemption does not say the item must then be raised; 「情况紧急时」 forks between R004 and A005; 「指定改写目标」 is undefined; rewrite raises a term difference that blocks execution at MUST (category 5, S002) while review reports it at SHOULD (T001)"
+    - date: 2026-11-09
+      purpose: >-
+        Record the si6 iteration (011). IDs and levels are unchanged. The permission exemption tests what the
+        permitted way of doing it adds to, or takes from, the default action; 「紧急时」 joins R004's open class;
+        a strength authorisation that names neither the items nor the target strength changes nothing; the
+        frontmatter description carries §1's exclusions; an omitted object in a permission sentence stays omitted.
+      applied:
+        - "011 G1c (si6 maintainer M5, M8; proposal 27, in part): A005's permission exemption — the permitted way of doing it introduces no destructive, irreversible or state-changing operation beyond the default action, does not reduce the checks or reviews before such an operation, and does not change the performer of such an operation. Narrows the third qualifier of 010 D1' (「所许可的也不是…操作」, 010 M8), which tested the permitted action as a whole: a permission that changes only how the default action is done (GO-03, GO-08) is now exempt"
+        - "011 Z2: the exemption points to P002's zero-anaphora clause (010 Z1) — an object the permission sentence omits and the preceding text uniquely recovers stays omitted. G-S-001 inserted it in 7 of 23 runs under G1b and 0 of 10 with Z2"
+        - "011 R1 (si6 maintainer M3, proposal 29): R004's open class adds 紧急时"
+        - "011 U1' (si6 maintainer M7, proposal 30 in part): S003 — a strength authorisation that names neither the items nor the target strength, or misses either, changes nothing on its account and is raised as category 5 (SKILL.md §3)"
+        - "011 F1 (si6 maintainer M2, proposal 10): the frontmatter description ends with §1's exclusions, word for word (SKILL.md only)"
+      not_applied_no_decision:
+        - "si6 M6 → M9: P003's own-step bound does not name backups or snapshots. The runtime already raises a backup before a destructive step (GO-01 3/3 on base); the added clause produced false positives (GO-05, G-R-007), so the maintainer dropped it"
+        - "si6 M4: a term difference that blocks execution stays CTC-T001 in review (escalated through §8's risk field); proposal 31 closed without a text change"
+        - "si6 EM-03: R004 reaches the category name 「紧急变更」 in 7 of 15 candidate runs (base never reports the category); recorded as open proposal 32, no text"
+        - "Open proposals after si6 (decision 011): 27 (in part: whether a backup, snapshot or export is state-changing), 28, 30 (in part: which prohibition a rewrite goal lifts), 10 (in part: the description's covered list), and new 32–35"
   rule_count: 29
   family_counts: {S: 7, A: 5, P: 5, T: 2, L: 4, R: 6}
   level_counts: {MUST: 19, SHOULD: 9, MAY: 1}
@@ -379,7 +396,7 @@ rules:
     trigger: "来源含有情态词、义务表述、请求、许可、禁止、建议或对系统行为的描述性陈述。"
     requirement: "输出必须保持三项：认识情态强度（可能／会／一定）、规范强度（必须／应／建议／可以／不得）、以及言语行为类型（描述陈述／规范要求／请求／许可）。要求的行为类型本身也必须保持：要求「使其为真」不得降级为要求「核对是否为真」。"
     prohibition: "可能→会；建议→必须；请→须；确保→确认；不会→禁止；禁止→不建议；必须→应；描述性陈述→规范条款；规范条款→描述性陈述；把可选步骤写成必需步骤或反之。"
-    exceptions: "同强度同类型的词形替换允许（不得↔禁止，应↔应当）。调用方明确要求调整规范强度时允许，且该调整不属于渲染决定。"
+    exceptions: "同强度同类型的词形替换允许（不得↔禁止，应↔应当）。调用方明确要求调整规范强度时允许，且该调整不属于渲染决定。授权没有指明调整哪些条目，或没有指明调整到何种强度时，不据此改动正文，按「待确认」第 5 类请调用方指明（011 U1'，维护者 M7；回归：AU-01、AU-04、AU-05，边界 AU-03）。"
     invariant: "modality-profile — (认识强度, 规范强度, 言语行为类型) 三元组逐处不变。"
     detection: mixed
     detection_note: "确定性层对情态词表做出现剖面差分（可能／会／必须／应／建议／请／确保／确认／禁止／不得／可以），差异输出 WARNING；强度是否真的改变由语义层判定，因为合法改写可以改变表层词形。"
@@ -676,7 +693,7 @@ rules:
     trigger: "来源存在两种以上读法且导致不同行为，而来源与调用上下文都不足以确定作者意图；或来源缺少执行所需的参数、阈值、接收方、判据。"
     requirement: "保持原有表述不做消歧改写，并在「待确认」中给出：位置、两种（或多种）读法或缺失项、判定所需的信息。review 模式下作为一条 finding 报告。"
     prohibition: "静默选定一种读法；用改写把歧义掩盖成流畅句子；补出缺失参数以使文本看起来可执行；在同一处既消歧又替换关键动词，使两处改动无法分别审查。"
-    exceptions: "调用方明确授权在指定读法下改写时，按授权执行并在「待确认」中记录所选读法。当一种读法在该领域中不可能成立（不对应任何可执行操作）时，不算真歧义。检查或确认步骤没有给出判据或判据含义未定（「确认无异常」）时，只有当破坏性、不可逆或改变外部状态的操作取决于它的结果，才提出或报告（009 B1，维护者 M5；010 H1'，维护者 M6；回归：P3-01、P3-02、P3-05、TH-01、TH-02，边界 PR-07）。以下两种情形即使缺少判据或阈值，也不按本规则或 R004 提出或报告：条件只放宽对操作者的限制（「若…，也可以…」），而默认动作不变、来源规定的义务不被免除、所许可的也不是破坏性、不可逆或改变外部状态的操作；文本只描述系统行为，不要求读者据此行动（010 D1'，维护者 M4、M5、M8；回归：OR-01、OR-02、OR-03、G-S-001、G-R-012，边界 OR-04、OR-05、OR-06、OR-07、OR-08）。"
+    exceptions: "调用方明确授权在指定读法下改写时，按授权执行并在「待确认」中记录所选读法。当一种读法在该领域中不可能成立（不对应任何可执行操作）时，不算真歧义。检查或确认步骤没有给出判据或判据含义未定（「确认无异常」）时，只有当破坏性、不可逆或改变外部状态的操作取决于它的结果，才提出或报告（009 B1，维护者 M5；010 H1'，维护者 M6；回归：P3-01、P3-02、P3-05、TH-01、TH-02，边界 PR-07）。以下两种情形即使缺少判据或阈值，也不按本规则或 R004 提出或报告：条件只放宽对操作者的限制（「若…，也可以…」），而默认动作不变、来源规定的义务不被免除、所许可的做法也不引入默认动作之外的破坏性、不可逆或改变外部状态的操作，不减少这类操作之前的检查或复核，也不更换这类操作的执行者；文本只描述系统行为，不要求读者据此行动（010 D1'，维护者 M4、M5、M8；011 G1c，维护者 si6 M5、M8；回归：OR-01、OR-02、OR-03、GO-03、GO-08、G-S-001、G-R-012，边界 OR-04、OR-05、OR-06、OR-07、OR-08、GO-02、GO-06、GO-07）。许可句省略的对象可由前文唯一确定时，按 P002 保持省略（011 Z2；回归：G-S-001）。"
     invariant: "ambiguity-conserved — 未获证据的歧义在输出中仍然存在，且被显式报告。"
     detection: semantic
     examples:
@@ -1219,13 +1236,13 @@ rules:
     level: SHOULD
     scope: [author, rewrite, review]
     modes: [strict, review]
-    trigger: "目标文本是规范性指令（agent 指令、SOP、策略、门禁条件），且其判定条件由无判据词承担，包括承担义务本身的情态模糊词（004 §8）。无判据词是表示程度、时机或裁量的开放类：尽量、尽可能、尽快、最好、适当、必要时、视情况、条件允许时、一般来说、合理等（008 S2，维护者 Q3；条件允许时由 009 R4L 列入，维护者 M4，回归 R4-05、R4-10）。未定义的状态（「服务稳定」「流量正常」）、未给出具体值的次数或时长（「多次」「一段时间」），以及用程度词描述运行指标而未给出阈值的触发条件（「延迟较高时」「负载过高时」）不属此类，按 A005 处理（008 S2、S4；009 B2，维护者 M4；回归：PR-07、R4-01–R4-09）。表示做多少的程度词（「调到适当的值」）仍属此类（R4-08）。"
+    trigger: "目标文本是规范性指令（agent 指令、SOP、策略、门禁条件），且其判定条件由无判据词承担，包括承担义务本身的情态模糊词（004 §8）。无判据词是表示程度、时机或裁量的开放类：尽量、尽可能、尽快、最好、适当、必要时、视情况、条件允许时、紧急时、一般来说、合理等（008 S2，维护者 Q3；条件允许时由 009 R4L 列入，维护者 M4，回归 R4-05、R4-10；紧急时由 011 R1 列入，维护者 si6 M3，回归 OR-07、EM-01，边界 EM-02、EM-03）。未定义的状态（「服务稳定」「流量正常」）、未给出具体值的次数或时长（「多次」「一段时间」），以及用程度词描述运行指标而未给出阈值的触发条件（「延迟较高时」「负载过高时」）不属此类，按 A005 处理（008 S2、S4；009 B2，维护者 M4；回归：PR-07、R4-01–R4-09）。表示做多少的程度词（「调到适当的值」）仍属此类（R4-08）。"
     requirement: "author 模式下，规范性条件应给出可判定的触发条件：阈值、状态或事件。rewrite 模式下不得补出来源没有的判据，应在「待确认」中提出；无判据词承担义务时，报告其可能的两种以上强度并在第四栏给出建议，然后停手，由作者决定（D003，003 §5，004 §8）。规范强度词（必须／应／可以）在同一文档内应保持稳定用法（000-design.md §26）。"
     prohibition: "在改写中把无判据词替换为具体阈值（那是 S002 违规）；在同一文档内让「应」时而表示义务、时而表示建议；把目标文档中限定观测事实的普通汉语副词当作违规删除。"
     exceptions: "本规则只适用于规范性指令文本。目标文档中对观测事实的限定（「该接口通常在 100 ms 内返回」）不受限制（000-design.md §26 末段）。只放宽对操作者限制的许可条件与只描述系统行为的文本，按 A005 例外中的两种情形处理，不按本规则报告（010 D1'）。"
     invariant: "criterion-decidable — 每个规范性条件都对应一个可观测的判定依据，或被显式标记为未定义。"
     detection: mixed
-    detection_note: "确定性层可对无判据词表（尽量、尽可能、尽快、最好、适当、必要时、视情况、条件允许时、一般来说、合理、酌情）做字符串检查并给出 WARNING，词表是开放类的已知成员，不是封闭清单；该词是否承担判定条件、附近是否已定义判据，由语义层判定。"
+    detection_note: "确定性层可对无判据词表（尽量、尽可能、尽快、最好、适当、必要时、视情况、条件允许时、紧急时、一般来说、合理、酌情）做字符串检查并给出 WARNING，词表是开放类的已知成员，不是封闭清单；该词是否承担判定条件、附近是否已定义判据，由语义层判定。"
     examples:
       positive:
         source_zh: "（author 模式；调用方素材：SLO 规定服务异常后 15 分钟内恢复，超时升级至平台组）服务异常时应尽量快速恢复。"
